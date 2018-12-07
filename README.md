@@ -2,7 +2,7 @@
 
 Using this extension you can run as many elections you want using your CiviCRM site. This extension also provides the unique ability to control who can participate in each election using CiviCRM Groups and CiviCRM Smart Groups. So you can run elections for country, regional, state-based or any criteria at all.
 
-Election results are calculated using the [Instant-runoff voting (IRV) method] (https://en.wikipedia.org/wiki/Instant-runoff_voting)
+Election results are calculated using the [Instant-runoff voting (IRV) method](https://en.wikipedia.org/wiki/Instant-runoff_voting)
 
 Election process is based on the Voting features which were originally implemented in [MemberDB](https://www.flamingspork.com/projects/memberdb/)
 
