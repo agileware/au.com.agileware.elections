@@ -1,0 +1,408 @@
+.crm-create-election-form-block h2 {
+    margin: 0;
+    border-bottom: solid 1px #ccc;
+    padding-bottom: 7px;
+    margin-bottom: 7px;
+}
+.crm-create-election-form-block-buttons .crm-submit-buttons {
+    padding-top: 20px;
+}
+.crm-delete-election-form-block .election-delete-message{
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding: 12px;
+    display: block;
+}
+.crm-election-position-nominations-block {
+    padding-bottom: 25px;
+    display: block;
+    float: left;
+    width: 100%;
+}
+.crm-container .status span.msg-title:after {
+    content: "";
+}
+.crm-container .status span.msg-title:not(:empty):after {
+    content: ":";
+}
+.crm-container .status.election-visibility-message {
+    padding: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.crm-container .crm-elections-list-block .status.election-visibility-message {
+    margin-bottom: 0px;
+}
+.crm-election-position-nominations-block a {
+    text-decoration: none !important;
+    color: inherit !important;
+}
+.crm-election-position-nominations-block table.dataTable th {
+    color: #444;
+    padding: 10px 10px;
+}
+.crm-election-position-nominations-block table {
+    margin-bottom: 0;
+}
+.crm-election-position-nominations-block h2 {
+    margin-top: 0;
+}
+.crm-election-position-nominations-block h3 {
+    padding: 10px;
+}
+.crm-container .crm-hover-button.action-item.danger-button {
+    color: #E43D2B;
+}
+.crm-container .fa-print {
+    display: none;
+}
+.crm-container .status {
+    background-image: none;
+    margin-bottom: 20px;
+    padding: 0.5em;
+    color: #3e3e3e;
+    padding-left: 0px;
+    font-weight: normal;
+}
+.crm-container .status .eligible-block {
+    /*display: inline-block;*/
+    width: 350px;
+}
+.crm-container .status input {
+    margin-left: 20px;
+}
+.crm-container .status span.msg-title {
+    font-weight: bold;
+}
+
+.positions-description {
+    padding-top: 10px;
+    padding-left: 5px;
+    display: block;
+}
+
+.election-nav-action-link {
+    margin-left: 20px;
+    display: inline-block;
+}
+
+.election-nav-action-button {
+    margin-right: 20px !important;
+    display: inline-block;
+}
+
+.crm-container .icon {
+    display: none;
+}
+.crm-election-view-block h2 {
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+.crm-election-view-block h3 {
+    padding: 0;
+    margin: 0;
+    background: none;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.crm-elections-action-block {
+    padding-bottom: 20px;
+}
+.crm-elections-helptext-block {
+    font-style: italic;
+    font-size: 90%;
+}
+.crm-election-view-block .no-result-message {
+    text-align: center;
+    padding-top: 15px;
+}
+.crm-election-form-block-container .crm-i.fa-check {
+    display: none;
+}
+
+.election_row_style {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+@media only screen and (max-width: 412px) {
+    .election_row_style > div {
+        flex:0 0 200px;
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    .election_row_style > a {
+        flex:0 0 200px;
+        text-align: center;
+        margin: 0 auto;
+    }
+}
+
+@media only screen and (min-width: 413px) {
+
+    .election_row_style > div {
+        flex: 0 0 320px;
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    .election_row_style > a {
+        flex: 0 0 320px;
+        text-align: center;
+        margin: 0 auto;
+    }
+}
+
+.crm-election-nominated-block {
+    float: left;
+    width: 100%;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+.crm-election-nominated-block img {
+    display: inline-block;
+    max-width: 80%;
+    max-height: 200px;
+}
+.clearfix {
+    clear: both;
+}
+
+.messages.status ul {
+    padding-left: 30px;
+}
+.election-positions-rank-block {
+    display: block;
+    width: 100%;
+    float: left;
+    padding-top: 20px;
+}
+
+.winner-type-label {
+
+}
+.crm-election-position-result-block h3 {
+
+}
+
+.candidate-details-block {
+    float: left;
+    width: 100%;
+    display: block;
+    padding-bottom: 30px;
+}
+
+.candidate-details-left-block img {
+    display: inline-block;
+    max-width: 100%;
+}
+
+@media only screen and (max-width: 748px) {
+    .candidate-details-left-block {
+        width: 50%;
+        float: left;
+        padding-right: 30px;
+    }
+
+    .candidate-details-right-block {
+        width: initial !important;
+        float: left;
+    }
+}
+
+@media only screen and (min-width: 749px) {
+    .candidate-details-left-block {
+        width: 300px;
+        float: left;
+        padding-right: 30px;
+    }
+
+    .candidate-details-right-block {
+        width: calc(100% - 330px);
+        float: left;
+    }
+}
+
+
+.vote-candidate-row {
+    display: block;
+    width: 100%;
+    float: left;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: solid 1px #dddddd;
+}
+
+.crm-election-form-row {
+    display: block;
+    width: 100%;
+    padding-bottom: 15px;
+    float: left;
+}
+
+.crm-election-form-row:last-child {
+    padding-top: 15px;
+}
+
+.vote-candidate-row label {
+    font-weight: normal;
+    padding-bottom: 10px;
+    display: block !important;
+}
+
+.vote-candidate-row .left-profile-block, .crm-election-form-col-left {
+    width: 90px;
+    float: left;
+    margin-right: 30px;
+}
+.crm-election-form-col-left.full {
+    width: 100%;
+    margin-right: 0;
+}
+
+.vote-candidate-row .left-profile-block img {
+    max-width: 100%;
+}
+
+.vote-candidate-row .right-info-block, .crm-election-form-col-right {
+    float: left;
+    width: 400px;
+    max-width: calc(100% - 120px);
+}
+
+.messages.crm-error {
+    background: #FBE3E4 none repeat scroll 0 0;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.crm-election-form-col-right.half {
+    width: 50%;
+}
+
+.crm-election-form-row div.error {
+    margin-left: 0;
+    background: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+ul#errorList {
+    padding-left: 20px;
+    margin: 0;
+}
+.crm-container .crm-error {
+    color: #8A1F11;
+}
+
+.error-heading {
+    text-align: center;
+}
+
+.crm-elections-list-block .crm-accordion-body {
+    padding-left: 20px;
+    padding-bottom: 20px;
+    padding-right: 20px;
+}
+
+.crm-elections-list-block .crm-accordion-wrapper {
+    margin-bottom: 20px;
+    width: 100%;
+    float: left;
+	display: flex;
+	flex-flow: column;
+}
+
+.crm-elections-list-block .crm-accordion-wrapper + .crm-accordion-wrapper {
+	margin-top: 1em;
+}
+
+.crm-elections-list-block .crm-accordion-wrapper p {
+    margin: 1em 0;
+}
+
+.crm-election-form-block-container .select2-container .select2-choice > .select2-chosen, .crm-container .select2-search input {
+  color: #333;
+}
+
+.crm-container .crm-elections-list-block .crm-accordion-header {
+    cursor: pointer;
+    background-image: none;
+    padding: 8px 8px 8px 20px;
+    border: solid 1px #70716B;
+    font-weight: bold;
+    width: 100%;
+    float: left;
+	display: flex;
+	box-sizing: border-box;
+}
+
+.crm-container .crm-elections-list-block .crm-accordion-header span {
+    float: left;
+}
+
+.crm-container .crm-elections-list-block .crm-accordion-header span:last-child {
+    float: right;
+	margin-left: auto;
+    padding-right: 10px;
+}
+
+.crm-container .crm-elections-list-block .crm-accordion-wrapper .crm-accordion-header span:last-child:after {
+    content: "\25B2";
+}
+
+.crm-container .crm-elections-list-block .crm-accordion-wrapper.collapsed .crm-accordion-header span:last-child:after {
+    content: "\25BC";
+}
+
+.election-position-summary-row {
+    display: block;
+    float: left;
+    width: 100%;
+}
+
+.election-position-summary-block {
+    width: calc(33% - 15px);
+    float: left;
+    padding-right: 15px;
+}
+
+.election-position-summary-block ul {
+    padding-left: 20px;
+}
+
+.crm-elections-list-block .crm-accordion-body p:last-child{
+    margin-bottom: 0;
+}
+
+
+.crm-container .crm-elections-list-block .crm-accordion-body {
+    border-radius: 0 0 4px 4px;
+    border: 1px solid #70716B;
+    border-top: 0;
+    width: 100%;
+    float: left;
+	box-sizing: border-box;
+}
+
+.hide-element {
+    display: none;
+}
+
+#positionsSortable tbody tr {
+    cursor: pointer;
+}
+
+.crm-election-nominated-block.inside {
+    width: 100%;
+}
+
+#crm-container.crm-public .label.label-select-col {
+    padding-top: 12px;
+}
+
+.crm-election-date {
+    font-weight: bold;
+}

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Elections</base>
+  <class>ElectionNomination</class>
+  <name>civicrm_election_nomination</name>
+  <comment>FIXME</comment>
+  <add>5.3</add>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique ElectionNomination ID</comment>
+    <add>5.3</add>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>comments</name>
+    <type>text</type>
+    <import>true</import>
+    <export>true</export>
+    <html>
+      <type>Text</type>
+    </html>
+    <add>5.3</add>
+  </field>
+
+  <field>
+    <name>rejection_comments</name>
+    <type>text</type>
+    <import>true</import>
+    <export>true</export>
+    <html>
+      <type>Text</type>
+    </html>
+    <add>5.3</add>
+  </field>
+
+  <field>
+    <name>is_eligible_candidate</name>
+    <type>boolean</type>
+    <default>0</default>
+    <import>true</import>
+    <export>true</export>
+    <comment>Boolean field to identity if nomination is a valid candidate.</comment>
+    <add>5.3</add>
+    <html>
+      <type>CheckBox</type>
+    </html>
+  </field>
+
+  <field>
+    <name>has_accepted_nomination</name>
+    <type>boolean</type>
+    <default>0</default>
+    <import>true</import>
+    <export>true</export>
+    <comment>Boolean field to identity if nomination has been accepted by candidate.</comment>
+    <add>5.3</add>
+    <html>
+      <type>CheckBox</type>
+    </html>
+  </field>
+
+  <field>
+    <name>has_rejected_nomination</name>
+    <type>boolean</type>
+    <default>0</default>
+    <import>true</import>
+    <export>true</export>
+    <comment>Boolean field to identity if nomination has been rejected by candidate.</comment>
+    <add>5.3</add>
+    <html>
+      <type>CheckBox</type>
+    </html>
+  </field>
+
+  <field>
+    <name>created_at</name>
+    <type>timestamp</type>
+    <export>true</export>
+    <comment>Date on which election nomination created.</comment>
+    <default>CURRENT_TIMESTAMP</default>
+    <add>5.3</add>
+  </field>
+
+  <field>
+    <name>updated_at</name>
+    <type>timestamp</type>
+    <export>true</export>
+    <required>false</required>
+    <comment>Date on which election nomination was updated.</comment>
+    <add>5.3</add>
+    <default>CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP</default>
+  </field>
+
+  <field>
+    <name>member_nominee</name>
+    <type>int unsigned</type>
+    <comment>FK to Contact for which this nomination is added.</comment>
+    <add>5.3</add>
+  </field>
+
+  <foreignKey>
+    <name>member_nominee</name>
+    <table>civicrm_contact</table>
+    <key>id</key>
+    <add>5.3</add>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>election_position_id</name>
+    <type>int unsigned</type>
+    <comment>FK to ElectionPosition for which this nomination is added.</comment>
+    <add>5.3</add>
+  </field>
+  <foreignKey>
+    <name>election_position_id</name>
+    <table>civicrm_election_position</table>
+    <key>id</key>
+    <add>5.3</add>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+</table>

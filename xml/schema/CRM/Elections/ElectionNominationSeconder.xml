@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Elections</base>
+  <class>ElectionNominationSeconder</class>
+  <name>civicrm_election_nomination_seconder</name>
+  <comment>FIXME</comment>
+  <add>5.3</add>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique ElectionNominationSeconder ID</comment>
+    <add>5.3</add>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>description</name>
+    <type>text</type>
+    <import>true</import>
+    <export>true</export>
+    <html>
+      <type>Text</type>
+    </html>
+    <add>5.3</add>
+  </field>
+
+  <field>
+    <name>member_nominator</name>
+    <type>int unsigned</type>
+    <comment>FK to Contact who nominated member_nominee for particular position.</comment>
+    <add>5.3</add>
+  </field>
+
+  <foreignKey>
+    <name>member_nominator</name>
+    <table>civicrm_contact</table>
+    <key>id</key>
+    <add>5.3</add>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>election_nomination_id</name>
+    <type>int unsigned</type>
+    <comment>FK to ElectionNomination for which this seconder is added.</comment>
+    <add>5.3</add>
+  </field>
+  <foreignKey>
+    <name>election_nomination_id</name>
+    <table>civicrm_election_nomination</table>
+    <key>id</key>
+    <add>5.3</add>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+</table>

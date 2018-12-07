@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<menu>
+  <item>
+    <path>civicrm/elections</path>
+    <page_callback>CRM_Elections_Page_Elections</page_callback>
+    <title>Elections</title>
+    <access_arguments>view Elections</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/elections/create</path>
+    <page_callback>CRM_Elections_Form_CreateElection</page_callback>
+    <title>Create Election</title>
+    <access_arguments>administer Elections</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/elections/delete</path>
+    <page_callback>CRM_Elections_Form_DeleteElection</page_callback>
+    <title>Delete Election</title>
+    <access_arguments>administer Elections</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/elections/positions</path>
+    <page_callback>CRM_Elections_Page_ElectionPositions</page_callback>
+    <title>Election Positions</title>
+    <access_arguments>administer Elections</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/elections/positions/create</path>
+    <page_callback>CRM_Elections_Form_CreateElectionPosition</page_callback>
+    <title>Create Election Position</title>
+    <access_arguments>administer Elections</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/elections/view</path>
+    <page_callback>CRM_Elections_Page_ViewElection</page_callback>
+    <title>View Election</title>
+    <access_arguments>view Elections</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/elections/nominations/create</path>
+    <page_callback>CRM_Elections_Form_CreateElectionNomination</page_callback>
+    <title>Create Election Nomination</title>
+    <access_arguments>view Elections</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/elections/nominations/accept</path>
+    <page_callback>CRM_Elections_Form_AcceptNomination</page_callback>
+    <title>Accept Nomination</title>
+    <access_arguments>view Elections</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/elections/vote</path>
+    <page_callback>CRM_Elections_Form_VoteCandidates</page_callback>
+    <title>Vote in an Election</title>
+    <access_arguments>view Elections</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/elections/positions/delete</path>
+    <page_callback>CRM_Elections_Form_DeleteElectionPosition</page_callback>
+    <title>Delete Election Position</title>
+    <access_arguments>administer Elections</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/ajax/elections/positions/reorder</path>
+    <page_callback>CRM_Elections_Page_ElectionPositions::reOrder</page_callback>
+    <access_arguments>administer Elections</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/elections/visibility</path>
+    <page_callback>CRM_Elections_Form_ElectionVisibility</page_callback>
+    <title>ElectionVisibility</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/elections/candidate</path>
+    <page_callback>CRM_Elections_Page_ElectionCandidate</page_callback>
+    <title>ElectionCandidate</title>
+    <access_arguments>view Elections</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/elections/summary</path>
+    <page_callback>CRM_Elections_Page_ElectionSummary</page_callback>
+    <title>ElectionSummary</title>
+    <access_arguments>view Elections</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/elections/nominations/reject</path>
+    <page_callback>CRM_Elections_Form_RejectNomination</page_callback>
+    <title>Withdraw Nomination</title>
+    <access_arguments>view Elections</access_arguments>
+  </item>
+</menu>

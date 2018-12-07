@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Elections</base>
+  <class>Election</class>
+  <name>civicrm_election</name>
+  <comment>FIXME</comment>
+  <add>5.3</add>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique Election ID</comment>
+    <add>5.3</add>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>name</name>
+    <type>varchar</type>
+    <length>255</length>
+    <import>true</import>
+    <export>true</export>
+    <comment>Name of the election.</comment>
+    <add>5.3</add>
+    <html>
+      <type>Text</type>
+    </html>
+  </field>
+
+  <field>
+    <name>description</name>
+    <type>text</type>
+    <import>true</import>
+    <export>true</export>
+    <html>
+      <type>Text</type>
+    </html>
+    <add>5.3</add>
+  </field>
+
+  <field>
+    <name>visibility_start_date</name>
+    <type>datetime</type>
+    <import>true</import>
+    <export>true</export>
+    <comment>Election visibility start date</comment>
+    <add>5.3</add>
+    <html>
+      <type>Select Date</type>
+      <formatType>birth</formatType>
+    </html>
+  </field>
+
+  <field>
+    <name>visibility_end_date</name>
+    <type>datetime</type>
+    <import>true</import>
+    <export>true</export>
+    <comment>Election visibility end date</comment>
+    <add>5.3</add>
+    <html>
+      <type>Select Date</type>
+      <formatType>birth</formatType>
+    </html>
+  </field>
+
+  <field>
+    <name>nomination_start_date</name>
+    <type>datetime</type>
+    <import>true</import>
+    <export>true</export>
+    <comment>Election nomination start date</comment>
+    <add>5.3</add>
+    <html>
+      <type>Select Date</type>
+      <formatType>birth</formatType>
+    </html>
+  </field>
+
+  <field>
+    <name>nomination_end_date</name>
+    <type>datetime</type>
+    <import>true</import>
+    <export>true</export>
+    <comment>Election nomination end date</comment>
+    <add>5.3</add>
+    <html>
+      <type>Select Date</type>
+      <formatType>birth</formatType>
+    </html>
+  </field>
+
+  <field>
+    <name>advertise_candidates_date</name>
+    <type>datetime</type>
+    <import>true</import>
+    <export>true</export>
+    <comment>Date from when candidates are available for viewing.</comment>
+    <add>5.3</add>
+    <html>
+      <type>Select Date</type>
+      <formatType>birth</formatType>
+    </html>
+  </field>
+
+  <field>
+    <name>voting_start_date</name>
+    <type>datetime</type>
+    <import>true</import>
+    <export>true</export>
+    <comment>Election voting start date</comment>
+    <add>5.3</add>
+    <html>
+      <type>Select Date</type>
+      <formatType>birth</formatType>
+    </html>
+  </field>
+
+  <field>
+    <name>voting_end_date</name>
+    <type>datetime</type>
+    <import>true</import>
+    <export>true</export>
+    <comment>Election voting end date</comment>
+    <add>5.3</add>
+    <html>
+      <type>Select Date</type>
+      <formatType>birth</formatType>
+    </html>
+  </field>
+
+  <field>
+    <name>result_date</name>
+    <type>datetime</type>
+    <import>true</import>
+    <export>true</export>
+    <comment>Election result date, after this date election results are published.</comment>
+    <add>5.3</add>
+    <html>
+      <type>Select Date</type>
+      <formatType>birth</formatType>
+    </html>
+  </field>
+
+  <field>
+    <name>result_status</name>
+    <type>int unsigned</type>
+    <comment>Election result status,  for admins to manage election result visibility manually.</comment>
+    <html>
+      <type>Select</type>
+    </html>
+    <import>true</import>
+    <default>0</default>
+    <add>5.3</add>
+  </field>
+
+  <field>
+    <name>is_deleted</name>
+    <type>boolean</type>
+    <default>0</default>
+    <export>true</export>
+    <comment>Boolean field to soft delete an election.</comment>
+    <add>5.3</add>
+    <html>
+      <type>CheckBox</type>
+    </html>
+  </field>
+
+  <field>
+    <name>is_visible</name>
+    <type>boolean</type>
+    <default>0</default>
+    <export>true</export>
+    <comment>Boolean field to set if election is visible or not.</comment>
+    <add>5.3</add>
+    <html>
+      <type>CheckBox</type>
+    </html>
+  </field>
+
+  <field>
+    <name>has_results_generated</name>
+    <type>boolean</type>
+    <default>0</default>
+    <export>true</export>
+    <comment>Boolean field to set if results are generated.</comment>
+    <add>5.3</add>
+    <html>
+      <type>CheckBox</type>
+    </html>
+  </field>
+
+  <field>
+    <name>anonymize_votes</name>
+    <type>boolean</type>
+    <default>1</default>
+    <export>true</export>
+    <comment>Boolean field to anonymize votes when results are generated.</comment>
+    <add>5.3</add>
+    <html>
+      <type>CheckBox</type>
+    </html>
+  </field>
+
+  <field>
+    <name>required_nominations</name>
+    <type>int unsigned</type>
+    <comment>Number of required nominations to become eligible candidate.</comment>
+    <html>
+      <type>Text</type>
+    </html>
+    <import>true</import>
+    <default>2</default>
+    <add>5.3</add>
+  </field>
+
+  <field>
+    <name>allow_revote</name>
+    <type>boolean</type>
+    <default>0</default>
+    <export>true</export>
+    <comment>Boolean field to set if members are allowed to re-vote in election.</comment>
+    <add>5.3</add>
+    <html>
+      <type>CheckBox</type>
+    </html>
+  </field>
+
+  <field>
+    <name>allowed_groups</name>
+    <type>text</type>
+    <export>true</export>
+    <comment>List of groups, members of it are allowed to participate in election.</comment>
+    <add>5.3</add>
+    <html>
+      <type>Select2</type>
+    </html>
+  </field>
+
+  <field>
+    <name>created_at</name>
+    <type>timestamp</type>
+    <export>true</export>
+    <comment>Date on which election created.</comment>
+    <default>CURRENT_TIMESTAMP</default>
+    <add>5.3</add>
+  </field>
+
+  <field>
+    <name>updated_at</name>
+    <type>timestamp</type>
+    <export>true</export>
+    <required>false</required>
+    <comment>Date on which election was updated.</comment>
+    <add>5.3</add>
+    <default>CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP</default>
+  </field>
+
+  <field>
+    <name>created_by</name>
+    <type>int unsigned</type>
+    <comment>FK to Contact who created particular election</comment>
+    <add>5.3</add>
+  </field>
+
+  <foreignKey>
+    <name>created_by</name>
+    <table>civicrm_contact</table>
+    <key>id</key>
+    <add>5.3</add>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+</table>
