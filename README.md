@@ -23,7 +23,7 @@ Sponsorship
 
 Development of this CiviCRM extension and development of the PHP Unit Tests was kindly sponsored by [Linux Australia](https://linux.org.au).
 
-![Linux Australia](docs/images/linux-australia-logo.svg) 
+![Linux Australia](docs/images/linux-australia-logo.png) 
 
 About the Authors
 ------
