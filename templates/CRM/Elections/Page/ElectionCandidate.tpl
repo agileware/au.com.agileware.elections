@@ -8,7 +8,6 @@
     <div class="candidate-details-right-block">
         {assign var='displayname' value='member_nominee.display_name'}
         <h2>{$nomination.$displayname}</h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut vehicula purus. Maecenas dolor arcu, facilisis et fringilla et, tempus cursus nibh. Donec eget sapien ut libero lacinia iaculis in id orci. Proin rutrum cursus velit, nec viverra leo auctor eget. Ut quis finibus nisi, in aliquet tortor. </p>
     </div><!-- ending of candidate-details-right-block -->
 </div><!-- ending of candidate-details-block -->
 
