@@ -57,5 +57,8 @@ function civicrm_api3_election_nominee_Getlist($params) {
     $apiParams['page_num'] = $params['page_num'];
   }
   $contacts = civicrm_api3('Contact', 'getlist', $apiParams);
+  foreach($contacts['values'] as &$contact) {
+    unset($contact['description']);
+  }
   return $contacts;
 }
