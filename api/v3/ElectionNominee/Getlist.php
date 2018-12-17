@@ -43,12 +43,19 @@ function civicrm_api3_election_nominee_Getlist($params) {
   if (!empty($allowedGroupIds)) {
     $allowedGroupIds = explode(",", $allowedGroupIds);
   }
-  $contacts = civicrm_api3('Contact', 'getlist', array(
-    'input'    => $params['input'],
-    'page_num' => $params['page_num'],
+
+  $apiParams = array(
     'params'   => array(
       'group'    => array('IN' => $allowedGroupIds),
     ),
-  ));
+  );
+  if (isset($params['id'])) {
+    $apiParams['id'] = $params['id'];
+  }
+  else {
+    $apiParams['input'] = $params['input'];
+    $apiParams['page_num'] = $params['page_num'];
+  }
+  $contacts = civicrm_api3('Contact', 'getlist', $apiParams);
   return $contacts;
 }
