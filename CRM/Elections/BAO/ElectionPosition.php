@@ -19,6 +19,9 @@ class CRM_Elections_BAO_ElectionPosition extends CRM_Elections_DAO_ElectionPosit
         'election_nomination_id' => array(
           'IN' => $nominationIds,
         ),
+        'options' => array(
+          'limit' => 0,
+        ),
         'return' => ["id", "description", "member_nominator.display_name", "member_nominator", "election_nomination_id"],
       ));
       $nominationSeconders = $nominationSeconders['values'];
