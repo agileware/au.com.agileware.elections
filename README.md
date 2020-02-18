@@ -1,8 +1,13 @@
-**Elections** (au.com.agileware.elections) is a CiviCRM extension which provides on-line election functionality (nominations and voting) to CiviCRM.
+**Elections** (au.com.agileware.elections) is a CiviCRM extension which facilitates an on-line election which is suitable for the establishment of committees, fulfilling of volunteer roles and other governing bodies for an organisation.
+
+1. Any number of positions can be advertised as being available.
+1. People can be nominated or nominate themselves for one or more of the advertised positions.
+1. People can vote for the nominees.
+1. Election results are calculated using the [instant-runoff voting (IRV) method](https://en.wikipedia.org/wiki/Instant-runoff_voting).
+1. Election results are then displayed and kept as a historical record.
+1. Multiple elections can be run concurrently.
 
 Using this extension you can run as many elections you want using your CiviCRM site. This extension also provides the unique ability to control who can participate in each election using CiviCRM Groups and CiviCRM Smart Groups. So you can run elections for country, regional, state-based or any criteria at all.
-
-Election results are calculated using the [Instant-runoff voting (IRV) method](https://en.wikipedia.org/wiki/Instant-runoff_voting)
 
 Election process is based on the Voting features which were originally implemented in [MemberDB](https://www.flamingspork.com/projects/memberdb/)
 
