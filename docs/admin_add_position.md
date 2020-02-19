@@ -13,4 +13,4 @@ To add a position, you need to have CiviCRM admin access and follow these steps:
 ![Set number of people](images/admin_add/03.gif)  
 -  **Description**: A short description of the position  
 ![Add Description](images/admin_add/04.gif)  
-Click **Create** to create the position
+4. Click **Create** to create the position
