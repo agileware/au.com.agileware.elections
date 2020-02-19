@@ -23,32 +23,6 @@ Viewing election results are shown below as an example.
 
 ![Elections](docs/images/user_view_results/03.gif)  
 
-Sponsorship
-------
-
-Development of this CiviCRM extension and development of the PHP Unit Tests was kindly sponsored by [Linux Australia](https://linux.org.au).
-
-![Linux Australia](docs/images/linux-australia-logo.png) 
-
-About the Authors
-------
-
-This CiviCRM extension was developed by the team at [Agileware](https://agileware.com.au).
-
-[Agileware](https://agileware.com.au) provide a range of CiviCRM services including:
-
-  * CiviCRM migration
-  * CiviCRM integration
-  * CiviCRM extension development
-  * CiviCRM support
-  * CiviCRM hosting
-  * CiviCRM remote training services
-
-Support your Australian [CiviCRM](https://civicrm.org) developers, [contact Agileware](https://agileware.com.au/contact) today!
-
-
-![Agileware](docs/images/agileware-logo.png)  
-
 Prerequisites
 -------------
 
@@ -87,3 +61,28 @@ This is used to display a single election which has been accessed from the elect
 ```[civicrm component="electioninfo"  hijack="0"]```
 
 When this page is accessed from the election listing page, the Election ID is passed to the Election information short-code using a URL parameter.
+
+Sponsorship
+------
+
+Development of this CiviCRM extension and development of the PHP Unit Tests was kindly sponsored by [Linux Australia](https://linux.org.au).
+
+![Linux Australia](docs/images/linux-australia-logo.png) 
+
+About the Authors
+------
+
+This CiviCRM extension was developed by the team at [Agileware](https://agileware.com.au).
+
+[Agileware](https://agileware.com.au) provide a range of CiviCRM services including:
+
+  * CiviCRM migration
+  * CiviCRM integration
+  * CiviCRM extension development
+  * CiviCRM support
+  * CiviCRM hosting
+  * CiviCRM remote training services
+
+Support your Australian [CiviCRM](https://civicrm.org) developers, [contact Agileware](https://agileware.com.au/contact) today!
+
+![Agileware](docs/images/agileware-logo.png)
