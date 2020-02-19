@@ -1,6 +1,6 @@
 # How to edit a position
 
-To edit a position, you should be a user who gains admin access for CiviCRM and follow these steps:
+To edit a position, you need to have CiviCRM admin access and follow these steps:
 
 1. Go to **Elections**  
 ![Click Elections](images/admin_election/01.gif)  
