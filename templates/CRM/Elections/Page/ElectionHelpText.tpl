@@ -4,7 +4,7 @@
     {/if}
     {if $election->isNominationsInProgress}
 			<p>{ts}This Election is currently in the Nominations phase.{/ts}</p>
-			<p>{ts}You can submit nominations for this Election using the button below, and see existing nominations for each position. If you have been nominated for any positions, you can see these and have the option of withdrawing them. Nominations that require one or persons to second them will also be marked as such – press the "Need second" button to add your nominations{/ts}</p>
+			<p>{ts}You can submit nominations for this Election using the button below, and see existing nominations for each position. If you have been nominated for any positions, you can see these and have the option of withdrawing the nomination. Nominations that require one or more people to second the nomination will also be marked as such – press the "Need second" button to add your nominations{/ts}</p>
     {/if}
     {if $election->isNominationsStarted and (!$election->isNominationsInProgress) and !$election->advertiseCandidatesStarted}
         <p>{ts}The Nominations period for this Election is now closed. Eligible nominations are listed below.{/ts}</p>
