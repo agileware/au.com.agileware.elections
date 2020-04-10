@@ -84,9 +84,9 @@
 
                     {if $election.hasUserAlreadyVoted and !$election.isVotingEnded}
                         <p>
-                            You voted in this election on <span class="crm-election-date">{$election.userVoteDate|crmDate} <a target="_blank" href="{$siteTimeZoneConvertUrl}">({$siteTimeZone})</a></span>.
+                            {ts}You voted in this election on{/ts} <span class="crm-election-date">{$election.userVoteDate|crmDate} <a target="_blank" href="{$siteTimeZoneConvertUrl}">({$siteTimeZone})</a></span>.
                             {if $election.isUserAllowedToVote}
-                                You can vote again if you wish to change your vote.
+                                {ts}You can vote again if you wish to change your vote.{/ts}
                             {/if}
                         </p>
                     {/if}
@@ -95,9 +95,9 @@
                     {if !$isFromShortCode}
                         {if $isElectionAdmin}
                             {if !$election.is_visible}
-                                <span class="error">Election is Inactive.</span>&nbsp;&nbsp;
+                                <span class="error">{ts}Election is not active.{/ts}</span>&nbsp;&nbsp;
                             {else}
-                                <span class="success">Election is Active.</span>&nbsp;&nbsp;
+                                <span class="success">{ts}Election is active.{/ts}</span>&nbsp;&nbsp;
                             {/if}
                             {if $election.is_visible}
                                 <a href="{crmURL p="civicrm/elections/visibility" q="eid=`$election.id`"}" class="action-item crm-hover-button" title="Deactivate">Deactivate</a>
@@ -117,7 +117,7 @@
                         {if $isElectionAdmin}
                             {if $election.positions == 0}
                                 <div class="messages status no-popup election-visibility-message">
-                                    At least one Position must be defined before the Election can be active.
+                                    {ts}At least one Position must be defined before the Election can be active.{/ts}
                                 </div>
                             {/if}
                         {/if}

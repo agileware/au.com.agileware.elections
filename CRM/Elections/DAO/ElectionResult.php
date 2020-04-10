@@ -91,7 +91,7 @@ class CRM_Elections_DAO_ElectionResult extends CRM_Core_DAO {
         'id' => [
           'name' => 'id',
           'type' => CRM_Utils_Type::T_INT,
-          'description' => 'Unique ElectionResult ID',
+          'description' => ts('Unique Election Result ID'),
           'required' => TRUE,
           'table_name' => 'civicrm_election_result',
           'entity' => 'ElectionResult',
@@ -102,7 +102,7 @@ class CRM_Elections_DAO_ElectionResult extends CRM_Core_DAO {
           'name' => 'rank',
           'type' => CRM_Utils_Type::T_INT,
           'title' => ts('Rank'),
-          'description' => 'Rank of a member for particular position.',
+          'description' => ts('Rank of a member for particular position.'),
           'import' => TRUE,
           'where' => 'civicrm_election_result.rank',
           'headerPattern' => '',
@@ -119,7 +119,7 @@ class CRM_Elections_DAO_ElectionResult extends CRM_Core_DAO {
         'election_position_id' => [
           'name' => 'election_position_id',
           'type' => CRM_Utils_Type::T_INT,
-          'description' => 'FK to ElectionPosition for which this result is added.',
+          'description' => ts('FK to ElectionPosition for which this result is added.'),
           'table_name' => 'civicrm_election_result',
           'entity' => 'ElectionResult',
           'bao' => 'CRM_Elections_DAO_ElectionResult',
@@ -130,7 +130,7 @@ class CRM_Elections_DAO_ElectionResult extends CRM_Core_DAO {
         'election_nomination_id' => [
           'name' => 'election_nomination_id',
           'type' => CRM_Utils_Type::T_INT,
-          'description' => 'FK to ElectionNomination for which this rank is added.',
+          'description' => ts('FK to ElectionNomination for which this rank is added.'),
           'table_name' => 'civicrm_election_result',
           'entity' => 'ElectionResult',
           'bao' => 'CRM_Elections_DAO_ElectionResult',

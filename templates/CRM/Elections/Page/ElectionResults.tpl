@@ -5,18 +5,18 @@
 
     {if $positions|@count == 0}
         <div class="messages status no-popup">
-            There were no positions added in this election.
+            {ts}There were no positions added in this election.{/ts}
         </div>
     {/if}
 
-    <h2>Election Results</h2>
+    <h2>{ts}Election Results{/ts}</h2>
     <center>
-        <a href="{crmURL p="civicrm/elections/summary" q="eid=`$election->id`"}">Click here to check election summary</a>
+        <a href="{crmURL p="civicrm/elections/summary" q="eid=`$election->id`"}">{ts}Click here to check election summary{/ts}</a>
     </center>
 
     {foreach from = $positions key = k item = position}
         <div class="crm-election-position-result-block">
-            <h3>Winner{if $position.quantity > 1}s{/if} for {$position.name}</h3>
+            <h3>{ts}Winner{/ts}{if $position.quantity > 1}s{/if} {ts}for{/ts} {$position.name}</h3>
             <span class="winner-type-label">
                 {include file="CRM/Elections/Page/PositionResultTypeMessage.tpl"}
              </span>

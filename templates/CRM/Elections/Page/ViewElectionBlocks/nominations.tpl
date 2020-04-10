@@ -1,12 +1,12 @@
 <h2>
     {if $election->advertiseCandidatesStarted}
-        Candidates
+        {ts}Candidates{/ts}
     {else}
-        Existing Nominations
+        {ts}Existing Nominations{/ts}
     {/if}
 </h2>
 {if $nominations|@count == 0 and $positions|@count == 0}
-    <p class="no-result-message">Positions are not added yet to be nominated.</p>
+    <p class="no-result-message">{ts}Positions are not added yet to be nominated.{/ts}</p>
 {/if}
 
 {foreach from = $nominations key = k item = nomination}
@@ -19,7 +19,7 @@
 
         <h3>{$positionKey} for {$nomination.name}</h3>
         {if $nomination.nominations|@count == 0 and !$election->advertiseCandidatesStarted}
-            <p>There are no existing nominations</p>
+            <p>{ts}There are no existing nominations{/ts}</p>
         {/if}
         {assign var="candidatesCount" value=0}
     <div class="election_row_style">
@@ -43,13 +43,13 @@
                             {if !$election->isVotingStarted and ($seconder.is_eligible_candidate == 1)}
                                 Candidate Status:
                                 {if $seconder.has_accepted_nomination == 1}
-                                    Accepted<br><br>
+                                    {ts}Accepted{/ts}<br><br>
                                     {$seconder.comments|nl2br}
                                 {elseif $seconder.has_rejected_nomination == 1}
-                                    Withdrawn<br><br>
+                                    {ts}Withdrawn{/ts}<br><br>
                                     {$seconder.rejection_comments|nl2br}
                                 {else}
-                                    Pending
+                                    {ts}Pending{/ts}
                                 {/if}
                             {/if}
 
@@ -72,10 +72,10 @@
         {/foreach}
     </div>
         {if $candidatesCount == 0 and $election->advertiseCandidatesStarted}
-            <p>There are no eligible candidates.</p>
+            <p>{ts}There are no eligible candidates.{/ts}</p>
         {/if}
         {if $candidatesCount == 0 and !$election->advertiseCandidatesStarted and $nomination.nominations|@count != 0}
-            <p>There are no eligible nominations.</p>
+            <p>{ts}There are no eligible nominations.{/ts}</p>
         {/if}
     </div><div class="clearfix"></div>
 {/foreach}

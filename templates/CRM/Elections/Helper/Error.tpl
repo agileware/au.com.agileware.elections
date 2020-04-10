@@ -1,7 +1,7 @@
 <div class="messages status no-popup election-visibility-message">
     {$errormessage}
     {if $nonmember}
-        <br><strong>Become a Member Now</strong>
+        <br><strong>{ts}Become a member now{/ts}</strong>
     {/if}
 </div>
 {if $return_button_text and $return_button_action}

@@ -84,7 +84,7 @@ function civicrm_api3_election_vote_delete($params) {
 function civicrm_api3_election_vote_deletevotes($params) {
   $electionId = $params['election_id'];
   if (is_array($params['member_id'])) {
-    return civicrm_api3_create_error('Multiple members are not yet supported.');
+    return civicrm_api3_create_error ( ts('Multiple members are not yet supported.'));
   }
   $previousVotes = civicrm_api3('ElectionVote', 'get', array(
     'election_nomination_id.election_position_id.election_id.id' => $electionId,
@@ -110,24 +110,24 @@ function civicrm_api3_election_vote_addvotes($params) {
 
   $election = findElectionById($electionId, FALSE);
   if ($election->is_deleted || !$election->is_visible) {
-    return civicrm_api3_create_error('Votes cannot be added for deleted election.');
+    return civicrm_api3_create_error ( ts('Votes cannot be added for deleted election.'));
   }
 
   if (!$election->isVotingStarted) {
-    return civicrm_api3_create_error('Votes cannot be added before voting period is started.');
+    return civicrm_api3_create_error ( ts('Votes cannot be added before voting period is started.'));
   }
 
   if ($election->isVotingEnded) {
-    return civicrm_api3_create_error('Votes cannot be added after voting period is ended.');
+    return civicrm_api3_create_error ( ts('Votes cannot be added after voting period is ended.'));
   }
 
   if (is_array($params['member_id'])) {
-    return civicrm_api3_create_error('Multiple members are not yet supported.');
+    return civicrm_api3_create_error ( ts('Multiple members are not yet supported.'));
   }
 
   if (hasLoggedInUserAlreadyVoted($election->id, $params['member_id'])) {
     if (!$election->allow_revote) {
-      return civicrm_api3_create_error('Member has already voted in given election.');
+      return civicrm_api3_create_error ( ts('Member has already voted in this election.'));
     }
     else {
       civicrm_api3('ElectionVote', 'deletevotes', array(
@@ -138,7 +138,7 @@ function civicrm_api3_election_vote_addvotes($params) {
   }
 
   if (!isLoggedInMemberAllowedToVote($election->id, $params['member_id'])) {
-    return civicrm_api3_create_error('Member is not allowed to vote in given election.');
+    return civicrm_api3_create_error ( ts('Member is not allowed to vote in this election.'));
   }
 
   $votes = $params['votes'];
@@ -148,7 +148,7 @@ function civicrm_api3_election_vote_addvotes($params) {
   }
 
   return civicrm_api3_create_success(array(
-    'message' => count($votes) . ' has been added successfully.',
+    'message' => ts('%1 has been added successfully.', array(1 => count($votes))),
   ), $params, 'ElectionVote', 'addvotes');
 }
 

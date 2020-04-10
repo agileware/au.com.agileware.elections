@@ -56,7 +56,7 @@ class CRM_Elections_Form_DeleteElectionPosition extends CRM_Elections_Form_Base 
        'id' => $this->electionPosition['id'],
     ));
 
-    CRM_Core_Session::setStatus('Election position has been deleted successfully.', '', 'success');
+    CRM_Core_Session::setStatus ( ts('Election position has been deleted successfully.'), '', 'success');
 
     parent::postProcess();
 

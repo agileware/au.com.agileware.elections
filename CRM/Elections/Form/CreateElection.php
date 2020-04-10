@@ -20,7 +20,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     $this->eId = CRM_Utils_Request::retrieve('eid', 'Positive', $this, FALSE, 0);
     $this->addFormElements();
     if ($this->eId) {
-      $this->pageTitle = 'Edit Election';
+      $this->pageTitle =  ts('Edit Election');
       CRM_Utils_System::setTitle($this->pageTitle);
     }
     else {
@@ -81,42 +81,42 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
    */
   private function addFormElements() {
     // election information fields
-    $this->add('text', 'name', 'Name', array('size' => 35), TRUE);
-    $this->add('textarea', 'description', 'Description', array('cols' => 55, 'rows' => 6), FALSE);
+    $this->add('text', 'name', ts('Name'), array('size' => 35), TRUE);
+    $this->add('textarea', 'description', ts('Description'), array('cols' => 55, 'rows' => 6), FALSE);
 
     // Visibility fields.
-    $this->add('datepicker', 'visibility_start_date', 'Start Date', array(), TRUE);
-    $this->add('datepicker', 'visibility_end_date', 'End Date', array(), TRUE);
+    $this->add('datepicker', 'visibility_start_date', ts('Start Date'), array(), TRUE);
+    $this->add('datepicker', 'visibility_end_date', ts('End Date'), array(), TRUE);
 
     // Nominations fields.
-    $this->add('datepicker', 'nomination_start_date', 'Start Date', array(), TRUE);
-    $this->add('datepicker', 'nomination_end_date', 'End Date', array(), TRUE);
+    $this->add('datepicker', 'nomination_start_date', ts('Start Date'), array(), TRUE);
+    $this->add('datepicker', 'nomination_end_date', ts('End Date'), array(), TRUE);
 
     // Advetise Candidates
-    $this->add('datepicker', 'advertise_candidates_date', 'Start Date', array(), TRUE);
+    $this->add('datepicker', 'advertise_candidates_date', ts('Start Date'), array(), TRUE);
 
     // Voting fields.
-    $this->add('datepicker', 'voting_start_date', 'Start Date', array(), TRUE);
-    $this->add('datepicker', 'voting_end_date', 'End Date', array(), TRUE);
+    $this->add('datepicker', 'voting_start_date', ts('Start Date'), array(), TRUE);
+    $this->add('datepicker', 'voting_end_date', ts('End Date'), array(), TRUE);
 
     // Publish result
-    $this->add('datepicker', 'result_date', 'Start Date', array(), TRUE);
+    $this->add('datepicker', 'result_date', ts('Start Date'), array(), TRUE);
 
     // Setting fields.
 
-    $this->add('select', 'anonymize_votes', 'Anonymise Votes', CRM_Core_SelectValues::boolean(), TRUE, array(
+    $this->add('select', 'anonymize_votes', ts('Anonymise Votes'), CRM_Core_SelectValues::boolean(), TRUE, array(
       'placeholder' => '- Select -',
     ));
 
-    $this->add('select', 'allow_revote', 'Allow Members to Change Vote', CRM_Core_SelectValues::boolean(), TRUE, array(
+    $this->add('select', 'allow_revote', ts('Allow Members to Change Vote'), CRM_Core_SelectValues::boolean(), TRUE, array(
       'placeholder' => '- Select -',
     ));
 
-    $this->add('text', 'required_nominations', 'Number of Required Nominations', array('size' => 15), TRUE);
+    $this->add('text', 'required_nominations', ts('Number of Required Nominations'), array('size' => 15), TRUE);
 
-    $this->addEntityRef('allowed_groups', 'Allowed by Groups', array(
+    $this->addEntityRef('allowed_groups', ts('Allowed by Groups'), array(
       'entity' => 'Group',
-      'placeholder' => '- Select Groups -',
+      'placeholder' =>  ts('- Select Groups -'),
       'multiple' => TRUE,
       'api' => array(
         'params' => array(
@@ -130,7 +130,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     $this->addButtons(array(
       array(
         'type' => 'submit',
-        'name' => E::ts('Submit'),
+        'name' => ts('Submit'),
         'isDefault' => TRUE,
       ),
     ));
@@ -186,7 +186,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       return;
     }
 
-    CRM_Core_Session::setStatus('Election has been ' . $messageKey . ' successfully.', '', 'success');
+    CRM_Core_Session::setStatus ( ts('Election has been %1 successfully.', array(1 => $messageKey)), '', 'success');
     parent::postProcess();
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections'));
   }

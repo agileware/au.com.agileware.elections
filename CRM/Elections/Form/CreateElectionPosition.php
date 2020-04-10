@@ -38,7 +38,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
     $this->assign('election', $this->election);
     $this->addFormElements();
 
-    CRM_Utils_System::setTitle('Add Election Position - ' . $this->election->name);
+    CRM_Utils_System::setTitle ( ts('Add Election Position') . ' - ' . $this->election->name);
     parent::buildQuickForm();
   }
 
@@ -59,7 +59,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
         $default['sortorder']     = $this->electionPosition['sortorder'];
         $default['description']   = (isset($this->electionPosition['description'])) ? $this->electionPosition['description'] : '';
 
-        CRM_Utils_System::setTitle('Edit Election Position - ' . $this->electionPosition['name']);
+        CRM_Utils_System::setTitle ( ts('Edit Election Position') . ' - ' . $this->electionPosition['name']);
       }
       else {
         $this->epId = 0;
@@ -73,10 +73,10 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
    */
   private function addFormElements() {
     // election information fields
-    $this->add('text', 'name', 'Name', array('size' => 35), TRUE);
-    $this->add('text', 'quantity', 'Seats', array('size' => 15), TRUE);
-    $this->add('text', 'sortorder', 'Order', array('size' => 15), TRUE);
-    $this->add('textarea', 'description', 'Description', array('cols' => 55, 'rows' => 6), FALSE);
+    $this->add('text', 'name', ts('Name'), array('size' => 35), TRUE);
+    $this->add('text', 'quantity', ts('Seats'), array('size' => 15), TRUE);
+    $this->add('text', 'sortorder', ts('Order'), array('size' => 15), TRUE);
+    $this->add('textarea', 'description', ts('Description'), array('cols' => 55, 'rows' => 6), FALSE);
     $this->addElement('hidden', 'eid', $this->eId);
     $this->addElement('hidden', 'epid', $this->epId);
 
@@ -84,7 +84,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
     $this->addButtons(array(
         array(
           'type' => 'submit',
-          'name' => E::ts(($this->epId) ? 'Edit Position' : 'Create'),
+          'name' => E::ts(($this->epId) ? ts('Edit Position') : ts('Create')),
           'isDefault' => TRUE,
         ),
     ));
@@ -94,11 +94,11 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
     $values = $this->exportValues();
 
     if (!CRM_Utils_Rule::positiveInteger($values['quantity'])) {
-      $this->_errors['quantity'] = 'Seats must be a valid positive integer.';
+      $this->_errors['quantity'] = ts('Seats must be a valid positive integer.');
     }
 
     if (!CRM_Utils_Rule::positiveInteger($values['sortorder']) || ($values['sortorder'] <= 0)) {
-      $this->_errors['sortorder'] = 'Rank must be a valid positive integer.';
+      $this->_errors['sortorder'] = ts('Rank must be a valid positive integer.');
     }
 
     return parent::validate();
@@ -117,7 +117,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
       'created_by'   => CRM_Core_Session::singleton()->getLoggedInContactID(),
     );
 
-    $successTag = 'created';
+    $successTag = ts('created');
     $electionPosition = NULL;
     if ($epId) {
       $electionPosition = civicrm_api3('ElectionPosition', 'get', array(
@@ -127,13 +127,13 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
 
     if (isset($electionPosition) && $electionPosition['count']) {
       $params['id'] = $epId;
-      $successTag = 'edited';
+      $successTag = ts('edited');
     }
 
     $electionPosition = civicrm_api3('ElectionPosition', 'create', $params);
     parent::postProcess();
 
-    CRM_Core_Session::setStatus('Election position has been ' . $successTag . ' successfully.', '', 'success');
+    CRM_Core_Session::setStatus ( ts('Election position has been %1 successfully.', array(1 => $successTag)), '', 'success');
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/positions', 'eid=' . $this->eId));
   }
 

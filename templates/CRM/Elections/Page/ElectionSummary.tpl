@@ -4,7 +4,7 @@
     <p>{ts}The votes have been counted for this election.  A breakdown of the nominations and results for each position is shown below.{/ts}</p>
 </div>
 
-<p>Results published on <span class="crm-election-date">{$election->result_date|crmDate} <a target="_blank" href="{$siteTimeZoneConvertUrl}">({$siteTimeZone})</a></span></p>
+<p>{ts}Results published on{/ts} <span class="crm-election-date">{$election->result_date|crmDate} <a target="_blank" href="{$siteTimeZoneConvertUrl}">({$siteTimeZone})</a></span></p>
 
 {foreach from=$positions item=position}
     <h2>{$position.name}</h2>

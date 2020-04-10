@@ -273,7 +273,7 @@ function isElectionAdmin() {
  */
 function throwUnauthorizedMessageIfRequired($formOrPage) {
   if (!isElectionAdmin()) {
-    throwAccessDeniedException($formOrPage, 'You\'re not authorized to perform this action.');
+    throwAccessDeniedException($formOrPage, ts('You are not authorized to perform this action.'));
     return TRUE;
   }
   return FALSE;
@@ -290,7 +290,7 @@ function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions
   $formOrPage->assign('errormessage', $exceptionMessage);
 
   if (empty($pageOptions)) {
-    $pageOptions['return_button_text'] = 'Return to Elections';
+    $pageOptions['return_button_text'] = ts('Return to Elections');
     $pageOptions['return_button_action'] = CRM_Utils_System::url('civicrm/elections');
   }
 
@@ -300,14 +300,14 @@ function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions
 }
 
 /**
- * Throw accesss denied exception if non-member is trying accept a member related page.
+ * Throw access denied exception if non-member is trying view a member related page.
  *
  * @param $exceptionMessage
  * @throws CRM_Extension_Exception
  */
 function throwNonMemberAccessDenied($formOrPage) {
   $formOrPage->assign('nonmember', TRUE);
-  throwAccessDeniedException($formOrPage, 'You may only see this page if you are a member.');
+  throwAccessDeniedException($formOrPage, ts('You are not authorized to access this page.'));
 }
 
 /**
@@ -317,7 +317,7 @@ function throwNonMemberAccessDenied($formOrPage) {
  */
 function throwAccessDeniedPage($formOrPage) {
   $formOrPage->thorwError = TRUE;
-  $formOrPage->assign('errormessage', "You're not authorized to access this page.");
+  $formOrPage->assign('errormessage', ts('You are not authorized to access this page.'));
 }
 
 /**
@@ -358,14 +358,14 @@ function isRequestUsingShortCode() {
  */
 function findElectionById($electionId, $throwErrorIfNotFound = TRUE) {
   if (!$electionId) {
-    throw new CRM_Extension_Exception('You\'re not authorized to access this page.');
+    throw new CRM_Extension_Exception ( ts('You are not authorized to access this page.'));
   }
 
   $election = new CRM_Elections_BAO_Election();
   $election->id = $electionId;
 
   if (!$election->find(TRUE) && $throwErrorIfNotFound) {
-    throw new CRM_Extension_Exception('You\'re not authorized to access this page.');
+    throw new CRM_Extension_Exception ( ts('You are not authorized to access this page.'));
   }
 
   $election->assignStatues();
@@ -390,7 +390,7 @@ function elections_civicrm_managed(&$entities) {
       'option_group_id' => 'activity_type',
       'label' => "Nomination",
       'name' => "Nomination",
-      'description' => "Nominated a member",
+      'description' => ts("Nominated a member"),
       'is_reserved' => 1,
       'weight' => 1,
       'is_active' => 1,
@@ -406,7 +406,7 @@ function elections_civicrm_managed(&$entities) {
       'option_group_id' => 'activity_type',
       'label' => "Vote",
       'name' => "Vote",
-      'description' => "Voted in an election",
+      'description' => ts("Voted in an election"),
       'is_reserved' => 1,
       'weight' => 1,
       'is_active' => 1,

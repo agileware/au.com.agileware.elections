@@ -97,7 +97,7 @@ CREATE TABLE `civicrm_election` (
      `voting_start_date` datetime    COMMENT 'Election voting start date',
      `voting_end_date` datetime    COMMENT 'Election voting end date',
      `result_date` datetime    COMMENT 'Election result date, after this date election results are published.',
-     `result_status` int unsigned   DEFAULT 0 COMMENT 'Election result status,  for admins to manage election result visibility manually.',
+     `result_status` int unsigned   DEFAULT 0 COMMENT 'Election result status, for admins to manage election result visibility manually.',
      `is_deleted` tinyint   DEFAULT 0 COMMENT 'Boolean field to soft delete an election.',
      `is_visible` tinyint   DEFAULT 0 COMMENT 'Boolean field to set if election is visible or not.',
      `has_results_generated` tinyint   DEFAULT 0 COMMENT 'Boolean field to set if results are generated.',

@@ -3,15 +3,15 @@
 {/if}
 
 {if $position.result_status == $resultStatuses.results_no_majority}
-    <p>There was no clear majority winner between two candidates at the end of the result process.</p>
+    <p>{ts}There was no clear majority winner between two candidates at the end of the result process.{/ts}</p>
 {/if}
 
 {if $position.result_status == $resultStatuses.results_no_nominations}
-    <p>There are not enough candidates for this position to generate a result.</p>
+    <p>{ts}There are not enough candidates for this position to generate a result.{/ts}</p>
 {/if}
 
 {if $position.result_status == $resultStatuses.results_more_seats}
-    <p>Not all seats were filled for this position.</p>
+    <p>{ts}Not all seats were filled for this position.{/ts}</p>
 {/if}
 
 {if $position.result_status == $resultStatuses.results_equal_seats}

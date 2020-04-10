@@ -151,7 +151,7 @@
   <field>
     <name>result_status</name>
     <type>int unsigned</type>
-    <comment>Election result status,  for admins to manage election result visibility manually.</comment>
+    <comment>Election result status, for admins to manage election result visibility manually.</comment>
     <html>
       <type>Select</type>
     </html>
