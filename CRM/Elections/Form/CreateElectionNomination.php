@@ -175,7 +175,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     $nominationSeconder = civicrm_api3('ElectionNominationSeconder', 'getcount', $seconderParams);
 
     if ($nominationSeconder != 0) {
-      CRM_Core_Session::setStatus('You have already nominated the selected contact for selected position.', '', 'error');
+      CRM_Core_Session::setStatus('You have already nominated this person for this position.', '', 'error');
     }
     else {
       $seconderParams['description'] = $values['reason'];
