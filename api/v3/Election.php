@@ -34,7 +34,7 @@ function civicrm_api3_election_create($params) {
   if (!isset($params['has_results_generated']) || $params['has_results_generated'] != 1) {
     $errors = CRM_Elections_BAO_Election::compareDates($params, $apiDateFormat);
     if (count($errors) > 0) {
-      return civicrm_api3_create_error ( ts('Please correct the form errors.'), array(
+      return civicrm_api3_create_error ( E::ts('Please correct the form errors.'), array(
           'errors' => $errors,
       ));
     }
@@ -44,7 +44,7 @@ function civicrm_api3_election_create($params) {
       $currentTime = new DateTime();
       $nominationStartDate = DateTime::createFromFormat("Y-m-d H:i:s", $election->nomination_start_date);
       if (CRM_Elections_Helper_Dates::compare($nominationStartDate->format($apiDateFormat), $currentTime->format($apiDateFormat), $apiDateFormat) == 1 && isset($params['is_deleted']) && $params['is_deleted'] == 1 && $election->is_visible == 1) {
-        return civicrm_api3_create_error ( ts('Election cannot be deleted once it has been started.'));
+        return civicrm_api3_create_error ( E::ts('Election cannot be deleted once it has been started.'));
       }
     }
   }
@@ -92,7 +92,7 @@ function civicrm_api3_election_generateresults($params) {
   $dao = NULL;
   if (!$elections["count"]) {
     return civicrm_api3_create_success(1, array(), NULL, NULL, $dao, array(
-      'message' => ts('No election results are scheduled today.'),
+      'message' => E::ts('No election results are scheduled today.'),
     ));
   }
 
@@ -103,7 +103,7 @@ function civicrm_api3_election_generateresults($params) {
   }
 
   return civicrm_api3_create_success(1, array(), NULL, NULL, $dao, array(
-     'message' => ts('Successfully generated results for %1 elections.', array(1 => count($elections))),
+     'message' => E::ts('Successfully generated results for %1 elections.', array(1 => count($elections))),
   ));
 
 }

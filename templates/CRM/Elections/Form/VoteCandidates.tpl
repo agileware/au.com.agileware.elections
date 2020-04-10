@@ -9,7 +9,7 @@
   {foreach from=$positions item=position}
     {if $position.candidates|@count > 0}
       <div class="crm-vote-election-form-block">
-          <p><strong>Vote for {$position.name}. Please number of the boxes from 1 to {$position.candidates|@count} in the order of your preferences.</strong></p>
+          <p><strong>{ts}Vote for{/ts} {$position.name}. {ts}Please number of the boxes from 1 to{/ts} {$position.candidates|@count} {ts}in preference order.{/ts}</strong></p>
             {foreach from=$position.candidates item=candidate}
               {assign var="cKey" value="candidate_`$candidate.id`"}
                 <div class="vote-candidate-row">
@@ -35,5 +35,5 @@
   </div>
 
   <br>
-  <p class="election-info-text"><em>{ts}If you have already voted, your existing votes will be replaced.{/ts}</em></p>
+  <p class="election-info-text"><em>{ts}If you have already voted, your existing votes will be changed.{/ts}</em></p>
 </div>

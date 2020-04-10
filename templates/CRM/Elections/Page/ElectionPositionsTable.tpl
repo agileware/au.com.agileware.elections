@@ -3,9 +3,9 @@
     <thead>
     <tr>
         <th>#</th>
-        <th>Name</th>
-        <th>Seats</th>
-        <th>Description</th>
+        <th>{ts}Name{/ts}</th>
+        <th>{ts}Seats{/ts}</th>
+        <th>{ts}Description{/ts}</th>
         {if $isElectionAdmin and (!$isElectionRunning or !$election->is_visible)}
             <th></th>
         {/if}
@@ -25,8 +25,8 @@
             {if $isElectionAdmin and (!$isElectionRunning or !$election->is_visible)}
                 <td>
                 <span>
-                    <a href="{crmURL p="civicrm/elections/positions/create" q="eid=`$election->id`&epid=`$position.id`"}" class="action-item crm-hover-button" title="Edit Position">Edit</a>
-                    <a href="{crmURL p="civicrm/elections/positions/delete" q="eid=`$election->id`&epid=`$position.id`"}" class="action-item crm-hover-button" title="Delete Position">Delete</a>
+                    <a href="{crmURL p="civicrm/elections/positions/create" q="eid=`$election->id`&epid=`$position.id`"}" class="action-item crm-hover-button" title="{ts}Edit Position{/ts}">{ts}Edit{/ts}</a>
+                    <a href="{crmURL p="civicrm/elections/positions/delete" q="eid=`$election->id`&epid=`$position.id`"}" class="action-item crm-hover-button" title="{ts}Delete Position{/ts}">{ts}Delete{/ts}</a>
                 </span>
                 </td>
             {/if}
@@ -34,7 +34,7 @@
     {/foreach}
     {if $positions|@count == 0}
         <tr class="even">
-            <td class="center" colspan="{if $isElectionAdmin and !$isElectionRunning}5{else}4{/if}">Positions are not added yet.</td>
+            <td class="center" colspan="{if $isElectionAdmin and !$isElectionRunning}5{else}4{/if}">{ts}No positions are currently available.{/ts}</td>
         </tr>
     {/if}
     </tbody>

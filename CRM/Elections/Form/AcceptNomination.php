@@ -41,17 +41,17 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
     }
 
     if ($this->electionNomination['has_accepted_nomination'] == 1) {
-      throwAccessDeniedException($this, ts('You have already accepted this nomination.'));
+      throwAccessDeniedException($this, E::ts('You have already accepted this nomination.'));
       return;
     }
 
     if ($this->electionNomination['has_rejected_nomination'] == 1) {
-      throwAccessDeniedException($this, ts('You cannot accept the rejected nomination.'));
+      throwAccessDeniedException($this, E::ts('You cannot accept the rejected nomination.'));
       return;
     }
 
     if ($election->isVotingStarted) {
-      throwAccessDeniedException($this, ts('You cannot accept the nomination once voting is started.'));
+      throwAccessDeniedException($this, E::ts('You cannot accept the nomination once voting is started.'));
       return;
     }
 
@@ -80,7 +80,7 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
       'has_accepted_nomination' => 1,
     ));
 
-    CRM_Core_Session::setStatus( ts('You have accepted the nomination successfully.'), '', 'success');
+    CRM_Core_Session::setStatus( E::ts('You have accepted the nomination successfully.'), '', 'success');
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/view', 'eid=' . $this->electionNomination['election_position_id.election_id'] . ''));
 
     parent::postProcess();

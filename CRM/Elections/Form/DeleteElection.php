@@ -18,12 +18,12 @@ class CRM_Elections_Form_DeleteElection extends CRM_Elections_Form_Base {
     $this->addButtons(array(
       array(
         'type' => 'submit',
-        'name' => ts('Delete'),
+        'name' => E::ts('Delete'),
         'isDefault' => TRUE,
       ),
       array(
         'type' => 'cancel',
-        'name' => ts('Cancel'),
+        'name' => E::ts('Cancel'),
       ),
     ));
 
@@ -53,10 +53,10 @@ class CRM_Elections_Form_DeleteElection extends CRM_Elections_Form_Base {
 
       $election->is_deleted = 1;
       if ($election->save()) {
-        CRM_Core_Session::setStatus ( ts('Election has been deleted successfully.'), '', 'success');
+        CRM_Core_Session::setStatus ( E::ts('Election has been deleted successfully.'), '', 'success');
       }
       else {
-        CRM_Core_Session::setStatus ( ts('An error occurred while deleting an election.'), '', 'danger');
+        CRM_Core_Session::setStatus ( E::ts('An error occurred while deleting an election.'), '', 'danger');
       }
     }
     parent::postProcess();

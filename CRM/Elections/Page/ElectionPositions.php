@@ -31,7 +31,7 @@ class CRM_Elections_Page_ElectionPositions extends CRM_Elections_Page_Base {
     $this->assign('isElectionRunning', $this->isElectionRunning);
     $this->assign('election', $this->election);
 
-    CRM_Utils_System::setTitle ( ts('Election Positions - ') . $this->election->name);
+    CRM_Utils_System::setTitle ( E::ts('Election Positions - ') . $this->election->name);
 
     $electionPositions = civicrm_api3('ElectionPosition', 'get', array(
       'election_id' => $this->eId,

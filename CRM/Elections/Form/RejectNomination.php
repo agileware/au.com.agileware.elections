@@ -40,18 +40,18 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
     }
 
     if ($this->electionNomination['has_rejected_nomination'] == 1) {
-      throwAccessDeniedException($this, ts('You have already withdrawn this nomination.'));
+      throwAccessDeniedException($this, E::ts('You have already withdrawn this nomination.'));
       return;
     }
 
     if ($election->isVotingStarted) {
-      throwAccessDeniedException($this, ts('You cannot withdraw the nomination once voting has started.'));
+      throwAccessDeniedException($this, E::ts('You cannot withdraw the nomination once voting has started.'));
       return;
     }
 
     $this->assign('electionNomination', $this->electionNomination);
 
-    $this->add('textarea', 'nominationcomments', ts('Comments'), array('cols' => 55, 'rows' => 6), FALSE);
+    $this->add('textarea', 'nominationcomments', E::ts('Comments'), array('cols' => 55, 'rows' => 6), FALSE);
     $this->addElement('hidden', 'enid', $this->enId);
 
     $this->addButtons(array(
@@ -75,7 +75,7 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
       'has_accepted_nomination' => 0,
     ));
 
-    CRM_Core_Session::setStatus ( ts('You have withdrawn the nomination successfully.'), '', 'success');
+    CRM_Core_Session::setStatus ( E::ts('You have withdrawn the nomination successfully.'), '', 'success');
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/view', 'eid=' . $this->electionNomination['election_position_id.election_id'] . ''));
 
     parent::postProcess();

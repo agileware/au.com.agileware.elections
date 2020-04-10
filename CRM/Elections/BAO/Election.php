@@ -107,48 +107,48 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
 
     // Check election visibility
     if (CRM_Elections_Helper_Dates::compare($values['visibility_start_date'], $values['visibility_end_date'], $dateFormat) != 1) {
-      $errors['visibility_end_date'] = ts('End date must be after start date.');
+      $errors['visibility_end_date'] = E::ts('End date must be after start date.');
     }
 
     // Check nominations
     if (CRM_Elections_Helper_Dates::compare($values['visibility_start_date'], $values['nomination_start_date'], $dateFormat) != 1) {
-      $errors['nomination_start_date'] = ts('Start date must be after visibility start date.');
+      $errors['nomination_start_date'] = E::ts('Start date must be after visibility start date.');
     }
 
     if (CRM_Elections_Helper_Dates::compare($values['nomination_start_date'], $values['nomination_end_date'], $dateFormat) != 1) {
-      $errors['nomination_end_date'] = ts('End date must be after start date.');
+      $errors['nomination_end_date'] = E::ts('End date must be after start date.');
     }
     elseif (CRM_Elections_Helper_Dates::compare($values['visibility_end_date'], $values['nomination_end_date'], $dateFormat) == 1) {
-      $errors['nomination_end_date'] = ts('End date must be before visibility end date.');
+      $errors['nomination_end_date'] = E::ts('End date must be before visibility end date.');
     }
 
     // Check advertise candidates
     if (CRM_Elections_Helper_Dates::compare($values['nomination_end_date'], $values['advertise_candidates_date'], $dateFormat) != 1) {
-      $errors['advertise_candidates_date'] = ts('Start Date must be after nomination end date.');
+      $errors['advertise_candidates_date'] = E::ts('Start Date must be after nomination end date.');
     }
     elseif (CRM_Elections_Helper_Dates::compare($values['visibility_end_date'], $values['advertise_candidates_date'], $dateFormat) == 1) {
-      $errors['advertise_candidates_date'] = ts('Start Date must be before visibility end date.');
+      $errors['advertise_candidates_date'] = E::ts('Start Date must be before visibility end date.');
     }
 
     // Checking voting with advertise candidates
     if (CRM_Elections_Helper_Dates::compare($values['advertise_candidates_date'], $values['voting_start_date'], $dateFormat) != 1) {
-      $errors['voting_start_date'] = ts('Start date must be after advertise candidate date.');
+      $errors['voting_start_date'] = E::ts('Start date must be after advertise candidate date.');
     }
 
     // Check voting end date
     if (CRM_Elections_Helper_Dates::compare($values['voting_start_date'], $values['voting_end_date'], $dateFormat) != 1) {
-      $errors['voting_end_date'] = ts('End date must be after start date.');
+      $errors['voting_end_date'] = E::ts('End date must be after start date.');
     }
     elseif (CRM_Elections_Helper_Dates::compare($values['visibility_end_date'], $values['voting_end_date'], $dateFormat) == 1) {
-      $errors['voting_end_date'] = ts('End date must be before visibility end date.');
+      $errors['voting_end_date'] = E::ts('End date must be before visibility end date.');
     }
 
     // Check results date
     if (CRM_Elections_Helper_Dates::compare($values['voting_end_date'], $values['result_date'], $dateFormat) != 1) {
-      $errors['result_date'] = ts('Start Date must be after voting end date.');
+      $errors['result_date'] = E::ts('Start Date must be after voting end date.');
     }
     elseif (CRM_Elections_Helper_Dates::compare($values['visibility_end_date'], $values['result_date'], $dateFormat) == 1) {
-      $errors['result_date'] = ts('Start Date must be before visibility end date.');
+      $errors['result_date'] = E::ts('Start Date must be before visibility end date.');
     }
 
     return $errors;

@@ -5,13 +5,13 @@
 // http://wiki.civicrm.org/confluence/display/CRMDOC42/Hook+Reference
 return array(
     0 => array(
-        'name' => ts('Elections Results Job'),
+        'name' => E::ts('Elections Results Job'),
         'entity' => 'Job',
         'update' => 'never',
         'params' => array(
             'version' => 3,
-            'name' => ts('Elections Results Job'),
-            'description' => ts('Generate the scheduled election results.'),
+            'name' => E::ts('Elections Results Job'),
+            'description' => E::ts('Generate the scheduled election results.'),
             'api_entity' => 'Election',
             'api_action' => 'generateresults',
             'run_frequency' => 'Always',

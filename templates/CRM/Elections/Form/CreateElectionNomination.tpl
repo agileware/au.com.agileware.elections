@@ -1,7 +1,7 @@
 <div class="crm-election-form-block-container">
 
   <div class="crm-elections-helptext-block">
-    <p>{ts}Use this form to nominate someone to a given position in this election by selecting the relevant position and then searching for your nominee by name or email. Only persons that can vote in this election may be nominated.{/ts} </p>
+    <p>{ts}Use this form to nominate someone to a given position in this election by selecting the relevant position and then searching for your nominee by name or email. Only persons that can vote in this election may be nominated.{/ts}</p>
   </div>
 
   <div class="crm-election-form-row">
@@ -45,7 +45,7 @@
 {literal}
   <script>
     CRM.$.fn.select2.defaults.formatInputTooShort = function() {
-        return CRM.ts('Start typing a name or email...');
+        return 'Start typing a name or email...';
     };
   </script>
 {/literal}

@@ -17,7 +17,7 @@
         <div class="election-position-summary-row">
 
             <div class="election-position-summary-block">
-                <h3>Elected</h3>
+                <h3>{ts}Elected{/ts}</h3>
                 <ul>
                     {foreach from=$position.candidates item=candidate}
                         {if $candidate.is_winner}
@@ -28,7 +28,7 @@
             </div><!-- ending of election-position-summary-block -->
 
             <div class="election-position-summary-block">
-                <h3>Candidates</h3>
+                <h3>{ts}Candidates{/ts}</h3>
                 <ul>
                     {foreach from=$position.candidates item=candidate}
                         <li>{$candidate.$memberdisplayname}</li>
@@ -37,7 +37,7 @@
             </div><!-- ending of election-position-summary-block -->
 
             <div class="election-position-summary-block">
-                <h3>Nominations</h3>
+                <h3>{ts}Nominations{/ts}</h3>
                 <ul>
                     {foreach from=$position.nominations item=nomination}
                         <li>{$nomination.$memberdisplayname}</li>

@@ -6,7 +6,7 @@
     {/if}
 </h2>
 {if $nominations|@count == 0 and $positions|@count == 0}
-    <p class="no-result-message">{ts}Positions are not added yet to be nominated.{/ts}</p>
+    <p class="no-result-message">{ts}No positions are currently available.{/ts}</p>
 {/if}
 
 {foreach from = $nominations key = k item = nomination}
@@ -19,7 +19,7 @@
 
         <h3>{$positionKey} for {$nomination.name}</h3>
         {if $nomination.nominations|@count == 0 and !$election->advertiseCandidatesStarted}
-            <p>{ts}There are no existing nominations{/ts}</p>
+            <p>{ts}There are no existing nominations.{/ts}</p>
         {/if}
         {assign var="candidatesCount" value=0}
     <div class="election_row_style">

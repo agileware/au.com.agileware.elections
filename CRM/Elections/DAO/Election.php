@@ -1,5 +1,7 @@
 <?php
 
+use CRM_Elections_ExtensionUtil as E;
+
 /**
  * @package CRM
  * @copyright CiviCRM LLC (c) 2004-2018
@@ -214,7 +216,7 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'id' => [
           'name' => 'id',
           'type' => CRM_Utils_Type::T_INT,
-          'description' => ts('Unique Election ID'),
+          'description' => E::ts('Unique Election ID'),
           'required' => TRUE,
           'table_name' => 'civicrm_election',
           'entity' => 'Election',
@@ -224,8 +226,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'name' => [
           'name' => 'name',
           'type' => CRM_Utils_Type::T_STRING,
-          'title' => ts('Name'),
-          'description' => ts('Name of the election.'),
+          'title' => E::ts('Name'),
+          'description' => E::ts('Name of the election.'),
           'maxlength' => 255,
           'size' => CRM_Utils_Type::HUGE,
           'import' => TRUE,
@@ -244,8 +246,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'description' => [
           'name' => 'description',
           'type' => CRM_Utils_Type::T_TEXT,
-          'title' => ts('Description'),
-          'description' => ts('Short description of this election.'),
+          'title' => E::ts('Description'),
+          'description' => E::ts('Short description of this election.'),
           'import' => TRUE,
           'where' => 'civicrm_election.description',
           'headerPattern' => '',
@@ -262,8 +264,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'visibility_start_date' => [
           'name' => 'visibility_start_date',
           'type' => CRM_Utils_Type::T_DATE + CRM_Utils_Type::T_TIME,
-          'title' => ts('Visibility Start Date'),
-          'description' => ts('Election visibility start date.'),
+          'title' => E::ts('Visibility Start Date'),
+          'description' => E::ts('Election visibility start date.'),
           'import' => TRUE,
           'where' => 'civicrm_election.visibility_start_date',
           'headerPattern' => '',
@@ -281,8 +283,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'visibility_end_date' => [
           'name' => 'visibility_end_date',
           'type' => CRM_Utils_Type::T_DATE + CRM_Utils_Type::T_TIME,
-          'title' => ts('Visibility End Date'),
-          'description' => ts('Election visibility end date.'),
+          'title' => E::ts('Visibility End Date'),
+          'description' => E::ts('Election visibility end date.'),
           'import' => TRUE,
           'where' => 'civicrm_election.visibility_end_date',
           'headerPattern' => '',
@@ -300,8 +302,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'nomination_start_date' => [
           'name' => 'nomination_start_date',
           'type' => CRM_Utils_Type::T_DATE + CRM_Utils_Type::T_TIME,
-          'title' => ts('Nomination Start Date'),
-          'description' => ts('Election nomination start date.'),
+          'title' => E::ts('Nomination Start Date'),
+          'description' => E::ts('Election nomination start date.'),
           'import' => TRUE,
           'where' => 'civicrm_election.nomination_start_date',
           'headerPattern' => '',
@@ -319,8 +321,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'nomination_end_date' => [
           'name' => 'nomination_end_date',
           'type' => CRM_Utils_Type::T_DATE + CRM_Utils_Type::T_TIME,
-          'title' => ts('Nomination End Date'),
-          'description' => ts('Election nomination end date.'),
+          'title' => E::ts('Nomination End Date'),
+          'description' => E::ts('Election nomination end date.'),
           'import' => TRUE,
           'where' => 'civicrm_election.nomination_end_date',
           'headerPattern' => '',
@@ -338,8 +340,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'advertise_candidates_date' => [
           'name' => 'advertise_candidates_date',
           'type' => CRM_Utils_Type::T_DATE + CRM_Utils_Type::T_TIME,
-          'title' => ts('Advertise Candidates Date'),
-          'description' => ts('Date from when candidates are available for viewing.'),
+          'title' => E::ts('Advertise Candidates Date'),
+          'description' => E::ts('Date from when candidates are available for viewing.'),
           'import' => TRUE,
           'where' => 'civicrm_election.advertise_candidates_date',
           'headerPattern' => '',
@@ -357,8 +359,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'voting_start_date' => [
           'name' => 'voting_start_date',
           'type' => CRM_Utils_Type::T_DATE + CRM_Utils_Type::T_TIME,
-          'title' => ts('Voting Start Date'),
-          'description' => ts('Election voting start date.'),
+          'title' => E::ts('Voting Start Date'),
+          'description' => E::ts('Election voting start date.'),
           'import' => TRUE,
           'where' => 'civicrm_election.voting_start_date',
           'headerPattern' => '',
@@ -376,8 +378,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'voting_end_date' => [
           'name' => 'voting_end_date',
           'type' => CRM_Utils_Type::T_DATE + CRM_Utils_Type::T_TIME,
-          'title' => ts('Voting End Date'),
-          'description' => ts('Election voting end date.'),
+          'title' => E::ts('Voting End Date'),
+          'description' => E::ts('Election voting end date.'),
           'import' => TRUE,
           'where' => 'civicrm_election.voting_end_date',
           'headerPattern' => '',
@@ -395,8 +397,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'result_date' => [
           'name' => 'result_date',
           'type' => CRM_Utils_Type::T_DATE + CRM_Utils_Type::T_TIME,
-          'title' => ts('Result Date'),
-          'description' => ts('Election result date, after this date election results are published.'),
+          'title' => E::ts('Result Date'),
+          'description' => E::ts('Election result date, after this date election results are published.'),
           'import' => TRUE,
           'where' => 'civicrm_election.result_date',
           'headerPattern' => '',
@@ -414,8 +416,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'result_status' => [
           'name' => 'result_status',
           'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Result Status'),
-          'description' => ts('Election result status, for admins to manage election result visibility manually.'),
+          'title' => E::ts('Result Status'),
+          'description' => E::ts('Election result status, for admins to manage election result visibility manually.'),
           'import' => TRUE,
           'where' => 'civicrm_election.result_status',
           'headerPattern' => '',
@@ -432,7 +434,7 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'is_deleted' => [
           'name' => 'is_deleted',
           'type' => CRM_Utils_Type::T_BOOLEAN,
-          'description' => ts('Boolean field to soft delete an election.'),
+          'description' => E::ts('Boolean field to soft delete an election.'),
           'export' => TRUE,
           'where' => 'civicrm_election.is_deleted',
           'headerPattern' => '',
@@ -448,7 +450,7 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'is_visible' => [
           'name' => 'is_visible',
           'type' => CRM_Utils_Type::T_BOOLEAN,
-          'description' => ts('Boolean field to set if election is visible or not.'),
+          'description' => E::ts('Boolean field to set if election is visible or not.'),
           'export' => TRUE,
           'where' => 'civicrm_election.is_visible',
           'headerPattern' => '',
@@ -465,8 +467,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'has_results_generated' => [
           'name' => 'has_results_generated',
           'type' => CRM_Utils_Type::T_BOOLEAN,
-          'title' => ts('Has Results Generated'),
-          'description' => ts('Boolean field to set if results are generated.'),
+          'title' => E::ts('Has Results Generated'),
+          'description' => E::ts('Boolean field to set if results are generated.'),
           'export' => TRUE,
           'where' => 'civicrm_election.has_results_generated',
           'headerPattern' => '',
@@ -482,8 +484,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'anonymize_votes' => [
           'name' => 'anonymize_votes',
           'type' => CRM_Utils_Type::T_BOOLEAN,
-          'title' => ts('Anonymize Votes'),
-          'description' => ts('Boolean field to anonymize votes when results are generated.'),
+          'title' => E::ts('Anonymize Votes'),
+          'description' => E::ts('Boolean field to anonymize votes when results are generated.'),
           'export' => TRUE,
           'where' => 'civicrm_election.anonymize_votes',
           'headerPattern' => '',
@@ -499,8 +501,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'allow_revote' => [
           'name' => 'allow_revote',
           'type' => CRM_Utils_Type::T_BOOLEAN,
-          'title' => ts('Allow Re-vote'),
-          'description' => ts('Boolean field to set if members are allowed to re-vote in election.'),
+          'title' => E::ts('Allow Re-vote'),
+          'description' => E::ts('Boolean field to set if members are allowed to re-vote in election.'),
           'export' => TRUE,
           'where' => 'civicrm_election.allow_revote',
           'headerPattern' => '',
@@ -516,8 +518,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'allowed_groups' => [
           'name' => 'allowed_groups',
           'type' => CRM_Utils_Type::T_TEXT,
-          'title' => ts('Allowed Groups'),
-          'description' => ts('Select one or more groups of contacts that are allowed to participate in the election.'),
+          'title' => E::ts('Allowed Groups'),
+          'description' => E::ts('Select one or more groups of contacts that are allowed to participate in the election.'),
           'import' => TRUE,
           'where' => 'civicrm_election.allowed_groups',
           'headerPattern' => '',
@@ -534,8 +536,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'required_nominations' => [
           'name' => 'required_nominations',
           'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Required Nominations'),
-          'description' => ts('Number of required nominations to become an eligible candidate.'),
+          'title' => E::ts('Required Nominations'),
+          'description' => E::ts('Number of required nominations to become an eligible candidate.'),
           'import' => TRUE,
           'where' => 'civicrm_election.required_nominations',
           'headerPattern' => '',
@@ -552,8 +554,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'created_at' => [
           'name' => 'created_at',
           'type' => CRM_Utils_Type::T_TIMESTAMP,
-          'title' => ts('Created At'),
-          'description' => ts('Election created date.'),
+          'title' => E::ts('Created At'),
+          'description' => E::ts('Election created date.'),
           'export' => TRUE,
           'where' => 'civicrm_election.created_at',
           'headerPattern' => '',
@@ -567,8 +569,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'updated_at' => [
           'name' => 'updated_at',
           'type' => CRM_Utils_Type::T_TIMESTAMP,
-          'title' => ts('Updated At'),
-          'description' => ts('Election updated date.'),
+          'title' => E::ts('Updated At'),
+          'description' => E::ts('Election updated date.'),
           'required' => FALSE,
           'export' => TRUE,
           'where' => 'civicrm_election.updated_at',
@@ -583,8 +585,8 @@ class CRM_Elections_DAO_Election extends CRM_Core_DAO {
         'created_by' => [
           'name' => 'created_by',
           'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Created By'),
-          'description' => ts('FK to Contact who created particular election.'),
+          'title' => E::ts('Created By'),
+          'description' => E::ts('FK to Contact who created particular election.'),
           'table_name' => 'civicrm_election',
           'entity' => 'Election',
           'bao' => 'CRM_Elections_DAO_Election',

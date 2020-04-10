@@ -1,5 +1,7 @@
 <?php
 
+use CRM_Elections_ExtensionUtil as E;
+
 /**
  * @package CRM
  * @copyright CiviCRM LLC (c) 2004-2018
@@ -89,7 +91,7 @@ class CRM_Elections_DAO_ElectionNominationSeconder extends CRM_Core_DAO {
         'id' => [
           'name' => 'id',
           'type' => CRM_Utils_Type::T_INT,
-          'description' => ts('Unique Election Nomination Seconder ID'),
+          'description' => E::ts('Unique Election Nomination Seconder ID'),
           'required' => TRUE,
           'table_name' => 'civicrm_election_nomination_seconder',
           'entity' => 'ElectionNominationSeconder',
@@ -99,7 +101,7 @@ class CRM_Elections_DAO_ElectionNominationSeconder extends CRM_Core_DAO {
         'description' => [
           'name' => 'description',
           'type' => CRM_Utils_Type::T_TEXT,
-          'title' => ts('Description'),
+          'title' => E::ts('Description'),
           'import' => TRUE,
           'where' => 'civicrm_election_nomination_seconder.description',
           'headerPattern' => '',
@@ -116,8 +118,8 @@ class CRM_Elections_DAO_ElectionNominationSeconder extends CRM_Core_DAO {
         'member_nominator' => [
           'name' => 'member_nominator',
           'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Member Nominator'),
-          'description' => ts('FK to Contact who nominated member_nominee for particular position.'),
+          'title' => E::ts('Member Nominator'),
+          'description' => E::ts('FK to Contact who nominated member_nominee for particular position.'),
           'table_name' => 'civicrm_election_nomination_seconder',
           'FKClassName' => 'CRM_Contact_DAO_Contact',
           'entity' => 'ElectionNominationSeconder',
@@ -128,7 +130,7 @@ class CRM_Elections_DAO_ElectionNominationSeconder extends CRM_Core_DAO {
           'name' => 'election_nomination_id',
           'type' => CRM_Utils_Type::T_INT,
           'title' => 'Election Nomination',
-          'description' => ts('FK to ElectionNomination for which this seconder is added.'),
+          'description' => E::ts('FK to ElectionNomination for which this seconder is added.'),
           'table_name' => 'civicrm_election_nomination_seconder',
           'entity' => 'ElectionNominationSeconder',
           'bao' => 'CRM_Elections_DAO_ElectionNominationSeconder',

@@ -5,13 +5,13 @@
 
     {if $positions|@count == 0}
         <div class="messages status no-popup">
-            {ts}There were no positions added in this election.{/ts}
+            {ts}There were no positions for this election.{/ts}
         </div>
     {/if}
 
     <h2>{ts}Election Results{/ts}</h2>
     <center>
-        <a href="{crmURL p="civicrm/elections/summary" q="eid=`$election->id`"}">{ts}Click here to check election summary{/ts}</a>
+        <a href="{crmURL p="civicrm/elections/summary" q="eid=`$election->id`"}">{ts}View the election results summary{/ts}</a>
     </center>
 
     {foreach from = $positions key = k item = position}

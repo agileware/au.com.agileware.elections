@@ -1,5 +1,7 @@
 <?php
 
+use CRM_Elections_ExtensionUtil as E;
+
 /**
  * @package CRM
  * @copyright CiviCRM LLC (c) 2004-2018
@@ -98,7 +100,7 @@ class CRM_Elections_DAO_ElectionVote extends CRM_Core_DAO {
         'id' => [
           'name' => 'id',
           'type' => CRM_Utils_Type::T_INT,
-          'description' => ts('Unique Vote ID'),
+          'description' => E::ts('Unique Vote ID'),
           'required' => TRUE,
           'table_name' => 'civicrm_election_vote',
           'entity' => 'ElectionVote',
@@ -108,8 +110,8 @@ class CRM_Elections_DAO_ElectionVote extends CRM_Core_DAO {
         'rank' => [
           'name' => 'rank',
           'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Rank'),
-          'description' => ts('Rank of a nomination for particular position.'),
+          'title' => E::ts('Rank'),
+          'description' => E::ts('Rank of a nomination for particular position.'),
           'import' => TRUE,
           'where' => 'civicrm_election_vote.rank',
           'headerPattern' => '',
@@ -126,7 +128,7 @@ class CRM_Elections_DAO_ElectionVote extends CRM_Core_DAO {
         'election_nomination_id' => [
           'name' => 'election_nomination_id',
           'type' => CRM_Utils_Type::T_INT,
-          'description' => ts('FK to Election Nomination for which this vote is counted.'),
+          'description' => E::ts('FK to Election Nomination for which this vote is counted.'),
           'table_name' => 'civicrm_election_vote',
           'entity' => 'ElectionVote',
           'bao' => 'CRM_Elections_DAO_ElectionVote',
@@ -137,8 +139,8 @@ class CRM_Elections_DAO_ElectionVote extends CRM_Core_DAO {
         'created_at' => [
           'name' => 'created_at',
           'type' => CRM_Utils_Type::T_TIMESTAMP,
-          'title' => ts('Created At'),
-          'description' => ts('Date vote created.'),
+          'title' => E::ts('Created At'),
+          'description' => E::ts('Date vote created.'),
           'export' => TRUE,
           'where' => 'civicrm_election_vote.created_at',
           'headerPattern' => '',
@@ -152,7 +154,7 @@ class CRM_Elections_DAO_ElectionVote extends CRM_Core_DAO {
         'member_id' => [
           'name' => 'member_id',
           'type' => CRM_Utils_Type::T_INT,
-          'description' => ts('FK to Contact who voted.'),
+          'description' => E::ts('FK to Contact who voted.'),
           'table_name' => 'civicrm_election_vote',
           'entity' => 'ElectionVote',
           'bao' => 'CRM_Elections_DAO_ElectionVote',

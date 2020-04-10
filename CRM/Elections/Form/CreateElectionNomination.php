@@ -95,20 +95,20 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     }
 
     if (count($positions) == 0) {
-      throwAccessDeniedException($this, ts('There are no positions available for selected election.'));
+      throwAccessDeniedException($this, E::ts('There are no positions available for this election.'));
       return;
     }
 
-    $this->add('select2', 'position', ts('Nominated Position'), $positions, TRUE);
+    $this->add('select2', 'position', E::ts('Nominated Position'), $positions, TRUE);
     $this->addEntityRef('contact', 'Nominee', array(
       'entity' => 'ElectionNominee',
-      'placeholder' => ts('- Select Nominee -'),
+      'placeholder' => E::ts('- Select Nominee -'),
       'api' => array(
         'election_id' => $this->election->id,
       ),
     ), TRUE);
     $this->addElement('hidden', 'eid', $this->eId);
-    $this->add('textarea', 'reason', ts('Why do you want to nominate this person for this position?'), array('cols' => 55, 'rows' => 6), FALSE);
+    $this->add('textarea', 'reason', E::ts('Why do you want to nominate this person for this position?'), array('cols' => 55, 'rows' => 6), FALSE);
 
     $this->addButtons(array(
       array(
@@ -138,7 +138,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     if ($nomination['count'] > 0) {
       $nomination = $nomination['values'][0];
       if ($nomination['has_rejected_nomination'] == 1) {
-        CRM_Core_Session::setStatus ( ts('Selected member has withdrawn the nomination, You cannot nominate the member again for this position.'), '', 'error');
+        CRM_Core_Session::setStatus ( E::ts('Selected member has withdrawn the nomination, You cannot nominate the member again for this position.'), '', 'error');
         CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/view', 'eid=' . $this->eId . ''));
         return -1;
       }
@@ -153,7 +153,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     }
 
     if (!$nominationId) {
-      throwAccessDeniedException($this, ts('An error occurred while creating a nomination. Please try again or contact us for support.'));
+      throwAccessDeniedException($this, E::ts('An error occurred while creating a nomination. Please try again or contact us for support.'));
       return -1;
     }
 
@@ -189,7 +189,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
         'nomination_seconder_id' => $nominationSeconder['id'],
         'is_eligible_candidate'  => ($isEligibleCandidate) ? 1 : 0,
       ));
-      CRM_Core_Session::setStatus('You have successfully nominated a member for selected position.', '', 'success');
+      CRM_Core_Session::setStatus('The nomination has been submitted successfully.', '', 'success');
     }
 
     parent::postProcess();

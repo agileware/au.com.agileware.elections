@@ -1,5 +1,7 @@
 <?php
 
+use CRM_Elections_ExtensionUtil as E;
+
 /**
  * @package CRM
  * @copyright CiviCRM LLC (c) 2004-2018
@@ -132,7 +134,7 @@ class CRM_Elections_DAO_ElectionPosition extends CRM_Core_DAO {
         'id' => [
           'name' => 'id',
           'type' => CRM_Utils_Type::T_INT,
-          'description' => ts('Unique Election Position ID'),
+          'description' => E::ts('Unique Election Position ID'),
           'required' => TRUE,
           'table_name' => 'civicrm_election_position',
           'entity' => 'ElectionPosition',
@@ -142,8 +144,8 @@ class CRM_Elections_DAO_ElectionPosition extends CRM_Core_DAO {
         'name' => [
           'name' => 'name',
           'type' => CRM_Utils_Type::T_STRING,
-          'title' => ts('Name'),
-          'description' => ts('Name of the position.'),
+          'title' => E::ts('Name'),
+          'description' => E::ts('Name of the position.'),
           'maxlength' => 255,
           'size' => CRM_Utils_Type::HUGE,
           'import' => TRUE,
@@ -162,8 +164,8 @@ class CRM_Elections_DAO_ElectionPosition extends CRM_Core_DAO {
         'quantity' => [
           'name' => 'quantity',
           'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Quantity'),
-          'description' => ts('Quantity of a this position.'),
+          'title' => E::ts('Quantity'),
+          'description' => E::ts('Quantity of a this position.'),
           'import' => TRUE,
           'where' => 'civicrm_election_position.quantity',
           'headerPattern' => '',
@@ -180,8 +182,8 @@ class CRM_Elections_DAO_ElectionPosition extends CRM_Core_DAO {
         'sortorder' => [
           'name' => 'sortorder',
           'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Order'),
-          'description' => ts('Order of this position.'),
+          'title' => E::ts('Order'),
+          'description' => E::ts('Order of this position.'),
           'import' => TRUE,
           'where' => 'civicrm_election_position.sortorder',
           'headerPattern' => '',
@@ -198,7 +200,7 @@ class CRM_Elections_DAO_ElectionPosition extends CRM_Core_DAO {
         'description' => [
           'name' => 'description',
           'type' => CRM_Utils_Type::T_TEXT,
-          'title' => ts('Description'),
+          'title' => E::ts('Description'),
           'import' => TRUE,
           'where' => 'civicrm_election_position.description',
           'headerPattern' => '',
@@ -215,8 +217,8 @@ class CRM_Elections_DAO_ElectionPosition extends CRM_Core_DAO {
         'created_at' => [
           'name' => 'created_at',
           'type' => CRM_Utils_Type::T_TIMESTAMP,
-          'title' => ts('Created At'),
-          'description' => ts('Date on which election position created.'),
+          'title' => E::ts('Created At'),
+          'description' => E::ts('Date on which election position created.'),
           'export' => TRUE,
           'where' => 'civicrm_election_position.created_at',
           'headerPattern' => '',
@@ -230,8 +232,8 @@ class CRM_Elections_DAO_ElectionPosition extends CRM_Core_DAO {
         'updated_at' => [
           'name' => 'updated_at',
           'type' => CRM_Utils_Type::T_TIMESTAMP,
-          'title' => ts('Updated At'),
-          'description' => ts('Date on which election position was updated.'),
+          'title' => E::ts('Updated At'),
+          'description' => E::ts('Date on which election position was updated.'),
           'required' => FALSE,
           'export' => TRUE,
           'where' => 'civicrm_election_position.updated_at',
@@ -246,7 +248,7 @@ class CRM_Elections_DAO_ElectionPosition extends CRM_Core_DAO {
         'election_id' => [
           'name' => 'election_id',
           'type' => CRM_Utils_Type::T_INT,
-          'description' => ts('FK to Election'),
+          'description' => E::ts('FK to Election'),
           'table_name' => 'civicrm_election_position',
           'entity' => 'ElectionPosition',
           'FKClassName' => 'CRM_Elections_DAO_Election',
@@ -257,8 +259,8 @@ class CRM_Elections_DAO_ElectionPosition extends CRM_Core_DAO {
         'created_by' => [
           'name' => 'created_by',
           'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Created By'),
-          'description' => ts('FK to Contact who created particular position'),
+          'title' => E::ts('Created By'),
+          'description' => E::ts('FK to Contact who created particular position'),
           'table_name' => 'civicrm_election_position',
           'entity' => 'ElectionPosition',
           'FKClassName' => 'CRM_Contact_DAO_Contact',
@@ -268,8 +270,8 @@ class CRM_Elections_DAO_ElectionPosition extends CRM_Core_DAO {
         'result_status' => [
           'name' => 'result_status',
           'type' => CRM_Utils_Type::T_STRING,
-          'title' => ts('Result Status'),
-          'description' => ts('Result status for this position.'),
+          'title' => E::ts('Result Status'),
+          'description' => E::ts('Result status for this position.'),
           'maxlength' => 255,
           'size' => CRM_Utils_Type::HUGE,
           'import' => TRUE,

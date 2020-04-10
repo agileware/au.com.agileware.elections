@@ -1,5 +1,7 @@
 <?php
 
+use CRM_Elections_ExtensionUtil as E;
+
 /**
  * @package CRM
  * @copyright CiviCRM LLC (c) 2004-2018
@@ -129,7 +131,7 @@ class CRM_Elections_DAO_ElectionNomination extends CRM_Core_DAO {
         'id' => [
           'name' => 'id',
           'type' => CRM_Utils_Type::T_INT,
-          'description' => ts('Unique Election Nomination ID'),
+          'description' => E::ts('Unique Election Nomination ID'),
           'required' => TRUE,
           'table_name' => 'civicrm_election_nomination',
           'entity' => 'ElectionNomination',
@@ -139,7 +141,7 @@ class CRM_Elections_DAO_ElectionNomination extends CRM_Core_DAO {
         'comments' => [
           'name' => 'comments',
           'type' => CRM_Utils_Type::T_TEXT,
-          'title' => ts('Comments'),
+          'title' => E::ts('Comments'),
           'import' => TRUE,
           'where' => 'civicrm_election_nomination.comments',
           'headerPattern' => '',
@@ -156,7 +158,7 @@ class CRM_Elections_DAO_ElectionNomination extends CRM_Core_DAO {
         'rejection_comments' => [
           'name' => 'rejection_comments',
           'type' => CRM_Utils_Type::T_TEXT,
-          'title' => ts('Rejection Comments'),
+          'title' => E::ts('Rejection Comments'),
           'import' => TRUE,
           'where' => 'civicrm_election_nomination.rejection_comments',
           'headerPattern' => '',
@@ -173,7 +175,7 @@ class CRM_Elections_DAO_ElectionNomination extends CRM_Core_DAO {
         'is_eligible_candidate' => [
           'name' => 'is_eligible_candidate',
           'type' => CRM_Utils_Type::T_BOOLEAN,
-          'description' => ts('Boolean field to identity if nomination is a valid candidate.'),
+          'description' => E::ts('Boolean field to identity if nomination is a valid candidate.'),
           'import' => TRUE,
           'where' => 'civicrm_election_nomination.is_eligible_candidate',
           'headerPattern' => '',
@@ -190,8 +192,8 @@ class CRM_Elections_DAO_ElectionNomination extends CRM_Core_DAO {
         'has_accepted_nomination' => [
           'name' => 'has_accepted_nomination',
           'type' => CRM_Utils_Type::T_BOOLEAN,
-          'title' => ts('Has Accepted Nomination'),
-          'description' => ts('Boolean field to identity if nomination has been accepted by candidate.'),
+          'title' => E::ts('Has Accepted Nomination'),
+          'description' => E::ts('Boolean field to identity if nomination has been accepted by candidate.'),
           'import' => TRUE,
           'where' => 'civicrm_election_nomination.has_accepted_nomination',
           'headerPattern' => '',
@@ -208,8 +210,8 @@ class CRM_Elections_DAO_ElectionNomination extends CRM_Core_DAO {
         'has_rejected_nomination' => [
           'name' => 'has_rejected_nomination',
           'type' => CRM_Utils_Type::T_BOOLEAN,
-          'title' => ts('Has Rejected Nomination'),
-          'description' => ts('Boolean field to identity if nomination has been rejected by candidate.'),
+          'title' => E::ts('Has Rejected Nomination'),
+          'description' => E::ts('Boolean field to identity if nomination has been rejected by candidate.'),
           'import' => TRUE,
           'where' => 'civicrm_election_nomination.has_rejected_nomination',
           'headerPattern' => '',
@@ -226,8 +228,8 @@ class CRM_Elections_DAO_ElectionNomination extends CRM_Core_DAO {
         'created_at' => [
           'name' => 'created_at',
           'type' => CRM_Utils_Type::T_TIMESTAMP,
-          'title' => ts('Created At'),
-          'description' => ts('Date on which election nomination created.'),
+          'title' => E::ts('Created At'),
+          'description' => E::ts('Date on which election nomination created.'),
           'export' => TRUE,
           'where' => 'civicrm_election_nomination.created_at',
           'headerPattern' => '',
@@ -241,8 +243,8 @@ class CRM_Elections_DAO_ElectionNomination extends CRM_Core_DAO {
         'updated_at' => [
           'name' => 'updated_at',
           'type' => CRM_Utils_Type::T_TIMESTAMP,
-          'title' => ts('Updated At'),
-          'description' => ts('Date on which election nomination was updated.'),
+          'title' => E::ts('Updated At'),
+          'description' => E::ts('Date on which election nomination was updated.'),
           'required' => FALSE,
           'export' => TRUE,
           'where' => 'civicrm_election_nomination.updated_at',
@@ -257,8 +259,8 @@ class CRM_Elections_DAO_ElectionNomination extends CRM_Core_DAO {
         'member_nominee' => [
           'name' => 'member_nominee',
           'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Member Nominee'),
-          'description' => ts('FK to Contact for which this nomination is added.'),
+          'title' => E::ts('Member Nominee'),
+          'description' => E::ts('FK to Contact for which this nomination is added.'),
           'table_name' => 'civicrm_election_nomination',
           'entity' => 'ElectionNomination',
           'bao' => 'CRM_Elections_DAO_ElectionNomination',
@@ -268,8 +270,8 @@ class CRM_Elections_DAO_ElectionNomination extends CRM_Core_DAO {
         'election_position_id' => [
           'name' => 'election_position_id',
           'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Election Position'),
-          'description' => ts('FK to ElectionPosition for which this nomination is added.'),
+          'title' => E::ts('Election Position'),
+          'description' => E::ts('FK to ElectionPosition for which this nomination is added.'),
           'table_name' => 'civicrm_election_nomination',
           'where' => 'civicrm_election_nomination.election_position_id',
           'entity' => 'ElectionNomination',
