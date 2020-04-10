@@ -56,7 +56,7 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
       $this->assignUserVotingVariables($this->eId);
 
       if ($isShowingSpecificElectionFromShortCode) {
-        CRM_Utils_System::setTitle("");
+        CRM_Utils_System::setTitle('');
       }
       else {
         CRM_Utils_System::setTitle($this->election->name);
