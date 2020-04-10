@@ -44,7 +44,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     $this->assign('election', $this->election);
     $this->assign('isElectionAdmin', $this->isElectionAdmin);
 
-    CRM_Utils_System::setTitle('Nominate A Person - ' . $this->election->name);
+    CRM_Utils_System::setTitle('Nomination - ' . $this->election->name);
 
     $this->addFormElements();
 
