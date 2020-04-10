@@ -26,7 +26,8 @@ Viewing election results are shown below as an example.
 Prerequisites
 -------------
 
-  * [CiviCRM](https://www.civicrm.org) 4.7 or greater  
+  * [CiviCRM](https://www.civicrm.org) version 4.7 or newer.
+  * [MySQL](https://www.mysql.com) version 5.6 or [MariaDB](https://mariadb.org) version 10 or newer. Prior versions are unable to install this CiviCRM extension and will report an installation error, 'Incorrect table definition'
 
 Installation
 -------------
