@@ -28,4 +28,7 @@
 <civix>
   <namespace>CRM/Elections</namespace>
 </civix>
+<classloader>
+  <psr4 prefix="Civi\" path="Civi" />
+</classloader>
 </extension>
