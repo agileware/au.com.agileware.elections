@@ -35,12 +35,13 @@ class VoteAction extends AbstractAction {
     }
 
     $vote['version'] = 3;
-    if (!$this->configuration->getParameter('anonymize_vote')) {
-      $vote['member_id'] = $voter_contact_id;
-    }
+    $vote['member_id'] = $voter_contact_id;
     $vote['election_nomination_id'] = $election_nomination_id;
     $vote['rank'] = $rank;
-    civicrm_api('ElectionVote', 'create', $vote);
+    $result = civicrm_api('ElectionVote', 'create', $vote);
+    if ($this->configuration->getParameter('anonymize_vote')) {
+      \CRM_Core_DAO::executeQuery("UPDATE `civicrm_election_vote` SET `member_id` = NULL WHERE `id` = %1", [1=>[$result['id'], 'Integer']]);
+    }
   }
 
   /**
