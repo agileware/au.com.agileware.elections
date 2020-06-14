@@ -35,7 +35,9 @@ class VoteAction extends AbstractAction {
     }
 
     $vote['version'] = 3;
-    $vote['member_id'] = $voter_contact_id;
+    if (!$this->configuration->getParameter('anonymize_vote')) {
+      $vote['member_id'] = $voter_contact_id;
+    }
     $vote['election_nomination_id'] = $election_nomination_id;
     $vote['rank'] = $rank;
     civicrm_api('ElectionVote', 'create', $vote);
@@ -84,6 +86,7 @@ class VoteAction extends AbstractAction {
 
     return new SpecificationBag([
       new Specification('election_id', 'Integer', E::ts('Election ID'), true, null, null, $elections),
+      new Specification('anonymize_vote', 'Boolean', E::ts('Anonymize vote')),
     ]);
   }
 
