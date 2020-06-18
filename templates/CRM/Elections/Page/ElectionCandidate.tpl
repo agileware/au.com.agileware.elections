@@ -24,14 +24,8 @@
                     {if $positionNomination.member_nominee == $session->get('userID')}
                         {include file="CRM/Elections/Helper/Gravatar.tpl"}
                     {/if}
-                        <p>{$positionNomination.member_nominee}</p>
-                        <p>{$session->get('userID')}</p>
-
-
-{*                    {$session = CRM_Core_Session::singleton();*}
-{*                $contact_id = $session->get('userID');}*}
-{*                    <p>{}</p>*}
-{*                    {include file="CRM/Elections/Helper/Gravatar.tpl"}*}
+{*                        <p>{$positionNomination.member_nominee}</p>*}
+{*                        <p>{$session->get('userID')}</p>*}
                     <h3>{$cTerm} for {$position.name}</h3>
 
                     {if $election->advertiseCandidatesStarted or $election->isNominationsStarted}
