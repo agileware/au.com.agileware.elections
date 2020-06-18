@@ -37,19 +37,22 @@
                     {/if}
 
                     {if $election.hasNominationsStarted and (!$election.isNominationsInProgress) and !$election.advertiseCandidatesStarted}
-                        {assign var="viewBtnTxt" value="View The Nominations"}
+{*                        {assign var="viewBtnTxt" value="View The Nominations"}*}
+                        <a href='{crmURL p="civicrm/elections/view" q="eid=`$election.id`"}'"">View The Nominations</a>
                         {assign var="electionProgressTxt" value="Advertise candidate will open on "}
                         {assign var="electionProgressDate" value=$election.advertise_candidates_date|crmDate}
                     {/if}
 
                     {if $election.advertiseCandidatesStarted and !$election.isVotingStarted}
-                        {assign var="viewBtnTxt" value="View The Candidates"}
+{*                        {assign var="viewBtnTxt" value="View The Candidates"}*}
+                        <a href='{crmURL p="civicrm/elections/view" q="eid=`$election.id`"}'"">View The Candidates</a>
                         {assign var="electionProgressTxt" value="Voting will open on "}
                         {assign var="electionProgressDate" value=$election.voting_start_date|crmDate}
                     {/if}
 
                     {if $election.isVotingStarted and !$election.isVotingEnded}
-                        {assign var="viewBtnTxt" value="Vote in The Election"}
+{*                        {assign var="viewBtnTxt" value="Vote in The Election"}*}
+                        <a href='{crmURL p="civicrm/elections/view" q="eid=`$election.id`"}'"">Vote in the Election</a>
                         {assign var="electionProgressTxt" value="Voting will close on "}
                         {assign var="electionProgressDate" value=$election.voting_end_date|crmDate}
                         {if !$election.isUserAllowedToVote}
@@ -59,13 +62,15 @@
                     {/if}
 
                     {if $election.isVotingEnded and !$election.isResultsOut}
-                        {assign var="viewBtnTxt" value="View The Candidates"}
+{*                        {assign var="viewBtnTxt" value="View The Candidates"}*}
+                        <a href='{crmURL p="civicrm/elections/view" q="eid=`$election.id`"}'"">View the Candidates</a>
                         {assign var="electionProgressTxt" value="Election results will be available on "}
                         {assign var="electionProgressDate" value=$election.result_date|crmDate}
                     {/if}
 
                     {if $election.isResultsOut}
-                        {assign var="viewBtnTxt" value="View Election Results"}
+{*                        {assign var="viewBtnTxt" value="View Election Results"}*}
+                        <a href='{crmURL p="civicrm/elections/view" q="eid=`$election.id`"}'"">View Election Results</a>
                         {assign var="electionProgressTxt" value="Election results published on "}
                         {assign var="electionProgressDate" value=$election.result_date|crmDate}
                     {/if}
