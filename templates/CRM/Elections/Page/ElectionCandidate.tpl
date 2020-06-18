@@ -20,8 +20,9 @@
                     {if $election->advertiseCandidatesStarted and $positionNomination.has_accepted_nomination == 1}
                         {assign var="cTerm" value="Candidate"}
                     {/if}
-
+                    <p> {include file="CRM/Elections/Helper/Gravatar.tpl"} </p>
                     <h3>{$cTerm} for {$position.name}</h3>
+
                     {if $election->advertiseCandidatesStarted or $election->isNominationsStarted}
                         {if $positionNomination.is_eligible_candidate == 1}
                             Candidate

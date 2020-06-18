@@ -1,5 +1,6 @@
 <div class="crm-elections-helptext-block">
     <p>{ts}To accept your candidacy, add any comments and press the "Accept" button.{/ts}</p>
+
 </div>
 
 <div class="crm-accept-nomination-form-block crm-election-form-block-container">
@@ -37,7 +38,9 @@
 
     <div class="crm-election-form-row">
         <div class="crm-election-form-col-right">
+            <p> {include file="CRM/Elections/Helper/Gravatar.tpl"} </p>
             {include file="CRM/common/formButtons.tpl" location="bottom"}
         </div>
     </div><!-- ending of crm-election-form-row -->
+
 </div>
