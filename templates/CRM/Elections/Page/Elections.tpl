@@ -30,7 +30,8 @@
                         {assign var="electionProgressDate" value=$election.nomination_start_date|crmDate}
                     {/if}
                     {if $election.isNominationsInProgress}
-                        {assign var="viewBtnTxt" value="View & Submit Nominations"}
+{*                        {assign var="viewBtnTxt" value="View & Submit Nominations"}*}
+                        <a href='{crmURL p="civicrm/elections/view" q="eid=`$election.id`"}'"">View and Submit Nominations</a>
                         {assign var="electionProgressTxt" value="Nominations will close on "}
                         {assign var="electionProgressDate" value=$election.nomination_end_date|crmDate}
                     {/if}
