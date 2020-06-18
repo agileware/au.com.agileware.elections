@@ -11,6 +11,7 @@
     </div><!-- ending of candidate-details-right-block -->
 </div><!-- ending of candidate-details-block -->
 
+
 {foreach from=$positions item=position}
     <div class="candidate-details-block">
         <div class="candidate-details-left-block">
@@ -20,7 +21,17 @@
                     {if $election->advertiseCandidatesStarted and $positionNomination.has_accepted_nomination == 1}
                         {assign var="cTerm" value="Candidate"}
                     {/if}
-                    <p> {include file="CRM/Elections/Helper/Gravatar.tpl"} </p>
+                    {if $positionNomination.member_nominee == $session->get('userID')}
+                        {include file="CRM/Elections/Helper/Gravatar.tpl"}
+                    {/if}
+                        <p>{$positionNomination.member_nominee}</p>
+                        <p>{$session->get('userID')}</p>
+
+
+{*                    {$session = CRM_Core_Session::singleton();*}
+{*                $contact_id = $session->get('userID');}*}
+{*                    <p>{}</p>*}
+{*                    {include file="CRM/Elections/Helper/Gravatar.tpl"}*}
                     <h3>{$cTerm} for {$position.name}</h3>
 
                     {if $election->advertiseCandidatesStarted or $election->isNominationsStarted}
@@ -62,3 +73,4 @@
         </div><!-- ending of candidate-details-right-block -->
     </div><!-- ending of candidate-details-block -->
 {/foreach}
+
