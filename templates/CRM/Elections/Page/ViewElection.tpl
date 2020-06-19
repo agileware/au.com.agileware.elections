@@ -7,7 +7,11 @@
 
     <p>{$election->description|nl2br}</p>
 
-    {include file="CRM/Elections/Page/ElectionHelpText.tpl"}
+
+{*logic for the nomination phase where if a user is not a member,hide the help text*}
+    {if $election->isNominationsInProgress and $isAllowedToNominate}
+        {include file="CRM/Elections/Page/ElectionHelpText.tpl"}
+    {/if}
 
     {include file="CRM/Elections/Page/ElectionActions.tpl"}
     {include file="CRM/Elections/Page/ElectionNotificationMessages.tpl"}
