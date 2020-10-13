@@ -1,7 +1,18 @@
 <?php
 
 require_once 'elections.civix.php';
+use \Symfony\Component\DependencyInjection\ContainerBuilder;
 use CRM_Elections_ExtensionUtil as E;
+
+/**
+ * Implements hook_civicrm_container()
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_container/
+ */
+function elections_civicrm_container(ContainerBuilder $container) {
+  $container->addCompilerPass(new Civi\Elections\CompilerPass());
+}
+
 
 /**
  * Implements hook_civicrm_config().
