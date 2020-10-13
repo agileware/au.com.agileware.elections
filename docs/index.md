@@ -1,10 +1,13 @@
-Elections (au.com.agileware.elections) is a CiviCRM extension which provides on-line election functionality (nominations and voting) to CiviCRM.
+Elections (au.com.agileware.elections) is a CiviCRM extension which provides on-line election functionality (nominations and voting) to CiviCRM. 
 
 The following sections describe the concepts and processes.
 
-# Creating an Election  
+# Initial Set Up
+Before creating an election, follow these [initial set up steps](setup.md) to configure your website and CiviCRM to host elections. 
+
+# Creating an Election
 To create a new election, you should identify the date of each stage in the election's process as well as name and description of the election.   
-- **Name and Description**: To tell a clearer picture about the election, for example, the purpose of the election, etc.  
+- **Name and Description**: Title the election and provide a brief description of the reason for the election. For example, Name: 2020 Legislative Assembly election; Description: Election of the Legislative Assembly for the 5 electorates of the ACT: Brindabella, Ginninderra, Kurrajong, Murrumbidgee and Yerrabi.  
 - **Visible Start Date**: The date that user can start seeing the election and the public will know about the election as well.  
 - **Visible End Date**: The election will be invisible to the public after this date.  
 - **Nomination Start Date**: Users allow to nominate from this date and it should be after **Visible Start Date** and before **Visible End Date**.    
@@ -55,7 +58,7 @@ A user can nominate any user including self, as set in the Settings for the Elec
 There is no limit for how many nominations a user can receive.
 The minimum number of  nominations for a user to become a candidate is set in the Settings for the Election
 
-# Accepting nomination  
+# Accepting a Nomination  
 
 If a user receives at least two nominations for a position, he/she will allow to accept the position to become a candidate for this position.  
 A nominee can only become a candidate for a position after accepting the position.  
