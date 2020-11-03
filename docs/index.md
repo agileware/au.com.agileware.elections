@@ -60,12 +60,8 @@ The minimum number of  nominations for a user to become a candidate is set in th
 
 # Accepting a Nomination  
 
-If a user receives at least two nominations for a position, he/she will allow to accept the position to become a candidate for this position.  
-A nominee can only become a candidate for a position after accepting the position.  
-If a nominee does not accept a position, him/her name wont be visible in the candidate list of this position after the **Voting Start Date**  
-A nominee can only accept a position before the **Voting Start Date** and after **Nomination Start Date**
-
-For more information, see[How to accept a position](user_accept_position.md)
+A user must accept a nomination to become a candidate for any position.
+For more information, see [How to accept a nomination](user_accept_nomination.md)
 
 # Voting  
 
