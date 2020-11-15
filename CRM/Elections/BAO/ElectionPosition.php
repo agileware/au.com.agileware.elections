@@ -9,7 +9,7 @@ class CRM_Elections_BAO_ElectionPosition extends CRM_Elections_DAO_ElectionPosit
       'return' => ["member_nominee.display_name", "member_nominee.image_URL", "election_position_id", "comments", "is_eligible_candidate", "id", "has_rejected_nomination", "rejection_comments", "has_accepted_nomination", "member_nominee"],
     ));
 
-    $nominations = shuffle_assoc($nominations['values']);
+    $nominations = elections_civicrm_shuffle_assoc($nominations['values']);
 
     $nominationIds = array_column($nominations, 'id');
 

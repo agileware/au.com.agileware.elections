@@ -699,19 +699,18 @@ function getTokenPlaceHolders() {
  * @param $list
  * @return array
  */
-function shuffle_assoc($list) {
-  if (!is_array($list)) {
-    return $list;
-  }
+function elections_civicrm_shuffle_assoc($list) {
+    if (!is_array($list)) {
+        return $list;
+    }
 
-  $keys = array_keys($list);
-  shuffle($keys);
-  $random = array();
-  foreach ($keys as $key) {
-    $random[$key] = $list[$key];
-  }
-  return $random;
-
+    $keys = array_keys($list);
+    shuffle($keys);
+    $random = array();
+    foreach ($keys as $key) {
+        $random[$key] = $list[$key];
+    }
+    return $random;
 }
 
 /**
