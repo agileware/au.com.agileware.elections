@@ -699,7 +699,7 @@ function getTokenPlaceHolders() {
  * @param $list
  * @return array
  */
-function elections_civicrm_shuffle_assoc($list) {
+function elections_shuffle_assoc($list) {
     if (!is_array($list)) {
         return $list;
     }
