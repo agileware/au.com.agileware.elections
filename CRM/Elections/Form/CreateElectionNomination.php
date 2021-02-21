@@ -120,7 +120,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
   }
 
   /**
-   * Get notification id given by
+   * Get nomination id given by contact and position
    *
    * @param $values
    * @return array|int
@@ -138,7 +138,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     if ($nomination['count'] > 0) {
       $nomination = $nomination['values'][0];
       if ($nomination['has_rejected_nomination'] == 1) {
-        CRM_Core_Session::setStatus('Selected member had withdrawn the nomination, You cannot nominate the member again for selected position.', '', 'error');
+        CRM_Core_Session::setStatus('Selected member has withdrawn the nomination, You cannot nominate the member again for selected position.', '', 'error');
         CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/view', 'eid=' . $this->eId . ''));
         return -1;
       }
