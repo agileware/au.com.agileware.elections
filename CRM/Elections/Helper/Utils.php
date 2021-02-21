@@ -48,7 +48,7 @@ class CRM_Elections_Helper_Utils {
   }
 
   private static function getGravatarUrlFromEmailId($emailId) {
-    return "http://2.gravatar.com/avatar/" . self::getEmailHashForGravatar($emailId) . "?s=300&d=mm&r=g";
+    return "https://2.gravatar.com/avatar/" . self::getEmailHashForGravatar($emailId) . "?s=300&d=mm&r=g";
   }
 
 }
