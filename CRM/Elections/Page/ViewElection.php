@@ -70,6 +70,7 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
     $electionPositions = civicrm_api3('ElectionPosition', 'get', array(
       'election_id' => $this->eId,
       'sequential'  => TRUE,
+	  'options' => ['limit' => 0],
     ));
 
     $this->assign('positions', $electionPositions['values']);

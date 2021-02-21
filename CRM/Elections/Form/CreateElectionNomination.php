@@ -82,7 +82,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
 
     $electionPositions = civicrm_api3('ElectionPosition', 'get', array(
        'election_id'     => $this->election->id,
-       'options'         => array('sort' => 'sortorder ASC'),
+       'options'         => array('limit' => 0, 'sort' => 'sortorder ASC'),
        'sequential'      => TRUE,
     ));
     $electionPositions = $electionPositions['values'];
@@ -133,6 +133,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
       'member_nominee'        => $values['contact'],
       'election_position_id'  => $values['position'],
       'sequential'            => TRUE,
+	  'options'               => ['limit' => 0],
     ));
 
     if ($nomination['count'] > 0) {
@@ -199,9 +200,10 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
   private function createNominationActivity($params) {
 
     $electionNomination = civicrm_api3('ElectionNomination', 'get', [
-      'sequential' => 1,
+      'sequential' => TRUE,
       'return'     => ["member_nominee.display_name", "election_position_id.name"],
       'id'         => $params['nomination_id'],
+	  'options'    => ['limit' => 0],
     ]);
     $electionNomination = $electionNomination['values'][0];
 

@@ -89,6 +89,7 @@ function civicrm_api3_election_vote_deletevotes($params) {
   $previousVotes = civicrm_api3('ElectionVote', 'get', array(
     'election_nomination_id.election_position_id.election_id.id' => $electionId,
     'member_id'                                                  => $params['member_id'],
+    'options'                                                    => ['limit' => 0],
   ));
   $previousVotes = $previousVotes['values'];
   foreach ($previousVotes as $voteId => $previousVote) {

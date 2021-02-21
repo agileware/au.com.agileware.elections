@@ -37,6 +37,7 @@ function civicrm_api3_election_nomination_seconder_create($params) {
       'return'    => array(
         'election_position_id.election_id.id',
       ),
+	  'options' => ['limit' => 0],
     ));
     $electionId = $electionInfo['values'][0]['election_position_id.election_id.id'];
 

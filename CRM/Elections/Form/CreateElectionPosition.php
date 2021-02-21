@@ -49,6 +49,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
         'id'         => $this->epId,
         'election_id' => $this->eId,
         'sequential' => TRUE,
+        'options' => ['limit' => 0],
       ));
 
       if ($this->electionPosition['count']) {
@@ -122,6 +123,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
     if ($epId) {
       $electionPosition = civicrm_api3('ElectionPosition', 'get', array(
         'id' => $epId,
+	    'options' => ['limit' => 0],
       ));
     }
 

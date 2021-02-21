@@ -84,9 +84,10 @@ function civicrm_api3_election_get($params) {
 function civicrm_api3_election_generateresults($params) {
   $currentDateTime = new DateTime();
   $elections = civicrm_api3('Election', 'get', [
-    'sequential' => 1,
+    'sequential' => TRUE,
     'result_date' => ['<=' => $currentDateTime->format("Y-m-d H:i:s")],
     'has_results_generated' => 0,
+    'options' => ['limit' => 0],
   ]);
 
   $dao = NULL;

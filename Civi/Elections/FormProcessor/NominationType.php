@@ -87,6 +87,7 @@ class NominationType extends AbstractType implements OptionListInterface {
       'election_position_id' => $position_id,
       'has_accepted_nomination' => 1,
       'is_eligible_candidate' => 1,
+      'options' => ['limit' => 0],
     ]);
     $nominations = [];
     foreach($nominationsApi['values'] as $nomination) {

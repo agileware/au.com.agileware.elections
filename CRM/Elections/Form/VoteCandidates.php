@@ -143,6 +143,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       'has_accepted_nomination' => 1,
       'return' => array('id', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL', 'election_position_id'),
       'election_position_id' => array('IN' => array_column($this->electionPositions, 'id')),
+      'options' => ['limit' => 0],
     ));
 
     if ($this->electionCandidates == 0) {

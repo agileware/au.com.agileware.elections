@@ -6,7 +6,7 @@ class CRM_Elections_Helper_Results {
   private function getPositions($electionId) {
     $positions = civicrm_api3("ElectionPosition", "get", array(
       'election_id' => $electionId,
-      'options' => array('limit' => 0),
+      'options' => ['limit' => 0],
     ));
     $positions = $positions["values"];
 
@@ -18,7 +18,7 @@ class CRM_Elections_Helper_Results {
       'is_eligible_candidate' => 1,
       'has_accepted_nomination' => 1,
       'election_position_id' => $positionId,
-      'options' => array('limit' => 0),
+      'options' => ['limit' => 0],
     ]);
 
     $nominations = $nominations["values"];
@@ -67,7 +67,7 @@ class CRM_Elections_Helper_Results {
   private function getVotesByNominationIds($nominationIds) {
     $votes = civicrm_api3("ElectionVote", "get", array(
       'election_nomination_id' => array('IN' => $nominationIds),
-      'options' => array('limit' => 0),
+      'options' => ['limit' => 0],
     ));
     $votes = $votes["values"];
 
@@ -273,6 +273,7 @@ class CRM_Elections_Helper_Results {
   public function removeVotes($electionId) {
     $votes = civicrm_api3('ElectionVote', 'get', array(
       'election_nomination_id.election_position_id.election_id.id' => $electionId,
+	  'options' => ['limit' => 0],
     ));
     $votes = $votes['values'];
     foreach ($votes as $vote) {

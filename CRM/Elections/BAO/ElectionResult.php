@@ -82,6 +82,7 @@ class CRM_Elections_BAO_ElectionResult extends CRM_Elections_DAO_ElectionResult 
   private static function getResultsForPosition($positionId) {
     $results = civicrm_api3("ElectionResult", "get", array(
       'election_position_id' => $positionId,
+	  'options' => ['limit' => 0],
     ));
     return $results['values'];
   }
@@ -89,7 +90,7 @@ class CRM_Elections_BAO_ElectionResult extends CRM_Elections_DAO_ElectionResult 
   private static function getAllNominations($positionId) {
     $nominations = civicrm_api3('ElectionNomination', 'get', [
       'election_position_id' => $positionId,
-      'options' => array('limit' => 0),
+      'options' => ['limit' => 0],
       'return' => array('comments', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL', 'election_position_id'),
     ]);
 
@@ -102,7 +103,7 @@ class CRM_Elections_BAO_ElectionResult extends CRM_Elections_DAO_ElectionResult 
       'is_eligible_candidate' => 1,
       'has_accepted_nomination' => 1,
       'election_position_id' => $positionId,
-      'options' => array('limit' => 0),
+      'options' => ['limit' => 0],
       'return' => array('comments', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL', 'election_position_id'),
     ]);
 

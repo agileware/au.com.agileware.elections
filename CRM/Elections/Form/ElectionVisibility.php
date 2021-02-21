@@ -55,6 +55,7 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
     if ($election->is_visible != 1) {
       $electionPostions = civicrm_api3('ElectionPosition', 'get', array(
         'election_id'  => $election->id,
+        'options' => ['limit' => 0],
       ));
       if (count($electionPostions['values']) == 0) {
         return throwAccessDeniedException($this, 'At least one Position must be defined before the Election can be active.', array(

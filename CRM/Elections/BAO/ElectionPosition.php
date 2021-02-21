@@ -7,6 +7,7 @@ class CRM_Elections_BAO_ElectionPosition extends CRM_Elections_DAO_ElectionPosit
     $nominations = civicrm_api3('ElectionNomination', 'get', array(
       'election_position_id.election_id'  => $electionId,
       'return' => ["member_nominee.display_name", "member_nominee.image_URL", "election_position_id", "comments", "is_eligible_candidate", "id", "has_rejected_nomination", "rejection_comments", "has_accepted_nomination", "member_nominee"],
+      'options' => ['limit' => 0],
     ));
 
     $nominations = elections_shuffle_assoc($nominations['values']);
@@ -38,6 +39,7 @@ class CRM_Elections_BAO_ElectionPosition extends CRM_Elections_DAO_ElectionPosit
 
     $electionPositions = civicrm_api3('ElectionPosition', 'get', array(
       'election_id' => $electionId,
+	  'options' => ['limit' => 0],
     ));
 
     $electionPositions = $electionPositions['values'];

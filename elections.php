@@ -446,8 +446,9 @@ function isLoggedInMemberAllowedToVote($electionId, $contactId = NULL) {
   }
 
   $groups = civicrm_api3('GroupContact', 'get', [
-    'sequential' => 1,
+    'sequential' => TRUE,
     'contact_id' => $contactId,
+	'options' => ['limit' => 0],
   ]);
 
   $contactGroups = array_column($groups['values'], 'group_id');
@@ -489,9 +490,10 @@ function hasLoggedInUserAlreadyVoted($electionId, $memberId = NULL) {
     $memberId = CRM_Core_Session::singleton()->getLoggedInContactID();
   }
   $votesCount = civicrm_api3('ElectionVote', 'getcount', [
-    'sequential' => 1,
+    'sequential' => TRUE,
     'member_id'  => $memberId,
     'election_nomination_id.election_position_id.election_id.id' => $electionId,
+    'options' => ['limit' => 0],
   ]);
   return ($votesCount > 0);
 }
@@ -505,7 +507,7 @@ function hasLoggedInUserAlreadyVoted($electionId, $memberId = NULL) {
  */
 function getLoggedInUserVoteDate($electionId) {
   $voteDate = civicrm_api3('ElectionVote', 'get', [
-    'sequential' => 1,
+    'sequential' => TRUE,
     'return'     => array('created_at'),
     'options'    => array('limit' => 1),
     'member_id'  => CRM_Core_Session::singleton()->getLoggedInContactID(),

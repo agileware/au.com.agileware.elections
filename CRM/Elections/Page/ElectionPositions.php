@@ -35,7 +35,7 @@ class CRM_Elections_Page_ElectionPositions extends CRM_Elections_Page_Base {
 
     $electionPositions = civicrm_api3('ElectionPosition', 'get', array(
       'election_id' => $this->eId,
-      'options'     => array('sort' => 'sortorder ASC'),
+      'options'     => array('limit' => 0, 'sort' => 'sortorder ASC'),
       'sequential'  => TRUE,
     ));
 

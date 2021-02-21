@@ -13,14 +13,16 @@ class CRM_Elections_Helper_Utils {
       return $profilePictures;
     }
     $cmsMatches = civicrm_api3('UFMatch', 'get', [
-      'sequential' => 1,
+	  'sequential' => TRUE,
       'return'     => ["uf_id", "contact_id"],
       'contact_id' => ['IN' => $contactIds],
+      'options' => ['limit' => 0],
     ]);
 
     $defaultEmails = civicrm_api3('Contact', 'get', [
       'return' => ["email"],
       'id' => ['IN' => $contactIds],
+	  'options' => ['limit' => 0],
     ]);
 
     $defaultEmails = $defaultEmails['values'];
