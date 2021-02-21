@@ -509,7 +509,7 @@ function getLoggedInUserVoteDate($electionId) {
   $voteDate = civicrm_api3('ElectionVote', 'get', [
     'sequential' => TRUE,
     'return'     => array('created_at'),
-    'options'    => array('limit' => 1),
+    'options'    => ['limit' => 0],
     'member_id'  => CRM_Core_Session::singleton()->getLoggedInContactID(),
     'election_nomination_id.election_position_id.election_id.id' => $electionId,
   ]);
