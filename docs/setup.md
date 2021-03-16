@@ -2,6 +2,14 @@
 
 This page documents the initial steps that need to be performed to configure your website and CiviCRM to host elections.
 
+## Scheduled Jobs
+
+CiviElections creates a new CiviCRM Scheduled Job, **Elections Results Job** on installation.
+This Scheduled Job calculates the [election results](user_view_results.md) which are then displayed on the election results page.
+This Scheduled Job is configured to execute **Always** and is **Enabled** by default.
+
+If this Scheduled Job is not enabled or executed, then no election results will be calculated.  
+
 ## For WordPress/CiviCRM Sites
 
 ### Create Pages for the Election Listing and Individual Election
