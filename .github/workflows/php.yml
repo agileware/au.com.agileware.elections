@@ -10,7 +10,7 @@ jobs:
       - name: Install civix and regenerate module
         run: |
           composer global config minimum-stability dev
-          composer global config --no-plugins allow-plugins.civicrm/composer-downloads-plugin true
+          composer global config --no-plugins allow-plugins.civicrm/composer-downloads-plugin false
           composer global require civicrm/civix
           civix generate:module
       - name: Commit and push changes
