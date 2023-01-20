@@ -1,6 +1,8 @@
 name: Push changes
 on:
   push
+env:
+   COMPOSER_COMPILE: all
 jobs:
   change-and-push:
     runs-on: ubuntu-latest
@@ -9,7 +11,6 @@ jobs:
         uses: actions/checkout@v3
       - name: Install civix and regenerate module
         run: |
-          COMPOSER_COMPILE=all
           composer global config minimum-stability dev
           composer global config --no-plugins allow-plugins.civicrm/composer-downloads-plugin true
           composer global config --no-plugins allow-plugins.civicrm/composer-compile-plugin true
