@@ -24,9 +24,12 @@ jobs:
           commit_prefix: "[AUTO]"
           commit_message: "civix upgraded"
           force: false
+          target_branch: civix-upgrade
       - name: Create pull request
         uses: devops-infra/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           body: "**Automated pull request** - civix regenerated"
-          title: ${{ github.event.commits[0].message }}
+          title:"Automated pull request - civix regenerated"
+          assignee: "agileware-fj"
+          label: "auto"
