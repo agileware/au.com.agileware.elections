@@ -1,28 +1,25 @@
-name: PHP Composer
-
+name: Push changes
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-
-permissions:
-  contents: read
-
+  push
 jobs:
-  build:
-
+  change-and-push:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
-
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress civicrm/civix
-      
-    - name: Re-generate civix
-      run:
-         civix generate:module
-         git add --all
-         git commit -a -m 'Re-generate civix'
-         git push origin master
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Change something
+        run: |
+          composer install --prefer-dist --no-progress
+          composer required civicrm/civix
+          civix generate:module
+      - name: Commit and push changes
+        uses: devops-infra/action-commit-push@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          commit_prefix: "[AUTO-COMMIT] civix regenerated"
+      - name: Create pull request
+        uses: devops-infra/action-pull-request@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          body: "**Automated pull request** - civix regenerated"
+          title: ${{ github.event.commits[0].message }}
