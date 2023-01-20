@@ -15,7 +15,7 @@ jobs:
           composer global config --no-plugins allow-plugins.civicrm/composer-downloads-plugin true
           composer global config --no-plugins allow-plugins.civicrm/composer-compile-plugin true
           composer global require civicrm/civix
-          /home/runner/.composer/vendor/bin/civix generate:module
+          /home/runner/.composer/vendor/bin/civix upgrade
       - name: Commit and push changes
         uses: devops-infra/action-commit-push@master
         with:
