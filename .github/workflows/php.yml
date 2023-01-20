@@ -34,7 +34,7 @@ jobs:
       
     - name: Re-generate civix
       run:
-         [ -f *.civix.php ] && civix generate:module
+         civix generate:module
          git add --all
          git commit -a -m 'Re-generate civix'
          git push origin master
