@@ -7,10 +7,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Change something
+      - name: Install civix and regenerate module
         run: |
-          composer install --prefer-dist --no-progress
-          composer required civicrm/civix
+          composer global require civicrm/civix
           civix generate:module
       - name: Commit and push changes
         uses: devops-infra/action-commit-push@master
