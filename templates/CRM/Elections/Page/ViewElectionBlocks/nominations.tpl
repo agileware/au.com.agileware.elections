@@ -75,7 +75,7 @@
         {if !isset($candidatesCount) or ($candidatesCount == 0 and $election->advertiseCandidatesStarted)}
             <p>There are no eligible candidates.</p>
         {/if}
-        {if !isset($candidatesCount) or ($candidatesCount == 0 and !$election->advertiseCandidatesStarted and isset($nomination.nominations) and $nomination.nominations|@count != 0)}
+        {if !isset($candidatesCount) or !isset($nomination.nominations) or ($candidatesCount == 0 and !$election->advertiseCandidatesStarted and $nomination.nominations|@count != 0)}
             <p>There are no eligible nominations.</p>
         {/if}
     </div><div class="clearfix"></div>
