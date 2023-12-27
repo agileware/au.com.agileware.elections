@@ -82,7 +82,7 @@ class CRM_Elections_Helper_Utils {
         foreach ($cmsMatches as $cmsMatch) {
           $user = \Drupal\user\Entity\User::load($cmsMatch['uf_id']);
           if (!$user->user_picture->isEmpty()) {
-            $profilePictures[$cmsMatch['contact_id']] = file_create_url($user->user_picture->entity->getFileUri());
+            $profilePictures[$cmsMatch['contact_id']] = $user->user_picture->entity->createFileUrl();
           };
         }
         break;
