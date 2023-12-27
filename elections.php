@@ -156,24 +156,15 @@ function elections_civicrm_navigationMenu(&$menu) {
   _elections_civix_insert_navigation_menu($menu, NULL, [
     'label' => E::ts('Elections'),
     'name' => 'Elections',
-    'url' => '#',
     'icon'     => 'crm-i fa-check-square-o',
+    'url' => 'civicrm/elections',
     'permission' => 'administer CiviCRM',
     'weight' => 62,
 
   ]);
 
-  _elections_civix_insert_navigation_menu($menu, 'Elections', [
-    'label' => E::ts('View Elections'),
-    'name' => 'viewElections',
-    'url' => 'civicrm/elections',
-    'permission' => 'administer CiviCRM',
-
-  ]);
-
-  // add child menu to above
-  _elections_civix_insert_navigation_menu($menu, 'Elections', [
-    'label' => E::ts('Configure Elections'),
+  _elections_civix_insert_navigation_menu($menu, 'Administer/System Settings', [
+    'label' => E::ts('Elections Settings'),
     'name' => 'configureElections',
     'url' => 'civicrm/admin/setting/elections',
     'permission' => 'administer CiviCRM',
