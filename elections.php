@@ -40,17 +40,6 @@ function elections_civicrm_enable() {
   _elections_civix_civicrm_enable();
 }
 
-/**
- * Implements hook_civicrm_entityTypes().
- *
- * Declare entity types provided by this module.
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_entityTypes
- */
-function elections_civicrm_entityTypes(&$entityTypes) {
-  _elections_civix_civicrm_entityTypes($entityTypes);
-}
-
 // --- Functions below this ship commented out. Uncomment as required. ---
 
 /**
@@ -97,63 +86,65 @@ function hideNonRequiredItemsOnPage($pageOrForm) {
   $pageOrForm->assign('urlIsPublic', TRUE);
 }
 
-/**
- * Add wordpress filters to expose Election pages as shortcode.
- */
-if (function_exists('add_filter')) {
-  add_filter('shortcode_atts_civicrm', 'elections_amend_shortcode_attributes', 10, 4);
-  add_filter('civicrm_shortcode_preprocess_atts', 'elections_civicrm_amend_args', 10, 2);
-}
+if (CRM_Core_Config::singleton()->userFramework == 'WordPress') {
+  /**
+   * Add wordpress filters to expose Election pages as shortcode.
+   */
+  if (function_exists('add_filter')) {
+    add_filter('shortcode_atts_civicrm', 'elections_amend_shortcode_attributes', 10, 4);
+    add_filter('civicrm_shortcode_preprocess_atts', 'elections_civicrm_amend_args', 10, 2);
+  }
+  /**
+   * Filter the CiviCRM shortcode arguments.
+   *
+   * Add our components and a CiviCRM path.
+   *
+   * @param array $args Existing shortcode arguments.
+   * @param array $shortcode_atts Shortcode attributes.
+   * @return array $args Modified shortcode arguments.
+   */
+  function elections_civicrm_amend_args($args, $shortcode_atts) {
+    $args['fs'] = TRUE;
 
-/**
- * Filter the CiviCRM shortcode arguments.
- *
- * Add our components and a CiviCRM path.
- *
- * @param array $args Existing shortcode arguments.
- * @param array $shortcode_atts Shortcode attributes.
- * @return array $args Modified shortcode arguments.
- */
-function elections_civicrm_amend_args($args, $shortcode_atts) {
-  $args['fs'] = TRUE;
-
-  if ($shortcode_atts['component'] == 'elections') {
-    $args['q'] = 'civicrm/elections';
-    $args['component'] = 'elections';
-    if ($shortcode_atts['action'] != 'all') {
-      $args['eaction'] = $shortcode_atts['action'];
-      if ($shortcode_atts['viewpageid']) {
-        $args['evaction'] = get_permalink($shortcode_atts['viewpageid']);
+    if ($shortcode_atts['component'] == 'elections') {
+      $args['q'] = 'civicrm/elections';
+      $args['component'] = 'elections';
+      if ($shortcode_atts['action'] != 'all') {
+        $args['eaction'] = $shortcode_atts['action'];
+        if ($shortcode_atts['viewpageid']) {
+          $args['evaction'] = get_permalink($shortcode_atts['viewpageid']);
+        }
       }
     }
-  }
-  if ($shortcode_atts['component'] == 'electioninfo') {
-    $args['q'] = 'civicrm/elections/view';
-    $args['component'] = 'electioninfo';
-    if (isset($shortcode_atts['id']) && !empty($shortcode_atts['id'])) {
-      $args['eid'] = $shortcode_atts['id'];
-      $args['sse'] = TRUE;
+    if ($shortcode_atts['component'] == 'electioninfo') {
+      $args['q'] = 'civicrm/elections/view';
+      $args['component'] = 'electioninfo';
+      if (isset($shortcode_atts['id']) && !empty($shortcode_atts['id'])) {
+        $args['eid'] = $shortcode_atts['id'];
+        $args['sse'] = TRUE;
+      }
     }
+
+    return $args;
   }
 
-  return $args;
+  /**
+   * Ammend custom shortcode attributes for this extension.
+   *
+   * @param $out
+   * @param $pairs
+   * @param $atts
+   * @param $shortcodename
+   * @return mixed
+   */
+  function elections_amend_shortcode_attributes($out, $pairs, $atts, $shortcodename) {
+    if (isset($atts['viewpageid']) && !empty($atts['viewpageid'])) {
+      $out['viewpageid'] = $atts['viewpageid'];
+    }
+    return $out;
+  }
 }
 
-/**
- * Ammend custom shortcode attributes for this extension.
- *
- * @param $out
- * @param $pairs
- * @param $atts
- * @param $shortcodename
- * @return mixed
- */
-function elections_amend_shortcode_attributes($out, $pairs, $atts, $shortcodename) {
-  if (isset($atts['viewpageid']) && !empty($atts['viewpageid'])) {
-    $out['viewpageid'] = $atts['viewpageid'];
-  }
-  return $out;
-}
 
 /**
  * Implements hook_civicrm_navigationMenu().
@@ -162,19 +153,34 @@ function elections_amend_shortcode_attributes($out, $pairs, $atts, $shortcodenam
  *
  */
 function elections_civicrm_navigationMenu(&$menu) {
-  $menu[] = array(
-    'attributes' => array(
-      'label' => 'Elections',
-      'name' => 'Elections',
-      'url' => 'civicrm/elections',
-      'operator' => NULL,
-      'icon'     => 'crm-i fa-check-square-o',
-      'separator' => NULL,
-      'active' => 1,
-      'weight' => 62,
-    ),
-  );
+  _elections_civix_insert_navigation_menu($menu, NULL, [
+    'label' => E::ts('Elections'),
+    'name' => 'Elections',
+    'url' => '#',
+    'icon'     => 'crm-i fa-check-square-o',
+    'permission' => 'administer CiviCRM',
+    'weight' => 62,
+
+  ]);
+
+  _elections_civix_insert_navigation_menu($menu, 'Elections', [
+    'label' => E::ts('View Elections'),
+    'name' => 'viewElections',
+    'url' => 'civicrm/elections',
+    'permission' => 'administer CiviCRM',
+
+  ]);
+
+  // add child menu to above
+  _elections_civix_insert_navigation_menu($menu, 'Elections', [
+    'label' => E::ts('Configure Elections'),
+    'name' => 'configureElections',
+    'url' => 'civicrm/admin/setting/elections',
+    'permission' => 'administer CiviCRM',
+
+  ]);
 }
+
 
 /**
  * Implements hook_civicrm_coreResourceList().
@@ -355,7 +361,7 @@ function isLoggedInMemberAllowedToVote($electionId, $contactId = NULL) {
   $election = findElectionById($electionId);
   $groupIds = $election->allowed_groups;
   if (!empty($groupIds)) {
-    $groupIds = explode(",", $groupIds);
+    $groupIds = explode(",", strval($groupIds));
   }
   if (count($groupIds) == 0 || empty($groupIds)) {
     return FALSE;
@@ -364,7 +370,7 @@ function isLoggedInMemberAllowedToVote($electionId, $contactId = NULL) {
   $groups = civicrm_api3('GroupContact', 'get', [
     'sequential' => TRUE,
     'contact_id' => $contactId,
-	'options' => ['limit' => 0],
+    'options' => ['limit' => 0],
   ]);
 
   $contactGroups = array_column($groups['values'], 'group_id');
@@ -563,11 +569,11 @@ function elections_civicrm_alterMailParams(&$params, $context) {
 
       if ($activityInfo['activity_type_id.name'] == 'Vote') {
         $electionInfo = civicrm_api3("Election", "getsingle", array(
-            'id' => $activityInfo['source_record_id'],
-            'sequential' => TRUE,
-            'return' => [
-                "name",
-            ],
+          'id' => $activityInfo['source_record_id'],
+          'sequential' => TRUE,
+          'return' => [
+            "name",
+          ],
         ));
 
         replacePlaceholderValue($subject, '[election.name]', $electionInfo['name']);
@@ -618,17 +624,17 @@ function getTokenPlaceHolders() {
  * @return array
  */
 function elections_shuffle_assoc($list) {
-    if (!is_array($list)) {
-        return $list;
-    }
+  if (!is_array($list)) {
+    return $list;
+  }
 
-    $keys = array_keys($list);
-    shuffle($keys);
-    $random = array();
-    foreach ($keys as $key) {
-        $random[$key] = $list[$key];
-    }
-    return $random;
+  $keys = array_keys($list);
+  shuffle($keys);
+  $random = array();
+  foreach ($keys as $key) {
+    $random[$key] = $list[$key];
+  }
+  return $random;
 }
 
 /**

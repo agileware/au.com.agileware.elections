@@ -28,8 +28,7 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
         'is_eligible_candidate' => 1,
         'return' => ["has_accepted_nomination", "election_position_id.name", "has_rejected_nomination", "election_position_id.election_id.name", "election_position_id.election_id"],
       ));
-    }
-    catch (CiviCRM_API3_Exception $e) {
+    } catch (CiviCRM_API3_Exception $e) {
       throwAccessDeniedException($this, $e->getMessage());
       return;
     }
@@ -85,5 +84,4 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
 
     parent::postProcess();
   }
-
 }
