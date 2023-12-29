@@ -23,6 +23,7 @@
 
                     <h3>{$cTerm} for {$position.name}</h3>
                     {if $election->advertiseCandidatesStarted or $election->isNominationsStarted}
+                        <p>
                         {if $positionNomination.is_eligible_candidate == 1}
                             Candidate
                         {else}
@@ -42,14 +43,15 @@
                                 Pending
                             {/if}
                         {/if}
+                        </p>
                     {/if}
                 {/if}
             {/foreach}
         </div><!-- ending of candidate-details-left-block -->
 
         <div class="candidate-details-right-block">
-            <h3>Was nominated by</h3>
             {foreach from=$position.nominations item=positionNomination}
+                <h3>Was nominated by</h3>
                 {if $positionNomination.member_nominee == $nomination.member_nominee}
                     {foreach from=$positionNomination.seconders item=seconder}
                         {assign var='nominatorName' value='member_nominator.display_name'}
