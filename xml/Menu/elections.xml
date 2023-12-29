@@ -89,4 +89,10 @@
     <title>Withdraw Nomination</title>
     <access_arguments>view Elections</access_arguments>
   </item>
+    <item>
+    <path>civicrm/admin/setting/elections</path>
+    <page_callback>CRM_Admin_Form_Generic</page_callback>
+    <title>Elections Settings</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
 </menu>

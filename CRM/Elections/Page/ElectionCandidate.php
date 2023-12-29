@@ -76,7 +76,7 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
     }
 
     foreach ($positionsWithNominations as $index => $positionsWithNomination) {
-      if (count($positionsWithNomination['nominations']) == 0) {
+      if (isset($positionsWithNomination['nominations']) && count($positionsWithNomination['nominations']) == 0) {
         $positionsToRemove[] = $index;
       }
     }
