@@ -5,10 +5,11 @@
         Existing Nominations
     {/if}
 </h2>
-{if $nominations|@count == 0 and $positions|@count == 0}
+{if empty($nominations) and empty($positions)}
     <p class="no-result-message">Positions are not added yet to be nominated.</p>
 {/if}
 
+{if !empty($nominations)}
 {foreach from = $nominations key = k item = nomination}
     <div class="crm-election-position-nominations-block">
 
@@ -18,7 +19,8 @@
         {/if}
 
         <h3>{$positionKey} for {$nomination.name}</h3>
-        {if $nomination.nominations|@count == 0 and !$election->advertiseCandidatesStarted}
+
+        {if empty($nomination.nominations) and !$election->advertiseCandidatesStarted}
             <p>There are no existing nominations</p>
         {/if}
         {assign var="candidatesCount" value=0}
@@ -71,11 +73,12 @@
 
         {/foreach}
     </div>
-        {if $candidatesCount == 0 and $election->advertiseCandidatesStarted}
+        {if empty($candidatesCount) and $election->advertiseCandidatesStarted}
             <p>There are no eligible candidates.</p>
         {/if}
-        {if $candidatesCount == 0 and !$election->advertiseCandidatesStarted and $nomination.nominations|@count != 0}
+        {if empty($candidatesCount) and !$election->advertiseCandidatesStarted and !empty($nomination.nominations)}
             <p>There are no eligible nominations.</p>
         {/if}
     </div><div class="clearfix"></div>
 {/foreach}
+{/if}
