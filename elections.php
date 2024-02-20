@@ -40,17 +40,6 @@ function elections_civicrm_enable() {
   _elections_civix_civicrm_enable();
 }
 
-/**
- * Implements hook_civicrm_entityTypes().
- *
- * Declare entity types provided by this module.
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_entityTypes
- */
-function elections_civicrm_entityTypes(&$entityTypes) {
-  _elections_civix_civicrm_entityTypes($entityTypes);
-}
-
 // --- Functions below this ship commented out. Uncomment as required. ---
 
 /**

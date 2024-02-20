@@ -18,11 +18,11 @@
   <version>1.2.3</version>
   <develStage>stable</develStage>
   <compatibility>
-    <ver>5.38</ver>
+    <ver>5.45</ver>
   </compatibility>
   <civix>
     <namespace>CRM/Elections</namespace>
-    <format>22.12.1</format>
+    <format>23.02.1</format>
   </civix>
   <classloader>
     <psr4 prefix="Civi\" path="Civi"/>
@@ -31,6 +31,8 @@
   <mixins>
     <mixin>menu-xml@1.0.0</mixin>
     <mixin>mgd-php@1.0.0</mixin>
+    <mixin>smarty-v2@1.0.1</mixin>
+    <mixin>entity-types-php@1.0.0</mixin>
   </mixins>
   <upgrader>CRM_Elections_Upgrader</upgrader>
 </extension>
