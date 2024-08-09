@@ -1,5 +1,5 @@
 <h2>Positions</h2>
-{if $positions|@count == 0}
+{if empty($positions)}
     <p class="no-result-message">Positions are not added yet.</p>
 {/if}
 {foreach from =$positions key=k item=position}

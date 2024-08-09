@@ -3,7 +3,7 @@
 
     {include file="CRM/Elections/Page/ElectionHelpText.tpl"}
 
-    {if $positions|@count == 0}
+    {if empty($positions)}
         <div class="messages status no-popup">
             There were no positions added in this election.
         </div>

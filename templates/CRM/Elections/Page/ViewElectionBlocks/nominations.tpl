@@ -5,7 +5,7 @@
         Existing Nominations
     {/if}
 </h2>
-{if !isset($nominations) or !isset($positions) or ($nominations|@count == 0 and $positions|@count == 0)}
+{if empty($nominations) or empty($positions)}
     <p class="no-result-message">Positions are not added yet to be nominated.</p>
 {/if}
 
@@ -19,7 +19,7 @@
 
         <h3>{$positionKey} for {$nomination.name}</h3>
 
-        {if !isset($nomination.nominations) or ($nomination.nominations|@count == 0 and !$election->advertiseCandidatesStarted)}
+        {if empty($nomination.nominations) and !$election->advertiseCandidatesStarted)}
             <p>There are no existing nominations</p>
         {/if}
         {assign var="candidatesCount" value=0}
@@ -72,11 +72,12 @@
 
             {/foreach}
         </div>
-        {if !isset($candidatesCount) or ($candidatesCount == 0 and $election->advertiseCandidatesStarted)}
-            <p>There are no eligible candidates.</p>
-        {/if}
-        {if !isset($candidatesCount) or !isset($nomination.nominations) or ($candidatesCount == 0 and !$election->advertiseCandidatesStarted and $nomination.nominations|@count != 0)}
-            <p>There are no eligible nominations.</p>
+        {if empty($candidatesCount) or (empty($nomination.nominations) and !$election->advertiseCandidatesStarted) or ($election->advertiseCandidatesStarted and empty($candidatesCount))}
+            {if $election->advertiseCandidatesStarted}
+                <p>There are no eligible candidates.</p>
+            {else}
+                <p>There are no eligible nominations.</p>
+            {/if}
         {/if}
     </div><div class="clearfix"></div>
 {/foreach}

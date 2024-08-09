@@ -32,7 +32,7 @@
             {/if}
         </tr>
     {/foreach}
-    {if $positions|@count == 0}
+    {if empty($positions)}
         <tr class="even">
             <td class="center" colspan="{if $isElectionAdmin and !$isElectionRunning}5{else}4{/if}">Positions are not added yet.</td>
         </tr>

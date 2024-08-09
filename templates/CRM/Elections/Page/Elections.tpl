@@ -6,7 +6,7 @@
 
     <div id="claim_level-wrapper" class="dataTables_wrapper">
         {assign var="rowCount" value=0}
-        {if $elections|@count == 0}
+        {if empty($elections)}
             <h2 class="error-heading">No elections found.</h2>
         {/if}
         {foreach from=$elections key=errorId item=election}
