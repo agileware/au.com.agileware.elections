@@ -8,8 +8,14 @@ use CRM_Elections_ExtensionUtil as E;
  * Implements hook_civicrm_container()
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_container/
+ * 
+ * @return void
  */
 function elections_civicrm_container(ContainerBuilder $container) {
+	$container->addResource(new FileResource(E::path('CRM/Elections/Tokens.php')));
+	$dispatcher = $container->findDefinition('dispatcher');
+	$dispatcher->addMethodCall('addListener', ['civi.token.eval', ['CRM_Elections_Tokens', 'evaluate']]);
+	$dispatcher->addMethodCall('addListener', ['civi.token.list', ['CRM_Elections_Tokens', 'register']]);
   $container->addCompilerPass(new Civi\Elections\CompilerPass());
 }
 
@@ -197,7 +203,7 @@ function isElectionAdmin() {
  */
 function throwUnauthorizedMessageIfRequired($formOrPage) {
   if (!isElectionAdmin()) {
-    throwAccessDeniedException($formOrPage, 'You\'re not authorized to perform this action.');
+    throwAccessDeniedException($formOrPage, 'You are not authorized to perform this action.');
     return TRUE;
   }
   return FALSE;
@@ -282,14 +288,14 @@ function isRequestUsingShortCode() {
  */
 function findElectionById($electionId, $throwErrorIfNotFound = TRUE) {
   if (!$electionId) {
-    throw new CRM_Extension_Exception('You\'re not authorized to access this page.');
+    throw new CRM_Extension_Exception('You are not authorised to access this page.');
   }
 
   $election = new CRM_Elections_BAO_Election();
   $election->id = $electionId;
 
   if (!$election->find(TRUE) && $throwErrorIfNotFound) {
-    throw new CRM_Extension_Exception('You\'re not authorized to access this page.');
+    throw new CRM_Extension_Exception('You are not authorised to access this page.');
   }
 
   $election->assignStatues();
@@ -429,61 +435,6 @@ function getLoggedInUserVoteDate($electionId) {
 }
 
 /**
- * Define election tokens to be included in emails.
- *
- * @param $tokens
- */
-function elections_civicrm_tokens(&$tokens) {
-  $tokensList = getElectionTokensList();
-  foreach ($tokensList as $tokenKey => $tokenItems) {
-    $tokens[$tokenKey] = $tokenItems;
-  }
-}
-
-/**
- * Get election tokens list
- *
- * @return array
- */
-function getElectionTokensList() {
-  $tokensList = array(
-    'election' => array(
-      'election.name' => "Name",
-    ),
-    'electionposition' => array(
-      'electionposition.name' => "Name",
-    ),
-    'nomination' => array(
-      'nomination.nominatorname' => "Nominator Name",
-      'nomination.nomineename'   => "Nominee Name",
-    ),
-  );
-  return $tokensList;
-}
-
-/**
- * Implements hook_civicrm_tokenValues().
- *
- */
-function elections_civicrm_tokenValues(&$values, $cids, $job = NULL, $tokens = array(), $context = NULL) {
-  $customTokens = array_keys(getElectionTokensList());
-  foreach ($customTokens as $customToken) {
-    if (isset($tokens[$customToken])) {
-      addPlaceholderTokenValues($tokens, $customToken, $cids, $values);
-    }
-  }
-}
-
-function addPlaceholderTokenValues($tokens, $customToken, $cids, &$values) {
-  foreach ($tokens[$customToken] as $electionToken) {
-    foreach ($cids as $cid) {
-      $tokenKey = $customToken . '.' . $electionToken;
-      $values[$cid][$tokenKey] = '[' . $tokenKey . ']';
-    }
-  }
-}
-
-/**
  * Implements hook_civicrm_permission().
  *
  */
@@ -496,112 +447,6 @@ function elections_civicrm_permission(&$permissions) {
     'label' => E::ts('CiviCRM: view elections'),
     'description' => E::ts('Grants the necessary permissions for participating in elections.'),
   ];
-}
-
-/**
- * Implements hook_civicrm_alterMailParams().
- *
- */
-function elections_civicrm_alterMailParams(&$params, $context) {
-  if ($params['groupName'] == 'Scheduled Reminder Sender' && $params['entity'] == 'action_schedule' && isset($params['token_params'])) {
-    $tokenValues = $params['token_params'];
-    if ($tokenValues['entity_table'] == 'civicrm_activity') {
-      $activityId = $tokenValues['entity_id'];
-      $activityInfo = civicrm_api3('Activity', 'getsingle', array(
-        'id'     => $activityId,
-        'return' => array(
-          'source_record_id',
-          'activity_type_id.name',
-          'is_star',
-        ),
-      ));
-
-      $subject = $params['subject'];
-      $text = $params['text'];
-      $html = $params['html'];
-
-      if ($activityInfo['activity_type_id.name'] == 'Nomination') {
-        $electionNominationInfo = civicrm_api3("ElectionNominationSeconder", "getsingle", array(
-          'id' => $activityInfo['source_record_id'],
-          'sequential' => TRUE,
-          'return' => [
-            "member_nominator.display_name",
-            "election_nomination_id.member_nominee.display_name",
-            "election_nomination_id.election_position_id.name",
-            "election_nomination_id.election_position_id.election_id.name",
-          ],
-        ));
-
-        $placeHolders = getTokenPlaceholders();
-        foreach ($placeHolders as $placeHolder) {
-          $placeHolderValue = "";
-          if ($placeHolder == '[election.name]') {
-            $placeHolderValue = $electionNominationInfo['election_nomination_id.election_position_id.election_id.name'];
-          }
-          if ($placeHolder == '[electionposition.name]') {
-            $placeHolderValue = $electionNominationInfo['election_nomination_id.election_position_id.name'];
-          }
-          if ($placeHolder == '[nomination.nominatorname]') {
-            $placeHolderValue = $electionNominationInfo['member_nominator.display_name'];
-          }
-          if ($placeHolder == '[nomination.nomineename]') {
-            $placeHolderValue = $electionNominationInfo['election_nomination_id.member_nominee.display_name'];
-          }
-
-          replacePlaceholderValue($subject, $placeHolder, $placeHolderValue);
-          replacePlaceholderValue($text, $placeHolder, $placeHolderValue);
-          replacePlaceholderValue($html, $placeHolder, $placeHolderValue);
-        }
-      }
-
-      if ($activityInfo['activity_type_id.name'] == 'Vote') {
-        $electionInfo = civicrm_api3("Election", "getsingle", array(
-          'id' => $activityInfo['source_record_id'],
-          'sequential' => TRUE,
-          'return' => [
-            "name",
-          ],
-        ));
-
-        replacePlaceholderValue($subject, '[election.name]', $electionInfo['name']);
-        replacePlaceholderValue($text, '[election.name]', $electionInfo['name']);
-        replacePlaceholderValue($html, '[election.name]', $electionInfo['name']);
-      }
-
-      $params['html'] = $html;
-      $params['subject'] = $subject;
-      $params['text'] = $text;
-    }
-  }
-}
-
-/**
- * Function replaces token placeholder with its actual value.
- *
- * @param $text
- * @param $placeholder
- * @param $placeholderValue
- */
-function replacePlaceholderValue(&$text, $placeholder, $placeholderValue) {
-  $text = str_replace($placeholder, $placeholderValue, $text);
-}
-
-/**
- * Function returns list of token placeholders.
- *
- * @return array
- */
-function getTokenPlaceHolders() {
-  $electionTokens = getElectionTokensList();
-  $placeHolders = array();
-  foreach ($electionTokens as $tokenKey => $electionTokenItems) {
-    foreach ($electionTokenItems as $electionTokenItemKey => $electionTokenItem) {
-      $tokenPlaceholder = '[' . $electionTokenItemKey . ']';
-      $placeHolders[] = $tokenPlaceholder;
-    }
-  }
-
-  return $placeHolders;
 }
 
 /**
