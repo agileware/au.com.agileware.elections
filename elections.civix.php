@@ -79,13 +79,6 @@ class CRM_Elections_ExtensionUtil {
 
 use CRM_Elections_ExtensionUtil as E;
 
-function _elections_civix_mixin_polyfill() {
-  if (!class_exists('CRM_Extension_MixInfo')) {
-    $polyfill = __DIR__ . '/mixin/polyfill.php';
-    (require $polyfill)(E::LONG_NAME, E::SHORT_NAME, E::path());
-  }
-}
-
 /**
  * (Delegated) Implements hook_civicrm_config().
  *
@@ -99,14 +92,9 @@ function _elections_civix_civicrm_config($config = NULL) {
   $configured = TRUE;
 
   $extRoot = __DIR__ . DIRECTORY_SEPARATOR;
-  $extDir = $extRoot . 'templates';
-  if (file_exists($extDir)) {
-    CRM_Core_Smarty::singleton()->addTemplateDir($extDir);
-  }
-
   $include_path = $extRoot . PATH_SEPARATOR . get_include_path();
   set_include_path($include_path);
-  _elections_civix_mixin_polyfill();
+  // Based on <compatibility>, this does not currently require mixin/polyfill.php.
 }
 
 /**
@@ -116,7 +104,7 @@ function _elections_civix_civicrm_config($config = NULL) {
  */
 function _elections_civix_civicrm_install() {
   _elections_civix_civicrm_config();
-  _elections_civix_mixin_polyfill();
+  // Based on <compatibility>, this does not currently require mixin/polyfill.php.
 }
 
 /**
@@ -126,7 +114,7 @@ function _elections_civix_civicrm_install() {
  */
 function _elections_civix_civicrm_enable(): void {
   _elections_civix_civicrm_config();
-  _elections_civix_mixin_polyfill();
+  // Based on <compatibility>, this does not currently require mixin/polyfill.php.
 }
 
 /**
@@ -145,8 +133,8 @@ function _elections_civix_insert_navigation_menu(&$menu, $path, $item) {
   if (empty($path)) {
     $menu[] = [
       'attributes' => array_merge([
-        'label'      => CRM_Utils_Array::value('name', $item),
-        'active'     => 1,
+        'label' => $item['name'] ?? NULL,
+        'active' => 1,
       ], $item),
     ];
     return TRUE;
@@ -209,46 +197,4 @@ function _elections_civix_fixNavigationMenuItems(&$nodes, &$maxNavID, $parentID)
       _elections_civix_fixNavigationMenuItems($nodes[$origKey]['child'], $maxNavID, $nodes[$origKey]['attributes']['navID']);
     }
   }
-}
-
-/**
- * (Delegated) Implements hook_civicrm_entityTypes().
- *
- * Find any *.entityType.php files, merge their content, and return.
- *
- * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_entityTypes
- */
-function _elections_civix_civicrm_entityTypes(&$entityTypes) {
-  $entityTypes = array_merge($entityTypes, [
-    'CRM_Elections_DAO_Election' => [
-      'name' => 'Election',
-      'class' => 'CRM_Elections_DAO_Election',
-      'table' => 'civicrm_election',
-    ],
-    'CRM_Elections_DAO_ElectionNomination' => [
-      'name' => 'ElectionNomination',
-      'class' => 'CRM_Elections_DAO_ElectionNomination',
-      'table' => 'civicrm_election_nomination',
-    ],
-    'CRM_Elections_DAO_ElectionNominationSeconder' => [
-      'name' => 'ElectionNominationSeconder',
-      'class' => 'CRM_Elections_DAO_ElectionNominationSeconder',
-      'table' => 'civicrm_election_nomination_seconder',
-    ],
-    'CRM_Elections_DAO_ElectionPosition' => [
-      'name' => 'ElectionPosition',
-      'class' => 'CRM_Elections_DAO_ElectionPosition',
-      'table' => 'civicrm_election_position',
-    ],
-    'CRM_Elections_DAO_ElectionResult' => [
-      'name' => 'ElectionResult',
-      'class' => 'CRM_Elections_DAO_ElectionResult',
-      'table' => 'civicrm_election_result',
-    ],
-    'CRM_Elections_DAO_ElectionVote' => [
-      'name' => 'ElectionVote',
-      'class' => 'CRM_Elections_DAO_ElectionVote',
-      'table' => 'civicrm_election_vote',
-    ],
-  ]);
 }

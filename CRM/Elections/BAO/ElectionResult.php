@@ -25,7 +25,7 @@ class CRM_Elections_BAO_ElectionResult extends CRM_Elections_DAO_ElectionResult 
     }
 
     $candidateIds = array_unique($candidateIds);
-    $profilePictures = CRM_Elections_Helper_Utils::getCMSProfilePictures($candidateIds);
+    $profilePictures = CRM_Elections_Helper_Utils::getCandidatePictures($candidateIds);
 
     foreach ($positions as $positionIndex => $position) {
       if ($hasCandidates && isset($position['candidates'])) {
