@@ -176,7 +176,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     $nominationSeconder = civicrm_api3('ElectionNominationSeconder', 'getcount', $seconderParams);
 
     if ($nominationSeconder != 0) {
-      CRM_Core_Session::setStatus('You\'ve already nominated the selected contact for selected position.', '', 'error');
+      CRM_Core_Session::setStatus('You have nominated this contact.', '', 'success');
     }
     else {
       $seconderParams['description'] = $values['reason'];
@@ -190,7 +190,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
         'nomination_seconder_id' => $nominationSeconder['id'],
         'is_eligible_candidate'  => ($isEligibleCandidate) ? 1 : 0,
       ));
-      CRM_Core_Session::setStatus('You\'ve successfully nominated a member for selected position.', '', 'success');
+      CRM_Core_Session::setStatus('You have nominated this contact.', '', 'success');
     }
 
     parent::postProcess();

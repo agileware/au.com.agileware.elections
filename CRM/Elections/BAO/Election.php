@@ -30,7 +30,7 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
     }
 
     if ($this->is_deleted) {
-      return 'You\'re not allowed to edit deleted election details.';
+      return 'Election has been deleted and cannot be edited.';
     }
 
     return TRUE;

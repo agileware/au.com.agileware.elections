@@ -40,12 +40,12 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
     }
 
     if ($this->electionNomination['has_rejected_nomination'] == 1) {
-      throwAccessDeniedException($this, 'You\'ve already withdrawn this nomination.');
+      throwAccessDeniedException($this, 'You have withdrawn this nomination.');
       return;
     }
 
     if ($election->isVotingStarted) {
-      throwAccessDeniedException($this, 'You\ cannot withdraw the nomination once voting is started.');
+      throwAccessDeniedException($this, 'You cannot withdraw the nomination once voting is started.');
       return;
     }
 
@@ -75,7 +75,7 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
       'has_accepted_nomination' => 0,
     ));
 
-    CRM_Core_Session::setStatus('You\'ve withdrawn the nomination successfully.', '', 'success');
+    CRM_Core_Session::setStatus('You have withdrawn the nomination.', '', 'success');
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/view', 'eid=' . $this->electionNomination['election_position_id.election_id'] . ''));
 
     parent::postProcess();

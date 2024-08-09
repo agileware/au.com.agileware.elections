@@ -40,7 +40,7 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
     }
 
     if ($this->electionNomination['has_accepted_nomination'] == 1) {
-      throwAccessDeniedException($this, 'You\'ve already accepted this nomination.');
+      throwAccessDeniedException($this, 'You have accepted this nomination.');
       return;
     }
 
@@ -79,7 +79,7 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
       'has_accepted_nomination' => 1,
     ));
 
-    CRM_Core_Session::setStatus('You\'ve accepted the nomination successfully.', '', 'success');
+    CRM_Core_Session::setStatus('You have accepted the nomination.', '', 'success');
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/view', 'eid=' . $this->electionNomination['election_position_id.election_id'] . ''));
 
     parent::postProcess();

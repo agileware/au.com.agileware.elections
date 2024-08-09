@@ -33,7 +33,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     }
 
     if (!isMemberAllowedToReVote($this->eId) && hasLoggedInUserAlreadyVoted($this->eId)) {
-      throwAccessDeniedException($this, 'You\'ve already voted for this election.');
+      throwAccessDeniedException($this, 'You have already voted in this election.');
     }
 
     $this->assign('election', $this->election);
@@ -204,7 +204,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       if (array_filter($ranksByPosition)) {
         $ranks = array_values($ranksByPosition);
         if (!in_array(1, $ranks)) {
-          $this->_errors['_qf_default'] = 'For each position, You may or may not assign a number to candidates. But if you\'re assigning numbers for a position, you must assign number 1 to at least one candidate';
+          $this->_errors['_qf_default'] = 'For each position, You may or may not assign a number to candidates. But if you are assigning numbers for a position, you must assign number 1 to at least one candidate';
         }
       }
     }
@@ -242,7 +242,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       'member_id' => $memberId,
     ));
 
-    CRM_Core_Session::setStatus('You\'ve successfully voted in an election.', '', 'success');
+    CRM_Core_Session::setStatus('You have successfully voted in the election.', '', 'success');
 
     parent::postProcess();
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/view', 'eid=' . $this->eId . ''));
