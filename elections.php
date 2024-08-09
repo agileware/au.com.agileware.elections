@@ -488,16 +488,14 @@ function addPlaceholderTokenValues($tokens, $customToken, $cids, &$values) {
  *
  */
 function elections_civicrm_permission(&$permissions) {
-  $permissions += array(
-    'administer Elections' => array(
-      ts('CiviCRM: administer elections', array('domain' => 'au.com.agileware.elections')),
-      ts('Grants the necessary permissions for administrating elections in CiviCRM.', array('domain' => 'au.com.agileware.elections')),
-    ),
-    'view Elections' => array(
-      ts('CiviCRM: view elections', array('domain' => 'au.com.agileware.elections')),
-      ts('Grants the necessary permissions for participating in elections.', array('domain' => 'au.com.agileware.elections')),
-    ),
-  );
+  $permissions['administer Elections'] = [
+    'label' => E::ts('CiviCRM: administer elections'),
+    'description' => E::ts('Grants the necessary permissions for administrating elections in CiviCRM.'),
+  ];
+  $permissions['view Elections'] = [
+    'label' => E::ts('CiviCRM: view elections'),
+    'description' => E::ts('Grants the necessary permissions for participating in elections.'),
+  ];
 }
 
 /**
