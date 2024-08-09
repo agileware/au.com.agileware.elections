@@ -145,7 +145,6 @@ if (CRM_Core_Config::singleton()->userFramework == 'WordPress') {
   }
 }
 
-
 /**
  * Implements hook_civicrm_navigationMenu().
  *
@@ -171,7 +170,6 @@ function elections_civicrm_navigationMenu(&$menu) {
 
   ]);
 }
-
 
 /**
  * Implements hook_civicrm_coreResourceList().
