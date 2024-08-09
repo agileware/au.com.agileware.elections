@@ -19,7 +19,7 @@
 
         <h3>{$positionKey} for {$nomination.name}</h3>
 
-        {if empty($nomination.nominations) and !$election->advertiseCandidatesStarted)}
+        {if empty($nomination.nominations) and !$election->advertiseCandidatesStarted}
             <p>There are no existing nominations</p>
         {/if}
         {assign var="candidatesCount" value=0}
