@@ -2,6 +2,7 @@
 
 require_once 'elections.civix.php';
 use \Symfony\Component\DependencyInjection\ContainerBuilder;
+use \Symfony\Component\Config\Resource\FileResource;
 use CRM_Elections_ExtensionUtil as E;
 
 /**
