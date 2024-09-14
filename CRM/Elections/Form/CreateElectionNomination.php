@@ -140,7 +140,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
       $nomination = $nomination['values'][0];
       if ($nomination['has_rejected_nomination'] == 1) {
         CRM_Core_Session::setStatus('Selected member has withdrawn the nomination, You cannot nominate the member again for selected position.', '', 'error');
-        CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/view', 'eid=' . $this->eId . ''));
+        CRM_Utils_System::redirect(Civi::url('frontend://civicrm/elections/view', 'eid=' . $this->eId . ''));
         return -1;
       }
       $nominationId = $nomination['id'];
@@ -194,7 +194,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     }
 
     parent::postProcess();
-    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/view', 'eid=' . $this->eId . ''));
+    CRM_Utils_System::redirect(Civi::url('frontend://civicrm/elections/view', 'eid=' . $this->eId));
   }
 
   private function createNominationActivity($params) {

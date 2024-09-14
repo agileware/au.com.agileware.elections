@@ -222,7 +222,7 @@ function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions
 
   if (empty($pageOptions)) {
     $pageOptions['return_button_text'] = 'Return to Elections';
-    $pageOptions['return_button_action'] = CRM_Utils_System::url('civicrm/elections');
+    $pageOptions['return_button_action'] = Civi::url('frontend://civicrm/elections');
   }
 
   foreach ($pageOptions as $optionKey => $pageOption) {

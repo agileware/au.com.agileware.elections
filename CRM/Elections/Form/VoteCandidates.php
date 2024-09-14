@@ -245,7 +245,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     CRM_Core_Session::setStatus('You have successfully voted in the election.', '', 'success');
 
     parent::postProcess();
-    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/view', 'eid=' . $this->eId . ''));
+    CRM_Utils_System::redirect(Civi::url('frontend://civicrm/elections/view', 'eid=' . $this->eId . ''));
   }
 
   private function createVoteActivity($params) {

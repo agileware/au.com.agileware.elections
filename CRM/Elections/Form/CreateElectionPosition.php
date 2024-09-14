@@ -136,7 +136,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
     parent::postProcess();
 
     CRM_Core_Session::setStatus('Election position has been ' . $successTag . ' successfully.', '', 'success');
-    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/positions', 'eid=' . $this->eId));
+    CRM_Utils_System::redirect(Civi::url('backend://civicrm/elections/positions', 'eid=' . $this->eId));
   }
 
 }

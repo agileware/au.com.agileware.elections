@@ -188,7 +188,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
 
     CRM_Core_Session::setStatus('Election has been ' . $messageKey . ' successfully.', '', 'success');
     parent::postProcess();
-    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections'));
+    CRM_Utils_System::redirect(Civi::url('backend://civicrm/elections'));
   }
 
 }
