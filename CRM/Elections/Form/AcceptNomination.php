@@ -40,7 +40,7 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
     }
 
     if ($this->electionNomination['has_accepted_nomination'] == 1) {
-      throwAccessDeniedException($this, 'You have accepted this nomination.');
+      throwAccessDeniedException($this, 'You already have accepted this nomination.');
       return;
     }
 
