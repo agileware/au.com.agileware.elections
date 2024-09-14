@@ -50,7 +50,7 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
     }
 
     if ($election->isVotingStarted) {
-      throwAccessDeniedException($this, 'You cannot accept the nomination once voting is started.');
+      throwAccessDeniedException($this, 'You cannot accept the nomination once voting has started.');
       return;
     }
 
