@@ -197,7 +197,7 @@ function isElectionAdmin() {
 }
 
 /**
- * Thorw unathorized message if logged in contact is not allowed to perform certain actions.
+ * Throw unauthorized message if logged in contact is not allowed to perform certain actions.
  *
  * @throws CRM_Extension_Exception
  * @throws CiviCRM_API3_Exception
@@ -211,7 +211,7 @@ function throwUnauthorizedMessageIfRequired($formOrPage) {
 }
 
 /**
- * Throw accesss denied exception with custom message.
+ * Throw access denied exception with custom message.
  *
  * @param $exceptionMessage
  * @throws CRM_Extension_Exception
@@ -231,7 +231,7 @@ function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions
 }
 
 /**
- * Throw accesss denied exception if non-member is trying accept a member related page.
+ * Throw access denied exception if non-member is trying accept a member related page.
  *
  * @param $exceptionMessage
  * @throws CRM_Extension_Exception
