@@ -258,13 +258,14 @@ function throwAccessDeniedPage($formOrPage) {
  * @throws CRM_Core_Exception
  * @throws CRM_Extension_Exception
  */
-function retrieveElectionIdFromUrl($form) {
-  $eId = CRM_Utils_Request::retrieve('eid', 'Positive', $form, FALSE, 0);
-  if (!$eId) {
-    throwAccessDeniedPage($form);
-    return -1;
-  }
-  return $eId;
+function retrieveElectionIdFromUrl($form)
+{
+    $eId = CRM_Utils_Request::retrieve('eid', 'Positive', $form, FALSE, 0);
+    if (!$eId) {
+        throwAccessDeniedException($form, 'Unable to view this Election, Election ID parameter missing.', ['']);
+        return -1;
+    }
+    return $eId;
 }
 
 /**
