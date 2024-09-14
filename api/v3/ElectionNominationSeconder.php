@@ -28,7 +28,7 @@ function civicrm_api3_election_nomination_seconder_create($params) {
       'election_nomination_id' => $params['election_nomination_id'],
     ]);
     if ($nominationSeconderCount > 0) {
-      return civicrm_api3_create_error('Member is already nominated by given nominator.');
+      return civicrm_api3_create_error('Contact is already nominated by given nominator.');
     }
 
     $electionInfo = civicrm_api3('ElectionNomination', 'get', [
