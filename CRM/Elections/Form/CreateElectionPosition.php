@@ -38,7 +38,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
     $this->assign('election', $this->election);
     $this->addFormElements();
 
-    CRM_Utils_System::setTitle('Add Election Position - ' . $this->election->name);
+    CRM_Utils_System::setTitle('Add Election Position for ' . $this->election->name);
     parent::buildQuickForm();
   }
 
@@ -60,7 +60,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
         $default['sortorder']     = $this->electionPosition['sortorder'];
         $default['description']   = (!empty($this->electionPosition['description'])) ? $this->electionPosition['description'] : '';
 
-        CRM_Utils_System::setTitle('Edit Election Position - ' . $this->electionPosition['name']);
+        CRM_Utils_System::setTitle('Edit Election Position for ' . $this->electionPosition['name']);
       }
       else {
         $this->epId = 0;

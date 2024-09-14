@@ -61,7 +61,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       ],
     ]);
 
-    CRM_Utils_System::setTitle('You are voting for ' . $this->election->name);
+    CRM_Utils_System::setTitle('You are Voting for ' . $this->election->name);
 
     parent::buildQuickForm();
   }
