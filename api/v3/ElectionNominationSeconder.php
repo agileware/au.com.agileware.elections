@@ -43,11 +43,11 @@ function civicrm_api3_election_nomination_seconder_create($params) {
 
     $election = findElectionById($electionId, FALSE);
     if ($election->is_deleted || !$election->is_visible) {
-      return civicrm_api3_create_error('NominationSeconder cannot be added for deleted election.');
+      return civicrm_api3_create_error('Nomination seconder cannot be added for a deleted election.');
     }
 
     if (!$election->isNominationsInProgress) {
-      return civicrm_api3_create_error('NominationSeconder cannot be added after nomination period is ended.');
+      return civicrm_api3_create_error('Nomination seconder cannot be added after nomination period is ended.');
     }
   }
 
