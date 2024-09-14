@@ -45,7 +45,7 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
     }
 
     if ($this->electionNomination['has_rejected_nomination'] == 1) {
-      throwAccessDeniedException($this, 'You cannot accept the rejected nomination.');
+      throwAccessDeniedException($this, 'You cannot accept a rejected nomination.');
       return;
     }
 
