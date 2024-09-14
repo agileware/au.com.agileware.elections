@@ -1,6 +1,7 @@
 {if !$election->isVotingEnded or $election->isResultsOut}
     <div class="crm-elections-action-block">
         {if $election->isNominationsInProgress or ($election->isNominationsStarted and !$election->isVotingStarted)}
+          {if !empty($nominations)}
           {foreach from = $nominations key = k item = nomination}
                 {foreach from = $nomination.nominations key = sk item = seconder}
                         {if $seconder.is_eligible_candidate == 1 and $seconder.has_accepted_nomination == 0 and $seconder.has_rejected_nomination == 0 and $loggedInContactId == $seconder.member_nominee}
@@ -20,6 +21,7 @@
                         {/if}
                 {/foreach}
           {/foreach}
+          {/if}
         {/if}
         {if $election->isNominationsInProgress and $isAllowedToNominate}
             <input type="button" value="{ts}Submit Nomination{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/create" q="eid=`$election->id`"}'" class="election-action-button" />
