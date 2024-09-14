@@ -25,11 +25,11 @@ class api_v3_ElectionBaseTestCase extends CiviCaseTestCase implements HeadlessIn
   }
 
   public function getElectionById($electionId) {
-    return $this->callAPISuccess("Election", "getsingle", array('id' => $electionId));
+    return $this->callAPISuccess("Election", "getsingle", ['id' => $electionId]);
   }
 
   public function getElectionPositionById($electionPositionId) {
-    return $this->callAPISuccess("ElectionPosition", "getsingle", array('id' => $electionPositionId));
+    return $this->callAPISuccess("ElectionPosition", "getsingle", ['id' => $electionPositionId]);
   }
 
   public function generateElectionResults($election) {
@@ -100,7 +100,7 @@ class api_v3_ElectionBaseTestCase extends CiviCaseTestCase implements HeadlessIn
    * @param null $state
    * @return mixed
    */
-  public function createElection($defaultParams = array(), $state = NULL) {
+  public function createElection($defaultParams = [], $state = NULL) {
     if ($state == NULL) {
       $state = self::$ELECTION_NOT_STARTED;
     }
@@ -108,16 +108,16 @@ class api_v3_ElectionBaseTestCase extends CiviCaseTestCase implements HeadlessIn
     $electionDates = $this->getElectionDates($this->getStartDateByState($state));
     $this->modifyDatesInString($electionDates);
 
-    $electionGroup = $this->groupCreate(array(
+    $electionGroup = $this->groupCreate([
       'name'  => 'Election Group #' . rand(0, 999999),
       'title' => 'Election Group #' . rand(0, 999999),
-    ));
+    ]);
 
-    $params = array(
+    $params = [
       'name'           => 'CiviTest Election',
       'allowed_groups' => $electionGroup,
       'description'    => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean viverra sed felis eget tempus. Morbi lacinia purus eget erat bibendum volutpat. Aenean eu viverra enim.',
-    );
+    ];
     $params = array_merge($params, $defaultParams);
     $params = array_merge($params, $electionDates);
     $election = $this->callAPISuccess('election', 'create', $params);
@@ -175,7 +175,7 @@ class api_v3_ElectionBaseTestCase extends CiviCaseTestCase implements HeadlessIn
     $votingEndDate->modify("+20 days");
     $resultDate->modify("+25 days");
 
-    return array(
+    return [
       'visibility_start_date' => $visibilityStartDate,
       'visibility_end_date' => $visibilityEndDate,
       'nomination_start_date' => $nominationStartDate,
@@ -184,7 +184,7 @@ class api_v3_ElectionBaseTestCase extends CiviCaseTestCase implements HeadlessIn
       'voting_start_date' => $votingStartDate,
       'voting_end_date' => $votingEndDate,
       'result_date' => $resultDate,
-    );
+    ];
   }
 
   /**
@@ -206,18 +206,18 @@ class api_v3_ElectionBaseTestCase extends CiviCaseTestCase implements HeadlessIn
    * @param null $election
    * @return mixed
    */
-  public function createElectionPosition($election = NULL, $defaultParams = array()) {
+  public function createElectionPosition($election = NULL, $defaultParams = []) {
     if ($election === NULL) {
-      $election = $this->createElection(array(
+      $election = $this->createElection([
         'is_deleted' => 0,
         'is_visible' => 1,
-      ));
+      ]);
     }
-    $params = array(
+    $params = [
       'name'        => 'President',
       'quantity'    => 1,
       'election_id' => $election['id'],
-    );
+    ];
     $params = array_merge($params, $defaultParams);
     $electionPosition = $this->callAPISuccess('ElectionPosition', 'create', $params);
     return $electionPosition['values'][$electionPosition['id']];
@@ -229,23 +229,23 @@ class api_v3_ElectionBaseTestCase extends CiviCaseTestCase implements HeadlessIn
    * @return array
    * @throws CiviCRM_API3_Exception
    */
-  public function createNomination($params = array()) {
+  public function createNomination($params = []) {
     $nominee = $this->individualCreate();
 
-    $electionParams = array(
+    $electionParams = [
       'is_deleted' => 0,
       'is_visible' => 1,
-    );
+    ];
     if (isset($params['election']) && isset($params['election']['params'])) {
       $electionParams = array_merge($electionParams, $params['election']['params']);
     }
     $election = $this->createElection($electionParams);
     $position = $this->createElectionPosition($election);
 
-    $params = array(
+    $params = [
       'member_nominee'       => $nominee,
       'election_position_id' => $position['id'],
-    );
+    ];
 
     $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $election);
     $nomination = $this->callAPISuccess('ElectionNomination', 'create', $params);

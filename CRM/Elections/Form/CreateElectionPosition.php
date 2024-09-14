@@ -45,12 +45,12 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
   public function setDefaultValues() {
     $default = parent::setDefaultValues();
     if ($this->epId) {
-      $this->electionPosition = civicrm_api3('ElectionPosition', 'get', array(
+      $this->electionPosition = civicrm_api3('ElectionPosition', 'get', [
         'id'         => $this->epId,
         'election_id' => $this->eId,
         'sequential' => TRUE,
         'options' => ['limit' => 0],
-      ));
+      ]);
 
       if ($this->electionPosition['count']) {
         $this->electionPosition   = $this->electionPosition['values'][0];
@@ -58,7 +58,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
         $default['name']          = $this->electionPosition['name'];
         $default['quantity']      = $this->electionPosition['quantity'];
         $default['sortorder']     = $this->electionPosition['sortorder'];
-        $default['description']   = (isset($this->electionPosition['description'])) ? $this->electionPosition['description'] : '';
+        $default['description']   = (!empty($this->electionPosition['description'])) ? $this->electionPosition['description'] : '';
 
         CRM_Utils_System::setTitle('Edit Election Position - ' . $this->electionPosition['name']);
       }
@@ -74,21 +74,21 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
    */
   private function addFormElements() {
     // election information fields
-    $this->add('text', 'name', 'Name', array('size' => 35), TRUE);
-    $this->add('text', 'quantity', 'Seats', array('size' => 15), TRUE);
-    $this->add('text', 'sortorder', 'Order', array('size' => 15), TRUE);
-    $this->add('textarea', 'description', 'Description', array('cols' => 55, 'rows' => 6), FALSE);
+    $this->add('text', 'name', 'Name', ['size' => 35], TRUE);
+    $this->add('text', 'quantity', 'Seats', ['size' => 15], TRUE);
+    $this->add('text', 'sortorder', 'Order', ['size' => 15], TRUE);
+    $this->add('textarea', 'description', 'Description', ['cols' => 55, 'rows' => 6], FALSE);
     $this->addElement('hidden', 'eid', $this->eId);
     $this->addElement('hidden', 'epid', $this->epId);
 
     // Submit button
-    $this->addButtons(array(
-        array(
+    $this->addButtons([
+        [
           'type' => 'submit',
           'name' => E::ts(($this->epId) ? 'Edit Position' : 'Create'),
           'isDefault' => TRUE,
-        ),
-    ));
+        ],
+    ]);
   }
 
   public function validate() {
@@ -109,22 +109,22 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
     $values = $this->exportValues();
     $epId = $values['epid'];
 
-    $params = array(
+    $params = [
       'name'         => $values['name'],
       'quantity'     => $values['quantity'],
       'sortorder'    => $values['sortorder'],
       'description'  => $values['description'],
       'election_id'  => $this->eId,
       'created_by'   => CRM_Core_Session::singleton()->getLoggedInContactID(),
-    );
+    ];
 
     $successTag = 'created';
     $electionPosition = NULL;
     if ($epId) {
-      $electionPosition = civicrm_api3('ElectionPosition', 'get', array(
+      $electionPosition = civicrm_api3('ElectionPosition', 'get', [
         'id' => $epId,
 	    'options' => ['limit' => 0],
-      ));
+      ]);
     }
 
     if (isset($electionPosition) && $electionPosition['count']) {

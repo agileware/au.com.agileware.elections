@@ -9,7 +9,7 @@ class api_v3_ElectionPositionTest extends api_v3_ElectionBaseTestCase {
    * Test that a election position is not created without any params and throw errors.
    */
   public function testCreateElectionPositionWithoutAnyParams() {
-    $this->callAPIFailure('ElectionPosition', 'create', array());
+    $this->callAPIFailure('ElectionPosition', 'create', []);
   }
 
   /**
@@ -17,11 +17,11 @@ class api_v3_ElectionPositionTest extends api_v3_ElectionBaseTestCase {
    */
   public function testCreateElectionPositionWithWrongData() {
     $election = $this->createElection();
-    $params = array(
+    $params = [
       'name'        => 'President',
       'quantity'    => 'a',
       'election_id' => $election['id'],
-    );
+    ];
     $this->callAPIFailure('ElectionPosition', 'create', $params);
     $params['quantity'] = 1;
     $params['election_id'] = -1;
@@ -39,15 +39,15 @@ class api_v3_ElectionPositionTest extends api_v3_ElectionBaseTestCase {
    * Test that a election position is not created for active election.
    */
   public function testCreateElectionPositionForActiveElection() {
-    $election = $this->createElection(array(
+    $election = $this->createElection([
       'is_deleted' => 0,
       'is_visible' => 1,
-    ), api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS);
-    $params = array(
+    ], api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS);
+    $params = [
       'name'        => 'President',
       'quantity'    => 1,
       'election_id' => $election['id'],
-    );
+    ];
     $this->callAPIFailure('ElectionPosition', 'create', $params);
   }
 
@@ -55,14 +55,14 @@ class api_v3_ElectionPositionTest extends api_v3_ElectionBaseTestCase {
    * Test that a election position is not created after nominations has been started.
    */
   public function testCreateElectionPositionOfDeletedElection() {
-    $election = $this->createElection(array(
+    $election = $this->createElection([
       'is_deleted' => 1,
-    ));
-    $params = array(
+    ]);
+    $params = [
       'name'        => 'President',
       'quantity'    => 1,
       'election_id' => $election['id'],
-    );
+    ];
     $this->callAPIFailure('ElectionPosition', 'create', $params);
   }
 
@@ -72,9 +72,9 @@ class api_v3_ElectionPositionTest extends api_v3_ElectionBaseTestCase {
   public function testDeleteElectionPosition() {
     $electionPosition = $this->createElectionPosition();
 
-    $this->callAPISuccess('ElectionPosition', 'delete', array(
+    $this->callAPISuccess('ElectionPosition', 'delete', [
       'id' => $electionPosition['id'],
-    ));
+    ]);
   }
 
   /**
@@ -85,9 +85,9 @@ class api_v3_ElectionPositionTest extends api_v3_ElectionBaseTestCase {
     $electionPosition = $this->createElectionPosition($election);
     $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $election);
 
-    $this->callAPISuccess('ElectionPosition', 'delete', array(
+    $this->callAPISuccess('ElectionPosition', 'delete', [
       'id' => $electionPosition['id'],
-    ));
+    ]);
   }
 
   /**

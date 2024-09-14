@@ -15,17 +15,17 @@ class CRM_Elections_Form_DeleteElection extends CRM_Elections_Form_Base {
     if (throwUnauthorizedMessageIfRequired($this)) {
       return;
     }
-    $this->addButtons(array(
-      array(
+    $this->addButtons([
+      [
         'type' => 'submit',
         'name' => E::ts('Delete'),
         'isDefault' => TRUE,
-      ),
-      array(
+      ],
+      [
         'type' => 'cancel',
         'name' => E::ts('Cancel'),
-      ),
-    ));
+      ],
+    ]);
 
     $this->eId = CRM_Utils_Request::retrieve('eid', 'Positive', $this, FALSE, 0);
     if (!$this->eId) {
@@ -37,7 +37,7 @@ class CRM_Elections_Form_DeleteElection extends CRM_Elections_Form_Base {
 
   public function postProcess() {
     $values = $this->exportValues();
-    $this->eId = (isset($values["eid"])) ? $values["eid"] : 0;
+    $this->eId = (isset($values['eid'])) ? $values['eid'] : 0;
     $election = new CRM_Elections_BAO_Election();
     $election->id = $this->eId;
 

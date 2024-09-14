@@ -57,30 +57,30 @@ function elections_civicrm_enable() {
  */
 function elections_civicrm_preProcess($formName, &$form) {
   if ($formName == 'CRM_Core_Form_ShortCode') {
-    $form->components['elections'] = array(
+    $form->components['elections'] = [
       'label'  => 'Elections',
-      'select' => array(),
-    );
-    $form->components['electioninfo'] = array(
+      'select' => [],
+    ];
+    $form->components['electioninfo'] = [
       'label'  => 'Election Info',
-      'select' => array(
+      'select' => [
         'key' => 'id',
         'entity' => 'Election',
-        'api' => array(
-          'params' => array(
+        'api' => [
+          'params' => [
             'is_deleted' => 0,
-          ),
-        ),
-      ),
-    );
-    $form->options[] = array(
+          ],
+        ],
+      ],
+    ];
+    $form->options[] = [
       'key' => 'action',
-      'components' => array('elections'),
-      'options' => array(
+      'components' => ['elections'],
+      'options' => [
         'visible' => 'Display visible elections',
         'hidden'  => 'Display non visible elections',
-      ),
-    );
+      ],
+    ];
   }
 }
 
@@ -216,8 +216,8 @@ function throwUnauthorizedMessageIfRequired($formOrPage) {
  * @param $exceptionMessage
  * @throws CRM_Extension_Exception
  */
-function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions = array()) {
-  $formOrPage->thorwError = TRUE;
+function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions = []) {
+  $formOrPage->throwError = TRUE;
   $formOrPage->assign('errormessage', $exceptionMessage);
 
   if (empty($pageOptions)) {
@@ -247,8 +247,8 @@ function throwNonMemberAccessDenied($formOrPage) {
  * @throws CRM_Extension_Exception
  */
 function throwAccessDeniedPage($formOrPage) {
-  $formOrPage->thorwError = TRUE;
-  $formOrPage->assign('errormessage', "You're not authorized to access this page.");
+  $formOrPage->throwError = TRUE;
+  $formOrPage->assign('errormessage', 'You are not authorized to access this page.');
 }
 
 /**
@@ -310,38 +310,38 @@ function findElectionById($electionId, $throwErrorIfNotFound = TRUE) {
  * Implements hook_civicrm_managed().
  */
 function elections_civicrm_managed(&$entities) {
-  $entities[] = array(
+  $entities[] = [
     'module' => 'au.com.agileware.elections',
     'name' => 'nomination_option_value',
     'entity' => 'OptionValue',
     'cleanup' => 'never',
-    'params' => array(
+    'params' => [
       'version' => 3,
       'option_group_id' => 'activity_type',
-      'label' => "Nomination",
-      'name' => "Nomination",
-      'description' => "Nominated a member",
+      'label' => 'Nomination',
+      'name' => 'Nomination',
+      'description' => 'Nominated a member',
       'is_reserved' => 1,
       'weight' => 1,
       'is_active' => 1,
-    ),
-  );
-  $entities[] = array(
+    ],
+  ];
+  $entities[] = [
     'module' => 'au.com.agileware.elections',
     'name' => 'vote_option_value',
     'entity' => 'OptionValue',
     'cleanup' => 'never',
-    'params' => array(
+    'params' => [
       'version' => 3,
       'option_group_id' => 'activity_type',
-      'label' => "Vote",
-      'name' => "Vote",
-      'description' => "Voted in an election",
+      'label' => 'Vote',
+      'name' => 'Vote',
+      'description' => 'Voted in an election',
       'is_reserved' => 1,
       'weight' => 1,
       'is_active' => 1,
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -357,9 +357,8 @@ function isLoggedInMemberAllowedToVote($electionId, $contactId = NULL) {
   $election = findElectionById($electionId);
   $groupIds = $election->allowed_groups;
   if (!empty($groupIds)) {
-    $groupIds = explode(",", strval($groupIds));
-  }
-  if (count($groupIds) == 0 || empty($groupIds)) {
+    $groupIds = explode(',', strval($groupIds));
+  } else {
     return FALSE;
   }
 
@@ -426,7 +425,7 @@ function hasLoggedInUserAlreadyVoted($electionId, $memberId = NULL) {
 function getLoggedInUserVoteDate($electionId) {
   $voteDate = civicrm_api3('ElectionVote', 'get', [
     'sequential' => TRUE,
-    'return'     => array('created_at'),
+    'return'     => ['created_at'],
     'options'    => ['limit' => 0],
     'member_id'  => CRM_Core_Session::singleton()->getLoggedInContactID(),
     'election_nomination_id.election_position_id.election_id.id' => $electionId,
@@ -463,7 +462,7 @@ function elections_shuffle_assoc($list) {
 
   $keys = array_keys($list);
   shuffle($keys);
-  $random = array();
+  $random = [];
   foreach ($keys as $key) {
     $random[$key] = $list[$key];
   }
@@ -478,5 +477,5 @@ function elections_shuffle_assoc($list) {
  * Implements hook_civicrm_alterAPIPermissions().
  */
 function elections_civicrm_alterAPIPermissions($entity, $action, &$params, &$permissions) {
-  $permissions['election_nominee']['getlist'] = array('view Elections');
+  $permissions['election_nominee']['getlist'] = ['view Elections'];
 }

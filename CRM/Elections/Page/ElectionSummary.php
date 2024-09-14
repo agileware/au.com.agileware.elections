@@ -17,10 +17,10 @@ class CRM_Elections_Page_ElectionSummary extends CRM_Elections_Page_Base {
     $this->election = findElectionById($this->eId);
     $this->isElectionAdmin = isElectionAdmin();
 
-    CRM_Utils_System::setTitle("Election Summary - " . $this->election->name);
+    CRM_Utils_System::setTitle('Election Summary - ' . $this->election->name);
 
     if (!$this->election->isResultsOut) {
-      throwAccessDeniedException($this, "Election summary is not available yet.");
+      throwAccessDeniedException($this, 'Election summary is not available yet.');
       parent::run();
       return;
     }

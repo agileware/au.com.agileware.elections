@@ -9,7 +9,7 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
    * Test that a election nomination is not created without any params and throw errors.
    */
   public function testCreateElectionNominationWithoutAnyParams() {
-    $this->callAPIFailure('ElectionNomination', 'create', array());
+    $this->callAPIFailure('ElectionNomination', 'create', []);
   }
 
   /**
@@ -17,17 +17,17 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
    */
   public function testCreateElectionNominationWithWrongData() {
     $nominee = $this->individualCreate();
-    $params = array(
+    $params = [
       'member_nominee'       => $nominee,
       'election_position_id' => -1,
-    );
+    ];
     $this->callAPIFailure('ElectionNomination', 'create', $params);
 
     $position = $this->createElectionPosition();
-    $params = array(
+    $params = [
       'member_nominee'       => -1,
       'election_position_id' => $position['id'],
-    );
+    ];
     $this->callAPIFailure('ElectionNomination', 'create', $params);
   }
 
@@ -37,10 +37,10 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
   public function testCreateElectionNominationBeforeNominationsStarted() {
     $nominee = $this->individualCreate();
     $position = $this->createElectionPosition();
-    $params = array(
+    $params = [
       'member_nominee'       => $nominee,
       'election_position_id' => $position['id'],
-    );
+    ];
     $this->callAPIFailure('ElectionNomination', 'create', $params);
   }
 
@@ -57,13 +57,13 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
   public function testCreateElectionNominationAfterNominationsEnd() {
     $nominee = $this->individualCreate();
     $position = $this->createElectionPosition();
-    $params = array(
+    $params = [
       'member_nominee'       => $nominee,
       'election_position_id' => $position['id'],
-    );
-    $election = civicrm_api3('Election', 'getsingle', array(
+    ];
+    $election = civicrm_api3('Election', 'getsingle', [
       'id' => $position['election_id'],
-    ));
+    ]);
     $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_ADVERTISE_CANDIDATES_STARTED, $election);
     $this->callAPIFailure('ElectionNomination', 'create', $params);
   }
@@ -82,13 +82,13 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
   public function testCreateNominationForDeletedElection() {
     $nominee = $this->individualCreate();
     $position = $this->createElectionPosition();
-    $params = array(
+    $params = [
       'member_nominee'       => $nominee,
       'election_position_id' => $position['id'],
-    );
-    $election = civicrm_api3('Election', 'getsingle', array(
+    ];
+    $election = civicrm_api3('Election', 'getsingle', [
       'id' => $position['election_id'],
-    ));
+    ]);
 
     $election = $this->markElectionInactive($election);
 
@@ -103,13 +103,13 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
   public function testCreateNominationForHiddenElection() {
     $nominee = $this->individualCreate();
     $position = $this->createElectionPosition();
-    $params = array(
+    $params = [
       'member_nominee'       => $nominee,
       'election_position_id' => $position['id'],
-    );
-    $election = civicrm_api3('Election', 'getsingle', array(
+    ];
+    $election = civicrm_api3('Election', 'getsingle', [
       'id' => $position['election_id'],
-    ));
+    ]);
     $election['is_visible'] = 0;
     civicrm_api3('Election', 'create', $election);
     $this->callAPIFailure('ElectionNomination', 'create', $params);

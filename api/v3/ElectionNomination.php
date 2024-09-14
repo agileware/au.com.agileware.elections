@@ -23,17 +23,17 @@ function _civicrm_api3_election_nomination_create_spec(&$spec) {
  */
 function civicrm_api3_election_nomination_create($params) {
   if (!isset($params['id'])) {
-    $nominationsCount = civicrm_api3("ElectionNomination", "getcount", array(
+    $nominationsCount = civicrm_api3('ElectionNomination', 'getcount', [
       'member_nominee'       => $params['member_nominee'],
       'election_position_id' => $params['election_position_id'],
-    ));
+    ]);
     if ($nominationsCount > 0) {
       return civicrm_api3_create_error('Member is already nominated for the selected position.');
     }
 
-    $electionPosition = civicrm_api3('ElectionPosition', 'getsingle', array(
+    $electionPosition = civicrm_api3('ElectionPosition', 'getsingle', [
       'id' => $params['election_position_id'],
-    ));
+    ]);
     $electionId = $electionPosition['election_id'];
     $election = findElectionById($electionId, FALSE);
     if ($election->is_deleted || !$election->is_visible) {

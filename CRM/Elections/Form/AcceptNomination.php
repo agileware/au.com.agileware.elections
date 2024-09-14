@@ -22,12 +22,12 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
     }
 
     try {
-      $this->electionNomination = civicrm_api3('ElectionNomination', 'getsingle', array(
+      $this->electionNomination = civicrm_api3('ElectionNomination', 'getsingle', [
         'id' => $this->enId,
         'member_nominee' => CRM_Core_Session::singleton()->getLoggedInContactID(),
         'is_eligible_candidate' => 1,
-        'return' => ["has_accepted_nomination", "election_position_id.name", "has_rejected_nomination", "election_position_id.election_id.name", "election_position_id.election_id"],
-      ));
+        'return' => ['has_accepted_nomination', 'election_position_id.name', 'has_rejected_nomination', 'election_position_id.election_id.name', 'election_position_id.election_id'],
+      ]);
     } catch (CiviCRM_API3_Exception $e) {
       throwAccessDeniedException($this, $e->getMessage());
       return;
@@ -56,16 +56,16 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
 
     $this->assign('electionNomination', $this->electionNomination);
 
-    $this->add('textarea', 'nominationcomments', 'Comments', array('cols' => 55, 'rows' => 6), FALSE);
+    $this->add('textarea', 'nominationcomments', 'Comments', ['cols' => 55, 'rows' => 6], FALSE);
     $this->addElement('hidden', 'enid', $this->enId);
 
-    $this->addButtons(array(
-      array(
+    $this->addButtons([
+      [
         'type' => 'submit',
         'name' => E::ts('Accept'),
         'isDefault' => TRUE,
-      ),
-    ));
+      ],
+    ]);
 
     parent::buildQuickForm();
   }
@@ -73,11 +73,11 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
   public function postProcess() {
     $values = $this->exportValues();
 
-    civicrm_api3('ElectionNomination', 'create', array(
+    civicrm_api3('ElectionNomination', 'create', [
       'id' => $this->enId,
       'comments' => $values['nominationcomments'],
       'has_accepted_nomination' => 1,
-    ));
+    ]);
 
     CRM_Core_Session::setStatus('You have accepted the nomination.', '', 'success');
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/view', 'eid=' . $this->electionNomination['election_position_id.election_id'] . ''));

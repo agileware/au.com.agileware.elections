@@ -56,7 +56,7 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
       $this->assignUserVotingVariables($this->eId);
 
       if ($isShowingSpecificElectionFromShortCode) {
-        CRM_Utils_System::setTitle("");
+        CRM_Utils_System::setTitle('');
       }
       else {
         CRM_Utils_System::setTitle($this->election->name);
@@ -67,11 +67,11 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
   }
 
   private function assignPositions() {
-    $electionPositions = civicrm_api3('ElectionPosition', 'get', array(
+    $electionPositions = civicrm_api3('ElectionPosition', 'get', [
       'election_id' => $this->eId,
       'sequential'  => TRUE,
 	  'options' => ['limit' => 0],
-    ));
+    ]);
 
     $this->assign('positions', $electionPositions['values']);
   }

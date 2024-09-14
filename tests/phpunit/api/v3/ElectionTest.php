@@ -9,7 +9,7 @@ class api_v3_ElectionTest extends api_v3_ElectionBaseTestCase {
    * Test that a election is not created without any params and throw errors.
    */
   public function testCreateElectionWithoutAnyParams() {
-    $params = array();
+    $params = [];
     $this->callAPIFailure('election', 'create', $params);
   }
 
@@ -20,9 +20,9 @@ class api_v3_ElectionTest extends api_v3_ElectionBaseTestCase {
     $electionDates = $this->getElectionDates();
     $electionDates['visibility_end_date'] = $electionDates['visibility_start_date'];
     $this->modifyDatesInString($electionDates);
-    $params = array(
+    $params = [
       'name'        => 'CiviTest Election',
-    );
+    ];
     $params = array_merge($params, $electionDates);
     $this->callAPIFailure('election', 'create', $params);
   }
@@ -39,10 +39,10 @@ class api_v3_ElectionTest extends api_v3_ElectionBaseTestCase {
    */
   public function testEditNonStartedElection() {
     $electionName = 'Non started election';
-    $election = $this->createElection(array(
+    $election = $this->createElection([
       'name'        => $electionName,
       'description' => 'Description of non started election',
-    ));
+    ]);
     $this->assertEquals($election['name'], $electionName);
 
     $electionName = 'Modified election name';
@@ -68,7 +68,7 @@ class api_v3_ElectionTest extends api_v3_ElectionBaseTestCase {
    * Test that a election should not be edit/delete if it has been started and active.
    */
   public function testEditDeleteActiveStartedElection() {
-    $election = $this->createElection(array(), api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS);
+    $election = $this->createElection([], api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS);
     $election['name'] = 'Deleting started election';
     $election['is_deleted'] = 1;
     $this->callAPIFailure('election', 'create', $election);
@@ -78,7 +78,7 @@ class api_v3_ElectionTest extends api_v3_ElectionBaseTestCase {
    * Test that a election should be edited/deleted if it has been started and not active.
    */
   public function testEditDeleteInactiveStartedElection() {
-    $election = $this->createElection(array(), api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS);
+    $election = $this->createElection([], api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS);
 
     $election['is_visible'] = 0;
     $election = $this->callAPISuccess('election', 'create', $election);
