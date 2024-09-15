@@ -80,7 +80,7 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
     ]);
 
     CRM_Core_Session::setStatus('Nomination accepted.', '', 'success');
-    CRM_Utils_System::redirect(Civi::url('frontend://civicrm/elections/view', 'eid=' . $this->electionNomination['election_position_id.election_id'] ));
+    CRM_Utils_System::redirect(Civi::url('current://civicrm/elections/view', 'eid=' . $this->electionNomination['election_position_id.election_id'] ));
 
     parent::postProcess();
   }
