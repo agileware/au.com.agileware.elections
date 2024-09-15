@@ -60,7 +60,7 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
       if (empty($electionPostions['values'])) {
         throwAccessDeniedException($this, 'At least one Position must be defined before the Election can be active.', [
           'return_button_text'   => 'Return to Elections',
-          'return_button_action' => Civi::url('backend://civicrm/elections'),
+          'return_button_action' => Civi::url('current://civicrm/elections'),
         ]);
         return;
       }
@@ -78,7 +78,7 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
     }
 
     parent::postProcess();
-    CRM_Utils_System::redirect(Civi::url('backend://civicrm/elections'));
+    CRM_Utils_System::redirect(Civi::url('current://civicrm/elections'));
   }
 
 }

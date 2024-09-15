@@ -60,7 +60,7 @@ class CRM_Elections_Form_DeleteElectionPosition extends CRM_Elections_Form_Base 
 
     parent::postProcess();
 
-    CRM_Utils_System::redirect(Civi::url('backend://civicrm/elections/positions', 'eid=' . $this->eId));
+    CRM_Utils_System::redirect(Civi::url('current://civicrm/elections/positions', 'eid=' . $this->eId));
   }
 
   private function getElectionPosition() {
