@@ -18,7 +18,7 @@
   <version>1.2.6</version>
   <develStage>stable</develStage>
   <compatibility>
-    <ver>5.45</ver>
+    <ver>5.67</ver>
   </compatibility>
   <civix>
     <namespace>CRM/Elections</namespace>
