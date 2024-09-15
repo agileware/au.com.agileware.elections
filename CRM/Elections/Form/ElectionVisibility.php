@@ -58,10 +58,11 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
         'options' => ['limit' => 0],
       ]);
       if (empty($electionPostions['values'])) {
-        return throwAccessDeniedException($this, 'At least one Position must be defined before the Election can be active.', [
+        throwAccessDeniedException($this, 'At least one Position must be defined before the Election can be active.', [
           'return_button_text'   => 'Return to Elections',
           'return_button_action' => Civi::url('backend://civicrm/elections'),
         ]);
+        return;
       }
     }
 
