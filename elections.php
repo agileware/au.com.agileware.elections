@@ -231,7 +231,7 @@ function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions
 }
 
 /**
- * Throw access denied exception if non-member is trying accept a member related page.
+ * Throw access denied exception if non-member is trying access a member related page.
  *
  * @param $exceptionMessage
  * @throws CRM_Extension_Exception
