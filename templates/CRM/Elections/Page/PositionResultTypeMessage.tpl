@@ -1,5 +1,5 @@
 {if $position.result_status == $resultStatuses.results_majority}
-    {*<p>Winner by clear majority.</p>*}
+    <p>Winner by clear majority.</p>
 {/if}
 
 {if $position.result_status == $resultStatuses.results_no_majority}
@@ -15,5 +15,5 @@
 {/if}
 
 {if $position.result_status == $resultStatuses.results_equal_seats}
-    {*<p>The number of candidates remaining equals the number of position holders. These candidates are the winners.</p>*}
+    <p>The number of candidates remaining equals the number of position holders. These candidates are the winners.</p>
 {/if}
