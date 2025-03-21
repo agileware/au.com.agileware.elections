@@ -6,18 +6,95 @@ env:
 jobs:
   upgrade-and-push:
     runs-on: ubuntu-latest
+
+    env:
+      DB_NAME: wordpress
+      DB_USER: wp_user
+      DB_PASS: wp_pass
+      DB_ROOT_PASS: root_pass
+      DB_HOST: mariadb:3306
+      WP_URL: http://localhost:8080
+      WP_TITLE: Test Site
+      WP_ADMIN_USER: admin
+      WP_ADMIN_PASS: admin
+      WP_ADMIN_EMAIL: test@example.com
+      EXTENSION_NAME: au.com.agileware.elections
+
+    services:
+      mariadb:
+        image: mariadb:10
+        env:
+          MYSQL_DATABASE: ${{ env.DB_NAME }}
+          MYSQL_USER: ${{ env.DB_USER }}
+          MYSQL_PASSWORD: ${{ env.DB_PASS }}
+          MYSQL_ROOT_PASSWORD: ${{ env.DB_ROOT_PASS }}
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Install civix and regenerate module
+        uses: actions/checkout@v4
+
+      - name: Wait for MariaDB to be ready
         run: |
-          composer global config minimum-stability dev
-          composer global config --no-plugins allow-plugins.civicrm/composer-downloads-plugin true
-          composer global config --no-plugins allow-plugins.civicrm/composer-compile-plugin true
-          composer global require civicrm/civix
-          /home/runner/.composer/vendor/bin/civix upgrade
+          echo "Waiting for MariaDB..."
+          docker run --network wp-net --rm \
+            mariadb:10 \
+            sh -c 'until mysql -h mariadb -u${{ env.DB_USER }} -p${{ env.DB_PASS }} -e "SHOW DATABASES"; do sleep 5; done'
+
+      - name: Start WordPress container
+        run: |
+          docker run -d --name wordpress \
+            --network wp-net \
+            -e WORDPRESS_DB_HOST=${{ env.DB_HOST }} \
+            -e WORDPRESS_DB_NAME=${{ env.DB_NAME }} \
+            -e WORDPRESS_DB_USER=${{ env.DB_USER }} \
+            -e WORDPRESS_DB_PASSWORD=${{ env.DB_PASS }} \
+            -p 8080:80 \
+            -v ./runner_mount/uploads:/var/www/html/wp-content/uploads
+            docker.io/agilewareprojects/wordpress:pipeline-latest
+            
+      - name: Install WordPress
+        run: |
+          docker exec wordpress wp core install \
+            --url=${{ env.WP_URL }} \
+            --title="${{ env.WP_TITLE }}" \
+            --admin_user=${{ env.WP_ADMIN_USER }} \
+            --admin_password=${{ env.WP_ADMIN_PASS }} \
+            --admin_email=${{ env.WP_ADMIN_EMAIL }} \
+            --skip-email
+
+      - name: Download & install cv and civix
+        run: |
+          curl -Ls https://download.civicrm.org/cv.phar -o cv
+          curl -Ls https://download.civicrm.org/civix.phar -o civix
+          docker cp cv wordpress:/usr/local/bin/cv
+          docker cp civix wordpress:/usr/local/bin/civix
+          docker exec wordpress chmod +x /usr/local/bin/cv /usr/local/bin/civix
+
+      - name: Install civicrm
+        run: |
+          rm -f ./runner_mount/uploads/civicrm/civicrm.settings.php
+          docker exec wordpress cv core:install 
+          docker exec wordpress wp plugin activate wordpress
+
+      - name: Prepare uploads directory and add worktree
+        run: |
+          mkdir -p runner_mount/uploads
+          git worktree add -b civix-upgrade runner_mount/uploads/civicrm/ext/${{ EXTENSION_NAME }}
+
+      - name: Regenerate module
+        run: |
+          docker exec wordpress -w /var/www/html/wp-content/uploads/civicrm/ext/${{ EXTENSION_NAME }} civix upgrade
+
       - name: Commit and push changes
         uses: devops-infra/action-commit-push@master
+        working-directory: ./runner_mount/uploads/${{ EXTENSION_NAME }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add_timestamp: true
@@ -25,6 +102,7 @@ jobs:
           commit_message: "civix upgraded"
           force: false
           target_branch: civix-upgrade
+
       - name: Create pull request
         uses: devops-infra/action-pull-request@master
         with:
