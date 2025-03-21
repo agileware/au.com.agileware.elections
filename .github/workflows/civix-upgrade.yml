@@ -64,7 +64,7 @@ jobs:
 
       - name: Install WordPress
         run: |
-          docker exec wordpress wp core install \
+          docker exec -u www-data wordpress wp core install \
             --url=${{ env.WP_URL }} \
             --title="${{ env.WP_TITLE }}" \
             --admin_user=${{ env.WP_ADMIN_USER }} \
@@ -74,17 +74,17 @@ jobs:
 
       - name: Download & install cv and civix
         run: |
-          curl -Ls https://download.civicrm.org/cv.phar -o cv
-          curl -Ls https://download.civicrm.org/civix.phar -o civix
-          docker cp cv wordpress:/usr/local/bin/cv
-          docker cp civix wordpress:/usr/local/bin/civix
+          curl -Ls https://download.civicrm.org/cv/cv.phar -o /tmp/cv
+          curl -Ls https://download.civicrm.org/civixcivix.phar -o /tmp/civix
+          docker cp /tmp/cv wordpress:/usr/local/bin/cv
+          docker cp /tmp/civix wordpress:/usr/local/bin/civix
           docker exec wordpress chmod +x /usr/local/bin/cv /usr/local/bin/civix
 
       - name: Install civicrm
         run: |
           docker exec rm -f ./uploads/civicrm/civicrm.settings.php
-          docker exec wordpress cv core:install
-          docker exec wordpress wp plugin activate wordpress
+          docker exec -u www-data wordpress cv core:install
+          docker exec -u www-data wordpress wp plugin activate wordpress
 
       - name: Regenerate module
         run: |
