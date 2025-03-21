@@ -86,15 +86,15 @@ jobs:
       - name: Prepare uploads directory and add worktree
         run: |
           mkdir -p runner_mount/uploads
-          git worktree add -b civix-upgrade runner_mount/uploads/civicrm/ext/${{ EXTENSION_NAME }}
+          git worktree add -b civix-upgrade runner_mount/uploads/civicrm/ext/${{ env.EXTENSION_NAME }}
 
       - name: Regenerate module
         run: |
-          docker exec wordpress -w /var/www/html/wp-content/uploads/civicrm/ext/${{ EXTENSION_NAME }} civix upgrade
+          docker exec wordpress -w /var/www/html/wp-content/uploads/civicrm/ext/${{ env.EXTENSION_NAME }} civix upgrade
 
       - name: Commit and push changes
         uses: devops-infra/action-commit-push@master
-        working-directory: ./runner_mount/uploads/${{ EXTENSION_NAME }}
+        working-directory: ./runner_mount/uploads/${{ env.EXTENSION_NAME }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add_timestamp: true
