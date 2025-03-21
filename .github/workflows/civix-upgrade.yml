@@ -95,7 +95,7 @@ jobs:
       - name: Download & install cv and civix
         run: |
           curl -Ls https://download.civicrm.org/cv/cv.phar -o /tmp/cv
-          curl -Ls https://download.civicrm.org/civixcivix.phar -o /tmp/civix
+          curl -Ls https://download.civicrm.org/civix/civix.phar -o /tmp/civix
           docker cp /tmp/cv wordpress:/usr/local/bin/cv
           docker cp /tmp/civix wordpress:/usr/local/bin/civix
           docker exec wordpress chmod +x /usr/local/bin/cv /usr/local/bin/civix
