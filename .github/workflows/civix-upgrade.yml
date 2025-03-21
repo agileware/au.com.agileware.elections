@@ -46,14 +46,17 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Create WP docker network
+      - name: Detect GitHub Actions Docker network
+        id: detect-network
         run: |
-          docker network create wp-net
+          NETWORK=$(docker network ls --filter "name=github_" --format "{{ .Name }}" | head -n 1)
+          echo "Detected Docker network: $NETWORK"
+          echo "network=$NETWORK" >> "$GITHUB_OUTPUT"
 
       - name: Start WordPress container
         run: |
           docker run -d --name wordpress \
-            --network wp-net \
+            --network ${{ steps.detect-network.outputs.network }} \
             -e WORDPRESS_DB_HOST=${{ env.DB_HOST }} \
             -e WORDPRESS_DB_NAME=${{ env.DB_NAME }} \
             -e WORDPRESS_DB_USER=${{ env.DB_USER }} \
