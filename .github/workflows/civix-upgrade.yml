@@ -50,13 +50,6 @@ jobs:
         run: |
           docker network create wp-net
 
-      - name: Wait for MariaDB to be ready
-        run: |
-          echo "Waiting for MariaDB..."
-          docker run --network wp-net --rm \
-            mariadb:10 \
-            sh -c 'until mysql -h mariadb -u${{ env.DB_USER }} -p${{ env.DB_PASS }} -e "SHOW DATABASES"; do sleep 5; done'
-
       - name: Start WordPress container
         run: |
           docker run -d --name wordpress \
