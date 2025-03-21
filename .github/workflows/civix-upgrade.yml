@@ -61,8 +61,23 @@ jobs:
             -p 8080:80 \
             -v .:/var/www/html/wp-content/uploads/civicrm/ext/${{ env.EXTENSION_NAME }} \
             docker.io/agilewareprojects/wordpress:pipeline-latest
-          docker exec -u www-data wordpress pwd
-          docker exec -u www-data wordpress ls
+
+      - name: Wait for WordPress container startup
+        run: |
+          echo "Waiting for wp-config.php to exist in the container..."
+          for i in {1..30}; do
+            if docker exec wordpress test -f /var/www/html/wp-config.php; then
+              echo "wp-config.php found!"
+              break
+            fi
+            echo "Still waiting... ($i)"
+            sleep 2
+          done
+
+          if ! docker exec wordpress test -f /var/www/html/wp-config.php; then
+            echo "Timed out waiting for wp-config.php"
+            exit 1
+          fi
 
       - name: Install WordPress
         run: |
