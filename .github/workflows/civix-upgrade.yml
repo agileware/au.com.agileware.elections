@@ -104,7 +104,7 @@ jobs:
         run: |
           docker exec wordpress chown www-data wp-content/ wp-content/uploads wp-content/uploads/civicrm
           docker exec -u www-data wordpress cv core:install
-          docker exec -u www-data wordpress wp plugin activate wordpress
+          docker exec -u www-data wordpress wp plugin activate civicrm
 
       - name: Regenerate module
         run: |
