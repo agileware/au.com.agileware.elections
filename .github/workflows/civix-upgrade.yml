@@ -56,7 +56,7 @@ jobs:
             -e WORDPRESS_DB_USER=${{ env.DB_USER }} \
             -e WORDPRESS_DB_PASSWORD=${{ env.DB_PASS }} \
             -p 8080:80 \
-            -v ./runner_mount/uploads:/var/www/html/wp-content/uploads
+            -v .:/var/www/html/wp-content/uploads/civicrm/ext/${{ env.EXTENSION_NAME }}
             docker.io/agilewareprojects/wordpress:pipeline-latest
             
       - name: Install WordPress
@@ -79,14 +79,9 @@ jobs:
 
       - name: Install civicrm
         run: |
-          rm -f ./runner_mount/uploads/civicrm/civicrm.settings.php
+          docker exec rm -f ./uploads/civicrm/civicrm.settings.php
           docker exec wordpress cv core:install 
           docker exec wordpress wp plugin activate wordpress
-
-      - name: Prepare uploads directory and add worktree
-        run: |
-          mkdir -p runner_mount/uploads
-          git worktree add -b civix-upgrade runner_mount/uploads/civicrm/ext/${{ env.EXTENSION_NAME }}
 
       - name: Regenerate module
         run: |
@@ -94,7 +89,6 @@ jobs:
 
       - name: Commit and push changes
         uses: devops-infra/action-commit-push@master
-        working-directory: ./runner_mount/uploads/${{ env.EXTENSION_NAME }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add_timestamp: true
