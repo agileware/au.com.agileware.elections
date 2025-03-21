@@ -112,6 +112,7 @@ jobs:
 
       - name: Commit and push changes
         uses: devops-infra/action-commit-push@master
+        id: push-commit
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add_timestamp: true
@@ -128,6 +129,7 @@ jobs:
           title: "Automated pull request - civix regenerated"
           assignee: "agileware-fj"
           label: "auto"
+          source_branch: ${{ steps.push-commit.outputs.branch_name  }}
 
       - name: Collect docker logs on failure
         if: failure()
