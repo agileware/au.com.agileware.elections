@@ -108,7 +108,7 @@ jobs:
 
       - name: Regenerate module
         run: |
-          docker exec wordpress -w /var/www/html/wp-content/uploads/civicrm/ext/${{ env.EXTENSION_NAME }} civix upgrade
+          docker exec -w /var/www/html/wp-content/uploads/civicrm/ext/${{ env.EXTENSION_NAME }} wordpress civix upgrade
 
       - name: Commit and push changes
         uses: devops-infra/action-commit-push@master
