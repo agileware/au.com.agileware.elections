@@ -102,7 +102,6 @@ jobs:
 
       - name: Install civicrm
         run: |
-          docker exec rm -f ./uploads/civicrm/civicrm.settings.php
           docker exec -u www-data wordpress cv core:install
           docker exec -u www-data wordpress wp plugin activate wordpress
 
