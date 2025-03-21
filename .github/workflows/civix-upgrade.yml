@@ -61,6 +61,8 @@ jobs:
             -p 8080:80 \
             -v .:/var/www/html/wp-content/uploads/civicrm/ext/${{ env.EXTENSION_NAME }} \
             docker.io/agilewareprojects/wordpress:pipeline-latest
+          docker exec -u www-data wordpress pwd
+          docker exec -u www-data wordpress ls
 
       - name: Install WordPress
         run: |
