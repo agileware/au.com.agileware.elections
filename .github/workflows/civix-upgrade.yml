@@ -59,7 +59,7 @@ jobs:
             -e WORDPRESS_DB_USER=${{ env.DB_USER }} \
             -e WORDPRESS_DB_PASSWORD=${{ env.DB_PASS }} \
             -p 8080:80 \
-            -v .:/var/www/html/wp-content/uploads/civicrm/ext/${{ env.EXTENSION_NAME }}
+            -v .:/var/www/html/wp-content/uploads/civicrm/ext/${{ env.EXTENSION_NAME }} \
             docker.io/agilewareprojects/wordpress:pipeline-latest
 
       - name: Install WordPress
