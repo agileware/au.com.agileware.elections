@@ -1,8 +1,8 @@
 name: civix upgrade
 on:
-  push
+  push: {}
   schedule:
-    - on: '23 18 * * 3'
+    - on: '23 18 * * 3' # Thursday 4:23am AEDT
 
 jobs:
   civix-upgrade:
