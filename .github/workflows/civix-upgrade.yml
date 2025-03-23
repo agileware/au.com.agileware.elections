@@ -1,10 +1,12 @@
 name: civix upgrade
 on:
   push
+  schedule:
+    - on: 23 18 * * 3 # Thursday 4:23am AEDT
 
 jobs:
   civix-upgrade:
-    uses: agileware/ci-workflows/civix-upgrade-template-final.yml@main
+    uses: agileware/ci-workflows/.github/workflows/civix-upgrade.yml@main
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
