@@ -1,0 +1,128 @@
+<?php
+use CRM_Elections_ExtensionUtil as E;
+
+return [
+  'name' => 'ElectionPosition',
+  'table' => 'civicrm_election_position',
+  'class' => 'CRM_Elections_DAO_ElectionPosition',
+  'getInfo' => fn() => [
+    'title' => E::ts('Election Position'),
+    'title_plural' => E::ts('Election Positions'),
+    'description' => E::ts('FIXME'),
+    'log' => TRUE,
+    'add' => '5.3',
+  ],
+  'getFields' => fn() => [
+    'id' => [
+      'title' => E::ts('ID'),
+      'sql_type' => 'int unsigned',
+      'input_type' => 'Number',
+      'required' => TRUE,
+      'description' => E::ts('Unique ElectionPosition ID'),
+      'add' => '5.3',
+      'primary_key' => TRUE,
+      'auto_increment' => TRUE,
+    ],
+    'name' => [
+      'title' => E::ts('Name'),
+      'sql_type' => 'varchar(255)',
+      'input_type' => 'Text',
+      'description' => E::ts('Name of the position.'),
+      'add' => '5.3',
+      'usage' => [
+        'import',
+        'export',
+        'duplicate_matching',
+      ],
+    ],
+    'quantity' => [
+      'title' => E::ts('Quantity'),
+      'sql_type' => 'int unsigned',
+      'input_type' => 'Text',
+      'description' => E::ts('Quantity of a this position.'),
+      'add' => '5.3',
+      'usage' => [
+        'import',
+        'export',
+        'duplicate_matching',
+      ],
+    ],
+    'sortorder' => [
+      'title' => E::ts('Sortorder'),
+      'sql_type' => 'int unsigned',
+      'input_type' => 'Text',
+      'description' => E::ts('Order of a this position.'),
+      'add' => '5.3',
+      'usage' => [
+        'import',
+        'export',
+        'duplicate_matching',
+      ],
+    ],
+    'description' => [
+      'title' => E::ts('Description'),
+      'sql_type' => 'text',
+      'input_type' => 'Text',
+      'add' => '5.3',
+      'usage' => [
+        'import',
+        'export',
+        'duplicate_matching',
+      ],
+    ],
+    'created_at' => [
+      'title' => E::ts('Created At'),
+      'sql_type' => 'timestamp',
+      'input_type' => NULL,
+      'description' => E::ts('Date on which election position created.'),
+      'add' => '5.3',
+      'default' => 'CURRENT_TIMESTAMP',
+      'usage' => ['export'],
+    ],
+    'updated_at' => [
+      'title' => E::ts('Updated At'),
+      'sql_type' => 'timestamp',
+      'input_type' => NULL,
+      'description' => E::ts('Date on which election position was updated.'),
+      'add' => '5.3',
+      'default' => 'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+      'usage' => ['export'],
+    ],
+    'election_id' => [
+      'title' => E::ts('Election ID'),
+      'sql_type' => 'int unsigned',
+      'input_type' => 'EntityRef',
+      'description' => E::ts('FK to Election'),
+      'add' => '5.3',
+      'entity_reference' => [
+        'entity' => 'Election',
+        'key' => 'id',
+        'on_delete' => 'CASCADE',
+      ],
+    ],
+    'created_by' => [
+      'title' => E::ts('Created By'),
+      'sql_type' => 'int unsigned',
+      'input_type' => 'EntityRef',
+      'description' => E::ts('FK to Contact who created particular position'),
+      'add' => '5.3',
+      'entity_reference' => [
+        'entity' => 'Contact',
+        'key' => 'id',
+        'on_delete' => 'CASCADE',
+      ],
+    ],
+    'result_status' => [
+      'title' => E::ts('Result Status'),
+      'sql_type' => 'varchar(255)',
+      'input_type' => 'Text',
+      'description' => E::ts('Result status for this position.'),
+      'add' => '5.3',
+      'usage' => [
+        'import',
+        'export',
+        'duplicate_matching',
+      ],
+    ],
+  ],
+];
