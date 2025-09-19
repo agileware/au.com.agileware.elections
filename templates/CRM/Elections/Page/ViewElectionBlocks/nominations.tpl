@@ -60,11 +60,11 @@
                         {/if}
                         {if $election->isNominationsInProgress and $election->required_nominations >= 2 and $seconder.seconders|@count < 2 and $seconder.is_eligible_candidate != 1}
                             <div class="clearfix"></div>
-                            <input type="button" value="{ts}Need Second{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/create" q="eid=`$election->id`&enid=`$seconder.id`"}'" class="election-action-button" />
+                            <input type="button" value="{ts escape='htmlattribute'}Need Second{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/create" q="eid=`$election->id`&enid=`$seconder.id`"}'" class="election-action-button" />
                         {/if}
                         {if $election->isNominationsInProgress and $seconder.has_rejected_nomination == 0 and $seconder.has_accepted_nomination == 0 and ($seconder.seconders|@count >= 2 or $seconder.is_eligible_candidate == 1) }
                             <div class="clearfix"></div>
-                            <input type="button" value="{ts}Nominate{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/create" q="eid=`$election->id`&enid=`$seconder.id`"}'" class="election-action-button" />
+                            <input type="button" value="{ts escape='htmlattribute'}Nominate{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/create" q="eid=`$election->id`&enid=`$seconder.id`"}'" class="election-action-button" />
                         {/if}
 
                     </div>
