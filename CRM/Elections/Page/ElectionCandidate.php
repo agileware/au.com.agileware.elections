@@ -19,10 +19,10 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
     }
 
     try {
-      $this->electionNomination = civicrm_api3('ElectionNomination', 'getsingle', array(
+      $this->electionNomination = civicrm_api3('ElectionNomination', 'getsingle', [
         'id' => $this->enId,
-        'return' => ["has_accepted_nomination", "comments", "election_position_id.name", "election_position_id.election_id.name", "election_position_id.election_id", "member_nominee", "member_nominee.display_name", "member_nominee.image_URL"],
-      ));
+        'return' => ['has_accepted_nomination', 'comments', 'election_position_id.name', 'election_position_id.election_id.name', 'election_position_id.election_id', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL'],
+      ]);
     }
     catch (CiviCRM_API3_Exception $e) {
       throwAccessDeniedException($this, $e->getMessage());
@@ -43,13 +43,13 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
     $this->removeNonRequiredPositions($positionsWithNominations);
     $this->assign('positions', $positionsWithNominations);
     $this->assign('election', $this->election);
-    CRM_Utils_System::setTitle($this->electionNomination['member_nominee.display_name'] . " - " . $this->election->name);
+    CRM_Utils_System::setTitle($this->electionNomination['member_nominee.display_name'] . ' - ' . $this->election->name);
 
     parent::run();
   }
 
   private function removeNonRequiredPositions(&$positionsWithNominations) {
-    $positionsToRemove = array();
+    $positionsToRemove = [];
     foreach ($positionsWithNominations as $index => $positionWithNominations) {
       if (isset($positionWithNominations['nominations'])) {
         $nominations = $positionWithNominations['nominations'];

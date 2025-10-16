@@ -2,7 +2,7 @@
 <extension key="au.com.agileware.elections" type="module">
   <file>elections</file>
   <name>Elections</name>
-  <description>Elections (au.com.agileware.elections) is a CiviCRM extension which provides on-line election functionality (nominations and voting) to CiviCRM.</description>
+  <description>Elections (au.com.agileware.elections) is a CiviCRM extension which provides an on-line elections platform, including nominations, candidates and voting.</description>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>Agileware Pty Ltd</author>
@@ -18,7 +18,7 @@
   <version>1.2.6</version>
   <develStage>stable</develStage>
   <compatibility>
-    <ver>5.45</ver>
+    <ver>5.67</ver>
   </compatibility>
   <civix>
     <namespace>CRM/Elections</namespace>

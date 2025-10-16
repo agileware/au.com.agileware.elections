@@ -33,17 +33,17 @@ class CRM_Elections_Form_DeleteElectionPosition extends CRM_Elections_Form_Base 
       return;
     }
 
-    $this->addButtons(array(
-      array(
+    $this->addButtons([
+      [
         'type' => 'submit',
         'name' => E::ts('Delete'),
         'isDefault' => TRUE,
-      ),
-      array(
+      ],
+      [
         'type' => 'cancel',
         'name' => E::ts('Cancel'),
-      ),
-    ));
+      ],
+    ]);
 
     $this->addElement('hidden', 'eid', $this->eId);
     $this->addElement('hidden', 'epid', $this->epId);
@@ -52,15 +52,15 @@ class CRM_Elections_Form_DeleteElectionPosition extends CRM_Elections_Form_Base 
   }
 
   public function postProcess() {
-    civicrm_api3('ElectionPosition', 'delete', array(
+    civicrm_api3('ElectionPosition', 'delete', [
        'id' => $this->electionPosition['id'],
-    ));
+    ]);
 
     CRM_Core_Session::setStatus('Election position has been deleted successfully.', '', 'success');
 
     parent::postProcess();
 
-    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/positions', 'eid=' . $this->eId));
+    CRM_Utils_System::redirect(Civi::url('current://civicrm/elections/positions', 'eid=' . $this->eId));
   }
 
   private function getElectionPosition() {
@@ -74,10 +74,10 @@ class CRM_Elections_Form_DeleteElectionPosition extends CRM_Elections_Form_Base 
       return FALSE;
     }
 
-    $this->electionPosition = civicrm_api3('ElectionPosition', 'get', array(
+    $this->electionPosition = civicrm_api3('ElectionPosition', 'get', [
       'id' => $this->epId,
       'election_id' => $this->eId,
-    ));
+    ]);
 
     if ($this->electionPosition['count'] == 0) {
       throwAccessDeniedPage($this);

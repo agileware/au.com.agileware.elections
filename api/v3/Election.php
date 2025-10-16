@@ -33,16 +33,16 @@ function civicrm_api3_election_create($params) {
 
   if (!isset($params['has_results_generated']) || $params['has_results_generated'] != 1) {
     $errors = CRM_Elections_BAO_Election::compareDates($params, $apiDateFormat);
-    if (count($errors) > 0) {
-      return civicrm_api3_create_error('Please correct the form errors.', array(
+    if (!empty($errors)) {
+      return civicrm_api3_create_error('Please correct the form errors.', [
           'errors' => $errors,
-      ));
+      ]);
     }
     if (isset($params['id'])) {
       //Election should not be edited/deleted if nomination period is started already.
       $election = findElectionById($params['id']);
       $currentTime = new DateTime();
-      $nominationStartDate = DateTime::createFromFormat("Y-m-d H:i:s", $election->nomination_start_date);
+      $nominationStartDate = DateTime::createFromFormat('Y-m-d H:i:s', $election->nomination_start_date);
       if (CRM_Elections_Helper_Dates::compare($nominationStartDate->format($apiDateFormat), $currentTime->format($apiDateFormat), $apiDateFormat) == 1 && isset($params['is_deleted']) && $params['is_deleted'] == 1 && $election->is_visible == 1) {
         return civicrm_api3_create_error('Election cannot be deleted once it has been started');
       }
@@ -85,26 +85,26 @@ function civicrm_api3_election_generateresults($params) {
   $currentDateTime = new DateTime();
   $elections = civicrm_api3('Election', 'get', [
     'sequential' => TRUE,
-    'result_date' => ['<=' => $currentDateTime->format("Y-m-d H:i:s")],
+    'result_date' => ['<=' => $currentDateTime->format('Y-m-d H:i:s')],
     'has_results_generated' => 0,
     'options' => ['limit' => 0],
   ]);
 
   $dao = NULL;
-  if (!$elections["count"]) {
-    return civicrm_api3_create_success(1, array(), NULL, NULL, $dao, array(
+  if (!$elections['count']) {
+    return civicrm_api3_create_success(1, [], NULL, NULL, $dao, [
       'message' => 'No election results are scheduled today.',
-    ));
+    ]);
   }
 
-  $elections = $elections["values"];
+  $elections = $elections['values'];
   $electionResults = new CRM_Elections_Helper_Results();
   foreach ($elections as $election) {
-    $electionResults->generateResult($election["id"], $election['anonymize_votes']);
+    $electionResults->generateResult($election['id'], $election['anonymize_votes']);
   }
 
-  return civicrm_api3_create_success(1, array(), NULL, NULL, $dao, array(
+  return civicrm_api3_create_success(1, [], NULL, NULL, $dao, [
      'message' => 'Successfully generated results for ' . count($elections) . ' elections.',
-  ));
+  ]);
 
 }

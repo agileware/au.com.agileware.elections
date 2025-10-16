@@ -3,24 +3,24 @@ use CRM_Elections_ExtensionUtil as E;
 
 class CRM_Elections_BAO_ElectionResult extends CRM_Elections_DAO_ElectionResult {
   public static function getResultsAndSummary($electionId, $completeSummary = FALSE) {
-    $positions = civicrm_api3("ElectionPosition", "get", array(
+    $positions = civicrm_api3('ElectionPosition', 'get', [
       'election_id' => $electionId,
-      'options' => array('limit' => 0, 'sort' => 'sortorder ASC'),
-    ));
-    $positions = $positions["values"];
+      'options' => ['limit' => 0, 'sort' => 'sortorder ASC'],
+    ]);
+    $positions = $positions['values'];
     self::setCandidatesAndResultsForEachPosition($positions, $completeSummary);
     self::updateCandidateProfilePictures($positions, TRUE, $completeSummary);
     return $positions;
   }
 
   public static function updateCandidateProfilePictures(&$positions, $hasCandidates = TRUE, $hasNominations = FALSE) {
-    $candidateIds = array();
+    $candidateIds = [];
     foreach ($positions as $position) {
       if ($hasCandidates && isset($position['candidates'])) {
-        $candidateIds = array_merge($candidateIds, array_column($position['candidates'], "member_nominee"));
+        $candidateIds = array_merge($candidateIds, array_column($position['candidates'], 'member_nominee'));
       }
       if ($hasNominations && isset($position['nominations'])) {
-        $candidateIds = array_merge($candidateIds, array_column($position['nominations'], "member_nominee"));
+        $candidateIds = array_merge($candidateIds, array_column($position['nominations'], 'member_nominee'));
       }
     }
 
@@ -54,10 +54,10 @@ class CRM_Elections_BAO_ElectionResult extends CRM_Elections_DAO_ElectionResult 
   }
 
   private static function getRanksForPosition($results, &$candidates, $positionQty) {
-    $ranks = array();
+    $ranks = [];
     foreach ($results as $result) {
       if (!array_key_exists($result['rank'], $ranks)) {
-        $ranks[$result['rank']] = array();
+        $ranks[$result['rank']] = [];
       }
 
       if ($result['rank'] <= $positionQty) {
@@ -80,10 +80,10 @@ class CRM_Elections_BAO_ElectionResult extends CRM_Elections_DAO_ElectionResult 
   }
 
   private static function getResultsForPosition($positionId) {
-    $results = civicrm_api3("ElectionResult", "get", array(
+    $results = civicrm_api3('ElectionResult', 'get', [
       'election_position_id' => $positionId,
 	  'options' => ['limit' => 0],
-    ));
+    ]);
     return $results['values'];
   }
 
@@ -91,10 +91,10 @@ class CRM_Elections_BAO_ElectionResult extends CRM_Elections_DAO_ElectionResult 
     $nominations = civicrm_api3('ElectionNomination', 'get', [
       'election_position_id' => $positionId,
       'options' => ['limit' => 0],
-      'return' => array('comments', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL', 'election_position_id'),
+      'return' => ['comments', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL', 'election_position_id'],
     ]);
 
-    $nominations = $nominations["values"];
+    $nominations = $nominations['values'];
     return $nominations;
   }
 
@@ -104,10 +104,10 @@ class CRM_Elections_BAO_ElectionResult extends CRM_Elections_DAO_ElectionResult 
       'has_accepted_nomination' => 1,
       'election_position_id' => $positionId,
       'options' => ['limit' => 0],
-      'return' => array('comments', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL', 'election_position_id'),
+      'return' => ['comments', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL', 'election_position_id'],
     ]);
 
-    $nominations = $nominations["values"];
+    $nominations = $nominations['values'];
     return $nominations;
   }
 

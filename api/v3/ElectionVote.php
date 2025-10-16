@@ -16,41 +16,41 @@ function _civicrm_api3_election_vote_create_spec(&$spec) {
 }
 
 function _civicrm_api3_election_vote_deletevotes_spec(&$spec) {
-  $spec['election_id'] = array(
+  $spec['election_id'] = [
     'title'        => 'Election ID',
     'api.required' => 1,
     'FKApiName'    => 'Election',
     'FKClassName'  => 'CRM_Elections_DAO_Election',
     'type'         => CRM_Utils_Type::T_INT,
-  );
-  $spec['member_id'] = array(
+  ];
+  $spec['member_id'] = [
     'title'        => 'Member ID',
     'api.required' => 1,
     'FKApiName'    => 'Contact',
     'FKClassName'  => 'CRM_Elections_DAO_Contact',
     'type'         => CRM_Utils_Type::T_INT,
-  );
+  ];
 }
 
 function _civicrm_api3_election_vote_addvotes_spec(&$spec) {
-  $spec['election_id'] = array(
+  $spec['election_id'] = [
     'title'        => 'Election ID',
     'api.required' => 1,
     'FKApiName'    => 'Election',
     'FKClassName'  => 'CRM_Elections_DAO_Election',
     'type'         => CRM_Utils_Type::T_INT,
-  );
-  $spec['member_id'] = array(
+  ];
+  $spec['member_id'] = [
     'title'        => 'Member ID',
     'api.required' => 1,
     'FKApiName'    => 'Contact',
     'FKClassName'  => 'CRM_Elections_DAO_Contact',
     'type'         => CRM_Utils_Type::T_INT,
-  );
-  $spec['votes'] = array(
+  ];
+  $spec['votes'] = [
     'title'        => 'Votes',
     'api.required' => 1,
-  );
+  ];
 }
 
 /**
@@ -86,16 +86,16 @@ function civicrm_api3_election_vote_deletevotes($params) {
   if (is_array($params['member_id'])) {
     return civicrm_api3_create_error('Multiple members are not yet supported.');
   }
-  $previousVotes = civicrm_api3('ElectionVote', 'get', array(
+  $previousVotes = civicrm_api3('ElectionVote', 'get', [
     'election_nomination_id.election_position_id.election_id.id' => $electionId,
     'member_id'                                                  => $params['member_id'],
     'options'                                                    => ['limit' => 0],
-  ));
+  ]);
   $previousVotes = $previousVotes['values'];
   foreach ($previousVotes as $voteId => $previousVote) {
-    civicrm_api3('ElectionVote', 'delete', array(
+    civicrm_api3('ElectionVote', 'delete', [
       'id' => $voteId,
-    ));
+    ]);
   }
 }
 
@@ -131,10 +131,10 @@ function civicrm_api3_election_vote_addvotes($params) {
       return civicrm_api3_create_error('Member has already voted in given election.');
     }
     else {
-      civicrm_api3('ElectionVote', 'deletevotes', array(
+      civicrm_api3('ElectionVote', 'deletevotes', [
         'election_id' => $election->id,
         'member_id'   => $params['member_id'],
-      ));
+      ]);
     }
   }
 
@@ -148,9 +148,9 @@ function civicrm_api3_election_vote_addvotes($params) {
     civicrm_api3('ElectionVote', 'create', $vote);
   }
 
-  return civicrm_api3_create_success(array(
+  return civicrm_api3_create_success([
     'message' => count($votes) . ' has been added successfully.',
-  ), $params, 'ElectionVote', 'addvotes');
+  ], $params, 'ElectionVote', 'addvotes');
 }
 
 /**

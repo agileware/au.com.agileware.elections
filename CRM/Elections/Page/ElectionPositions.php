@@ -31,13 +31,13 @@ class CRM_Elections_Page_ElectionPositions extends CRM_Elections_Page_Base {
     $this->assign('isElectionRunning', $this->isElectionRunning);
     $this->assign('election', $this->election);
 
-    CRM_Utils_System::setTitle('Election Positions - ' . $this->election->name);
+    CRM_Utils_System::setTitle('Election Positions for ' . $this->election->name);
 
-    $electionPositions = civicrm_api3('ElectionPosition', 'get', array(
+    $electionPositions = civicrm_api3('ElectionPosition', 'get', [
       'election_id' => $this->eId,
-      'options'     => array('limit' => 0, 'sort' => 'sortorder ASC'),
+      'options'     => ['limit' => 0, 'sort' => 'sortorder ASC'],
       'sequential'  => TRUE,
-    ));
+    ]);
 
     $this->assign('positions', $electionPositions['values']);
 
@@ -59,9 +59,9 @@ class CRM_Elections_Page_ElectionPositions extends CRM_Elections_Page_Base {
       }
     }
 
-    CRM_Utils_JSON::output(array(
+    CRM_Utils_JSON::output([
       'status' => 1,
-    ));
+    ]);
   }
 
 }

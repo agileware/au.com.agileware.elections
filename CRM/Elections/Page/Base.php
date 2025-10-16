@@ -1,10 +1,10 @@
 <?php
 
 class CRM_Elections_Page_Base extends CRM_Core_Page {
-  public $thorwError = FALSE;
+  public $throwError = FALSE;
 
   public function getTemplateFileName() {
-    if ($this->thorwError) {
+    if ($this->throwError) {
       return 'CRM/Elections/Helper/Error.tpl';
     }
     return parent::getTemplateFileName();
@@ -22,7 +22,7 @@ class CRM_Elections_Page_Base extends CRM_Core_Page {
   public function getUserVotingVariables($isVotingStarted, $electionId) {
     $isUserAllowedToVote = FALSE;
     $hasAlreadyVoted = FALSE;
-    $userVoteDate = "";
+    $userVoteDate = '';
 
     if ($isVotingStarted) {
       $hasAlreadyVoted = hasLoggedInUserAlreadyVoted($electionId);
@@ -34,11 +34,11 @@ class CRM_Elections_Page_Base extends CRM_Core_Page {
       }
     }
 
-    return array(
+    return [
       'user_vote_date' => $userVoteDate,
       'is_user_allowed_to_vote' => $isUserAllowedToVote,
       'has_user_already_voted'  => $hasAlreadyVoted,
-    );
+    ];
   }
 
   public function run() {

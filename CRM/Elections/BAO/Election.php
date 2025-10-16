@@ -10,13 +10,13 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
   public static $RESULTS_NO_MAJORITY = 'tie';
 
   public static function getResultStatues() {
-    return array(
+    return [
       'results_no_majority' => self::$RESULTS_NO_MAJORITY,
       'results_equal_seats' => self::$RESULTS_EQUAL_SEATS,
       'results_more_seats' => self::$RESULTS_MORE_SEATS,
       'results_majority' => self::$RESULTS_MAJORITY,
       'results_no_nominations' => self::$RESULTS_NO_NOMINATIONS,
-    );
+    ];
   }
 
   /**
@@ -102,8 +102,8 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
    * @param $values
    * @return array of errors
    */
-  public static function compareDates($values, $dateFormat = "Y-m-d H:i:s") {
-    $errors = array();
+  public static function compareDates($values, $dateFormat = 'Y-m-d H:i:s') {
+    $errors = [];
 
     // Check election visibility
     if (CRM_Elections_Helper_Dates::compare($values['visibility_start_date'], $values['visibility_end_date'], $dateFormat) != 1) {

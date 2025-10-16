@@ -15,10 +15,10 @@ class CRM_BAO_ElectionResultTest extends api_v3_ElectionBaseTestCase {
 
   public function setUp() {
     parent::setUp();
-    $this->election = $this->createElection(array(
+    $this->election = $this->createElection([
       'is_visible' => 1,
       'is_deleted' => 0,
-    ));
+    ]);
   }
 
   /**
@@ -34,9 +34,9 @@ class CRM_BAO_ElectionResultTest extends api_v3_ElectionBaseTestCase {
    * Test that a correct result status is set of election position (Multiple Seats) for no nominations.
    */
   public function testNoNominationsForPositionWithMultipleSeats() {
-    $this->electionPosition = $this->createElectionPosition($this->election, array(
+    $this->electionPosition = $this->createElectionPosition($this->election, [
       'quantity' => 2,
-    ));
+    ]);
     $this->election = $this->generateElectionResults($this->election);
     $this->assertElectionPositionStatus(CRM_Elections_BAO_Election::$RESULTS_NO_NOMINATIONS);
   }
@@ -45,9 +45,9 @@ class CRM_BAO_ElectionResultTest extends api_v3_ElectionBaseTestCase {
    * Test that a correct result status is set of election position (Multiple Seats) for no candidates.
    */
   public function testNoCandidatesForPositionWithMultipleSeats() {
-    $this->electionPosition = $this->createElectionPosition($this->election, array(
+    $this->electionPosition = $this->createElectionPosition($this->election, [
       'quantity' => 2,
-    ));
+    ]);
     $this->election = $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $this->election);
     $this->createNominationForResults($this->electionPosition['id']);
     $this->election = $this->generateElectionResults($this->election);
@@ -58,9 +58,9 @@ class CRM_BAO_ElectionResultTest extends api_v3_ElectionBaseTestCase {
    * Test that a correct result status is set of election position (Multiple Seats) for single candidate.
    */
   public function testSingleCandidateForPositionWithMultipleSeats() {
-    $this->electionPosition = $this->createElectionPosition($this->election, array(
+    $this->electionPosition = $this->createElectionPosition($this->election, [
       'quantity' => 2,
-    ));
+    ]);
     $this->election = $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $this->election);
     $members = $this->createNominationForResults($this->electionPosition['id'], 1, 1);
     $this->election = $this->generateElectionResults($this->election);
@@ -73,9 +73,9 @@ class CRM_BAO_ElectionResultTest extends api_v3_ElectionBaseTestCase {
    * Test that a correct result status is set of election position (Multiple Seats) for equal candidates.
    */
   public function testEqualCandidatesForPositionWithMultipleSeats() {
-    $this->electionPosition = $this->createElectionPosition($this->election, array(
+    $this->electionPosition = $this->createElectionPosition($this->election, [
       'quantity' => 2,
-    ));
+    ]);
     $this->election = $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $this->election);
     $members = $this->createNominationForResults($this->electionPosition['id'], 2, 2);
     $this->election = $this->generateElectionResults($this->election);
@@ -342,9 +342,9 @@ class CRM_BAO_ElectionResultTest extends api_v3_ElectionBaseTestCase {
    * Test that a correct result status is set of election position when there is equal number of  seats after one elimination.
    */
   public function testEqualSeatsAfterEliminationBetweenThreeCandidatesForPosition() {
-    $this->electionPosition = $this->createElectionPosition($this->election, array(
+    $this->electionPosition = $this->createElectionPosition($this->election, [
       'quantity' => 2,
-    ));
+    ]);
     $this->election = $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $this->election);
     $members = $this->createNominationForResults($this->electionPosition['id'], 3, 3);
     $winnerCandidate = $members['candidates'][0];
@@ -440,9 +440,9 @@ class CRM_BAO_ElectionResultTest extends api_v3_ElectionBaseTestCase {
    * Test that a correct result status is set of election position when there is majority after first elimination between four candidates.
    */
   public function testEqualSeatsAfterTwoEliminationBetweenFourCandidatesForPosition() {
-    $this->electionPosition = $this->createElectionPosition($this->election, array(
+    $this->electionPosition = $this->createElectionPosition($this->election, [
       'quantity' => 2,
-    ));
+    ]);
     $this->election = $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $this->election);
     $members = $this->createNominationForResults($this->electionPosition['id'], 4, 4);
     $winnerCandidate = $members['candidates'][0];
@@ -523,9 +523,9 @@ class CRM_BAO_ElectionResultTest extends api_v3_ElectionBaseTestCase {
     $this->election = $this->generateElectionResults($this->election);
     $this->assertElectionPositionStatus(CRM_Elections_BAO_Election::$RESULTS_MAJORITY);
 
-    $votesCount = $this->callAPISuccess('ElectionVote', 'getcount', array(
+    $votesCount = $this->callAPISuccess('ElectionVote', 'getcount', [
       'election_nomination_id.election_position_id.election_id.id' => $this->election['id'],
-    ));
+    ]);
 
     $this->assertEquals(0, $votesCount, 'Votes count should be zero.');
   }
@@ -561,35 +561,35 @@ class CRM_BAO_ElectionResultTest extends api_v3_ElectionBaseTestCase {
     $this->election = $this->generateElectionResults($this->election);
     $this->assertElectionPositionStatus(CRM_Elections_BAO_Election::$RESULTS_MAJORITY);
 
-    $votesCount = $this->callAPISuccess('ElectionVote', 'getcount', array(
+    $votesCount = $this->callAPISuccess('ElectionVote', 'getcount', [
       'election_nomination_id.election_position_id.election_id.id' => $this->election['id'],
-    ));
+    ]);
 
     $this->assertEquals(10, $votesCount, 'Votes count should be zero.');
   }
 
 
   public function recordVote($rank, $nominationId) {
-    return array(
+    return [
       'rank'                   => $rank,
       'election_nomination_id' => $nominationId,
-    );
+    ];
   }
 
   public function createNominationForResults($positionId, $nominationsCount = 1, $candidatesCount = 0) {
-    $members = array(
-      'nominations' => array(),
-      'candidates'  => array(),
-    );
+    $members = [
+      'nominations' => [],
+      'candidates'  => [],
+    ];
     while ($nominationsCount > 0) {
-      $nominee = $this->individualCreate(array(
+      $nominee = $this->individualCreate([
         'first_name' => 'Candidate',
         'last_name'  => '#' . $nominationsCount,
-      ));
-      $params = array(
+      ]);
+      $params = [
         'member_nominee'       => $nominee,
         'election_position_id' => $positionId,
-      );
+      ];
       $isCandidate = FALSE;
       if ($candidatesCount > 0) {
         $params['is_eligible_candidate']   = 1;
@@ -619,31 +619,31 @@ class CRM_BAO_ElectionResultTest extends api_v3_ElectionBaseTestCase {
 
   public function addMemberVotes($memberVotes) {
     foreach ($memberVotes as $memberId => $votes) {
-      $addVotesParams = array(
+      $addVotesParams = [
         'member_id'   => $memberId,
         'election_id' => $this->election['id'],
         'votes'       => $votes,
-      );
+      ];
       civicrm_api3('ElectionVote', 'addvotes', $addVotesParams);
     }
   }
 
   public function getVoters($n = 5) {
-    $voters = array();
-    $memberVotes = array();
+    $voters = [];
+    $memberVotes = [];
     while ($n > 0) {
       $n--;
-      $voterId = $this->individualCreate(array(
+      $voterId = $this->individualCreate([
         'first_name' => 'Voter',
         'last_name'  => '#' . $n,
-      ));
+      ]);
       $voters[] = $voterId;
-      $memberVotes[$voterId] = array();
+      $memberVotes[$voterId] = [];
     }
-    return array(
+    return [
       'voters' => $voters,
       'memberVotes' => $memberVotes,
-    );
+    ];
   }
 
   /**
@@ -654,11 +654,11 @@ class CRM_BAO_ElectionResultTest extends api_v3_ElectionBaseTestCase {
    * @param $rank
    */
   public function assertRank($nominationId, $positionId, $rank) {
-    $this->callAPISuccess('ElectionResult', 'getsingle', array(
+    $this->callAPISuccess('ElectionResult', 'getsingle', [
       'rank'                     => $rank,
       'election_position_id'     => $positionId,
       'election_nomination_id'   => $nominationId,
-    ));
+    ]);
   }
 
 }

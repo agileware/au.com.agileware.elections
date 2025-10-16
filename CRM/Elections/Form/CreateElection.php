@@ -32,7 +32,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
   public function setDefaultValues() {
     $defaults = parent::setDefaultValues();
     if (is_null($defaults) || !is_array($defaults)) {
-      $defaults = array();
+      $defaults = [];
     }
     $election = new CRM_Elections_BAO_Election();
     $election->id = $this->eId;
@@ -81,59 +81,59 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
    */
   private function addFormElements() {
     // election information fields
-    $this->add('text', 'name', 'Name', array('size' => 35), TRUE);
-    $this->add('textarea', 'description', 'Description', array('cols' => 55, 'rows' => 6), FALSE);
+    $this->add('text', 'name', 'Name', ['size' => 35], TRUE);
+    $this->add('textarea', 'description', 'Description', ['cols' => 55, 'rows' => 6], FALSE);
 
     // Visibility fields.
-    $this->add('datepicker', 'visibility_start_date', 'Start Date', array(), TRUE);
-    $this->add('datepicker', 'visibility_end_date', 'End Date', array(), TRUE);
+    $this->add('datepicker', 'visibility_start_date', 'Start Date', [], TRUE);
+    $this->add('datepicker', 'visibility_end_date', 'End Date', [], TRUE);
 
     // Nominations fields.
-    $this->add('datepicker', 'nomination_start_date', 'Start Date', array(), TRUE);
-    $this->add('datepicker', 'nomination_end_date', 'End Date', array(), TRUE);
+    $this->add('datepicker', 'nomination_start_date', 'Start Date', [], TRUE);
+    $this->add('datepicker', 'nomination_end_date', 'End Date', [], TRUE);
 
     // Advetise Candidates
-    $this->add('datepicker', 'advertise_candidates_date', 'Start Date', array(), TRUE);
+    $this->add('datepicker', 'advertise_candidates_date', 'Start Date', [], TRUE);
 
     // Voting fields.
-    $this->add('datepicker', 'voting_start_date', 'Start Date', array(), TRUE);
-    $this->add('datepicker', 'voting_end_date', 'End Date', array(), TRUE);
+    $this->add('datepicker', 'voting_start_date', 'Start Date', [], TRUE);
+    $this->add('datepicker', 'voting_end_date', 'End Date', [], TRUE);
 
     // Publish result
-    $this->add('datepicker', 'result_date', 'Start Date', array(), TRUE);
+    $this->add('datepicker', 'result_date', 'Start Date', [], TRUE);
 
     // Setting fields.
 
-    $this->add('select', 'anonymize_votes', 'Anonymise Votes', CRM_Core_SelectValues::boolean(), TRUE, array(
+    $this->add('select', 'anonymize_votes', 'Anonymise Votes', CRM_Core_SelectValues::boolean(), TRUE, [
       'placeholder' => '- Select -',
-    ));
+    ]);
 
-    $this->add('select', 'allow_revote', 'Allow Members to Change Vote', CRM_Core_SelectValues::boolean(), TRUE, array(
+    $this->add('select', 'allow_revote', 'Allow Members to Change Vote', CRM_Core_SelectValues::boolean(), TRUE, [
       'placeholder' => '- Select -',
-    ));
+    ]);
 
-    $this->add('text', 'required_nominations', 'Number of Required Nominations', array('size' => 15), TRUE);
+    $this->add('text', 'required_nominations', 'Number of Required Nominations', ['size' => 15], TRUE);
 
-    $this->addEntityRef('allowed_groups', 'Allowed by Groups', array(
+    $this->addEntityRef('allowed_groups', 'Allowed by Groups', [
       'entity' => 'Group',
       'placeholder' => '- Select Groups -',
       'multiple' => TRUE,
-      'api' => array(
-        'params' => array(
+      'api' => [
+        'params' => [
           'is_active' => 1,
           'is_hidden' => 0,
-        ),
-      ),
-    ), TRUE);
+        ],
+      ],
+    ], TRUE);
 
     // Submit button
-    $this->addButtons(array(
-      array(
+    $this->addButtons([
+      [
         'type' => 'submit',
         'name' => E::ts('Submit'),
         'isDefault' => TRUE,
-      ),
-    ));
+      ],
+    ]);
   }
 
   public function validate() {
@@ -142,14 +142,14 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     $this->_errors = array_merge($this->_errors, $errors);
 
     if (!CRM_Utils_Rule::positiveInteger($values['required_nominations'])) {
-      $this->_errors['required_nominations'] = "Value should be a positive integer.";
+      $this->_errors['required_nominations'] = 'Value should be a positive integer.';
     }
     return parent::validate();
   }
 
   public function postProcess() {
     $values = $this->exportValues();
-    $election = array(
+    $election = [
       'name'                        => $values['name'],
       'description'                 => $values['description'],
       'visibility_start_date'       => $values['visibility_start_date'],
@@ -166,7 +166,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       'required_nominations'        => $values['required_nominations'],
       'allowed_groups'              => $values['allowed_groups'],
       'created_by'                  => CRM_Core_Session::singleton()->getLoggedInContactID(),
-    );
+    ];
 
     $messageKey = 'created';
     if ($this->eId) {
@@ -188,7 +188,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
 
     CRM_Core_Session::setStatus('Election has been ' . $messageKey . ' successfully.', '', 'success');
     parent::postProcess();
-    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections'));
+    CRM_Utils_System::redirect(Civi::url('current://civicrm/elections'));
   }
 
 }

@@ -40,7 +40,7 @@ class VoteAction extends AbstractAction {
     $vote['rank'] = $rank;
     $result = civicrm_api('ElectionVote', 'create', $vote);
     if ($this->configuration->getParameter('anonymize_vote')) {
-      \CRM_Core_DAO::executeQuery("UPDATE `civicrm_election_vote` SET `member_id` = NULL WHERE `id` = %1", [1=>[$result['id'], 'Integer']]);
+      \CRM_Core_DAO::executeQuery('UPDATE `civicrm_election_vote` SET `member_id` = NULL WHERE `id` = %1', [1=>[$result['id'], 'Integer']]);
     }
   }
 

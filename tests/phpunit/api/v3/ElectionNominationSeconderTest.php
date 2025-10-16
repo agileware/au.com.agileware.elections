@@ -8,7 +8,7 @@ class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase 
    * Test that an election nomination seconder is not created without any params and throw errors.
    */
   public function testCreateNominationSeconderWithoutAnyParams() {
-    $this->callAPIFailure('ElectionNominationSeconder', 'create', array());
+    $this->callAPIFailure('ElectionNominationSeconder', 'create', []);
   }
 
   /**
@@ -19,16 +19,16 @@ class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase 
     $nominationParams = $this->createNomination();
     $nomination = $nominationParams['nomination'];
 
-    $params = array(
+    $params = [
       'member_nominator'       => $nominator,
       'election_nomination_id' => -1,
-    );
+    ];
 
     $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
-    $params = array(
+    $params = [
       'member_nominator'       => -1,
       'election_nomination_id' => $nomination['id'],
-    );
+    ];
 
     $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
   }
@@ -57,14 +57,14 @@ class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase 
     $nomination = $nominationParams['nomination'];
     $position = $nominationParams['position'];
 
-    $params = array(
+    $params = [
       'member_nominator'       => $nominator,
       'election_nomination_id' => $nomination['id'],
-    );
+    ];
 
-    $election = civicrm_api3('Election', 'getsingle', array(
+    $election = civicrm_api3('Election', 'getsingle', [
       'id' => $position['election_id'],
-    ));
+    ]);
 
     $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_ADVERTISE_CANDIDATES_STARTED, $election);
     $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
@@ -79,14 +79,14 @@ class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase 
     $nomination = $nominationParams['nomination'];
     $position = $nominationParams['position'];
 
-    $params = array(
+    $params = [
       'member_nominator'       => $nominator,
       'election_nomination_id' => $nomination['id'],
-    );
+    ];
 
-    CRM_Core_DAO::executeQuery("UPDATE civicrm_election SET is_deleted = 1 WHERE id = %1", array(
-      1 => array($position['election_id'], 'Integer'),
-    ));
+    CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET is_deleted = 1 WHERE id = %1', [
+      1 => [$position['election_id'], 'Integer'],
+    ]);
     $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
   }
 
@@ -99,14 +99,14 @@ class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase 
     $nomination = $nominationParams['nomination'];
     $position = $nominationParams['position'];
 
-    $params = array(
+    $params = [
       'member_nominator'       => $nominator,
       'election_nomination_id' => $nomination['id'],
-    );
+    ];
 
-    CRM_Core_DAO::executeQuery("UPDATE civicrm_election SET is_visible = 0 WHERE id = %1", array(
-      1 => array($position['election_id'], 'Integer'),
-    ));
+    CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET is_visible = 0 WHERE id = %1', [
+      1 => [$position['election_id'], 'Integer'],
+    ]);
     $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
   }
 
@@ -122,19 +122,19 @@ class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase 
     $nomination = $nominationParams['nomination'];
     $election = $nominationParams['election'];
 
-    $params = array(
+    $params = [
       'member_nominator'       => $nominator,
       'election_nomination_id' => $nomination['id'],
-    );
+    ];
 
     $nominationSeconder = $this->callAPISuccess('ElectionNominationSeconder', 'create', $params);
 
-    return array(
+    return [
       'params'     => $params,
       'seconder'   => $nominationSeconder,
       'nomination' => $nomination,
       'election'   => $election,
-    );
+    ];
   }
 
 }

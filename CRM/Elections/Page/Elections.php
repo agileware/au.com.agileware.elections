@@ -45,10 +45,10 @@ class CRM_Elections_Page_Elections extends CRM_Elections_Page_Base {
    * @access protected
    */
   protected function getElections() {
-    $params = array(
+    $params = [
       'is_deleted'  => 0,
-      'options'    => array('sort' => "voting_start_date ASC"),
-    );
+      'options'    => ['sort' => 'voting_start_date ASC'],
+    ];
     if (!$this->isElectionAdmin || ($this->isFromShortCode && $this->electionsAction == 'visible')) {
       $params['visibility_start_date'] = ['<=' => $this->getCurrentDateTime()];
       $params['visibility_end_date'] = ['>' => $this->getCurrentDateTime()];
@@ -59,11 +59,11 @@ class CRM_Elections_Page_Elections extends CRM_Elections_Page_Base {
       $params['visibility_start_date'] = ['>' => $this->getCurrentDateTime()];
       $params['visibility_end_date'] = ['<=' => $this->getCurrentDateTime()];
       $params['is_visible'] = 0;
-      $params['options'] = ['or' => [["visibility_start_date", "is_visible", "visibility_end_date"]]];
+      $params['options'] = ['or' => [['visibility_start_date', 'is_visible', 'visibility_end_date']]];
     }
 
-    $elections = civicrm_api3("Election", "get", $params);
-    $elections = $elections["values"];
+    $elections = civicrm_api3('Election', 'get', $params);
+    $elections = $elections['values'];
     $this->modifyElectionValues($elections);
     $elections = $this->getSortedElections($elections);
     return $elections;
@@ -95,7 +95,7 @@ class CRM_Elections_Page_Elections extends CRM_Elections_Page_Base {
 
     $today = new DateTime();
     foreach ($elections as $election) {
-      $voteEndDate = DateTime::createFromFormat("Y-m-d H:i:s", $election['voting_end_date']);
+      $voteEndDate = DateTime::createFromFormat('Y-m-d H:i:s', $election['voting_end_date']);
       if ($today < $voteEndDate) {
         $runningElections[] = $election;
       }
@@ -133,9 +133,9 @@ class CRM_Elections_Page_Elections extends CRM_Elections_Page_Base {
       $elections[$index]['isUserAllowedToVote'] = $variables['is_user_allowed_to_vote'];
       $elections[$index]['hasUserAlreadyVoted'] = $variables['has_user_already_voted'];
 
-      $elections[$index]['positions'] = civicrm_api3('ElectionPosition', 'getcount', array(
+      $elections[$index]['positions'] = civicrm_api3('ElectionPosition', 'getcount', [
         'election_id' => $election['id'],
-      ));
+      ]);
     }
   }
 

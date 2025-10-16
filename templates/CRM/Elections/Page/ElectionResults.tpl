@@ -11,7 +11,7 @@
 
     <h2>Election Results</h2>
     <center>
-        <a href="{crmURL p="civicrm/elections/summary" q="eid=`$election->id`"}">Click here to check election summary</a>
+        <a href="{crmURL p="civicrm/elections/summary" q="eid=`$election->id`"}">View the Election summary</a>
     </center>
 
     {foreach from = $positions key = k item = position}

@@ -44,7 +44,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     $this->assign('election', $this->election);
     $this->assign('isElectionAdmin', $this->isElectionAdmin);
 
-    CRM_Utils_System::setTitle('Nominate A Person - ' . $this->election->name);
+    CRM_Utils_System::setTitle('Submit Nomination for ' . $this->election->name);
 
     $this->addFormElements();
 
@@ -55,10 +55,10 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     $this->enId = CRM_Utils_Request::retrieve('enid', 'Positive', $this, FALSE, 0);
     if ($this->enId) {
       try {
-        $this->secondElectionNomination = civicrm_api3('ElectionNomination', 'getsingle', array(
+        $this->secondElectionNomination = civicrm_api3('ElectionNomination', 'getsingle', [
           'id'                               => $this->enId,
           'election_position_id.election_id' => $this->eId,
-        ));
+        ]);
       }
       catch (CiviCRM_API3_Exception $e) {
         return FALSE;
@@ -80,43 +80,43 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
    */
   public function addFormElements() {
 
-    $electionPositions = civicrm_api3('ElectionPosition', 'get', array(
+    $electionPositions = civicrm_api3('ElectionPosition', 'get', [
        'election_id'     => $this->election->id,
-       'options'         => array('limit' => 0, 'sort' => 'sortorder ASC'),
+       'options'         => ['limit' => 0, 'sort' => 'sortorder ASC'],
        'sequential'      => TRUE,
-    ));
+    ]);
     $electionPositions = $electionPositions['values'];
-    $positions = array();
+    $positions = [];
     foreach ($electionPositions as $electionPosition) {
-      $positions[] = array(
+      $positions[] = [
         'text' => $electionPosition['name'],
         'id'   => $electionPosition['id'],
-      );
+      ];
     }
 
-    if (count($positions) == 0) {
+    if (empty($positions)) {
       throwAccessDeniedException($this, 'There are no positions available for selected election.');
       return;
     }
 
     $this->add('select2', 'position', 'Nominated Position', $positions, TRUE);
-    $this->addEntityRef('contact', 'Nominee', array(
+    $this->addEntityRef('contact', 'Nominee', [
       'entity' => 'ElectionNominee',
       'placeholder' => '- Select Nominee -',
-      'api' => array(
+      'api' => [
         'election_id' => $this->election->id,
-      ),
-    ), TRUE);
+      ],
+    ], TRUE);
     $this->addElement('hidden', 'eid', $this->eId);
-    $this->add('textarea', 'reason', 'Why do you want to nominate this person for this position?', array('cols' => 55, 'rows' => 6), FALSE);
+    $this->add('textarea', 'reason', 'Why do you want to nominate this person for this position?', ['cols' => 55, 'rows' => 6], FALSE);
 
-    $this->addButtons(array(
-      array(
+    $this->addButtons([
+      [
         'type' => 'submit',
         'name' => E::ts('Nominate'),
         'isDefault' => TRUE,
-      ),
-    ));
+      ],
+    ]);
   }
 
   /**
@@ -129,32 +129,32 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
    */
   private function getNominationId($values) {
     $nominationId = 0;
-    $nomination = civicrm_api3('ElectionNomination', 'get', array(
+    $nomination = civicrm_api3('ElectionNomination', 'get', [
       'member_nominee'        => $values['contact'],
       'election_position_id'  => $values['position'],
       'sequential'            => TRUE,
 	  'options'               => ['limit' => 0],
-    ));
+    ]);
 
     if ($nomination['count'] > 0) {
       $nomination = $nomination['values'][0];
       if ($nomination['has_rejected_nomination'] == 1) {
         CRM_Core_Session::setStatus('Selected member has withdrawn the nomination, You cannot nominate the member again for selected position.', '', 'error');
-        CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/view', 'eid=' . $this->eId . ''));
+        CRM_Utils_System::redirect(Civi::url('current://civicrm/elections/view', 'eid=' . $this->eId ));
         return -1;
       }
       $nominationId = $nomination['id'];
     }
     else {
-      $nominationId = civicrm_api3('ElectionNomination', 'create', array(
+      $nominationId = civicrm_api3('ElectionNomination', 'create', [
         'member_nominee'        => $values['contact'],
         'election_position_id'  => $values['position'],
-      ));
+      ]);
       $nominationId = $nominationId['id'];
     }
 
     if (!$nominationId) {
-      throwAccessDeniedException($this, 'Some error occured while creating a nomination, Please try again.');
+      throwAccessDeniedException($this, 'Some error occurred while creating a nomination, Please try again.');
       return -1;
     }
 
@@ -169,50 +169,50 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     }
     $nominatorId = CRM_Core_Session::singleton()->getLoggedInContactID();
 
-    $seconderParams = array(
+    $seconderParams = [
       'member_nominator'       => $nominatorId,
       'election_nomination_id' => $nominationId,
-    );
+    ];
     $nominationSeconder = civicrm_api3('ElectionNominationSeconder', 'getcount', $seconderParams);
 
     if ($nominationSeconder != 0) {
-      CRM_Core_Session::setStatus('You have nominated this contact.', '', 'success');
+      CRM_Core_Session::setStatus('Nomination submitted.', '', 'success');
     }
     else {
       $seconderParams['description'] = $values['reason'];
       $nominationSeconder = civicrm_api3('ElectionNominationSeconder', 'create', $seconderParams);
 
       $isEligibleCandidate = $this->markNominationAsEligibleCandidate($nominationId);
-      $this->createNominationActivity(array(
+      $this->createNominationActivity([
         'nominator'              => $nominatorId,
         'nomination_id'          => $nominationId,
         'nominee'                => $values['contact'],
         'nomination_seconder_id' => $nominationSeconder['id'],
         'is_eligible_candidate'  => ($isEligibleCandidate) ? 1 : 0,
-      ));
-      CRM_Core_Session::setStatus('You have nominated this contact.', '', 'success');
+      ]);
+      CRM_Core_Session::setStatus('Nomination submitted.', '', 'success');
     }
 
     parent::postProcess();
-    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/view', 'eid=' . $this->eId . ''));
+    CRM_Utils_System::redirect(Civi::url('current://civicrm/elections/view', 'eid=' . $this->eId));
   }
 
   private function createNominationActivity($params) {
 
     $electionNomination = civicrm_api3('ElectionNomination', 'get', [
       'sequential' => TRUE,
-      'return'     => ["member_nominee.display_name", "election_position_id.name"],
+      'return'     => ['member_nominee.display_name', 'election_position_id.name'],
       'id'         => $params['nomination_id'],
 	  'options'    => ['limit' => 0],
     ]);
     $electionNomination = $electionNomination['values'][0];
 
-    $currentDateTime = (new DateTime())->format("Y-m-d H:i:s");
+    $currentDateTime = (new DateTime())->format('Y-m-d H:i:s');
     civicrm_api3('Activity', 'create', [
       'source_contact_id' => $params['nominator'],
-      'activity_type_id' => "Nomination",
+      'activity_type_id' => 'Nomination',
       'activity_date_time' => $currentDateTime,
-      'status_id' => "Completed",
+      'status_id' => 'Completed',
       'assignee_id' => $params['nominator'],
       'target_id' => $params['nominee'],
       'source_record_id' => $params['nomination_seconder_id'],
@@ -229,14 +229,14 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
    * @throws CiviCRM_API3_Exception
    */
   private function markNominationAsEligibleCandidate($nominationId) {
-    $totalNominations = civicrm_api3('ElectionNominationSeconder', 'getcount', array(
+    $totalNominations = civicrm_api3('ElectionNominationSeconder', 'getcount', [
       'election_nomination_id'  => $nominationId,
-    ));
+    ]);
     if ($totalNominations >= $this->election->required_nominations) {
-      civicrm_api3('ElectionNomination', 'create', array(
+      civicrm_api3('ElectionNomination', 'create', [
         'id'                    => $nominationId,
         'is_eligible_candidate' => 1,
-      ));
+      ]);
       return TRUE;
     }
     return FALSE;

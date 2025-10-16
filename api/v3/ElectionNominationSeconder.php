@@ -23,31 +23,31 @@ function _civicrm_api3_election_nomination_seconder_create_spec(&$spec) {
  */
 function civicrm_api3_election_nomination_seconder_create($params) {
   if (!isset($params['id'])) {
-    $nominationSeconderCount = civicrm_api3("ElectionNominationSeconder", "getcount", array(
+    $nominationSeconderCount = civicrm_api3('ElectionNominationSeconder', 'getcount', [
       'member_nominator'       => $params['member_nominator'],
       'election_nomination_id' => $params['election_nomination_id'],
-    ));
+    ]);
     if ($nominationSeconderCount > 0) {
-      return civicrm_api3_create_error('Member is already nominated by given nominator.');
+      return civicrm_api3_create_error('Contact is already nominated by given nominator.');
     }
 
-    $electionInfo = civicrm_api3('ElectionNomination', 'get', array(
+    $electionInfo = civicrm_api3('ElectionNomination', 'get', [
       'id'         => $params['election_nomination_id'],
       'sequential' => TRUE,
-      'return'    => array(
+      'return'    => [
         'election_position_id.election_id.id',
-      ),
+      ],
 	  'options' => ['limit' => 0],
-    ));
+    ]);
     $electionId = $electionInfo['values'][0]['election_position_id.election_id.id'];
 
     $election = findElectionById($electionId, FALSE);
     if ($election->is_deleted || !$election->is_visible) {
-      return civicrm_api3_create_error('NominationSeconder cannot be added for deleted election.');
+      return civicrm_api3_create_error('Nomination seconder cannot be added for a deleted election.');
     }
 
     if (!$election->isNominationsInProgress) {
-      return civicrm_api3_create_error('NominationSeconder cannot be added after nomination period is ended.');
+      return civicrm_api3_create_error('Nomination seconder cannot be added after nomination period is ended.');
     }
   }
 

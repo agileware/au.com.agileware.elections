@@ -24,19 +24,19 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
     }
     $this->election = findElectionById($this->eId);
 
-    $this->addButtons(array(
-      array(
+    $this->addButtons([
+      [
         'type' => 'submit',
         'name' => ($this->election->is_visible) ? E::ts('Deactivate Election') : E::ts('Activate Election'),
         'isDefault' => TRUE,
-      ),
-    ));
+      ],
+    ]);
 
     if ($this->election->is_visible) {
-      CRM_Utils_System::setTitle("Deactivate Election");
+      CRM_Utils_System::setTitle('Deactivate Election');
     }
     else {
-      CRM_Utils_System::setTitle("Activate Election");
+      CRM_Utils_System::setTitle('Activate Election');
     }
 
     $this->assign('election', $this->election);
@@ -48,36 +48,37 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
   public function postProcess() {
     $values = $this->exportValues();
 
-    $this->eId = (isset($values["eid"])) ? $values["eid"] : 0;
+    $this->eId = (isset($values['eid'])) ? $values['eid'] : 0;
     $election = new CRM_Elections_BAO_Election();
     $election->id = $this->eId;
 
     if ($election->is_visible != 1) {
-      $electionPostions = civicrm_api3('ElectionPosition', 'get', array(
+      $electionPostions = civicrm_api3('ElectionPosition', 'get', [
         'election_id'  => $election->id,
         'options' => ['limit' => 0],
-      ));
-      if (count($electionPostions['values']) == 0) {
-        return throwAccessDeniedException($this, 'At least one Position must be defined before the Election can be active.', array(
+      ]);
+      if (empty($electionPostions['values'])) {
+        throwAccessDeniedException($this, 'At least one Position must be defined before the Election can be active.', [
           'return_button_text'   => 'Return to Elections',
-          'return_button_action' => CRM_Utils_System::url('civicrm/elections'),
-        ));
+          'return_button_action' => Civi::url('current://civicrm/elections'),
+        ]);
+        return;
       }
     }
 
     if ($election->find(TRUE)) {
       $election->is_visible = !($election->is_visible);
       if ($election->save()) {
-        $action = "activated";
+        $action = 'activated';
         if (!$election->is_visible) {
-          $action = "deactivated";
+          $action = 'deactivated';
         }
         CRM_Core_Session::setStatus('Election has been ' . $action . ' successfully.', '', 'success');
       }
     }
 
     parent::postProcess();
-    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections'));
+    CRM_Utils_System::redirect(Civi::url('current://civicrm/elections'));
   }
 
 }

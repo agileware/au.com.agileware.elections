@@ -30,25 +30,25 @@
                         {assign var="electionProgressDate" value=$election.nomination_start_date|crmDate}
                     {/if}
                     {if $election.isNominationsInProgress}
-                        {assign var="viewBtnTxt" value="View & Submit Nominations"}
+                        {assign var="viewBtnTxt" value="View and submit Nominations"}
                         {assign var="electionProgressTxt" value="Nominations will close on "}
                         {assign var="electionProgressDate" value=$election.nomination_end_date|crmDate}
                     {/if}
 
                     {if $election.hasNominationsStarted and (!$election.isNominationsInProgress) and !$election.advertiseCandidatesStarted}
-                        {assign var="viewBtnTxt" value="View The Nominations"}
+                        {assign var="viewBtnTxt" value="View the Nominations"}
                         {assign var="electionProgressTxt" value="Advertise candidate will open on "}
                         {assign var="electionProgressDate" value=$election.advertise_candidates_date|crmDate}
                     {/if}
 
                     {if $election.advertiseCandidatesStarted and !$election.isVotingStarted}
-                        {assign var="viewBtnTxt" value="View The Candidates"}
+                        {assign var="viewBtnTxt" value="View the Candidates"}
                         {assign var="electionProgressTxt" value="Voting will open on "}
                         {assign var="electionProgressDate" value=$election.voting_start_date|crmDate}
                     {/if}
 
                     {if $election.isVotingStarted and !$election.isVotingEnded}
-                        {assign var="viewBtnTxt" value="Vote in The Election"}
+                        {assign var="viewBtnTxt" value="Vote in the Election"}
                         {assign var="electionProgressTxt" value="Voting will close on "}
                         {assign var="electionProgressDate" value=$election.voting_end_date|crmDate}
                         {if !$election.isUserAllowedToVote}
@@ -58,13 +58,13 @@
                     {/if}
 
                     {if $election.isVotingEnded and !$election.isResultsOut}
-                        {assign var="viewBtnTxt" value="View The Candidates"}
+                        {assign var="viewBtnTxt" value="View the Candidates"}
                         {assign var="electionProgressTxt" value="Election results will be available on "}
                         {assign var="electionProgressDate" value=$election.result_date|crmDate}
                     {/if}
 
                     {if $election.isResultsOut}
-                        {assign var="viewBtnTxt" value="View Election Results"}
+                        {assign var="viewBtnTxt" value="View Election results"}
                         {assign var="electionProgressTxt" value="Election results published on "}
                         {assign var="electionProgressDate" value=$election.result_date|crmDate}
                     {/if}

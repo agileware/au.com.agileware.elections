@@ -10,21 +10,21 @@ use CRM_Elections_ExtensionUtil as E;
  * @see http://wiki.civicrm.org/confluence/display/CRMDOC/API+Architecture+Standards
  */
 function _civicrm_api3_election_nominee_Getlist_spec(&$spec) {
-  $spec['election_id'] = array(
+  $spec['election_id'] = [
     'title' => 'Election ID',
     'api.required' => 1,
     'FKApiName' => 'Election',
     'FKClassName' => 'CRM_Elections_DAO_Election',
     'type' => CRM_Utils_Type::T_INT,
-  );
-  $spec['input'] = array(
+  ];
+  $spec['input'] = [
     'title' => 'Search Term',
     'api.required' => 1,
-  );
-  $spec['page_num'] = array(
+  ];
+  $spec['page_num'] = [
     'title' => 'Page Number',
     'api.required' => 1,
-  );
+  ];
 }
 
 /**
@@ -41,14 +41,14 @@ function civicrm_api3_election_nominee_Getlist($params) {
   $election = findElectionById($electionId);
   $allowedGroupIds = $election->allowed_groups;
   if (!empty($allowedGroupIds)) {
-    $allowedGroupIds = explode(",", $allowedGroupIds);
+    $allowedGroupIds = explode(',', $allowedGroupIds);
   }
 
-  $apiParams = array(
-    'params'   => array(
-      'group'    => array('IN' => $allowedGroupIds),
-    ),
-  );
+  $apiParams = [
+    'params'   => [
+      'group'    => ['IN' => $allowedGroupIds],
+    ],
+  ];
   if (isset($params['id'])) {
     $apiParams['id'] = $params['id'];
   }

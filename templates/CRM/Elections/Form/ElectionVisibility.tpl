@@ -5,7 +5,6 @@
         {else}
             This will remove the administrator restriction on all pages for this election.
         {/if}
-        {$form.eid.html}
     </div>
     <div class="crm-submit-buttons">
         {include file="CRM/common/formButtons.tpl" location="bottom"}
