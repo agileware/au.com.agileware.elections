@@ -10,6 +10,8 @@ use CRM_Elections_ExtensionUtil as E;
 class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
 
   private $eId = 0;
+  private $cid = NULL;
+  private $cs = NULL;
   private $election = NULL;
   private $electionPositions = [];
   private $electionCandidates = [];
@@ -22,35 +24,67 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     }
     $this->election = findElectionById($this->eId);
 
-    if ((!$this->election->isVisible) || !isLoggedInMemberAllowedToVote($this->eId)) {
+    // Election is not visible
+    if ( !$this->election->isVisible ) {
       throwAccessDeniedPage($this);
       return;
     }
 
-    if (!isLoggedInMemberAllowedToVote($this->eId)) {
+    // Support non-logged in or proxy voting via contact checksum
+    $cid = CRM_Utils_Request::retrieve('cid', 'Positive');
+    $cs = CRM_Utils_Request::retrieve('cs', 'String');
+    // Only validate cs and cid if the user is not logged in
+    if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && $cid && $cs ) {
+      $results = \Civi\Api4\Contact::validateChecksum(FALSE)
+                                    ->setContactId($cid)
+                                    ->setChecksum($cs)
+                                    ->execute()
+                                    ->first();
+
+      if ( !$results['valid'] ) {
+        // Invalid checksum
+        return;
+      }
+
+      // TODO: This bit runs again on form submission, for some reason. The query parameters are
+      // not available on submission, so these are cleared. How will I figure out how to submit as this user?
+      $this->cid = $cid;
+      $this->cs = $cs;
+    }
+
+    // Logged in but not allowed to vote
+    if ( !empty( \CRM_Core_Session::getLoggedInContactID() ) && !isLoggedInMemberAllowedToVote( $this->eId ) ) {
       throwNonMemberAccessDenied($this);
       return;
     }
 
-    if (!isMemberAllowedToReVote($this->eId) && hasLoggedInUserAlreadyVoted($this->eId)) {
-      throwAccessDeniedException($this, 'You have already voted in this election.');
+    // Already voted
+    if ( !isMemberAllowedToReVote( $this->eId ) && hasLoggedInUserAlreadyVoted( $this->eId ) ) {
+      throwAccessDeniedException( $this, 'You have already voted in this election.' );
     }
 
-    $this->assign('election', $this->election);
-    if (!$this->findElectionPositions()) {
-      return;
-    }
-    if (!$this->findElectionCandidates()) {
-      return;
-    }
-    if ($this->throwExceptionIfNoCandidates()) {
+    // Check if there are positions or candidates
+    $this->assign('election', $this->election); // Assign the election from class to the template (QuickForms)
+    if ( !$this->findElectionPositions() || !$this->findElectionCandidates() || $this->throwExceptionIfNoCandidates() ) {
       return;
     }
 
-    if ($this->election->isVotingEnded) {
+    if ( $this->election->isVotingEnded ) {
       throwAccessDeniedException($this, 'Voting is closed on ' . CRM_Utils_Date::customFormat($this->election->voting_end_date));
       return;
     }
+
+    if ( $this->cid && $this->cs ) {
+      // Expose to Smarty
+      $contact = \Civi\Api4\Contact::get(FALSE)
+                                    ->addSelect('email_primary', 'display_name')
+                                    ->addWhere('id', '=', $cid)
+                                    ->execute()
+                                    ->first();
+
+      $this->assign( 'checksum_authenticated', $contact );
+    }
+
     $this->assignFormElements();
 
     $this->addButtons([
@@ -112,10 +146,14 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     return $options;
   }
 
-  private function assignFormElements() {
+  private function assignFormElements( $cid = null, $cs = null ) {
     CRM_Elections_BAO_ElectionResult::updateCandidateProfilePictures($this->electionPositions);
     $this->assign('positions', $this->electionPositions);
     $this->addElement('hidden', 'eid', $this->eId);
+    if ( $cid && $cs ) {
+      $this->addElement('hidden', 'cid', $cid);
+      $this->addElement('hidden', 'cs', $cs);
+    }
     $elements = $this->getFormElementsByCandidates();
     foreach ($elements as $element) {
       $this->add('select2', $element['key'], $element['name'], $this->getVoteSelectionByPosition($element['position_id']), FALSE);
@@ -215,7 +253,27 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
   public function postProcess() {
     $values = $this->exportValues();
     $elements = $this->getFormElementsByCandidates();
-    $memberId = CRM_Core_Session::singleton()->getLoggedInContactID();
+
+    // TODO: Refactor to get the cs and cid from the form, rather than from the URL at this point
+    // Maybe cache the validation?
+    $cid = CRM_Utils_Request::retrieve('cid', 'Positive');
+    $cs = CRM_Utils_Request::retrieve('cs', 'String');
+    if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && $cid && $cs ) {
+      $results = \Civi\Api4\Contact::validateChecksum(FALSE)
+                                    ->setContactId($cid)
+                                    ->setChecksum($cs)
+                                    ->execute()
+                                    ->first();
+
+      if ( !$results['valid'] ) {
+        // Invalid checksum
+        return;
+      }
+
+      $memberId = $cid;
+    } else {
+      $memberId = \CRM_Core_Session::getLoggedInContactID();
+    }
 
     $addVotesParams = [
       'election_id' => $this->election->id,

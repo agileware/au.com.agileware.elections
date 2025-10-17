@@ -1,4 +1,9 @@
 <div class="crm-election-form-block-container">
+  {if $checksum_authenticated }
+    <div>
+      <p>You are voting on behalf of {$checksum_authenticated.display_name}.</p>
+    </div>
+  {/if}
   <div class="crm-elections-helptext-block">
     <p>{ts}Use this form to vote for your preferred candidates in each position.{/ts}</p>
 		<p>{ts}Votes are numbered from 1 onwards, where 1 is your highest preference, followed by 2 and so on.{/ts}</p>
