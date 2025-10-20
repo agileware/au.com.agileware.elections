@@ -514,4 +514,36 @@ function elections_shuffle_assoc($list) {
  */
 function elections_civicrm_alterAPIPermissions($entity, $action, &$params, &$permissions) {
   $permissions['election_nominee']['getlist'] = ['view Elections'];
+
+  if ( $entity !== 'election_nominee' && $action !== 'getlist' ) {
+    return;
+  }
+
+  // Default to logged in permissions
+  if ( !empty( CRM_Core_Session::getLoggedInContactID() ) ) {
+    return;
+  }
+
+  // Get cs and cid parameters via referer in AJAX calls
+  $referer = CRM_Utils_System::getRequestHeaders()['Referer'] ?? NULL;
+  if ( !filter_var( $referer, FILTER_VALIDATE_URL) ) {
+    // Do nothing if not a URL
+    return;
+  }
+  $referer_parsed = parse_url($referer);
+  parse_str($referer_parsed['query'], $query_params);
+
+  // Bypass 'view elections' permissions if we have a validated checksum.
+  // Defer to AJAX API permissions.
+  if ( $query_params['cid'] && $query_params['cs'] ) {
+    $results = \Civi\Api4\Contact::validateChecksum(FALSE)
+                                  ->setContactId($query_params['cid'])
+                                  ->setChecksum($query_params['cs'])
+                                  ->execute()
+                                  ->first();
+
+    if ( $results['valid'] ) {
+      $permissions['election_nominee']['getlist'] = ['access AJAX API'];
+    }
+  }
 }

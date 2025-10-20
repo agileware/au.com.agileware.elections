@@ -128,10 +128,6 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     CRM_Elections_BAO_ElectionResult::updateCandidateProfilePictures($this->electionPositions);
     $this->assign('positions', $this->electionPositions);
     $this->addElement('hidden', 'eid', $this->eId);
-    if ( $this->cid && $this->cs ) {
-      $this->addElement('hidden', 'cid', $this->cid);
-      $this->addElement('hidden', 'cs', $this->cs);
-    }
     $elements = $this->getFormElementsByCandidates();
     foreach ($elements as $element) {
       $this->add('select2', $element['key'], $element['name'], $this->getVoteSelectionByPosition($element['position_id']), FALSE);

@@ -42,6 +42,7 @@
     <page_callback>CRM_Elections_Form_CreateElectionNomination</page_callback>
     <title>Create Election Nomination</title>
     <access_arguments>view Elections</access_arguments>
+    <access_callback>CRM_Elections_Permission::check</access_callback>
   </item>
   <item>
     <path>civicrm/elections/nominations/accept</path>
