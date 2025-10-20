@@ -67,7 +67,7 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
       'query' => sprintf( 'eid=%s', $this->eId )
     ]);
 
-    // Support non-logged in or proxy voting via contact checksum
+    // Support anonymous validated via contact checksum
     // Only validate cs and cid if the user is not logged in
     if ( empty( \CRM_Core_Session::getLoggedInContactID() ) ) {
       // The custom access callback should lready validate this, but
@@ -92,6 +92,7 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
                                     ->first();
 
         $this->assign( 'checksum_authenticated', $contact );
+        $this->assign('loggedInContactId', $contact_valid_checksum['cid']); // Override
       }
     }
 
