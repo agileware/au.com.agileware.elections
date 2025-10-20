@@ -30,28 +30,6 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       return;
     }
 
-    // Support non-logged in or proxy voting via contact checksum
-    $cid = CRM_Utils_Request::retrieve('cid', 'Positive');
-    $cs = CRM_Utils_Request::retrieve('cs', 'String');
-    // Only validate cs and cid if the user is not logged in
-    if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && $cid && $cs ) {
-      $results = \Civi\Api4\Contact::validateChecksum(FALSE)
-                                    ->setContactId($cid)
-                                    ->setChecksum($cs)
-                                    ->execute()
-                                    ->first();
-
-      if ( !$results['valid'] ) {
-        // Invalid checksum
-        return;
-      }
-
-      // TODO: This bit runs again on form submission, for some reason. The query parameters are
-      // not available on submission, so these are cleared. How will I figure out how to submit as this user?
-      $this->cid = $cid;
-      $this->cs = $cs;
-    }
-
     // Logged in but not allowed to vote
     if ( !empty( \CRM_Core_Session::getLoggedInContactID() ) && !isLoggedInMemberAllowedToVote( $this->eId ) ) {
       throwNonMemberAccessDenied($this);
@@ -78,7 +56,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       // Expose to Smarty
       $contact = \Civi\Api4\Contact::get(FALSE)
                                     ->addSelect('email_primary', 'display_name')
-                                    ->addWhere('id', '=', $cid)
+                                    ->addWhere('id', '=', $this->cid)
                                     ->execute()
                                     ->first();
 
@@ -146,13 +124,13 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     return $options;
   }
 
-  private function assignFormElements( $cid = null, $cs = null ) {
+  private function assignFormElements() {
     CRM_Elections_BAO_ElectionResult::updateCandidateProfilePictures($this->electionPositions);
     $this->assign('positions', $this->electionPositions);
     $this->addElement('hidden', 'eid', $this->eId);
-    if ( $cid && $cs ) {
-      $this->addElement('hidden', 'cid', $cid);
-      $this->addElement('hidden', 'cs', $cs);
+    if ( $this->cid && $this->cs ) {
+      $this->addElement('hidden', 'cid', $this->cid);
+      $this->addElement('hidden', 'cs', $this->cs);
     }
     $elements = $this->getFormElementsByCandidates();
     foreach ($elements as $element) {
@@ -250,34 +228,31 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     return parent::validate();
   }
 
+  public function preProcess() {
+    $cid = CRM_Utils_Request::retrieve('cid', 'Positive');
+    $cs = CRM_Utils_Request::retrieve('cs', 'String');
+
+    // Only store these if the user is not logged in. Otherwise we want to
+    // defer to the logged in contact.
+    if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && $cid && $cs ) {
+      $this->cid = $cid;
+      $this->cs = $cs;
+    }
+  }
+
   public function postProcess() {
     $values = $this->exportValues();
     $elements = $this->getFormElementsByCandidates();
 
-    // TODO: Refactor to get the cs and cid from the form, rather than from the URL at this point
-    // Maybe cache the validation?
-    $cid = CRM_Utils_Request::retrieve('cid', 'Positive');
-    $cs = CRM_Utils_Request::retrieve('cs', 'String');
-    if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && $cid && $cs ) {
-      $results = \Civi\Api4\Contact::validateChecksum(FALSE)
-                                    ->setContactId($cid)
-                                    ->setChecksum($cs)
-                                    ->execute()
-                                    ->first();
+    $member_cid = \CRM_Core_Session::getLoggedInContactID();
 
-      if ( !$results['valid'] ) {
-        // Invalid checksum
-        return;
-      }
-
-      $memberId = $cid;
-    } else {
-      $memberId = \CRM_Core_Session::getLoggedInContactID();
+    if ( !$member_cid && $this->cid && $this->cs ) {
+      $member_cid = $this->cid;
     }
 
     $addVotesParams = [
       'election_id' => $this->election->id,
-      'member_id'   => $memberId,
+      'member_id'   => $member_cid,
       'votes'       => [],
     ];
     foreach ($elements as $element) {
@@ -297,24 +272,46 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     civicrm_api3('ElectionVote', 'addvotes', $addVotesParams);
 
     $this->createVoteActivity([
-      'member_id' => $memberId,
+      'member_cid' => $member_cid,
     ]);
 
-    CRM_Core_Session::setStatus('You have successfully voted in the election.', '', 'success');
+    if ( $this->cid && $this->cs ) {
+      // User is validated by cs and cid, not logged in.
+      // Indicate the voting was done as the validated user.
+      $contact = \Civi\Api4\Contact::get(FALSE)
+                                    ->addSelect('display_name')
+                                    ->addWhere('id', '=', $this->cid)
+                                    ->execute()
+                                    ->first();
+
+      CRM_Core_Session::setStatus('You have successfully voted as ' . $contact['display_name'] . ' in the election.', '', 'success');
+    } else {
+      CRM_Core_Session::setStatus('You have successfully voted in the election.', '', 'success');
+    }
 
     parent::postProcess();
-    CRM_Utils_System::redirect(Civi::url('current://civicrm/elections/view', 'eid=' . $this->eId ));
+
+    // Redirect back to the main election info view
+    $redirectUrl = Civi::url('current://civicrm/elections/view');
+    $redirectUrl->addQuery(['eid' => $this->eId]);
+
+    // Conditionally add contact ID and checksum
+    if ( $this->cid && $this->cs ) {
+        $redirectUrl->addQuery(['cid' => $this->cid]);
+        $redirectUrl->addQuery(['cs' => $this->cs]);
+    }
+    CRM_Utils_System::redirect( $redirectUrl );
   }
 
   private function createVoteActivity($params) {
     $currentDateTime = (new DateTime())->format('Y-m-d H:i:s');
     civicrm_api3('Activity', 'create', [
-      'source_contact_id' => $params['member_id'],
+      'source_contact_id' => $params['member_cid'],
       'activity_type_id' => 'Vote',
       'activity_date_time' => $currentDateTime,
       'status_id' => 'Completed',
-      'assignee_id' => $params['member_id'],
-      'target_id' => $params['member_id'],
+      'assignee_id' => $params['member_cid'],
+      'target_id' => $params['member_cid'],
       'source_record_id' => $this->eId,
       'subject'  => 'Voted in an election : ' . $this->election->name,
     ]);

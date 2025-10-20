@@ -9,7 +9,7 @@ use CRM_Elections_ExtensionUtil as E;
  * Implements hook_civicrm_container()
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_container/
- * 
+ *
  * @return void
  */
 function elections_civicrm_container(ContainerBuilder $container) {
@@ -267,6 +267,41 @@ function retrieveElectionIdFromUrl($form)
     }
     return $eId;
 }
+
+/**
+ * Get cs and cid from URL.
+ *
+ * @return mixed
+ * @throws CRM_Core_Exception
+ * @throws CRM_Extension_Exception
+ */
+function retrieveContactChecksumFromUrl( $form )
+{
+  $cid = CRM_Utils_Request::retrieve('cid', 'Positive');
+  $cs = CRM_Utils_Request::retrieve('cs', 'String');
+
+  // Only validate cs and cid if the user is not logged in
+  if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && $cid && $cs ) {
+    $results = \Civi\Api4\Contact::validateChecksum(FALSE)
+                                  ->setContactId($cid)
+                                  ->setChecksum($cs)
+                                  ->execute()
+                                  ->first();
+
+    if ( !$results['valid'] ) {
+      // Invalid checksum
+      throwAccessDeniedException( $form, 'Unauthorised. Invalid contact credentials.', [''] );
+      return false;
+    }
+
+    return [ 'cid' => $cid, 'cs' => $cs ];
+  }
+
+  // Otherwise, something is missing
+  throwAccessDeniedException( $form, 'Unauthorised. Missing valid contact credentials.', [''] );
+  return false;
+}
+
 
 /**
  * Check if page/form request is by wordpress shortcode.

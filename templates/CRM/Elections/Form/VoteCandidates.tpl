@@ -1,7 +1,8 @@
 <div class="crm-election-form-block-container">
   {if $checksum_authenticated }
-    <div>
-      <p>You are voting on behalf of {$checksum_authenticated.display_name}.</p>
+    <div class="messages status no-popup">
+      <i aria-hidden="true" class="crm-i fa-info-circle"></i>
+      <span class="msg-text">You are voting as {$checksum_authenticated.display_name}.</span>
     </div>
   {/if}
   <div class="crm-elections-helptext-block">
