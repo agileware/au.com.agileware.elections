@@ -83,6 +83,15 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
           'cs' => $contact_valid_checksum['cs'],
           'query' => sprintf( 'eid=%s&cs=%s&cid=%s', $this->eId, $contact_valid_checksum['cs'], $contact_valid_checksum['cid'] )
         ]);
+
+        // Expose to Smarty
+        $contact = \Civi\Api4\Contact::get(FALSE)
+                                    ->addSelect('email_primary', 'display_name')
+                                    ->addWhere('id', '=', $contact_valid_checksum['cid'])
+                                    ->execute()
+                                    ->first();
+
+        $this->assign( 'checksum_authenticated', $contact );
       }
     }
 

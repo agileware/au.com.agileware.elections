@@ -24,7 +24,7 @@
           {/if}
         {/if}
         {if $election->isNominationsInProgress and $isAllowedToNominate}
-            <input type="button" value="{ts}Submit Nomination{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/create" q="eid=`$election->id`"}'" class="election-action-button" />
+            <input type="button" value="{ts}Submit Nomination{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/create" q="`$checksum_query['query']`"}'" class="election-action-button" />
         {/if}
         {if $election->isVotingStarted and !$election->isVotingEnded and $isUserAllowedToVote and $isAllowedToNominate}
             <input type="button" value="{ts}Vote Now{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/vote" q="`$checksum_query['query']`"}'" class="election-action-button" />

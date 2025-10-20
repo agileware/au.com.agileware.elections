@@ -1,5 +1,12 @@
 <div class="crm-election-form-block-container">
 
+  {if $checksum_authenticated }
+    <div class="messages status no-popup">
+      <i aria-hidden="true" class="crm-i fa-info-circle"></i>
+      <span class="msg-text">You are submitting a nomination as {$checksum_authenticated.display_name}.</span>
+    </div>
+  {/if}
+
   <div class="crm-elections-helptext-block">
     <p>{ts}Use this form to nominate someone to a given position in this election by selecting the relevant position and then searching for your nominee by name or email. Only persons that can vote in this election may be nominated.{/ts} </p>
   </div>

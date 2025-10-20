@@ -5,6 +5,13 @@
         <div class="clear"></div><br>
     {/if}
 
+    {if $checksum_authenticated }
+        <div class="messages status no-popup">
+            <i aria-hidden="true" class="crm-i fa-info-circle"></i>
+            <span class="msg-text">You are acting as {$checksum_authenticated.display_name}.</span>
+        </div>
+    {/if}
+
     <p>{$election->description|nl2br}</p>
 
     {include file="CRM/Elections/Page/ElectionHelpText.tpl"}
