@@ -35,6 +35,7 @@
     <page_callback>CRM_Elections_Page_ViewElection</page_callback>
     <title>View Election</title>
     <access_arguments>view Elections</access_arguments>
+    <access_callback>CRM_Elections_Permission::check</access_callback>
   </item>
   <item>
     <path>civicrm/elections/nominations/create</path>
@@ -53,6 +54,7 @@
     <page_callback>CRM_Elections_Form_VoteCandidates</page_callback>
     <title>Vote in an Election</title>
     <access_arguments>view Elections</access_arguments>
+    <access_callback>CRM_Elections_Permission::check</access_callback>
   </item>
   <item>
     <path>civicrm/elections/positions/delete</path>
