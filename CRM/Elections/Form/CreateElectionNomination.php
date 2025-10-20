@@ -121,6 +121,10 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
       ],
     ], TRUE);
     $this->addElement('hidden', 'eid', $this->eId);
+    if ( $this->cid && $this->cs ) {
+      $this->addElement('hidden', 'cid', $this->cid);
+      $this->addElement('hidden', 'cs', $this->cs);
+    }
     $this->add('textarea', 'reason', 'Why do you want to nominate this person for this position?', ['cols' => 55, 'rows' => 6], FALSE);
 
     $this->addButtons([
