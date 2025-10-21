@@ -92,6 +92,7 @@
     <page_callback>CRM_Elections_Form_RejectNomination</page_callback>
     <title>Withdraw Nomination</title>
     <access_arguments>view Elections</access_arguments>
+    <access_callback>CRM_Elections_Permission::check</access_callback>
   </item>
     <item>
     <path>civicrm/admin/setting/elections</path>
