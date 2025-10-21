@@ -1,3 +1,5 @@
+{include file="CRM/Elections/Page/WelcomeMessage.tpl"}
+
 <p>{$election->description|nl2br}</p>
 
 <div class="crm-elections-helptext-block">
