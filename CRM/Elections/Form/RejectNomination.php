@@ -66,6 +66,9 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
 
       $this->assign( 'checksum_authenticated', $contact );
 
+      $login_url = getLoginPageURL(\CRM_Utils_System::currentPath());
+      $this->assign( 'login_url', sprintf( '%s?eid=%s', $login_url, $this->electionNomination['election_position_id.election_id'] ) );
+
       // Add to form elements
       $this->addElement('hidden', 'cid', $this->cid);
       $this->addElement('hidden', 'cs', $this->cs);

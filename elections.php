@@ -547,3 +547,31 @@ function elections_civicrm_alterAPIPermissions($entity, $action, &$params, &$per
     }
   }
 }
+
+/**
+ * Helper function to get the login URL for the site.
+ */
+function getLoginPageURL( $redirect = '' ) {
+  $config = CRM_Core_Config::singleton();
+  $login_url = $config->userSystem->getLoginURL($redirect);
+
+  switch (CIVICRM_UF) {
+    case 'Drupal8':
+      break;
+
+    case 'Drupal':
+    case 'Backdrop':
+      // TODO
+      break;
+
+    case 'Joomla':
+      // TODO
+      break;
+
+    case 'WordPress':
+      $login_url = apply_filters( 'elections_get_login_page_url', $login_url, $redirect );
+      break;
+  }
+
+  return $login_url;
+}

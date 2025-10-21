@@ -70,7 +70,7 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
     // Support anonymous validated via contact checksum
     // Only validate cs and cid if the user is not logged in
     if ( empty( \CRM_Core_Session::getLoggedInContactID() ) ) {
-      // The custom access callback should lready validate this, but
+      // The custom access callback should already validate this, but
       // we want the utils function to always validate anyway, just
       // in case it is used outside of a page with the access
       // callback for whatever reason.
@@ -92,7 +92,10 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
                                     ->first();
 
         $this->assign( 'checksum_authenticated', $contact );
-        $this->assign('loggedInContactId', $contact_valid_checksum['cid']); // Override
+        $this->assign( 'loggedInContactId', $contact_valid_checksum['cid'] ); // Override
+
+        $login_url = getLoginPageURL(\CRM_Utils_System::currentPath());
+        $this->assign( 'login_url', sprintf( '%s?eid=%s', $login_url, $this->eId ) );
       }
     }
 

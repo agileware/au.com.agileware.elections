@@ -57,6 +57,9 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
                                     ->first();
 
       $this->assign( 'checksum_authenticated', $contact );
+
+      $login_url = getLoginPageURL(\CRM_Utils_System::currentPath());
+      $this->assign( 'login_url', sprintf( '%s?eid=%s', $login_url, $this->eId ) );
     }
 
     $this->addFormElements();

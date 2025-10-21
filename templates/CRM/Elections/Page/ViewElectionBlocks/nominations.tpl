@@ -32,7 +32,7 @@
                         {assign var='scImgKey' value='member_nominee.image_URL'}
                         <div class="crm-election-nominated-block">
                             {if $election->isNominationsStarted}
-                            <a href="{crmURL p="civicrm/elections/candidate" q="enid=`$seconder.id`"}">
+                            <a href="{crmURL p="civicrm/elections/candidate" q="`$checksum_query['query']`&enid=`$seconder.id`"}">
                                 {/if}
 
                                 {assign var="candidatesCount" value=$candidatesCount+1}

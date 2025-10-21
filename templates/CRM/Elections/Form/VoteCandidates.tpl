@@ -1,10 +1,5 @@
 <div class="crm-election-form-block-container">
-  {if $checksum_authenticated }
-    <div class="messages status no-popup">
-      <i aria-hidden="true" class="crm-i fa-info-circle"></i>
-      <span class="msg-text">You are voting as {$checksum_authenticated.display_name}.</span>
-    </div>
-  {/if}
+  {include file="CRM/Elections/Page/WelcomeMessage.tpl"}
   <div class="crm-elections-helptext-block">
     <p>{ts}Use this form to vote for your preferred candidates in each position.{/ts}</p>
 		<p>{ts}Votes are numbered from 1 onwards, where 1 is your highest preference, followed by 2 and so on.{/ts}</p>
