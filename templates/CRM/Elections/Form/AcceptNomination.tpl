@@ -1,3 +1,9 @@
+{if $checksum_authenticated }
+    <div class="messages status no-popup">
+        <i aria-hidden="true" class="crm-i fa-info-circle"></i>
+        <span class="msg-text">You are acting as {$checksum_authenticated.display_name}.</span>
+    </div>
+{/if}
 <div class="crm-elections-helptext-block">
     <p>{ts}To accept your candidacy, add any comments and press the "Accept" button.{/ts}</p>
 </div>
