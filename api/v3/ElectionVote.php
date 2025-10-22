@@ -58,7 +58,7 @@ function _civicrm_api3_election_vote_addvotes_spec(&$spec) {
  *
  * @param array $params
  * @return array API result descriptor
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_election_vote_create($params) {
   return _civicrm_api3_basic_create(_civicrm_api3_get_BAO(__FUNCTION__), $params);
@@ -69,7 +69,7 @@ function civicrm_api3_election_vote_create($params) {
  *
  * @param array $params
  * @return array API result descriptor
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_election_vote_delete($params) {
   return _civicrm_api3_basic_delete(_civicrm_api3_get_BAO(__FUNCTION__), $params);
@@ -79,7 +79,7 @@ function civicrm_api3_election_vote_delete($params) {
  * ElectionVote.deletevotes API
  *
  * @param array $params
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_election_vote_deletevotes($params) {
   $electionId = $params['election_id'];
@@ -104,7 +104,7 @@ function civicrm_api3_election_vote_deletevotes($params) {
  *
  * @param array $params
  * @return array API result descriptor
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_election_vote_addvotes($params) {
   $electionId = $params['election_id'];
@@ -158,7 +158,7 @@ function civicrm_api3_election_vote_addvotes($params) {
  *
  * @param array $params
  * @return array API result descriptor
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_election_vote_get($params) {
   return _civicrm_api3_basic_get(_civicrm_api3_get_BAO(__FUNCTION__), $params);
