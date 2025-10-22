@@ -190,7 +190,7 @@ function elections_civicrm_coreResourceList(&$list, $region) {
  * Check if logged in user is member of any election admin group.
  *
  * @return bool
- * @throws CiviCRM_API3_Exception
+ * @throws CRM_Core_Exception
  */
 function isElectionAdmin() {
   return CRM_Core_Permission::check('administer Elections');
@@ -200,7 +200,7 @@ function isElectionAdmin() {
  * Throw unauthorized message if logged in contact is not allowed to perform certain actions.
  *
  * @throws CRM_Extension_Exception
- * @throws CiviCRM_API3_Exception
+ * @throws CRM_Core_Exception
  */
 function throwUnauthorizedMessageIfRequired($formOrPage) {
   if (!isElectionAdmin()) {
@@ -349,7 +349,7 @@ function elections_civicrm_managed(&$entities) {
  * Check if logged in member has current membership return if he/she is allowed to vote/nominate in election.
  *
  * @return bool
- * @throws CiviCRM_API3_Exception
+ * @throws CRM_Core_Exception
  */
 function isLoggedInMemberAllowedToVote($electionId, $contactId = NULL) {
   if ($contactId == NULL) {
@@ -401,7 +401,7 @@ function isMemberAllowedToReVote($electionId) {
  *
  * @param $electionId
  * @return bool
- * @throws CiviCRM_API3_Exception
+ * @throws CRM_Core_Exception
  */
 function hasLoggedInUserAlreadyVoted($electionId, $memberId = NULL) {
   if (!$memberId) {
@@ -421,7 +421,7 @@ function hasLoggedInUserAlreadyVoted($electionId, $memberId = NULL) {
  *
  * @param $electionId
  * @return bool
- * @throws CiviCRM_API3_Exception
+ * @throws CRM_Core_Exception
  */
 function getLoggedInUserVoteDate($electionId) {
   $voteDate = civicrm_api3('ElectionVote', 'get', [

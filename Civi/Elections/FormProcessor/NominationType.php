@@ -97,7 +97,7 @@ class NominationType extends AbstractType implements OptionListInterface {
           'id' => $nomination['member_nominee'],
           'return' => 'display_name'
         ]);
-      } catch (\CiviCRM_API3_Exception $ex) {
+      } catch (\CRM_Core_Exception $ex) {
         // Do nothing.
       }
       $nominations[$nomination['id']] = $display_name;

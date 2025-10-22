@@ -20,7 +20,7 @@ function _civicrm_api3_election_position_create_spec(&$spec) {
  *
  * @param array $params
  * @return array API result descriptor
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_election_position_create($params) {
   $electionId = $params['election_id'];
@@ -41,7 +41,7 @@ function civicrm_api3_election_position_create($params) {
  *
  * @param array $params
  * @return array API result descriptor
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_election_position_delete($params) {
   $electionPosition = civicrm_api3_election_position_get($params);
@@ -60,7 +60,7 @@ function civicrm_api3_election_position_delete($params) {
  *
  * @param array $params
  * @return array API result descriptor
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_election_position_get($params) {
   return _civicrm_api3_basic_get(_civicrm_api3_get_BAO(__FUNCTION__), $params);

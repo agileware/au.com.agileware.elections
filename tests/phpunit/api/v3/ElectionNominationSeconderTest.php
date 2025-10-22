@@ -114,7 +114,7 @@ class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase 
    * Create nomination seconder.
    *
    * @return array
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    */
   private function createNominationSeconder() {
     $nominator = $this->individualCreate();

@@ -19,7 +19,7 @@ function _civicrm_api3_election_nomination_seconder_create_spec(&$spec) {
  *
  * @param array $params
  * @return array API result descriptor
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_election_nomination_seconder_create($params) {
   if (!isset($params['id'])) {
@@ -59,7 +59,7 @@ function civicrm_api3_election_nomination_seconder_create($params) {
  *
  * @param array $params
  * @return array API result descriptor
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_election_nomination_seconder_delete($params) {
   return _civicrm_api3_basic_delete(_civicrm_api3_get_BAO(__FUNCTION__), $params);
@@ -70,7 +70,7 @@ function civicrm_api3_election_nomination_seconder_delete($params) {
  *
  * @param array $params
  * @return array API result descriptor
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_election_nomination_seconder_get($params) {
   return _civicrm_api3_basic_get(_civicrm_api3_get_BAO(__FUNCTION__), $params);
