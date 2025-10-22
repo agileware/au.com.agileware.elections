@@ -181,7 +181,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
         return;
       }
     }
-    catch (CiviCRM_API3_Exception $e) {
+    catch (CRM_Core_Exception $e) {
       CRM_Core_Session::setStatus($e->getMessage(), '', 'error');
       return;
     }

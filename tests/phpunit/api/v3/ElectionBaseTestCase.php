@@ -227,7 +227,7 @@ class api_v3_ElectionBaseTestCase extends CiviCaseTestCase implements HeadlessIn
    * Create successful nomination.
    *
    * @return array
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    */
   public function createNomination($params = []) {
     $nominee = $this->individualCreate();

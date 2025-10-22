@@ -60,7 +60,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
           'election_position_id.election_id' => $this->eId,
         ]);
       }
-      catch (CiviCRM_API3_Exception $e) {
+      catch (CRM_Core_Exception $e) {
         return FALSE;
       }
     }
@@ -125,7 +125,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
    * @param $values
    * @return array|int
    * @throws CRM_Extension_Exception
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    */
   private function getNominationId($values) {
     $nominationId = 0;
@@ -226,7 +226,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
    *
    * @param $nominationId
    * @return bool
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    */
   private function markNominationAsEligibleCandidate($nominationId) {
     $totalNominations = civicrm_api3('ElectionNominationSeconder', 'getcount', [

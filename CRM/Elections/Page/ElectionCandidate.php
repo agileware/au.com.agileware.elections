@@ -24,7 +24,7 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
         'return' => ['has_accepted_nomination', 'comments', 'election_position_id.name', 'election_position_id.election_id.name', 'election_position_id.election_id', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL'],
       ]);
     }
-    catch (CiviCRM_API3_Exception $e) {
+    catch (CRM_Core_Exception $e) {
       throwAccessDeniedException($this, $e->getMessage());
       parent::run();
       return;
