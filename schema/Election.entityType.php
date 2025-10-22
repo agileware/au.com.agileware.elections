@@ -275,5 +275,14 @@ return [
         'on_delete' => 'CASCADE',
       ],
     ],
+    'allow_checksum_access' => [
+      'title' => E::ts('Allow Checksum Validated Access'),
+      'sql_type' => 'boolean',
+      'input_type' => 'CheckBox',
+      'description' => E::ts('Boolean field to set if users are allowed to access the election and perform actions while logged-out with a valid Checksum.'),
+      'add' => '6.7.1',
+      'default' => FALSE,
+      'usage' => ['export'],
+    ],
   ],
 ];
