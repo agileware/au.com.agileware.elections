@@ -302,7 +302,6 @@ function retrieveContactChecksumFromUrl( $form )
   return false;
 }
 
-
 /**
  * Check if page/form request is by wordpress shortcode.
  *
