@@ -24,6 +24,13 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
     }
     $this->election = findElectionById($this->eId);
 
+    // User is not logged in, and the election does not allow checksum access
+    if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && !filter_var($this->election->allow_checksum_access, FILTER_VALIDATE_BOOL) ) {
+      throwAccessDeniedPage($this);
+      parent::run();
+      return;
+    }
+
     $this->isElectionAdmin = isElectionAdmin();
 
     if (!$this->isElectionAdmin && !$this->election->isVisible) {

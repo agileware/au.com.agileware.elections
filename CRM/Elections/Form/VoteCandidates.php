@@ -30,6 +30,12 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       return;
     }
 
+    // User is not logged in, and the election does not allow checksum access
+    if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && !filter_var($this->election->allow_checksum_access, FILTER_VALIDATE_BOOL) ) {
+      throwAccessDeniedPage($this);
+      return;
+    }
+
     // Logged in but not allowed to vote
     if ( !empty( \CRM_Core_Session::getLoggedInContactID() ) && !isLoggedInMemberAllowedToVote( $this->eId ) ) {
       throwNonMemberAccessDenied($this);

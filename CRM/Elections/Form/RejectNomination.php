@@ -41,6 +41,12 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
       return;
     }
 
+    // User is not logged in, and the election does not allow checksum access
+    if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && !filter_var($election->allow_checksum_access, FILTER_VALIDATE_BOOL) ) {
+      throwAccessDeniedPage($this);
+      return;
+    }
+
     if ($this->electionNomination['has_rejected_nomination'] == 1) {
       throwAccessDeniedException($this, 'You have withdrawn this nomination.');
       return;

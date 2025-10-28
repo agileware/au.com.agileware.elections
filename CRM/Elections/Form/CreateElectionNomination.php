@@ -25,6 +25,13 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
       return;
     }
     $this->election = findElectionById($this->eId);
+
+    // User is not logged in, and the election does not allow checksum access
+    if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && !filter_var($this->election->allow_checksum_access, FILTER_VALIDATE_BOOL) ) {
+      throwAccessDeniedPage($this);
+      return;
+    }
+
     $this->isElectionAdmin = isElectionAdmin();
 
     if (!$this->election->isNominationsInProgress || (!$this->election->isVisible && !isElectionAdmin())) {
