@@ -35,24 +35,28 @@
     <page_callback>CRM_Elections_Page_ViewElection</page_callback>
     <title>View Election</title>
     <access_arguments>view Elections</access_arguments>
+    <access_callback>CRM_Elections_Permission::check</access_callback>
   </item>
   <item>
     <path>civicrm/elections/nominations/create</path>
     <page_callback>CRM_Elections_Form_CreateElectionNomination</page_callback>
     <title>Create Election Nomination</title>
     <access_arguments>view Elections</access_arguments>
+    <access_callback>CRM_Elections_Permission::check</access_callback>
   </item>
   <item>
     <path>civicrm/elections/nominations/accept</path>
     <page_callback>CRM_Elections_Form_AcceptNomination</page_callback>
     <title>Accept Nomination</title>
     <access_arguments>view Elections</access_arguments>
+    <access_callback>CRM_Elections_Permission::check</access_callback>
   </item>
   <item>
     <path>civicrm/elections/vote</path>
     <page_callback>CRM_Elections_Form_VoteCandidates</page_callback>
     <title>Vote in an Election</title>
     <access_arguments>view Elections</access_arguments>
+    <access_callback>CRM_Elections_Permission::check</access_callback>
   </item>
   <item>
     <path>civicrm/elections/positions/delete</path>
@@ -76,18 +80,21 @@
     <page_callback>CRM_Elections_Page_ElectionCandidate</page_callback>
     <title>ElectionCandidate</title>
     <access_arguments>view Elections</access_arguments>
+    <access_callback>CRM_Elections_Permission::check</access_callback>
   </item>
   <item>
     <path>civicrm/elections/summary</path>
     <page_callback>CRM_Elections_Page_ElectionSummary</page_callback>
     <title>ElectionSummary</title>
     <access_arguments>view Elections</access_arguments>
+    <access_callback>CRM_Elections_Permission::check</access_callback>
   </item>
   <item>
     <path>civicrm/elections/nominations/reject</path>
     <page_callback>CRM_Elections_Form_RejectNomination</page_callback>
     <title>Withdraw Nomination</title>
     <access_arguments>view Elections</access_arguments>
+    <access_callback>CRM_Elections_Permission::check</access_callback>
   </item>
     <item>
     <path>civicrm/admin/setting/elections</path>

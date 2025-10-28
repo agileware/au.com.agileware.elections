@@ -5,6 +5,8 @@
         <div class="clear"></div><br>
     {/if}
 
+    {include file="CRM/Elections/Page/WelcomeMessage.tpl"}
+
     <p>{$election->description|nl2br}</p>
 
     {include file="CRM/Elections/Page/ElectionHelpText.tpl"}

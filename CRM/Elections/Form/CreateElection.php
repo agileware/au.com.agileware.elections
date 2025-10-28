@@ -64,6 +64,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       $defaults['required_nominations'] = $election->required_nominations;
       $defaults['allowed_groups'] = $election->allowed_groups;
 
+      $defaults['allow_checksum_access'] = $election->allow_checksum_access;
     }
     else {
       $this->eId = 0;
@@ -111,6 +112,8 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     $this->add('select', 'allow_revote', 'Allow Members to Change Vote', CRM_Core_SelectValues::boolean(), TRUE, [
       'placeholder' => '- Select -',
     ]);
+
+    $this->add('advcheckbox', 'allow_checksum_access', 'Allow non-logged in access');
 
     $this->add('text', 'required_nominations', 'Number of Required Nominations', ['size' => 15], TRUE);
 
@@ -162,6 +165,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       'result_date'                 => $values['result_date'],
       'anonymize_votes'             => $values['anonymize_votes'],
       'allow_revote'                => $values['allow_revote'],
+      'allow_checksum_access'       => $values['allow_checksum_access'],
       'is_visible'                  => 0,
       'required_nominations'        => $values['required_nominations'],
       'allowed_groups'              => $values['allowed_groups'],

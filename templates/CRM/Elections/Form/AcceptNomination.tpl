@@ -1,3 +1,4 @@
+{include file="CRM/Elections/Page/WelcomeMessage.tpl"}
 <div class="crm-elections-helptext-block">
     <p>{ts}To accept your candidacy, add any comments and press the "Accept" button.{/ts}</p>
 </div>

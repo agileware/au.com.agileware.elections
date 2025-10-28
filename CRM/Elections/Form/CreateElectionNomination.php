@@ -10,6 +10,8 @@ use CRM_Elections_ExtensionUtil as E;
 class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Base {
 
   private $eId = 0;
+  private $cid = NULL;
+  private $cs = NULL;
   private $isElectionAdmin = FALSE;
   private $election = NULL;
 
@@ -17,13 +19,19 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
   private $secondElectionNomination = NULL;
 
   public function buildQuickForm() {
-
     $this->eId = retrieveElectionIdFromUrl($this);
     hideNonRequiredItemsOnPage($this);
     if ($this->eId == -1) {
       return;
     }
     $this->election = findElectionById($this->eId);
+
+    // User is not logged in, and the election does not allow checksum access
+    if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && !filter_var($this->election->allow_checksum_access, FILTER_VALIDATE_BOOL) ) {
+      throwAccessDeniedPage($this);
+      return;
+    }
+
     $this->isElectionAdmin = isElectionAdmin();
 
     if (!$this->election->isNominationsInProgress || (!$this->election->isVisible && !isElectionAdmin())) {
@@ -31,7 +39,8 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
       return;
     }
 
-    if (!isLoggedInMemberAllowedToVote($this->eId)) {
+    // Logged in but not allowed to vote
+    if ( !empty( \CRM_Core_Session::getLoggedInContactID() ) && !isLoggedInMemberAllowedToVote( $this->eId ) ) {
       throwNonMemberAccessDenied($this);
       return;
     }
@@ -45,6 +54,20 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     $this->assign('isElectionAdmin', $this->isElectionAdmin);
 
     CRM_Utils_System::setTitle('Submit Nomination for ' . $this->election->name);
+
+    if ( $this->cid && $this->cs ) {
+      // Expose to Smarty
+      $contact = \Civi\Api4\Contact::get(FALSE)
+                                    ->addSelect('email_primary', 'display_name')
+                                    ->addWhere('id', '=', $this->cid)
+                                    ->execute()
+                                    ->first();
+
+      $this->assign( 'checksum_authenticated', $contact );
+
+      $login_url = getLoginPageURL(\CRM_Utils_System::currentPath());
+      $this->assign( 'login_url', sprintf( '%s?eid=%s', $login_url, $this->eId ) );
+    }
 
     $this->addFormElements();
 
@@ -108,6 +131,10 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
       ],
     ], TRUE);
     $this->addElement('hidden', 'eid', $this->eId);
+    if ( $this->cid && $this->cs ) {
+      $this->addElement('hidden', 'cid', $this->cid);
+      $this->addElement('hidden', 'cs', $this->cs);
+    }
     $this->add('textarea', 'reason', 'Why do you want to nominate this person for this position?', ['cols' => 55, 'rows' => 6], FALSE);
 
     $this->addButtons([
@@ -161,6 +188,18 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     return $nominationId;
   }
 
+  public function preProcess() {
+    $cid = CRM_Utils_Request::retrieve('cid', 'Positive');
+    $cs = CRM_Utils_Request::retrieve('cs', 'String');
+
+    // Only store these if the user is not logged in. Otherwise we want to
+    // defer to the logged in contact.
+    if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && $cid && $cs ) {
+      $this->cid = $cid;
+      $this->cs = $cs;
+    }
+  }
+
   public function postProcess() {
     $values = $this->exportValues();
     $nominationId = $this->getNominationId($values);
@@ -168,6 +207,10 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
       return;
     }
     $nominatorId = CRM_Core_Session::singleton()->getLoggedInContactID();
+
+    if ( !$nominatorId && $this->cid && $this->cs ) {
+      $nominatorId = $this->cid;
+    }
 
     $seconderParams = [
       'member_nominator'       => $nominatorId,
@@ -194,7 +237,17 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     }
 
     parent::postProcess();
-    CRM_Utils_System::redirect(Civi::url('current://civicrm/elections/view', 'eid=' . $this->eId));
+
+    // Redirect back to the main election info view
+    $redirectUrl = Civi::url('current://civicrm/elections/view');
+    $redirectUrl->addQuery(['eid' => $this->eId]);
+
+    // Conditionally add contact ID and checksum
+    if ( $this->cid && $this->cs ) {
+        $redirectUrl->addQuery(['cid' => $this->cid]);
+        $redirectUrl->addQuery(['cs' => $this->cs]);
+    }
+    CRM_Utils_System::redirect( $redirectUrl );
   }
 
   private function createNominationActivity($params) {

@@ -1,3 +1,4 @@
+{include file="CRM/Elections/Page/WelcomeMessage.tpl"}
 <div class="candidate-details-block">
     <div class="candidate-details-left-block">
         {assign var='imgKey' value='member_nominee.image_URL'}
@@ -63,4 +64,4 @@
         </div><!-- ending of candidate-details-right-block -->
     </div><!-- ending of candidate-details-block -->
 {/foreach}
-<input type="button" value="Back" onclick="window.location.href='{crmURL p="civicrm/elections/view" q="eid=`$election->id`"}'" class="election-action-button" />
+<input type="button" value="Back" onclick="window.location.href='{crmURL p="civicrm/elections/view" q="`$checksum_query['query']`"}'" class="election-action-button" />

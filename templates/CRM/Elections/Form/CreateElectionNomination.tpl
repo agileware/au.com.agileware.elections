@@ -1,5 +1,7 @@
 <div class="crm-election-form-block-container">
 
+  {include file="CRM/Elections/Page/WelcomeMessage.tpl"}
+
   <div class="crm-elections-helptext-block">
     <p>{ts}Use this form to nominate someone to a given position in this election by selecting the relevant position and then searching for your nominee by name or email. Only persons that can vote in this election may be nominated.{/ts} </p>
   </div>

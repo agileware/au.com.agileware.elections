@@ -10,6 +10,8 @@ use CRM_Elections_ExtensionUtil as E;
 class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
 
   private $eId = 0;
+  private $cid = NULL;
+  private $cs = NULL;
   private $election = NULL;
   private $electionPositions = [];
   private $electionCandidates = [];
@@ -22,35 +24,54 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     }
     $this->election = findElectionById($this->eId);
 
-    if ((!$this->election->isVisible) || !isLoggedInMemberAllowedToVote($this->eId)) {
+    // Election is not visible
+    if ( !$this->election->isVisible ) {
       throwAccessDeniedPage($this);
       return;
     }
 
-    if (!isLoggedInMemberAllowedToVote($this->eId)) {
+    // User is not logged in, and the election does not allow checksum access
+    if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && !filter_var($this->election->allow_checksum_access, FILTER_VALIDATE_BOOL) ) {
+      throwAccessDeniedPage($this);
+      return;
+    }
+
+    // Logged in but not allowed to vote
+    if ( !empty( \CRM_Core_Session::getLoggedInContactID() ) && !isLoggedInMemberAllowedToVote( $this->eId ) ) {
       throwNonMemberAccessDenied($this);
       return;
     }
 
-    if (!isMemberAllowedToReVote($this->eId) && hasLoggedInUserAlreadyVoted($this->eId)) {
-      throwAccessDeniedException($this, 'You have already voted in this election.');
+    // Already voted
+    if ( !isMemberAllowedToReVote( $this->eId ) && hasLoggedInUserAlreadyVoted( $this->eId ) ) {
+      throwAccessDeniedException( $this, 'You have already voted in this election.' );
     }
 
-    $this->assign('election', $this->election);
-    if (!$this->findElectionPositions()) {
-      return;
-    }
-    if (!$this->findElectionCandidates()) {
-      return;
-    }
-    if ($this->throwExceptionIfNoCandidates()) {
+    // Check if there are positions or candidates
+    $this->assign('election', $this->election); // Assign the election from class to the template (QuickForms)
+    if ( !$this->findElectionPositions() || !$this->findElectionCandidates() || $this->throwExceptionIfNoCandidates() ) {
       return;
     }
 
-    if ($this->election->isVotingEnded) {
+    if ( $this->election->isVotingEnded ) {
       throwAccessDeniedException($this, 'Voting is closed on ' . CRM_Utils_Date::customFormat($this->election->voting_end_date));
       return;
     }
+
+    if ( $this->cid && $this->cs ) {
+      // Expose to Smarty
+      $contact = \Civi\Api4\Contact::get(FALSE)
+                                    ->addSelect('email_primary', 'display_name')
+                                    ->addWhere('id', '=', $this->cid)
+                                    ->execute()
+                                    ->first();
+
+      $this->assign( 'checksum_authenticated', $contact );
+
+      $login_url = getLoginPageURL(\CRM_Utils_System::currentPath());
+      $this->assign( 'login_url', sprintf( '%s?eid=%s', $login_url, $this->eId ) );
+    }
+
     $this->assignFormElements();
 
     $this->addButtons([
@@ -116,6 +137,10 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     CRM_Elections_BAO_ElectionResult::updateCandidateProfilePictures($this->electionPositions);
     $this->assign('positions', $this->electionPositions);
     $this->addElement('hidden', 'eid', $this->eId);
+    if ( $this->cid && $this->cs ) {
+      $this->addElement('hidden', 'cid', $this->cid);
+      $this->addElement('hidden', 'cs', $this->cs);
+    }
     $elements = $this->getFormElementsByCandidates();
     foreach ($elements as $element) {
       $this->add('select2', $element['key'], $element['name'], $this->getVoteSelectionByPosition($element['position_id']), FALSE);
@@ -212,14 +237,31 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     return parent::validate();
   }
 
+  public function preProcess() {
+    $cid = CRM_Utils_Request::retrieve('cid', 'Positive');
+    $cs = CRM_Utils_Request::retrieve('cs', 'String');
+
+    // Only store these if the user is not logged in. Otherwise we want to
+    // defer to the logged in contact.
+    if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && $cid && $cs ) {
+      $this->cid = $cid;
+      $this->cs = $cs;
+    }
+  }
+
   public function postProcess() {
     $values = $this->exportValues();
     $elements = $this->getFormElementsByCandidates();
-    $memberId = CRM_Core_Session::singleton()->getLoggedInContactID();
+
+    $member_cid = \CRM_Core_Session::getLoggedInContactID();
+
+    if ( !$member_cid && $this->cid && $this->cs ) {
+      $member_cid = $this->cid;
+    }
 
     $addVotesParams = [
       'election_id' => $this->election->id,
-      'member_id'   => $memberId,
+      'member_id'   => $member_cid,
       'votes'       => [],
     ];
     foreach ($elements as $element) {
@@ -239,24 +281,46 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     civicrm_api3('ElectionVote', 'addvotes', $addVotesParams);
 
     $this->createVoteActivity([
-      'member_id' => $memberId,
+      'member_cid' => $member_cid,
     ]);
 
-    CRM_Core_Session::setStatus('You have successfully voted in the election.', '', 'success');
+    if ( $this->cid && $this->cs ) {
+      // User is validated by cs and cid, not logged in.
+      // Indicate the voting was done as the validated user.
+      $contact = \Civi\Api4\Contact::get(FALSE)
+                                    ->addSelect('display_name')
+                                    ->addWhere('id', '=', $this->cid)
+                                    ->execute()
+                                    ->first();
+
+      CRM_Core_Session::setStatus('You have successfully voted as ' . $contact['display_name'] . ' in the election.', '', 'success');
+    } else {
+      CRM_Core_Session::setStatus('You have successfully voted in the election.', '', 'success');
+    }
 
     parent::postProcess();
-    CRM_Utils_System::redirect(Civi::url('current://civicrm/elections/view', 'eid=' . $this->eId ));
+
+    // Redirect back to the main election info view
+    $redirectUrl = Civi::url('current://civicrm/elections/view');
+    $redirectUrl->addQuery(['eid' => $this->eId]);
+
+    // Conditionally add contact ID and checksum
+    if ( $this->cid && $this->cs ) {
+        $redirectUrl->addQuery(['cid' => $this->cid]);
+        $redirectUrl->addQuery(['cs' => $this->cs]);
+    }
+    CRM_Utils_System::redirect( $redirectUrl );
   }
 
   private function createVoteActivity($params) {
     $currentDateTime = (new DateTime())->format('Y-m-d H:i:s');
     civicrm_api3('Activity', 'create', [
-      'source_contact_id' => $params['member_id'],
+      'source_contact_id' => $params['member_cid'],
       'activity_type_id' => 'Vote',
       'activity_date_time' => $currentDateTime,
       'status_id' => 'Completed',
-      'assignee_id' => $params['member_id'],
-      'target_id' => $params['member_id'],
+      'assignee_id' => $params['member_cid'],
+      'target_id' => $params['member_cid'],
       'source_record_id' => $this->eId,
       'subject'  => 'Voted in an election : ' . $this->election->name,
     ]);

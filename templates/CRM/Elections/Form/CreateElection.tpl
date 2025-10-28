@@ -124,6 +124,14 @@
             </td>
         </tr>
 
+        <tr class="crm-create-election-form-block-results">
+            <td class="label label-select-col">{$form.allow_checksum_access.label}</td>
+            <td>
+                {$form.allow_checksum_access.html}<br>
+                <span class="description">{ts}Allow Members to access Election pages and perform actions when not-logged in. Requires the user to have a valid checksum URL.{/ts}</span>
+            </td>
+        </tr>
+
 
         <tr class="crm-create-election-form-block-buttons">
             <td colspan="2">

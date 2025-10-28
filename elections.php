@@ -9,7 +9,7 @@ use CRM_Elections_ExtensionUtil as E;
  * Implements hook_civicrm_container()
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_container/
- * 
+ *
  * @return void
  */
 function elections_civicrm_container(ContainerBuilder $container) {
@@ -269,6 +269,40 @@ function retrieveElectionIdFromUrl($form)
 }
 
 /**
+ * Get cs and cid from URL.
+ *
+ * @return mixed
+ * @throws CRM_Core_Exception
+ * @throws CRM_Extension_Exception
+ */
+function retrieveContactChecksumFromUrl( $form )
+{
+  $cid = CRM_Utils_Request::retrieve('cid', 'Positive');
+  $cs = CRM_Utils_Request::retrieve('cs', 'String');
+
+  // Only validate cs and cid if the user is not logged in
+  if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && $cid && $cs ) {
+    $results = \Civi\Api4\Contact::validateChecksum(FALSE)
+                                  ->setContactId($cid)
+                                  ->setChecksum($cs)
+                                  ->execute()
+                                  ->first();
+
+    if ( !$results['valid'] ) {
+      // Invalid checksum
+      throwAccessDeniedException( $form, 'Unauthorised. Invalid contact credentials.', [''] );
+      return false;
+    }
+
+    return [ 'cid' => $cid, 'cs' => $cs ];
+  }
+
+  // Otherwise, something is missing
+  throwAccessDeniedException( $form, 'Unauthorised. Missing valid contact credentials.', [''] );
+  return false;
+}
+
+/**
  * Check if page/form request is by wordpress shortcode.
  *
  * @return bool
@@ -479,4 +513,64 @@ function elections_shuffle_assoc($list) {
  */
 function elections_civicrm_alterAPIPermissions($entity, $action, &$params, &$permissions) {
   $permissions['election_nominee']['getlist'] = ['view Elections'];
+
+  if ( $entity !== 'election_nominee' && $action !== 'getlist' ) {
+    return;
+  }
+
+  // Default to logged in permissions
+  if ( !empty( CRM_Core_Session::getLoggedInContactID() ) ) {
+    return;
+  }
+
+  // Get cs and cid parameters via referer in AJAX calls
+  $referer = CRM_Utils_System::getRequestHeaders()['Referer'] ?? NULL;
+  if ( !filter_var( $referer, FILTER_VALIDATE_URL) ) {
+    // Do nothing if not a URL
+    return;
+  }
+  $referer_parsed = parse_url($referer);
+  parse_str($referer_parsed['query'], $query_params);
+
+  // Bypass 'view elections' permissions if we have a validated checksum.
+  // Defer to AJAX API permissions.
+  if ( $query_params['cid'] && $query_params['cs'] ) {
+    $results = \Civi\Api4\Contact::validateChecksum(FALSE)
+                                  ->setContactId($query_params['cid'])
+                                  ->setChecksum($query_params['cs'])
+                                  ->execute()
+                                  ->first();
+
+    if ( $results['valid'] ) {
+      $permissions['election_nominee']['getlist'] = ['access AJAX API'];
+    }
+  }
+}
+
+/**
+ * Helper function to get the login URL for the site.
+ */
+function getLoginPageURL( $redirect = '' ) {
+  $config = CRM_Core_Config::singleton();
+  $login_url = $config->userSystem->getLoginURL($redirect);
+
+  switch (CIVICRM_UF) {
+    case 'Drupal8':
+      break;
+
+    case 'Drupal':
+    case 'Backdrop':
+      // TODO
+      break;
+
+    case 'Joomla':
+      // TODO
+      break;
+
+    case 'WordPress':
+      $login_url = apply_filters( 'elections_get_login_page_url', $login_url, $redirect );
+      break;
+  }
+
+  return $login_url;
 }

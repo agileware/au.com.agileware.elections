@@ -1,3 +1,4 @@
+{include file="CRM/Elections/Page/WelcomeMessage.tpl"}
 <div class="crm-elections-helptext-block">
   <p>{ts}To withdraw your candidacy, add any comments and press the "Withdraw" button.{/ts}</p>
 </div>

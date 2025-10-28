@@ -32,7 +32,7 @@
                         {assign var='scImgKey' value='member_nominee.image_URL'}
                         <div class="crm-election-nominated-block">
                             {if $election->isNominationsStarted}
-                            <a href="{crmURL p="civicrm/elections/candidate" q="enid=`$seconder.id`"}">
+                            <a href="{crmURL p="civicrm/elections/candidate" q="`$checksum_query['query']`&enid=`$seconder.id`"}">
                                 {/if}
 
                                 {assign var="candidatesCount" value=$candidatesCount+1}
@@ -65,13 +65,13 @@
                             {if $election->isNominationsInProgress and $election->required_nominations >= 2 and $seconder.seconders|@count < 2 and $seconder.is_eligible_candidate != 1}
                                 <div class="clearfix"></div>
                                 <input type="button" value="{ts}Need Second{/ts}"
-                                       onclick="window.location.href='{crmURL p="civicrm/elections/nominations/create" q="eid=`$election->id`&enid=`$seconder.id`"}'"
+                                       onclick="window.location.href='{crmURL p="civicrm/elections/nominations/create" q="`$checksum_query['query']`&enid=`$seconder.id`"}'"
                                        class="election-action-button"/>
                             {/if}
                             {if $election->isNominationsInProgress and $seconder.has_rejected_nomination == 0 and $seconder.has_accepted_nomination == 0 and ($seconder.seconders|@count >= 2 or $seconder.is_eligible_candidate == 1) }
                                 <div class="clearfix"></div>
                                 <input type="button" value="{ts}Nominate{/ts}"
-                                       onclick="window.location.href='{crmURL p="civicrm/elections/nominations/create" q="eid=`$election->id`&enid=`$seconder.id`"}'"
+                                       onclick="window.location.href='{crmURL p="civicrm/elections/nominations/create" q="`$checksum_query['query']`&enid=`$seconder.id`"}'"
                                        class="election-action-button"/>
                             {/if}
 
