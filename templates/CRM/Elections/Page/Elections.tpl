@@ -1,5 +1,5 @@
 {if $isElectionAdmin and !$isFromShortCode}
-    <a href="{crmURL p="civicrm/elections/create"}" class="button"><span><i class="crm-i fa-plus-circle"></i> {ts}Create Election{/ts}</span></a>
+    <a href="{crmURL p="civicrm/elections/create"}" class="button"><span><i class="crm-i fa-plus-circle" role="img" aria-hidden="true"></i> {ts}Create Election{/ts}</span></a>
     <div class="clear"></div><br>
 {/if}
 <div class="crm-content-block crm-block crm-elections-list-block">
