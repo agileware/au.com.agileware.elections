@@ -6,7 +6,7 @@ class CRM_Elections_Permission {
    * Custom access callback function specified in xml/Menu/Elections.xml.
    *
    * This function implements the core logic:
-   * 1. Checks if the current user has the 'view elections' permission.
+   * 1. Checks if the current user has the 'view Elections' permission.
    * 2. If not, it checks for a valid contact ID (cid) and checksum (cs) in the URL.
    *
    * @return bool
@@ -15,7 +15,7 @@ class CRM_Elections_Permission {
   public static function check() {
     // Check for the explicit CiviCRM permission first.
     // Always grant access to logged-in users with the right role.
-    if (CRM_Core_Permission::check('view elections')) {
+    if (CRM_Core_Permission::check('view Elections')) {
       return TRUE;
     }
 

@@ -27,7 +27,7 @@ If this Scheduled Job is not enabled or executed, then no election results will 
 1. In CiviCRM, on the WordPress Access Control page,  _/wp-admin/admin.php?page=CiviCRM&q=civicrm%2Fadmin%2Faccess%2Fwp-permissions&reset=1_
 2. Enable these two additional permissions for the **User Roles** that need to _participate in the election_
 -  **CiviCRM: access AJAX API**
--  **CiviCRM: view elections**
+-  **CiviCRM: view Elections**
 
 Other default permissions which should already be enabled for the **User Role** role to interact with CiviCRM and will also be required are listed below.
 -  **CiviCRM: access uploaded files**
