@@ -479,7 +479,7 @@ function elections_civicrm_permission(&$permissions) {
     'description' => E::ts('Grants the necessary permissions for administrating elections in CiviCRM.'),
   ];
   $permissions['view Elections'] = [
-    'label' => E::ts('CiviCRM: view elections'),
+    'label' => E::ts('CiviCRM: view Elections'),
     'description' => E::ts('Grants the necessary permissions for participating in elections.'),
   ];
 }
@@ -532,7 +532,7 @@ function elections_civicrm_alterAPIPermissions($entity, $action, &$params, &$per
   $referer_parsed = parse_url($referer);
   parse_str($referer_parsed['query'], $query_params);
 
-  // Bypass 'view elections' permissions if we have a validated checksum.
+  // Bypass 'view Elections' permissions if we have a validated checksum.
   // Defer to AJAX API permissions.
   if ( $query_params['cid'] && $query_params['cs'] ) {
     $results = \Civi\Api4\Contact::validateChecksum(FALSE)
