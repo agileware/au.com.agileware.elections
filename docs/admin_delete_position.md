@@ -1,6 +1,8 @@
 # How to delete a position
 
-To edit an election, you should be a user who gains admin access for CiviCRM and follow these steps:
+A position can only be deleted before the election's **Nomination Start Date**, or while the election is inactive.
+
+To delete a position, you should be a user who gains admin access for CiviCRM and follow these steps:
 
 1. Go to **Elections**  
 ![Click Elections](images/admin_election/01.gif)  

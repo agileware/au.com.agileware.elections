@@ -2,6 +2,7 @@
 
 1. Any number of positions can be advertised as being available.
 1. People can be nominated or nominate themselves for one or more of the advertised positions.
+1. Nominations can require one or more other people to second them before the nominee becomes an eligible candidate.
 1. People can vote for the nominees.
 1. Election results are calculated using the [instant-runoff voting (IRV) method](https://en.wikipedia.org/wiki/Instant-runoff_voting).
 1. Election results are then displayed and kept as a historical record.
@@ -18,6 +19,9 @@ Each election has individual settings which provide these capabilities:
 1. Number of nominations required for a person to become an eligible candidate for each election.
 1. Allow or disallow a user to change their vote.
 1. Anonymise votes after the election results are posted.
+1. Allow people who are not logged in to nominate, accept nominations and vote using a personalised link.
+
+A new election is created inactive, and must have at least one Position added and then be activated before it becomes visible and open for participation. See [How to activate an election](docs/admin_activate_election.md).
 
 Viewing election results are shown below as an example.
 
@@ -40,6 +44,11 @@ Getting Started
 -------------
 
 Read the [documentation](docs/index.md)  to get started setting up your first election.
+
+Settings
+-------------
+
+Once enabled, a global **Elections Settings** page is available at 'System Settings / Elections Settings' which controls the source of candidate photos shown throughout the extension. See [Elections Settings](docs/admin_election_settings.md) for details.
 
 WordPress Short-codes
 -------------

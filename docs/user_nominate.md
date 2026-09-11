@@ -14,3 +14,5 @@ You can nominate yourself, an existing nominees or a new person. Each nominee mu
 4. Click **Nominate** to nominate
 ![Click Nominate](images/user_nominate/04.gif)
 
+Depending on the election's settings, a nomination may need to be seconded by one or more other people before the nominee becomes an eligible candidate - see [How to second a nomination](user_second_nomination.md). The nominee can [withdraw the nomination](user_withdraw_nomination.md) at any time before voting starts.
+

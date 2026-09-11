@@ -1,5 +1,7 @@
 # How to edit an election
 
+An election can only be edited before its **Nomination Start Date** has passed while it is [active](admin_activate_election.md). Once nominations for an active election have started, its details can no longer be edited.
+
 To edit an election, you should be a user who gains admin access for CiviCRM and follow these steps:
 
 1. Go to **Elections**  
@@ -16,3 +18,8 @@ To edit an election, you should be a user who gains admin access for CiviCRM and
 - **Voting Start Date**: to edit voting start date. This date should be after **Advertise Start Date** and before **Visible End Date**  
 - **Voting End Date**: to edit voting end date. This date should be after **Voting Start Date** and before **Visible End Date**  
 - **Results Start Date**: to edit results start date. This date should be after **Voting End Date** and before **Visible End Date**
+- **Anonymise Votes**: to edit whether votes are anonymised once results are published.
+- **Allow Members to Change Vote**: to edit whether a member can revote to change their vote before **Voting End Date**.
+- **Allow non-logged in access**: to edit whether people can participate using a personalised link without logging in. See [Participating without logging in](setup.md#participating-without-logging-in).
+- **Number of Required Nominations**: to edit the number of nominations a person needs to become an eligible candidate. See [How to second a nomination](user_second_nomination.md).
+- **Allowed by Groups**: to edit the CiviCRM Groups and Smart Groups permitted to participate in this election.

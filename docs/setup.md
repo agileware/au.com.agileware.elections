@@ -10,6 +10,21 @@ This Scheduled Job is configured to execute **Always** and is **Enabled** by def
 
 If this Scheduled Job is not enabled or executed, then no election results will be calculated.  
 
+## CiviCRM Permissions
+
+This extension adds two CiviCRM permissions:
+
+- **administer Elections**: Required by staff to create, edit, delete and activate elections and positions from the CiviCRM 'Elections' administration screens. Staff also need the core **administer CiviCRM** permission to see the 'Elections' and 'Elections Settings' items in the CiviCRM menu.
+- **view Elections**: Required by end users to participate in elections, for example to view, nominate, accept nominations or vote. See below for the additional permissions required on WordPress/CiviCRM sites.
+
+## Participating without logging in
+
+By default, a user must be logged in to nominate, accept a nomination or vote. Each election has an **Allow non-logged in access** setting which, when enabled, allows a person to perform these actions using a personalised link containing their CiviCRM contact ID and checksum (`cid` and `cs` URL parameters), without needing to log in. This is useful for inviting people to participate who do not have a website user account.
+
+A personalised link can be generated for a contact using CiviCRM's standard checksum tokens (for example `{contact.checksum}`) in a mailing or PDF letter, combined with the contact's ID, appended to the election page URL, for example: `https://example.org/elections/view?eid=1&cid={contact.contact_id}&cs={contact.checksum}`.
+
+This extension also provides `election_name`, `election_position`, `nominator_name` and `nominee_name` tokens for the **Nomination** activity, and an `election_name` token for the **Vote** activity, for use when emailing people about their nominations or votes.
+
 ## For WordPress/CiviCRM Sites
 
 ### Create Pages for the Election Listing and Individual Election
