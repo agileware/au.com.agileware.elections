@@ -30,7 +30,7 @@ Viewing election results are shown below as an example.
 Prerequisites
 -------------
 
-  * [CiviCRM](https://www.civicrm.org) 4.7 or greater  
+  * [CiviCRM](https://www.civicrm.org) 5.73 or greater, verified compatible up to 6.16.5  
 
 Installation
 -------------
