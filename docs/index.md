@@ -2,6 +2,23 @@ Elections (au.com.agileware.elections) is a CiviCRM extension which provides on-
 
 The following sections describe the concepts and processes.
 
+# Election Workflow Overview
+
+An election moves through a fixed sequence of stages, each one gated by a date set when the election was created - see [Creating an Election](#creating-an-election). The diagram below shows the stages in order, the date that opens each one, and what happens at a high level during each stage.
+
+```mermaid
+flowchart TD
+    A["Election created<br/>(inactive)"] --> B{"At least one Position added?<br/>Admin activates the election"}
+    B -->|Yes| C["Visible<br/>from Visible Start Date<br/>Election is listed on the website"]
+    C --> D["Nominations<br/>Nomination Start Date to Nomination End Date<br/>People nominate, and second, candidates for each position"]
+    D --> E["Advertise Candidates<br/>Advertise Candidates Date to Voting Start Date<br/>Eligible candidates accept or withdraw their nomination"]
+    E --> F["Voting<br/>Voting Start Date to Voting End Date<br/>Permitted members rank the candidates for each position"]
+    F --> G["Results<br/>from Results Start Date<br/>Results are calculated using Instant-Runoff Voting and published"]
+    G --> H["Hidden<br/>after Visible End Date<br/>Election is removed from the website, results remain as a historical record"]
+```
+
+An election which is not [activated](admin_activate_election.md), or which has no Positions, is never shown to end users, regardless of these dates. See [Nomination Workflow](#nomination-workflow) below for what happens to an individual nomination between the Nominations and Advertise Candidates stages.
+
 # Initial Set Up
 Before creating an election, follow these [initial set up steps](setup.md) to configure your website and CiviCRM to host elections. 
 
@@ -77,6 +94,23 @@ User cannot nominate after the **Nomination End Date**
 A user can nominate any user including self, as set in the Settings for the Election
 There is no limit for how many nominations a user can receive.
 The minimum number of  nominations for a user to become a candidate is set in the Settings for the Election
+
+## Nomination Workflow
+
+Each nomination for a position moves through its own smaller workflow, shown below, before it can appear on the ballot.
+
+```mermaid
+flowchart TD
+    N1["Nomination submitted<br/>(select position and nominee)<br/>only between Nomination Start Date and Nomination End Date"] --> N2{"Has the nomination received<br/>Number of Required Nominations?"}
+    N2 -->|"No"| N3["Needs a Second<br/>'Need Second' button is shown"]
+    N3 -->|"Someone else seconds it"| N2
+    N2 -->|"Yes"| N4["Nominee becomes an<br/>Eligible Candidate"]
+    N4 --> N5{"What does the nominee do,<br/>before Voting Start Date?"}
+    N5 -->|"Accepts"| N6["Candidate<br/>appears on the ballot for voting"]
+    N5 -->|"Withdraws, or no response"| N7["Not a candidate<br/>does not appear on the ballot"]
+```
+
+A withdrawn nomination cannot be nominated again for the same position. For more information, see [How to nominate a user](user_nominate.md), [How to second a nomination](user_second_nomination.md), [How to accept a nomination](user_accept_nomination.md) and [How to withdraw a nomination](user_withdraw_nomination.md).
 
 ## Seconding a Nomination
 

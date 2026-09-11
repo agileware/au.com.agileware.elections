@@ -43,7 +43,7 @@ Installation
 Getting Started
 -------------
 
-Read the [documentation](docs/index.md)  to get started setting up your first election.
+Read the [documentation](docs/index.md)  to get started setting up your first election. This includes a [workflow diagram](docs/index.md#election-workflow-overview) showing the stages, date gates and nomination process of an election.
 
 Settings
 -------------
