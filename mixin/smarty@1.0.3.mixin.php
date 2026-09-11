@@ -3,13 +3,9 @@
 /**
  * Auto-register "templates/" folder.
  *
- * @mixinName smarty-v2
+ * @mixinName smarty
  * @mixinVersion 1.0.3
- * @since 5.59
- *
- * @deprecated - it turns out that the mixin is not version specific so the 'smarty'
- * mixin is preferred over smarty-v2 (they are the same but not having the version
- * in the name is less misleading.)
+ * @since 5.71
  *
  * @param CRM_Extension_MixInfo $mixInfo
  *   On newer deployments, this will be an instance of MixInfo. On older deployments, Civix may polyfill with a work-a-like.
@@ -60,7 +56,7 @@ return function ($mixInfo, $bootCache) {
   // Typical Pageview, Standard Loader: Defer the actual registration for a moment -- to ensure that Smarty is online.
   // We need to bundle-up all dirs -- Smarty 3/4/5 is inefficient with processing repeated calls to `getTemplateDir()`+`setTemplateDir()`
   if (!isset(Civi::$statics[__FILE__]['event'])) {
-    Civi::$statics[__FILE__]['event'] = 'civi.smarty-v2.addPaths.' . md5(__FILE__);
+    Civi::$statics[__FILE__]['event'] = 'civi.smarty.addPaths.' . md5(__FILE__);
     Civi::dispatcher()->addListener('hook_civicrm_config', function() use ($register) {
       $dirs = [];
       $event = \Civi\Core\Event\GenericHookEvent::create(['dirs' => &$dirs]);
