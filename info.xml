@@ -22,7 +22,7 @@
   </compatibility>
   <civix>
     <namespace>CRM/Elections</namespace>
-    <format>25.10.1</format>
+    <format>25.10.2</format>
   </civix>
   <classloader>
     <psr4 prefix="Civi\" path="Civi"/>
