@@ -37,6 +37,25 @@ class CRM_Elections_Helper_EligibilityTest extends api_v3_ElectionBaseTestCase {
     $this->assertFalse(CRM_Elections_Helper_Eligibility::canVote($election['id']));
   }
 
+  public function testNoActingContactWithoutLoginOrChecksum() {
+    $this->assertNull(CRM_Elections_Helper_Eligibility::getActingContactId());
+  }
+
+  public function testInvalidChecksumIsNotAnActingContact() {
+    $contact = $this->individualCreate();
+    $_REQUEST['cid'] = $_GET['cid'] = $contact;
+    $_REQUEST['cs'] = $_GET['cs'] = 'not-a-valid-checksum';
+    try {
+      $this->assertNull(CRM_Elections_Helper_Eligibility::getActingContactId());
+      $good = CRM_Contact_BAO_Contact_Utils::generateChecksum($contact);
+      $_REQUEST['cs'] = $_GET['cs'] = $good;
+      $this->assertSame($contact, CRM_Elections_Helper_Eligibility::getActingContactId());
+    }
+    finally {
+      unset($_REQUEST['cid'], $_GET['cid'], $_REQUEST['cs'], $_GET['cs']);
+    }
+  }
+
   public function testHasVotedRequiresAContact() {
     $election = $this->createElection(['is_visible' => 1, 'is_deleted' => 0]);
     $this->assertFalse(CRM_Elections_Helper_Eligibility::hasVoted($election['id']));

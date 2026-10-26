@@ -9,6 +9,33 @@
 class CRM_Elections_Helper_Eligibility {
 
   /**
+   * The contact acting in the election pages.
+   *
+   * This is the logged in contact or, when nobody is logged in, the contact
+   * identified by a valid checksum link (`cid` and `cs` URL parameters).
+   *
+   * @return int|null
+   */
+  public static function getActingContactId() {
+    $loggedIn = CRM_Core_Session::singleton()->getLoggedInContactID();
+    if (!empty($loggedIn)) {
+      return (int) $loggedIn;
+    }
+
+    $contactId = CRM_Utils_Request::retrieve('cid', 'Positive');
+    $checksum = CRM_Utils_Request::retrieve('cs', 'String');
+    if (!$contactId || !$checksum) {
+      return NULL;
+    }
+    $result = \Civi\Api4\Contact::validateChecksum(FALSE)
+      ->setContactId($contactId)
+      ->setChecksum($checksum)
+      ->execute()
+      ->first();
+    return !empty($result['valid']) ? (int) $contactId : NULL;
+  }
+
+  /**
    * Is the contact a member of any of the given groups, directly or through a smart group?
    *
    * @param int|null $contactId
@@ -54,13 +81,13 @@ class CRM_Elections_Helper_Eligibility {
    *
    * @param int $electionId
    * @param int|null $contactId
-   *   Defaults to the logged in contact.
+   *   Defaults to the acting contact (logged in, or validated by checksum).
    *
    * @return bool
    */
   public static function canVote($electionId, $contactId = NULL) {
     if (empty($contactId)) {
-      $contactId = CRM_Core_Session::singleton()->getLoggedInContactID();
+      $contactId = self::getActingContactId();
     }
     $election = findElectionById($electionId);
     return self::isContactInGroups($contactId, $election->allowed_groups);
@@ -85,13 +112,13 @@ class CRM_Elections_Helper_Eligibility {
    *
    * @param int $electionId
    * @param int|null $contactId
-   *   Defaults to the logged in contact.
+   *   Defaults to the acting contact (logged in, or validated by checksum).
    *
    * @return bool
    */
   public static function hasVoted($electionId, $contactId = NULL) {
     if (empty($contactId)) {
-      $contactId = CRM_Core_Session::singleton()->getLoggedInContactID();
+      $contactId = self::getActingContactId();
     }
     if (empty($contactId)) {
       return FALSE;
@@ -106,21 +133,22 @@ class CRM_Elections_Helper_Eligibility {
   }
 
   /**
-   * When did the logged in contact vote in the election?
+   * When did the acting contact vote in the election?
    *
    * @param int $electionId
    *
    * @return string|null
    */
   public static function getVoteDate($electionId) {
-    if (empty(CRM_Core_Session::singleton()->getLoggedInContactID())) {
+    $contactId = self::getActingContactId();
+    if (empty($contactId)) {
       return NULL;
     }
     $voteDate = civicrm_api3('ElectionVote', 'get', [
       'sequential' => TRUE,
       'return' => ['created_at'],
       'options' => ['limit' => 0],
-      'member_id' => CRM_Core_Session::singleton()->getLoggedInContactID(),
+      'member_id' => $contactId,
       'election_nomination_id.election_position_id.election_id.id' => $electionId,
     ]);
     return $voteDate['values'][0]['created_at'] ?? NULL;
