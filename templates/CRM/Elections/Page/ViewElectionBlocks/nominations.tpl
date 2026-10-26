@@ -22,7 +22,7 @@
             <div class="election_row_style">
                 {foreach from = $nomination.nominations key = sk item = seconder}
 
-                    {if (!$election->advertiseCandidatesStarted and $election->isNominationsInProgress and $seconder.has_rejected_nomination == 0) or (!$election->advertiseCandidatesStarted and !$election->isNominationsInProgress and $seconder.seconders|@count >= 2) or ($election->advertiseCandidatesStarted and !$election->isVotingStarted and $seconder.is_eligible_candidate == 1 and $seconder.has_rejected_nomination == 0) or ($election->isVotingStarted and $seconder.has_accepted_nomination == 1)}
+                    {if (!$election->advertiseCandidatesStarted and $election->isNominationsInProgress and $seconder.has_rejected_nomination == 0) or (!$election->advertiseCandidatesStarted and !$election->isNominationsInProgress and $seconder.is_eligible_candidate == 1) or ($election->advertiseCandidatesStarted and !$election->isVotingStarted and $seconder.is_eligible_candidate == 1 and $seconder.has_rejected_nomination == 0) or ($election->isVotingStarted and $seconder.has_accepted_nomination == 1)}
                         {assign var='scKey' value='member_nominee.display_name'}
                         {assign var='scImgKey' value='member_nominee.image_URL'}
                         <div class="crm-election-nominated-block">
@@ -57,13 +57,13 @@
                                 {if $election->isNominationsStarted}
                             </a>
                             {/if}
-                            {if $election->isNominationsInProgress and $election->required_nominations >= 2 and $seconder.seconders|@count < 2 and $seconder.is_eligible_candidate != 1}
+                            {if $election->isNominationsInProgress and $election->required_nominations >= 2 and $seconder.is_eligible_candidate != 1}
                                 <div class="clearfix"></div>
                                 <input type="button" value="{ts escape='htmlattribute'}Need Second{/ts}"
                                        onclick="window.location.href='{crmURL p="civicrm/elections/nominations/create" q="`$checksum_query['query']`&enid=`$seconder.id`"}'"
                                        class="election-action-button"/>
                             {/if}
-                            {if $election->isNominationsInProgress and $seconder.has_rejected_nomination == 0 and $seconder.has_accepted_nomination == 0 and ($seconder.seconders|@count >= 2 or $seconder.is_eligible_candidate == 1) }
+                            {if $election->isNominationsInProgress and $seconder.has_rejected_nomination == 0 and $seconder.has_accepted_nomination == 0 and $seconder.is_eligible_candidate == 1}
                                 <div class="clearfix"></div>
                                 <input type="button" value="{ts escape='htmlattribute'}Nominate{/ts}"
                                        onclick="window.location.href='{crmURL p="civicrm/elections/nominations/create" q="`$checksum_query['query']`&enid=`$seconder.id`"}'"

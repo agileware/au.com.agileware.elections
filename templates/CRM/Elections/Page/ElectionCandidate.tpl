@@ -52,7 +52,7 @@
             {foreach from=$position.nominations item=positionNomination}
                 <h3>{ts}Was nominated by{/ts}</h3>
                 {if $positionNomination.member_nominee == $nomination.member_nominee}
-                    {foreach from=$positionNomination.seconders item=seconder}
+                    {foreach from=$positionNomination.seconders|default:[] item=seconder}
                         {assign var='nominatorName' value='member_nominator.display_name'}
                         <p>{$seconder.$nominatorName}<br>
                         {$seconder.description}</p>
