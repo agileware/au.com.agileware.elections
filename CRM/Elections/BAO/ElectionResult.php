@@ -91,10 +91,11 @@ class CRM_Elections_BAO_ElectionResult extends CRM_Elections_DAO_ElectionResult 
     $nominations = civicrm_api3('ElectionNomination', 'get', [
       'election_position_id' => $positionId,
       'options' => ['limit' => 0],
-      'return' => ['comments', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL', 'election_position_id'],
+      'return' => array_merge(['comments', 'member_nominee', 'member_nominee.image_URL', 'election_position_id'], CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS),
     ]);
 
     $nominations = $nominations['values'];
+    CRM_Elections_Helper_Candidate::applyNameFormatToAll($nominations);
     return $nominations;
   }
 
@@ -104,10 +105,11 @@ class CRM_Elections_BAO_ElectionResult extends CRM_Elections_DAO_ElectionResult 
       'has_accepted_nomination' => 1,
       'election_position_id' => $positionId,
       'options' => ['limit' => 0],
-      'return' => ['comments', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL', 'election_position_id'],
+      'return' => array_merge(['comments', 'member_nominee', 'member_nominee.image_URL', 'election_position_id'], CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS),
     ]);
 
     $nominations = $nominations['values'];
+    CRM_Elections_Helper_Candidate::applyNameFormatToAll($nominations);
     return $nominations;
   }
 
