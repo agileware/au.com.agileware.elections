@@ -33,7 +33,7 @@
                                 {assign var="candidatesCount" value=$candidatesCount+1}
                                 <div class="crm-election-nominated-block inside">
                                     {assign var='profilePicUrl' value=$seconder.$scImgKey}
-                                    <img src="{$profilePicUrl}"/><br><br>
+                                    {if $election->showPhotos}<img src="{$profilePicUrl}" alt=""/><br><br>{/if}
                                     {$seconder.$scKey}<br>
 
                                     {if !$election->isVotingStarted and ($seconder.is_eligible_candidate == 1)}
@@ -42,12 +42,12 @@
                                             {ts}Accepted{/ts}
                                             <br>
                                             <br>
-                                            {$seconder.comments|nl2br}
+                                            {$seconder.comments|escape|nl2br}
                                         {elseif $seconder.has_rejected_nomination == 1}
                                             {ts}Withdrawn{/ts}
                                             <br>
                                             <br>
-                                            {$seconder.rejection_comments|nl2br}
+                                            {$seconder.rejection_comments|escape|nl2br}
                                         {else}
                                             {ts}Pending{/ts}
                                         {/if}
@@ -56,6 +56,9 @@
                                 </div>
                                 {if $election->isNominationsStarted}
                             </a>
+                            {/if}
+                            {if $election->showStatements and $election->isVotingStarted and $seconder.has_accepted_nomination == 1}
+                                {include file="CRM/Elections/Page/CandidateStatement.tpl" statementText=$seconder.comments|default:'' statementUrl=$seconder.statement_url|default:'' statementDisplay=$election->statementDisplay}
                             {/if}
                             {if $election->isNominationsInProgress and $election->required_nominations >= 2 and $seconder.is_eligible_candidate != 1}
                                 <div class="clearfix"></div>

@@ -1,10 +1,12 @@
 {include file="CRM/Elections/Page/WelcomeMessage.tpl"}
 <div class="candidate-details-block">
+    {if $election->showPhotos}
     <div class="candidate-details-left-block">
         {assign var='imgKey' value='member_nominee.image_URL'}
         {assign var='profilePicUrl' value=$nomination.$imgKey}
-        <img src="{$profilePicUrl}" /><br>
+        <img src="{$profilePicUrl}" alt="" /><br>
     </div><!-- ending of candidate-details-left-block -->
+    {/if}
 
     <div class="candidate-details-right-block">
         {assign var='displayname' value='member_nominee.display_name'}
@@ -31,10 +33,10 @@
                         {/if}
                         {if $positionNomination.has_accepted_nomination == 1}
                             {ts}Accepted{/ts}<br><br>
-                            {$positionNomination.comments|nl2br}
+                            {include file="CRM/Elections/Page/CandidateStatement.tpl" statementText=$positionNomination.comments|default:'' statementUrl=$positionNomination.statement_url|default:'' statementDisplay='inline'}
                         {elseif $positionNomination.has_rejected_nomination == 1}
                             {ts}Withdrawn{/ts}<br><br>
-                            {$positionNomination.rejection_comments|nl2br}
+                            {$positionNomination.rejection_comments|escape|nl2br}
                         {else}
                             {if $election->isVotingStarted}
                                 {ts}Not Accepted{/ts}
@@ -48,6 +50,7 @@
             {/foreach}
         </div><!-- ending of candidate-details-left-block -->
 
+        {if $election->showNominators}
         <div class="candidate-details-right-block">
             {foreach from=$position.nominations item=positionNomination}
                 <h3>{ts}Was nominated by{/ts}</h3>
@@ -60,6 +63,10 @@
                 {/if}
             {/foreach}
         </div><!-- ending of candidate-details-right-block -->
+        {/if}
     </div><!-- ending of candidate-details-block -->
 {/foreach}
+{if $canEditStatement}
+<input type="button" value="{ts escape='htmlattribute'}Edit statement{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/candidate/statement" q="`$checksum_query['query']`&enid=`$nomination.id`"}'" class="election-action-button" />
+{/if}
 <input type="button" value="{ts escape='htmlattribute'}Back{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/view" q="`$checksum_query['query']`"}'" class="election-action-button" />

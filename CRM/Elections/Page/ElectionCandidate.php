@@ -21,7 +21,7 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
     try {
       $this->electionNomination = civicrm_api3('ElectionNomination', 'getsingle', [
         'id' => $this->enId,
-        'return' => array_merge(['has_accepted_nomination', 'comments', 'election_position_id.name', 'election_position_id.election_id.name', 'election_position_id.election_id', 'member_nominee', 'member_nominee.image_URL'], CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS),
+        'return' => array_merge(['has_accepted_nomination', 'comments', 'election_position_id.name', 'election_position_id.election_id.name', 'election_position_id.election_id', 'member_nominee', 'member_nominee.image_URL', 'statement_url'], CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS),
       ]);
     }
     catch (CRM_Core_Exception $e) {
@@ -37,13 +37,14 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
       return;
     }
 
-    CRM_Elections_Helper_Candidate::applyNameFormat($this->electionNomination);
+    CRM_Elections_Helper_Candidate::applyNameFormat($this->electionNomination, CRM_Elections_Helper_Candidate::getNameFormatForElection($this->election->id));
     CRM_Elections_Helper_Utils::replaceSingleProfilePic($this->electionNomination, 'member_nominee.image_URL', 'member_nominee');
     $this->assign('nomination', $this->electionNomination);
     $positionsWithNominations = CRM_Elections_BAO_ElectionPosition::findWithNominationsByElectionId($this->electionNomination['election_position_id.election_id']);
     $this->removeNonRequiredPositions($positionsWithNominations);
     $this->assign('positions', $positionsWithNominations);
     $this->assign('election', $this->election);
+    $this->assign('canEditStatement', $this->canEditStatement());
     CRM_Utils_System::setTitle($this->electionNomination['member_nominee.display_name'] . ' - ' . $this->election->name);
 
     $this->assign('checksum_query', [
@@ -83,6 +84,22 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
     }
 
     parent::run();
+  }
+
+  /**
+   * Show the "Edit statement" button to administrators, and to the candidate until voting starts.
+   *
+   * @return bool
+   */
+  private function canEditStatement() {
+    if (isElectionAdmin()) {
+      return !$this->election->isVotingEnded;
+    }
+    $actingContactId = CRM_Elections_Helper_Eligibility::getActingContactId();
+    return !empty($actingContactId)
+      && $actingContactId == $this->electionNomination['member_nominee']
+      && $this->electionNomination['has_accepted_nomination'] == 1
+      && !$this->election->isVotingStarted;
   }
 
   private function removeNonRequiredPositions(&$positionsWithNominations) {

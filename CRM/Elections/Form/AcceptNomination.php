@@ -23,10 +23,17 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
       return;
     }
 
+    // The nominee is the logged in contact, or the contact identified by a valid checksum link.
+    $nomineeId = CRM_Elections_Helper_Eligibility::getActingContactId();
+    if (empty($nomineeId)) {
+      throwAccessDeniedPage($this);
+      return;
+    }
+
     try {
       $this->electionNomination = civicrm_api3('ElectionNomination', 'getsingle', [
         'id' => $this->enId,
-        'member_nominee' => CRM_Core_Session::singleton()->getLoggedInContactID(),
+        'member_nominee' => $nomineeId,
         'is_eligible_candidate' => 1,
         'return' => ['has_accepted_nomination', 'election_position_id.name', 'has_rejected_nomination', 'election_position_id.election_id.name', 'election_position_id.election_id'],
       ]);
@@ -64,7 +71,8 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
 
     $this->assign('electionNomination', $this->electionNomination);
 
-    $this->add('textarea', 'nominationcomments', E::ts('Comments'), ['cols' => 55, 'rows' => 6], FALSE);
+    $this->add('textarea', 'nominationcomments', E::ts('Candidate statement'), ['cols' => 55, 'rows' => 6], FALSE);
+    $this->add('text', 'statement_url', E::ts('Link to a longer statement or CV'), ['size' => 55, 'maxlength' => 2048], FALSE);
     $this->addElement('hidden', 'enid', $this->enId);
 
     if ( $this->cid && $this->cs ) {
@@ -108,12 +116,21 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
     }
   }
 
+  public function validate() {
+    $values = $this->exportValues();
+    if (!CRM_Elections_Helper_Candidate::isValidStatementUrl($values['statement_url'] ?? '')) {
+      $this->_errors['statement_url'] = E::ts('Enter a web address starting with http:// or https://');
+    }
+    return parent::validate();
+  }
+
   public function postProcess() {
     $values = $this->exportValues();
 
     civicrm_api3('ElectionNomination', 'create', [
       'id' => $this->enId,
       'comments' => $values['nominationcomments'],
+      'statement_url' => trim($values['statement_url'] ?? '') !== '' ? trim($values['statement_url']) : NULL,
       'has_accepted_nomination' => 1,
     ]);
 

@@ -166,7 +166,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     $this->electionCandidates = civicrm_api3('ElectionNomination', 'get', [
       'is_eligible_candidate' => 1,
       'has_accepted_nomination' => 1,
-      'return' => array_merge(['id', 'member_nominee', 'member_nominee.image_URL', 'election_position_id'], CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS),
+      'return' => array_merge(['id', 'member_nominee', 'member_nominee.image_URL', 'election_position_id', 'comments', 'statement_url'], CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS),
       'election_position_id' => ['IN' => array_column($this->electionPositions, 'id')],
       'options' => ['limit' => 0],
     ]);
@@ -177,7 +177,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     }
 
     $this->electionCandidates = $this->electionCandidates['values'];
-    CRM_Elections_Helper_Candidate::applyNameFormatToAll($this->electionCandidates);
+    CRM_Elections_Helper_Candidate::applyNameFormatToAll($this->electionCandidates, CRM_Elections_Helper_Candidate::getNameFormatForElection($this->election->id));
     $this->mapCandidatesWithPosition();
     return TRUE;
   }

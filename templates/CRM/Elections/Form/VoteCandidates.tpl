@@ -14,16 +14,21 @@
           <p><strong>{ts 1=$position.name 2=$candidateCount}Vote for %1. Please number the candidates from 1 to %2 in the order of your preferences.{/ts}</strong></p>
             {foreach from=$position.candidates item=candidate}
               {assign var="cKey" value="candidate_`$candidate.id`"}
-                <div class="vote-candidate-row">
+                <div class="vote-candidate-row{if !$election->showPhotos} no-photo{/if}">
+                  {if $election->showPhotos}
                   <div class="left-profile-block">
                     {assign var='profilePicUrl' value=$candidate.$imgKey}
                     <a href="{crmURL p="civicrm/elections/candidate" q="enid=`$candidate.id`"}">
-                        <img src="{$profilePicUrl}" />
+                        <img src="{$profilePicUrl}" alt="" />
                     </a>
                   </div>
+                  {/if}
                   <div class="right-info-block">
                     {$form.$cKey.label}
                     {$form.$cKey.html}
+                    {if $election->showStatements}
+                      {include file="CRM/Elections/Page/CandidateStatement.tpl" statementText=$candidate.comments|default:'' statementUrl=$candidate.statement_url|default:'' statementDisplay=$election->statementDisplay}
+                    {/if}
                   </div>
                 </div><!-- ending of vote-candidate-row --> <div class="clearfix"></div>
 
