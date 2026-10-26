@@ -17,31 +17,29 @@
         <div class="candidate-details-left-block">
             {foreach from=$position.nominations item=positionNomination}
                 {if $positionNomination.member_nominee == $nomination.member_nominee}
-                    {assign var="cTerm" value="Nominated"}
                     {if $election->advertiseCandidatesStarted and $positionNomination.has_accepted_nomination == 1}
-                        {assign var="cTerm" value="Candidate"}
+                        <h3>{ts 1=$position.name}Candidate for %1{/ts}</h3>
+                    {else}
+                        <h3>{ts 1=$position.name}Nominated for %1{/ts}</h3>
                     {/if}
-
-                    <h3>{$cTerm} for {$position.name}</h3>
                     {if $election->advertiseCandidatesStarted or $election->isNominationsStarted}
                         <p>
                         {if $positionNomination.is_eligible_candidate == 1}
-                            Candidate
+                            {ts}Candidate Status:{/ts}
                         {else}
-                            Nomination
+                            {ts}Nomination Status:{/ts}
                         {/if}
-                         Status:
                         {if $positionNomination.has_accepted_nomination == 1}
-                            Accepted<br><br>
+                            {ts}Accepted{/ts}<br><br>
                             {$positionNomination.comments|nl2br}
                         {elseif $positionNomination.has_rejected_nomination == 1}
-                            Withdrawn<br><br>
+                            {ts}Withdrawn{/ts}<br><br>
                             {$positionNomination.rejection_comments|nl2br}
                         {else}
                             {if $election->isVotingStarted}
-                                Not Accepted
+                                {ts}Not Accepted{/ts}
                             {else}
-                                Pending
+                                {ts}Pending{/ts}
                             {/if}
                         {/if}
                         </p>
@@ -52,7 +50,7 @@
 
         <div class="candidate-details-right-block">
             {foreach from=$position.nominations item=positionNomination}
-                <h3>Was nominated by</h3>
+                <h3>{ts}Was nominated by{/ts}</h3>
                 {if $positionNomination.member_nominee == $nomination.member_nominee}
                     {foreach from=$positionNomination.seconders item=seconder}
                         {assign var='nominatorName' value='member_nominator.display_name'}
@@ -64,4 +62,4 @@
         </div><!-- ending of candidate-details-right-block -->
     </div><!-- ending of candidate-details-block -->
 {/foreach}
-<input type="button" value="Back" onclick="window.location.href='{crmURL p="civicrm/elections/view" q="`$checksum_query['query']`"}'" class="election-action-button" />
+<input type="button" value="{ts escape='htmlattribute'}Back{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/view" q="`$checksum_query['query']`"}'" class="election-action-button" />

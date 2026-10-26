@@ -48,18 +48,18 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
     }
 
     if ($this->electionNomination['has_rejected_nomination'] == 1) {
-      throwAccessDeniedException($this, 'You have withdrawn this nomination.');
+      throwAccessDeniedException($this, E::ts('You have withdrawn this nomination.'));
       return;
     }
 
     if ($election->isVotingStarted) {
-      throwAccessDeniedException($this, 'You cannot withdraw the nomination once voting is started.');
+      throwAccessDeniedException($this, E::ts('You cannot withdraw the nomination once voting is started.'));
       return;
     }
 
     $this->assign('electionNomination', $this->electionNomination);
 
-    $this->add('textarea', 'nominationcomments', 'Comments', ['cols' => 55, 'rows' => 6], FALSE);
+    $this->add('textarea', 'nominationcomments', E::ts('Comments'), ['cols' => 55, 'rows' => 6], FALSE);
     $this->addElement('hidden', 'enid', $this->enId);
 
     if ( $this->cid && $this->cs ) {
@@ -113,7 +113,7 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
       'has_accepted_nomination' => 0,
     ]);
 
-    CRM_Core_Session::setStatus('You have withdrawn the nomination.', '', 'success');
+    CRM_Core_Session::setStatus(E::ts('You have withdrawn the nomination.'), '', 'success');
 
     // Redirect back to the main election info view
     $redirectUrl = Civi::url('current://civicrm/elections/view');

@@ -33,10 +33,10 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
     ]);
 
     if ($this->election->is_visible) {
-      CRM_Utils_System::setTitle('Deactivate Election');
+      CRM_Utils_System::setTitle(E::ts('Deactivate Election'));
     }
     else {
-      CRM_Utils_System::setTitle('Activate Election');
+      CRM_Utils_System::setTitle(E::ts('Activate Election'));
     }
 
     $this->assign('election', $this->election);
@@ -58,8 +58,8 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
         'options' => ['limit' => 0],
       ]);
       if (empty($electionPostions['values'])) {
-        throwAccessDeniedException($this, 'At least one Position must be defined before the Election can be active.', [
-          'return_button_text'   => 'Return to Elections',
+        throwAccessDeniedException($this, E::ts('At least one Position must be defined before the Election can be active.'), [
+          'return_button_text'   => E::ts('Return to Elections'),
           'return_button_action' => Civi::url('current://civicrm/elections'),
         ]);
         return;
@@ -69,11 +69,11 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
     if ($election->find(TRUE)) {
       $election->is_visible = !($election->is_visible);
       if ($election->save()) {
-        $action = 'activated';
+        $successMessage = E::ts('Election has been activated successfully.');
         if (!$election->is_visible) {
-          $action = 'deactivated';
+          $successMessage = E::ts('Election has been deactivated successfully.');
         }
-        CRM_Core_Session::setStatus('Election has been ' . $action . ' successfully.', '', 'success');
+        CRM_Core_Session::setStatus($successMessage, '', 'success');
       }
     }
 

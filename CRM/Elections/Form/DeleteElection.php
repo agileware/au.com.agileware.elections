@@ -53,10 +53,10 @@ class CRM_Elections_Form_DeleteElection extends CRM_Elections_Form_Base {
 
       $election->is_deleted = 1;
       if ($election->save()) {
-        CRM_Core_Session::setStatus('Election has been deleted successfully.', '', 'success');
+        CRM_Core_Session::setStatus(E::ts('Election has been deleted successfully.'), '', 'success');
       }
       else {
-        CRM_Core_Session::setStatus('Error occurred while deleting an election.', '', 'danger');
+        CRM_Core_Session::setStatus(E::ts('Error occurred while deleting an election.'), '', 'danger');
       }
     }
     parent::postProcess();

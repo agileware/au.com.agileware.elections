@@ -1,26 +1,21 @@
 <h2>
     {if $election->advertiseCandidatesStarted}
-        Candidates
+        {ts}Candidates{/ts}
     {else}
-        Existing Nominations
+        {ts}Existing Nominations{/ts}
     {/if}
 </h2>
 {if empty($nominations) or empty($positions)}
-    <p class="no-result-message">Positions are not added yet to be nominated.</p>
+    <p class="no-result-message">{ts}Positions are not added yet to be nominated.{/ts}</p>
 {/if}
 
 {foreach from = $nominations key = k item = nomination}
     <div class="crm-election-position-nominations-block">
 
-        {assign var="positionKey" value="Nominations"}
-        {if $election->advertiseCandidatesStarted}
-            {assign var="positionKey" value="Candidates"}
-        {/if}
-
-        <h3>{$positionKey} for {$nomination.name}</h3>
+        <h3>{if $election->advertiseCandidatesStarted}{ts 1=$nomination.name}Candidates for %1{/ts}{else}{ts 1=$nomination.name}Nominations for %1{/ts}{/if}</h3>
 
         {if empty($nomination.nominations) and !$election->advertiseCandidatesStarted}
-            <p>There are no existing nominations</p>
+            <p>{ts}There are no existing nominations{/ts}</p>
         {/if}
         {assign var="candidatesCount" value=0}
         {if !empty($nomination.nominations)}
@@ -42,19 +37,19 @@
                                     {$seconder.$scKey}<br>
 
                                     {if !$election->isVotingStarted and ($seconder.is_eligible_candidate == 1)}
-                                        Candidate Status:
+                                        {ts}Candidate Status:{/ts}
                                         {if $seconder.has_accepted_nomination == 1}
-                                            Accepted
+                                            {ts}Accepted{/ts}
                                             <br>
                                             <br>
                                             {$seconder.comments|nl2br}
                                         {elseif $seconder.has_rejected_nomination == 1}
-                                            Withdrawn
+                                            {ts}Withdrawn{/ts}
                                             <br>
                                             <br>
                                             {$seconder.rejection_comments|nl2br}
                                         {else}
-                                            Pending
+                                            {ts}Pending{/ts}
                                         {/if}
                                     {/if}
 
@@ -82,9 +77,9 @@
             </div>
             {if empty($candidatesCount) or (empty($nomination.nominations) and !$election->advertiseCandidatesStarted) or ($election->advertiseCandidatesStarted and empty($candidatesCount))}
                 {if $election->advertiseCandidatesStarted}
-                    <p>There are no eligible candidates.</p>
+                    <p>{ts}There are no eligible candidates.{/ts}</p>
                 {else}
-                    <p>There are no eligible nominations.</p>
+                    <p>{ts}There are no eligible nominations.{/ts}</p>
                 {/if}
             {/if}
         {/if}
