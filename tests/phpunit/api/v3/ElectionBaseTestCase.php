@@ -1,11 +1,15 @@
 <?php
 
+use Civi\Test\Api3TestTrait;
 use Civi\Test\HeadlessInterface;
+use Civi\Test\TransactionalInterface;
 
 /**
  * @group headless
  */
-class api_v3_ElectionBaseTestCase extends CiviCaseTestCase implements HeadlessInterface {
+class api_v3_ElectionBaseTestCase extends \PHPUnit\Framework\TestCase implements HeadlessInterface, TransactionalInterface {
+
+  use Api3TestTrait;
 
   public static $ELECTION_NOT_STARTED = 'not-started';
   public static $ELECTION_NOMINATION_IN_PROGRESS = 'nomination-in-progress';
@@ -13,15 +17,45 @@ class api_v3_ElectionBaseTestCase extends CiviCaseTestCase implements HeadlessIn
   public static $ELECTION_VOTING_IN_PROGRESS = 'voting-in-progress';
   public static $ELECTION_RESULTS_STARTED = 'results-started';
 
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
   }
-  public function tearDown() {
+
+  public function tearDown(): void {
     parent::tearDown();
   }
 
   public function setUpHeadless() {
+    return \Civi\Test::headless()->installMe(__DIR__)->apply();
+  }
 
+  /**
+   * Create an Individual contact and return its id.
+   *
+   * @param array $params
+   * @return int
+   */
+  public function individualCreate($params = []) {
+    $params += [
+      'contact_type' => 'Individual',
+      'first_name' => 'Test' . rand(0, 999999),
+      'last_name' => 'Voter' . rand(0, 999999),
+    ];
+    return (int) $this->callAPISuccess('Contact', 'create', $params)['id'];
+  }
+
+  /**
+   * Create a Group and return its id.
+   *
+   * @param array $params
+   * @return int
+   */
+  public function groupCreate($params = []) {
+    $params += [
+      'name' => 'Test Group ' . rand(0, 999999),
+      'title' => 'Test Group ' . rand(0, 999999),
+    ];
+    return (int) $this->callAPISuccess('Group', 'create', $params)['id'];
   }
 
   public function getElectionById($electionId) {
