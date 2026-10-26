@@ -94,7 +94,7 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
         $nominationsToRemove = [];
         $foundNominee = FALSE;
         foreach ($nominations as $nominationIndex => $nomination) {
-          if (($nomination['member_nominee'] == $this->electionNomination['member_nominee']) and (($this->election->isNominationsInProgress) or (!$this->election->isNominationsInProgress and count($nomination['seconders']) >= 2)) and (!$this->election->isVotingStarted || ($this->election->isVotingStarted && $nomination['has_accepted_nomination']))) {
+          if (($nomination['member_nominee'] == $this->electionNomination['member_nominee']) and (($this->election->isNominationsInProgress) or (!$this->election->isNominationsInProgress and !empty($nomination['is_eligible_candidate']))) and (!$this->election->isVotingStarted || ($this->election->isVotingStarted && $nomination['has_accepted_nomination']))) {
             $foundNominee = TRUE;
           }
           else {
