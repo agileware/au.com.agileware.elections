@@ -10,7 +10,7 @@ use CRM_Elections_ExtensionUtil as E;
 class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
 
   private $eId = 0;
-  private $pageTitle = 'Create Election';
+  private $pageTitle = NULL;
 
   public function buildQuickForm() {
     hideNonRequiredItemsOnPage($this);
@@ -20,7 +20,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     $this->eId = CRM_Utils_Request::retrieve('eid', 'Positive', $this, FALSE, 0);
     $this->addFormElements();
     if ($this->eId) {
-      $this->pageTitle = 'Edit Election';
+      $this->pageTitle = E::ts('Edit Election');
       CRM_Utils_System::setTitle($this->pageTitle);
     }
     else {
@@ -82,40 +82,40 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
    */
   private function addFormElements() {
     // election information fields
-    $this->add('text', 'name', 'Name', ['size' => 35], TRUE);
-    $this->add('textarea', 'description', 'Description', ['cols' => 55, 'rows' => 6], FALSE);
+    $this->add('text', 'name', E::ts('Name'), ['size' => 35], TRUE);
+    $this->add('textarea', 'description', E::ts('Description'), ['cols' => 55, 'rows' => 6], FALSE);
 
     // Visibility fields.
-    $this->add('datepicker', 'visibility_start_date', 'Start Date', [], TRUE);
-    $this->add('datepicker', 'visibility_end_date', 'End Date', [], TRUE);
+    $this->add('datepicker', 'visibility_start_date', E::ts('Start Date'), [], TRUE);
+    $this->add('datepicker', 'visibility_end_date', E::ts('End Date'), [], TRUE);
 
     // Nominations fields.
-    $this->add('datepicker', 'nomination_start_date', 'Start Date', [], TRUE);
-    $this->add('datepicker', 'nomination_end_date', 'End Date', [], TRUE);
+    $this->add('datepicker', 'nomination_start_date', E::ts('Start Date'), [], TRUE);
+    $this->add('datepicker', 'nomination_end_date', E::ts('End Date'), [], TRUE);
 
     // Advetise Candidates
-    $this->add('datepicker', 'advertise_candidates_date', 'Start Date', [], TRUE);
+    $this->add('datepicker', 'advertise_candidates_date', E::ts('Start Date'), [], TRUE);
 
     // Voting fields.
-    $this->add('datepicker', 'voting_start_date', 'Start Date', [], TRUE);
-    $this->add('datepicker', 'voting_end_date', 'End Date', [], TRUE);
+    $this->add('datepicker', 'voting_start_date', E::ts('Start Date'), [], TRUE);
+    $this->add('datepicker', 'voting_end_date', E::ts('End Date'), [], TRUE);
 
     // Publish result
-    $this->add('datepicker', 'result_date', 'Start Date', [], TRUE);
+    $this->add('datepicker', 'result_date', E::ts('Start Date'), [], TRUE);
 
     // Setting fields.
 
-    $this->add('select', 'anonymize_votes', 'Anonymise Votes', CRM_Core_SelectValues::boolean(), TRUE, [
+    $this->add('select', 'anonymize_votes', E::ts('Anonymise Votes'), CRM_Core_SelectValues::boolean(), TRUE, [
       'placeholder' => '- Select -',
     ]);
 
-    $this->add('select', 'allow_revote', 'Allow Members to Change Vote', CRM_Core_SelectValues::boolean(), TRUE, [
+    $this->add('select', 'allow_revote', E::ts('Allow Members to Change Vote'), CRM_Core_SelectValues::boolean(), TRUE, [
       'placeholder' => '- Select -',
     ]);
 
-    $this->add('advcheckbox', 'allow_checksum_access', 'Allow non-logged in access');
+    $this->add('advcheckbox', 'allow_checksum_access', E::ts('Allow non-logged in access'));
 
-    $this->add('text', 'required_nominations', 'Number of Required Nominations', ['size' => 15], TRUE);
+    $this->add('text', 'required_nominations', E::ts('Number of Required Nominations'), ['size' => 15], TRUE);
 
     $this->addEntityRef('allowed_groups', 'Allowed by Groups', [
       'entity' => 'Group',
@@ -145,7 +145,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     $this->_errors = array_merge($this->_errors, $errors);
 
     if (!CRM_Utils_Rule::positiveInteger($values['required_nominations'])) {
-      $this->_errors['required_nominations'] = 'Value should be a positive integer.';
+      $this->_errors['required_nominations'] = E::ts('Value should be a positive integer.');
     }
     return parent::validate();
   }
@@ -172,9 +172,9 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       'created_by'                  => CRM_Core_Session::singleton()->getLoggedInContactID(),
     ];
 
-    $messageKey = 'created';
+    $successMessage = E::ts('Election has been created successfully.');
     if ($this->eId) {
-      $messageKey = 'updated';
+      $successMessage = E::ts('Election has been updated successfully.');
       $election['id'] = $this->eId;
     }
 
@@ -190,7 +190,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       return;
     }
 
-    CRM_Core_Session::setStatus('Election has been ' . $messageKey . ' successfully.', '', 'success');
+    CRM_Core_Session::setStatus($successMessage, '', 'success');
     parent::postProcess();
     CRM_Utils_System::redirect(Civi::url('current://civicrm/elections'));
   }

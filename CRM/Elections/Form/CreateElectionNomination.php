@@ -53,7 +53,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     $this->assign('election', $this->election);
     $this->assign('isElectionAdmin', $this->isElectionAdmin);
 
-    CRM_Utils_System::setTitle('Submit Nomination for ' . $this->election->name);
+    CRM_Utils_System::setTitle(E::ts('Submit Nomination for %1', [1 => $this->election->name]));
 
     if ( $this->cid && $this->cs ) {
       // Expose to Smarty
@@ -118,11 +118,11 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     }
 
     if (empty($positions)) {
-      throwAccessDeniedException($this, 'There are no positions available for selected election.');
+      throwAccessDeniedException($this, E::ts('There are no positions available for selected election.'));
       return;
     }
 
-    $this->add('select2', 'position', 'Nominated Position', $positions, TRUE);
+    $this->add('select2', 'position', E::ts('Nominated Position'), $positions, TRUE);
     $this->addEntityRef('contact', 'Nominee', [
       'entity' => 'ElectionNominee',
       'placeholder' => '- Select Nominee -',
@@ -135,7 +135,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
       $this->addElement('hidden', 'cid', $this->cid);
       $this->addElement('hidden', 'cs', $this->cs);
     }
-    $this->add('textarea', 'reason', 'Why do you want to nominate this person for this position?', ['cols' => 55, 'rows' => 6], FALSE);
+    $this->add('textarea', 'reason', E::ts('Why do you want to nominate this person for this position?'), ['cols' => 55, 'rows' => 6], FALSE);
 
     $this->addButtons([
       [
@@ -166,7 +166,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     if ($nomination['count'] > 0) {
       $nomination = $nomination['values'][0];
       if ($nomination['has_rejected_nomination'] == 1) {
-        CRM_Core_Session::setStatus('Selected member has withdrawn the nomination, You cannot nominate the member again for selected position.', '', 'error');
+        CRM_Core_Session::setStatus(E::ts('Selected member has withdrawn the nomination, You cannot nominate the member again for selected position.'), '', 'error');
         CRM_Utils_System::redirect(Civi::url('current://civicrm/elections/view', 'eid=' . $this->eId ));
         return -1;
       }
@@ -181,7 +181,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     }
 
     if (!$nominationId) {
-      throwAccessDeniedException($this, 'Some error occurred while creating a nomination, Please try again.');
+      throwAccessDeniedException($this, E::ts('Some error occurred while creating a nomination, Please try again.'));
       return -1;
     }
 
@@ -219,7 +219,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     $nominationSeconder = civicrm_api3('ElectionNominationSeconder', 'getcount', $seconderParams);
 
     if ($nominationSeconder != 0) {
-      CRM_Core_Session::setStatus('Nomination submitted.', '', 'success');
+      CRM_Core_Session::setStatus(E::ts('Nomination submitted.'), '', 'success');
     }
     else {
       $seconderParams['description'] = $values['reason'];
@@ -233,7 +233,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
         'nomination_seconder_id' => $nominationSeconder['id'],
         'is_eligible_candidate'  => ($isEligibleCandidate) ? 1 : 0,
       ]);
-      CRM_Core_Session::setStatus('Nomination submitted.', '', 'success');
+      CRM_Core_Session::setStatus(E::ts('Nomination submitted.'), '', 'success');
     }
 
     parent::postProcess();
@@ -270,7 +270,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
       'target_id' => $params['nominee'],
       'source_record_id' => $params['nomination_seconder_id'],
       'is_star'  => $params['is_eligible_candidate'],
-      'subject'  => 'Nominated ' . $electionNomination['member_nominee.display_name'] . ' for the position of ' . $electionNomination['election_position_id.name'],
+      'subject'  => E::ts('Nominated %1 for the position of %2', [1 => $electionNomination['member_nominee.display_name'], 2 => $electionNomination['election_position_id.name']]),
     ]);
   }
 

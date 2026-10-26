@@ -48,23 +48,23 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
     }
 
     if ($this->electionNomination['has_accepted_nomination'] == 1) {
-      throwAccessDeniedException($this, 'You already have accepted this nomination.');
+      throwAccessDeniedException($this, E::ts('You already have accepted this nomination.'));
       return;
     }
 
     if ($this->electionNomination['has_rejected_nomination'] == 1) {
-      throwAccessDeniedException($this, 'You cannot accept a rejected nomination.');
+      throwAccessDeniedException($this, E::ts('You cannot accept a rejected nomination.'));
       return;
     }
 
     if ($election->isVotingStarted) {
-      throwAccessDeniedException($this, 'You cannot accept the nomination once voting has started.');
+      throwAccessDeniedException($this, E::ts('You cannot accept the nomination once voting has started.'));
       return;
     }
 
     $this->assign('electionNomination', $this->electionNomination);
 
-    $this->add('textarea', 'nominationcomments', 'Comments', ['cols' => 55, 'rows' => 6], FALSE);
+    $this->add('textarea', 'nominationcomments', E::ts('Comments'), ['cols' => 55, 'rows' => 6], FALSE);
     $this->addElement('hidden', 'enid', $this->enId);
 
     if ( $this->cid && $this->cs ) {
@@ -117,7 +117,7 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
       'has_accepted_nomination' => 1,
     ]);
 
-    CRM_Core_Session::setStatus('Nomination accepted.', '', 'success');
+    CRM_Core_Session::setStatus(E::ts('Nomination accepted.'), '', 'success');
 
     // Redirect back to the main election info view
     $redirectUrl = Civi::url('current://civicrm/elections/view');

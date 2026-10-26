@@ -204,7 +204,7 @@ function isElectionAdmin() {
  */
 function throwUnauthorizedMessageIfRequired($formOrPage) {
   if (!isElectionAdmin()) {
-    throwAccessDeniedException($formOrPage, 'You are not authorized to perform this action.');
+    throwAccessDeniedException($formOrPage, E::ts('You are not authorized to perform this action.'));
     return TRUE;
   }
   return FALSE;
@@ -221,7 +221,7 @@ function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions
   $formOrPage->assign('errormessage', $exceptionMessage);
 
   if (empty($pageOptions)) {
-    $pageOptions['return_button_text'] = 'Return to Elections';
+    $pageOptions['return_button_text'] = E::ts('Return to Elections');
     $pageOptions['return_button_action'] = Civi::url('current://civicrm/elections');
   }
 
@@ -238,7 +238,7 @@ function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions
  */
 function throwNonMemberAccessDenied($formOrPage) {
   $formOrPage->assign('nonmember', TRUE);
-  throwAccessDeniedException($formOrPage, 'You may only see this page if you are a member.');
+  throwAccessDeniedException($formOrPage, E::ts('You may only see this page if you are a member.'));
 }
 
 /**
@@ -248,7 +248,7 @@ function throwNonMemberAccessDenied($formOrPage) {
  */
 function throwAccessDeniedPage($formOrPage) {
   $formOrPage->throwError = TRUE;
-  $formOrPage->assign('errormessage', 'You are not authorized to access this page.');
+  $formOrPage->assign('errormessage', E::ts('You are not authorized to access this page.'));
 }
 
 /**
@@ -262,7 +262,7 @@ function retrieveElectionIdFromUrl($form)
 {
     $eId = CRM_Utils_Request::retrieve('eid', 'Positive', $form, FALSE, 0);
     if (!$eId) {
-        throwAccessDeniedException($form, 'Unable to view this Election, Election ID parameter missing.', ['']);
+        throwAccessDeniedException($form, E::ts('Unable to view this Election, Election ID parameter missing.'), ['']);
         return -1;
     }
     return $eId;
@@ -290,7 +290,7 @@ function retrieveContactChecksumFromUrl( $form )
 
     if ( !$results['valid'] ) {
       // Invalid checksum
-      throwAccessDeniedException( $form, 'Unauthorised. Invalid contact credentials.', [''] );
+      throwAccessDeniedException( $form, E::ts('Unauthorised. Invalid contact credentials.'), [''] );
       return false;
     }
 
@@ -298,7 +298,7 @@ function retrieveContactChecksumFromUrl( $form )
   }
 
   // Otherwise, something is missing
-  throwAccessDeniedException( $form, 'Unauthorised. Missing valid contact credentials.', [''] );
+  throwAccessDeniedException( $form, E::ts('Unauthorised. Missing valid contact credentials.'), [''] );
   return false;
 }
 
@@ -324,14 +324,14 @@ function isRequestUsingShortCode() {
  */
 function findElectionById($electionId, $throwErrorIfNotFound = TRUE) {
   if (!$electionId) {
-    throw new CRM_Extension_Exception('You are not authorised to access this page.');
+    throw new CRM_Extension_Exception(E::ts('You are not authorised to access this page.'));
   }
 
   $election = new CRM_Elections_BAO_Election();
   $election->id = $electionId;
 
   if (!$election->find(TRUE) && $throwErrorIfNotFound) {
-    throw new CRM_Extension_Exception('You are not authorised to access this page.');
+    throw new CRM_Extension_Exception(E::ts('You are not authorised to access this page.'));
   }
 
   $election->assignStatues();

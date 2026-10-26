@@ -47,7 +47,7 @@
 {literal}
   <script>
     CRM.$.fn.select2.defaults.formatInputTooShort = function() {
-        return 'Start typing a name or email...';
+        return '{/literal}{ts escape='js'}Start typing a name or email...{/ts}{literal}';
     };
   </script>
 {/literal}

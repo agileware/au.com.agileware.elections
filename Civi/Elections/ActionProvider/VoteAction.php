@@ -54,16 +54,16 @@ class VoteAction extends AbstractAction {
     $voter_contact_id = $parameters->getParameter('voter_contact_id');
     $election = findElectionById($election_id);
     if (!$election->isVisible) {
-      throw new InvalidParameterException('Voting is closed.');
+      throw new InvalidParameterException(E::ts('Voting is closed.'));
     }
     if (!$election->isVotingStarted) {
-      throw new InvalidParameterException('Voting is closed.');
+      throw new InvalidParameterException(E::ts('Voting is closed.'));
     }
     if ($election->isVotingEnded) {
-      throw new InvalidParameterException('Voting is closed.');
+      throw new InvalidParameterException(E::ts('Voting is closed.'));
     }
     if (hasLoggedInUserAlreadyVoted($election_id, $voter_contact_id)) {
-      throw new InvalidParameterException('User has already voted.');
+      throw new InvalidParameterException(E::ts('User has already voted.'));
     }
     return $return;
   }

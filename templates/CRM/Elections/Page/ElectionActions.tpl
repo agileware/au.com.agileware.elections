@@ -6,17 +6,17 @@
                 {foreach from = $nomination.nominations key = sk item = seconder}
                         {if $seconder.is_eligible_candidate == 1 and $seconder.has_accepted_nomination == 0 and $seconder.has_rejected_nomination == 0 and $loggedInContactId == $seconder.member_nominee}
                             <div class="messages status no-popup">
-                                <span class="eligible-block">You are an eligible candidate for {$nomination.name}</span> <input type="button" value="{ts escape='htmlattribute'}Accept Nomination{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/accept" q="`$checksum_query['query']`&enid=`$seconder.id`"}'" class="election-action-button" /> <span><input type="button" value="{ts escape='htmlattribute'}Withdraw Nomination{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/reject" q="`$checksum_query['query']`&enid=`$seconder.id`"}'" class="election-action-button" /></span>
+                                <span class="eligible-block">{ts 1=$nomination.name}You are an eligible candidate for %1{/ts}</span> <input type="button" value="{ts escape='htmlattribute'}Accept Nomination{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/accept" q="`$checksum_query['query']`&enid=`$seconder.id`"}'" class="election-action-button" /> <span><input type="button" value="{ts escape='htmlattribute'}Withdraw Nomination{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/reject" q="`$checksum_query['query']`&enid=`$seconder.id`"}'" class="election-action-button" /></span>
                             </div>
                         {/if}
                         {if $seconder.is_eligible_candidate == 1 and $seconder.has_accepted_nomination == 1 and $seconder.has_rejected_nomination == 0 and $loggedInContactId == $seconder.member_nominee}
                             <div class="messages status no-popup">
-                                <span class="eligible-block">You have accepted the nomination for {$nomination.name}</span> <input type="button" value="{ts escape='htmlattribute'}Withdraw Nomination{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/reject" q="`$checksum_query['query']`&enid=`$seconder.id`"}'" class="election-action-button" />
+                                <span class="eligible-block">{ts 1=$nomination.name}You have accepted the nomination for %1{/ts}</span> <input type="button" value="{ts escape='htmlattribute'}Withdraw Nomination{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/reject" q="`$checksum_query['query']`&enid=`$seconder.id`"}'" class="election-action-button" />
                             </div>
                         {/if}
                         {if $election->isNominationsInProgress and $seconder.is_eligible_candidate == 0 and $seconder.has_rejected_nomination == 0 and $loggedInContactId == $seconder.member_nominee}
                             <div class="messages status no-popup">
-                                <span class="eligible-block">You have been nominated for {$nomination.name}</span> <input type="button" value="{ts escape='htmlattribute'}Withdraw Nomination{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/reject" q="`$checksum_query['query']`&enid=`$seconder.id`"}'" class="election-action-button" />
+                                <span class="eligible-block">{ts 1=$nomination.name}You have been nominated for %1{/ts}</span> <input type="button" value="{ts escape='htmlattribute'}Withdraw Nomination{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/reject" q="`$checksum_query['query']`&enid=`$seconder.id`"}'" class="election-action-button" />
                             </div>
                         {/if}
                 {/foreach}

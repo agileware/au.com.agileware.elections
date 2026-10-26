@@ -25,10 +25,10 @@ class CRM_Elections_Page_ElectionSummary extends CRM_Elections_Page_Base {
 
     $this->isElectionAdmin = isElectionAdmin();
 
-    CRM_Utils_System::setTitle('Election Summary for ' . $this->election->name);
+    CRM_Utils_System::setTitle(E::ts('Election Summary for %1', [1 => $this->election->name]));
 
     if (!$this->election->isResultsOut) {
-      throwAccessDeniedException($this, 'Election summary is not available yet.');
+      throwAccessDeniedException($this, E::ts('Election summary is not available yet.'));
       parent::run();
       return;
     }

@@ -93,7 +93,7 @@ function civicrm_api3_election_generateresults($params) {
   $dao = NULL;
   if (!$elections['count']) {
     return civicrm_api3_create_success(1, [], NULL, NULL, $dao, [
-      'message' => 'No election results are scheduled today.',
+      'message' => E::ts('No election results are scheduled today.'),
     ]);
   }
 
@@ -104,7 +104,7 @@ function civicrm_api3_election_generateresults($params) {
   }
 
   return civicrm_api3_create_success(1, [], NULL, NULL, $dao, [
-     'message' => 'Successfully generated results for ' . count($elections) . ' elections.',
+     'message' => E::ts('Successfully generated results for %1 elections.', [1 => count($elections)]),
   ]);
 
 }

@@ -44,7 +44,7 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
       $positions = CRM_Elections_BAO_ElectionResult::getResultsAndSummary($this->election->id);
       $this->assign('positions', $positions);
       $this->assign('resultStatuses', CRM_Elections_BAO_Election::getResultStatues());
-      CRM_Utils_System::setTitle($this->election->name . ' - Result');
+      CRM_Utils_System::setTitle(E::ts('%1 - Result', [1 => $this->election->name]));
     }
     else {
       $canEdit = $this->election->canEdit();
