@@ -59,7 +59,7 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
       $this->assign('nominations', $positionsWithNominations);
       $this->assign('loggedInContactId', CRM_Core_Session::singleton()->getLoggedInContactID());
 
-      $isShowingSpecificElectionFromShortCode = CRM_Utils_Request::retrieve('sse', 'Boolean', $form, FALSE, FALSE);
+      $isShowingSpecificElectionFromShortCode = CRM_Utils_Request::retrieve('sse', 'Boolean', $this, FALSE, FALSE);
       $this->assignUserVotingVariables($this->eId);
 
       if ($isShowingSpecificElectionFromShortCode) {
