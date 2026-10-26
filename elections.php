@@ -386,39 +386,7 @@ function elections_civicrm_managed(&$entities) {
  * @throws CRM_Core_Exception
  */
 function isLoggedInMemberAllowedToVote($electionId, $contactId = NULL) {
-  if ($contactId == NULL) {
-    $contactId = CRM_Core_Session::singleton()->getLoggedInContactID();
-  }
-  if (empty($contactId)) {
-    return FALSE;
-  }
-  $election = findElectionById($electionId);
-  $groupIds = $election->allowed_groups;
-  if (!empty($groupIds)) {
-    $groupIds = explode(',', strval($groupIds));
-  } else {
-    return FALSE;
-  }
-
-  $groups = civicrm_api3('GroupContact', 'get', [
-    'sequential' => TRUE,
-    'contact_id' => $contactId,
-    'options' => ['limit' => 0],
-  ]);
-
-  $contactGroups = array_column($groups['values'], 'group_id');
-  $groupsCount = count(array_intersect($contactGroups, $groupIds));
-
-  // Check if contact belongs to any of the selected smart groups.
-  if ($groupsCount == 0) {
-    $smartGroups = CRM_Contact_BAO_GroupContactCache::contactGroup((int) $contactId);
-    if (isset($smartGroups['group'])) {
-      $smartGroups = array_column($smartGroups['group'], 'id');
-      $groupsCount = count(array_intersect($smartGroups, $groupIds));
-    }
-  }
-
-  return ($groupsCount > 0) ? TRUE : FALSE;
+  return CRM_Elections_Helper_Eligibility::canVote($electionId, $contactId);
 }
 
 /**
@@ -441,16 +409,7 @@ function isMemberAllowedToReVote($electionId) {
  * @throws CRM_Core_Exception
  */
 function hasLoggedInUserAlreadyVoted($electionId, $memberId = NULL) {
-  if (!$memberId) {
-    $memberId = CRM_Core_Session::singleton()->getLoggedInContactID();
-  }
-  $votesCount = civicrm_api3('ElectionVote', 'getcount', [
-    'sequential' => TRUE,
-    'member_id'  => $memberId,
-    'election_nomination_id.election_position_id.election_id.id' => $electionId,
-    'options' => ['limit' => 0],
-  ]);
-  return ($votesCount > 0);
+  return CRM_Elections_Helper_Eligibility::hasVoted($electionId, $memberId);
 }
 
 /**
@@ -461,15 +420,7 @@ function hasLoggedInUserAlreadyVoted($electionId, $memberId = NULL) {
  * @throws CRM_Core_Exception
  */
 function getLoggedInUserVoteDate($electionId) {
-  $voteDate = civicrm_api3('ElectionVote', 'get', [
-    'sequential' => TRUE,
-    'return'     => ['created_at'],
-    'options'    => ['limit' => 0],
-    'member_id'  => CRM_Core_Session::singleton()->getLoggedInContactID(),
-    'election_nomination_id.election_position_id.election_id.id' => $electionId,
-  ]);
-  $voteDate = $voteDate['values'][0]['created_at'];
-  return $voteDate;
+  return CRM_Elections_Helper_Eligibility::getVoteDate($electionId);
 }
 
 /**
