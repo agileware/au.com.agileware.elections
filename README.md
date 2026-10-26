@@ -18,6 +18,7 @@ Each election has individual settings which provide these capabilities:
 1. Restrict participation in a specific election using CiviCRM Groups and CiviCRM Smart Groups.
 1. Number of nominations required for a person to become an eligible candidate for each election.
 1. Allow or disallow a user to change their vote.
+1. Choose what voters see about candidates: photos, written candidate statements on the ballot, who nominated each candidate, and how names (including nicknames) are shown.
 1. Anonymise votes after the election results are posted.
 1. Allow people who are not logged in to nominate, accept nominations and vote using a personalised link.
 
@@ -48,7 +49,7 @@ Read the [documentation](docs/index.md)  to get started setting up your first el
 Settings
 -------------
 
-Once enabled, a global **Elections Settings** page is available at 'System Settings / Elections Settings' which controls the source of candidate photos shown throughout the extension. See [Elections Settings](docs/admin_election_settings.md) for details.
+Once enabled, a global **Elections Settings** page is available at 'System Settings / Elections Settings' which controls the source of candidate photos and the default format of candidate names (for example including nicknames) shown throughout the extension. See [Elections Settings](docs/admin_election_settings.md) for details.
 
 WordPress Short-codes
 -------------

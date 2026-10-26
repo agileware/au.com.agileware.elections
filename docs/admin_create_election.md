@@ -24,6 +24,11 @@ To create a new election, you should be a user who gains admin access for CiviCR
 - **Allow non-logged in access**: If enabled, people can nominate, accept nominations and vote using a personalised link, without needing to log in. See [Participating without logging in](setup.md#participating-without-logging-in).
 - **Number of Required Nominations**: The number of people who must nominate a person for a position before they become an eligible candidate. See [How to second a nomination](user_second_nomination.md).
 - **Allowed by Groups**: The CiviCRM Groups and Smart Groups whose members are permitted to nominate, accept nominations and vote in this election.
-5. Click **Create** to create a new election.
+5. Choose the **Display options** for what voters see about candidates:
+- **Show candidate photos**: untick to hide candidate photos everywhere in this election - the nominations list, candidate pages, the ballot and the results. Use this when you want voters to decide without photos.
+- **Candidate statements**: candidates write a statement when they accept a nomination (see [How to accept a nomination](user_accept_nomination.md)). A statement is always shown on the candidate's own page. Choose whether it is also shown on the ballot, as an expandable *Read statement* or in full, and in the candidate list once voting has started.
+- **Show who nominated each candidate**: untick to hide the nominators and seconders on the candidate page, for example when nominations are handled outside the website.
+- **Candidate name format**: how candidate names are written. Use **First "Nickname" Last** to show, for example, Edward "Butch" Smith. Nicknames come from the contact's *Nickname* field. The default follows the site-wide setting, see [Elections Settings](admin_election_settings.md).
+6. Click **Create** to create a new election.
 
 The election is created inactive. At least one [Position](admin_add_position.md) must be added, and the election must be [activated](admin_activate_election.md), before it is visible to end users.
