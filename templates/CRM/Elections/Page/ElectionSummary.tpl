@@ -23,7 +23,7 @@
                 <h3>{ts}Elected{/ts}</h3>
                 <ul>
                     {foreach from=$position.candidates item=candidate}
-                        {if $candidate.is_winner}
+                        {if $candidate.is_winner|default:false}
                             <li>{$candidate.$memberdisplayname}</li>
                         {/if}
                     {/foreach}
