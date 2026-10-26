@@ -2,6 +2,10 @@
 
 Once a nomination has received the number of nominations required by the election's settings, the nominee becomes an **eligible candidate** - see [How to second a nomination](user_second_nomination.md). To become a candidate, an eligible candidate must then accept the nomination before the **Voting Start Date**. Nominations are usually accepted during the **Advertise Candidates** stage, after nominations have closed and while people wait to see who has accepted their nomination.
 
+When accepting, the nominee writes a **candidate statement** for voters (their experience, what they want to achieve) and can add a **link to a longer statement or CV**. The statement is shown on the candidate's page and, depending on the election's [display options](admin_create_election.md), on the ballot. A candidate can change their statement, using **Edit statement** on their candidate page, until voting starts. Election administrators can correct a statement at any time before voting ends.
+
+Accepting is done by the nominee themselves: they open the election while logged in as themselves (or through their personalised link, if [non-logged in access](setup.md#participating-without-logging-in) is enabled) and use the **Accept Nomination** button shown for each position they are an eligible candidate for. An administrator cannot accept on someone's behalf, and some site tools that let an administrator impersonate a user (for example Drupal masquerade) may not work with CiviCRM sessions - log in as the nominee in a separate browser instead.
+
 If the nominee does not accept a nomination, then they will not be listed as a candidate when voting starts, after the **Voting Start Date**.
 
 A nominee can instead [withdraw a nomination](user_withdraw_nomination.md) if they do not want to be a candidate for the position.
