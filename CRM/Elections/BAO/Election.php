@@ -56,6 +56,9 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
    * @return bool
    */
   public static function isElectionInProcess($processStartDate) {
+    if (empty($processStartDate)) {
+      return FALSE;
+    }
     $nominationStartDate = DateTime::createFromFormat('Y-m-d H:i:s', $processStartDate);
     $today = new DateTime();
 
@@ -83,6 +86,9 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
    * @return bool
    */
   public static function isTodayBetweenDates($dateA, $dateB) {
+    if (empty($dateA)) {
+      return FALSE;
+    }
     $today = new DateTime();
     $dateA = DateTime::createFromFormat('Y-m-d H:i:s', $dateA);
 
