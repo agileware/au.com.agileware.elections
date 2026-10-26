@@ -126,27 +126,34 @@ function civicrm_api3_election_vote_addvotes($params) {
     return civicrm_api3_create_error('Multiple members are not yet supported.');
   }
 
-  if (hasLoggedInUserAlreadyVoted($election->id, $params['member_id'])) {
-    if (!$election->allow_revote) {
-      return civicrm_api3_create_error('Member has already voted in given election.');
-    }
-    else {
-      civicrm_api3('ElectionVote', 'deletevotes', [
-        'election_id' => $election->id,
-        'member_id'   => $params['member_id'],
-      ]);
-    }
-  }
-
+  // Check everything before touching an earlier ballot, so a rejected ballot never costs someone their vote.
   if (!isLoggedInMemberAllowedToVote($election->id, $params['member_id'])) {
     return civicrm_api3_create_error('Member is not allowed to vote in given election.');
   }
 
+  $hasVoted = hasLoggedInUserAlreadyVoted($election->id, $params['member_id']);
+  if ($hasVoted && !$election->allow_revote) {
+    return civicrm_api3_create_error('Member has already voted in given election.');
+  }
+
   $votes = $params['votes'];
+  $voteError = _civicrm_api3_election_vote_validate_ballot($election->id, $votes);
+  if ($voteError) {
+    return civicrm_api3_create_error($voteError);
+  }
+
+  $transaction = new CRM_Core_Transaction();
+  if ($hasVoted) {
+    civicrm_api3('ElectionVote', 'deletevotes', [
+      'election_id' => $election->id,
+      'member_id'   => $params['member_id'],
+    ]);
+  }
   foreach ($votes as $vote) {
     $vote['member_id'] = $params['member_id'];
     civicrm_api3('ElectionVote', 'create', $vote);
   }
+  $transaction->commit();
 
   return civicrm_api3_create_success([
     'message' => count($votes) . ' has been added successfully.',
@@ -162,4 +169,63 @@ function civicrm_api3_election_vote_addvotes($params) {
  */
 function civicrm_api3_election_vote_get($params) {
   return _civicrm_api3_basic_get(_civicrm_api3_get_BAO(__FUNCTION__), $params);
+}
+
+
+/**
+ * Check a ballot only ranks real candidates of the election, with sensible ranks.
+ *
+ * @param int $electionId
+ * @param array $votes
+ *   Each with election_nomination_id and rank.
+ *
+ * @return string|null
+ *   An error message, or NULL when the ballot is fine.
+ */
+function _civicrm_api3_election_vote_validate_ballot($electionId, $votes) {
+  if (!is_array($votes) || empty($votes)) {
+    return 'A ballot must rank at least one candidate.';
+  }
+
+  $nominationIds = [];
+  foreach ($votes as $vote) {
+    if (!isset($vote['election_nomination_id']) || !CRM_Utils_Rule::positiveInteger($vote['election_nomination_id'])) {
+      return 'Each vote must be for a candidate.';
+    }
+    if (!isset($vote['rank']) || !CRM_Utils_Rule::positiveInteger($vote['rank'])) {
+      return 'Rank must be a valid positive integer.';
+    }
+    if (in_array($vote['election_nomination_id'], $nominationIds)) {
+      return 'A candidate can only be ranked once.';
+    }
+    $nominationIds[] = $vote['election_nomination_id'];
+  }
+
+  $candidates = CRM_Core_DAO::executeQuery('
+    SELECT n.id, n.election_position_id
+    FROM civicrm_election_nomination n
+    INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
+    WHERE p.election_id = %1
+      AND n.is_eligible_candidate = 1 AND n.has_accepted_nomination = 1 AND IFNULL(n.has_rejected_nomination, 0) = 0
+      AND n.id IN (' . implode(',', array_map('intval', $nominationIds)) . ')
+  ', [1 => [$electionId, 'Positive']])->fetchMap('id', 'election_position_id');
+
+  $ranksByPosition = [];
+  foreach ($votes as $vote) {
+    $positionId = $candidates[$vote['election_nomination_id']] ?? NULL;
+    if (!$positionId) {
+      return 'You can only vote for candidates of this election.';
+    }
+    if (in_array($vote['rank'], $ranksByPosition[$positionId] ?? [])) {
+      return 'Rank must be different for each candidate.';
+    }
+    $ranksByPosition[$positionId][] = $vote['rank'];
+  }
+  foreach ($ranksByPosition as $ranks) {
+    if (!in_array(1, $ranks)) {
+      return 'If you rank candidates for a position you must give one of them rank 1.';
+    }
+  }
+
+  return NULL;
 }

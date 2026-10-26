@@ -113,14 +113,13 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
   public function postProcess() {
     $values = $this->exportValues();
 
-    civicrm_api3('ElectionNomination', 'create', [
-      'id' => $this->enId,
-      'rejection_comments' => $values['nominationcomments'],
-      'has_rejected_nomination' => 1,
-      'has_accepted_nomination' => 0,
-    ]);
-
-    CRM_Core_Session::setStatus(E::ts('You have withdrawn the nomination.'), '', 'success');
+    try {
+      CRM_Elections_Helper_Process::withdraw($this->enId, CRM_Elections_Helper_Eligibility::getActingContactId(), $values['nominationcomments']);
+      CRM_Core_Session::setStatus(E::ts('You have withdrawn the nomination.'), '', 'success');
+    }
+    catch (CRM_Core_Exception $e) {
+      CRM_Core_Session::setStatus($e->getMessage(), '', 'error');
+    }
 
     // Redirect back to the main election info view
     $redirectUrl = Civi::url('current://civicrm/elections/view');

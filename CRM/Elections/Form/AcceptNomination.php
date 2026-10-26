@@ -127,14 +127,13 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
   public function postProcess() {
     $values = $this->exportValues();
 
-    civicrm_api3('ElectionNomination', 'create', [
-      'id' => $this->enId,
-      'comments' => $values['nominationcomments'],
-      'statement_url' => trim($values['statement_url'] ?? '') !== '' ? trim($values['statement_url']) : NULL,
-      'has_accepted_nomination' => 1,
-    ]);
-
-    CRM_Core_Session::setStatus(E::ts('Nomination accepted.'), '', 'success');
+    try {
+      CRM_Elections_Helper_Process::accept($this->enId, CRM_Elections_Helper_Eligibility::getActingContactId(), $values['nominationcomments'], $values['statement_url'] ?? NULL);
+      CRM_Core_Session::setStatus(E::ts('Nomination accepted.'), '', 'success');
+    }
+    catch (CRM_Core_Exception $e) {
+      CRM_Core_Session::setStatus($e->getMessage(), '', 'error');
+    }
 
     // Redirect back to the main election info view
     $redirectUrl = Civi::url('current://civicrm/elections/view');
