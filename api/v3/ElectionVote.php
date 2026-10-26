@@ -192,7 +192,7 @@ function _civicrm_api3_election_vote_validate_ballot($electionId, $votes) {
     if (!isset($vote['election_nomination_id']) || !CRM_Utils_Rule::positiveInteger($vote['election_nomination_id'])) {
       return 'Each vote must be for a candidate.';
     }
-    if (!isset($vote['rank']) || !CRM_Utils_Rule::positiveInteger($vote['rank'])) {
+    if (!isset($vote['rank']) || !CRM_Utils_Rule::positiveInteger($vote['rank']) || (int) $vote['rank'] < 1) {
       return 'Rank must be a valid positive integer.';
     }
     if (in_array($vote['election_nomination_id'], $nominationIds)) {
