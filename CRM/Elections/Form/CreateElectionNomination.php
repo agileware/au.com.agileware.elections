@@ -146,48 +146,6 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     ]);
   }
 
-  /**
-   * Get nomination id given by contact and position
-   *
-   * @param $values
-   * @return array|int
-   * @throws CRM_Extension_Exception
-   * @throws CRM_Core_Exception
-   */
-  private function getNominationId($values) {
-    $nominationId = 0;
-    $nomination = civicrm_api3('ElectionNomination', 'get', [
-      'member_nominee'        => $values['contact'],
-      'election_position_id'  => $values['position'],
-      'sequential'            => TRUE,
-	  'options'               => ['limit' => 0],
-    ]);
-
-    if ($nomination['count'] > 0) {
-      $nomination = $nomination['values'][0];
-      if ($nomination['has_rejected_nomination'] == 1) {
-        CRM_Core_Session::setStatus(E::ts('Selected member has withdrawn the nomination, You cannot nominate the member again for selected position.'), '', 'error');
-        CRM_Utils_System::redirect(Civi::url('current://civicrm/elections/view', 'eid=' . $this->eId ));
-        return -1;
-      }
-      $nominationId = $nomination['id'];
-    }
-    else {
-      $nominationId = civicrm_api3('ElectionNomination', 'create', [
-        'member_nominee'        => $values['contact'],
-        'election_position_id'  => $values['position'],
-      ]);
-      $nominationId = $nominationId['id'];
-    }
-
-    if (!$nominationId) {
-      throwAccessDeniedException($this, E::ts('Some error occurred while creating a nomination, Please try again.'));
-      return -1;
-    }
-
-    return $nominationId;
-  }
-
   public function preProcess() {
     $cid = CRM_Utils_Request::retrieve('cid', 'Positive');
     $cs = CRM_Utils_Request::retrieve('cs', 'String');
@@ -202,97 +160,26 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
 
   public function postProcess() {
     $values = $this->exportValues();
-    $nominationId = $this->getNominationId($values);
-    if ($nominationId < 0) {
-      return;
+    $nominatorId = CRM_Elections_Helper_Eligibility::getActingContactId();
+
+    $redirectUrl = Civi::url('current://civicrm/elections/view');
+    $redirectUrl->addQuery(['eid' => $this->eId]);
+    // Conditionally add contact ID and checksum
+    if ($this->cid && $this->cs) {
+      $redirectUrl->addQuery(['cid' => $this->cid]);
+      $redirectUrl->addQuery(['cs' => $this->cs]);
     }
-    $nominatorId = CRM_Core_Session::singleton()->getLoggedInContactID();
 
-    if ( !$nominatorId && $this->cid && $this->cs ) {
-      $nominatorId = $this->cid;
-    }
-
-    $seconderParams = [
-      'member_nominator'       => $nominatorId,
-      'election_nomination_id' => $nominationId,
-    ];
-    $nominationSeconder = civicrm_api3('ElectionNominationSeconder', 'getcount', $seconderParams);
-
-    if ($nominationSeconder != 0) {
+    try {
+      CRM_Elections_Helper_Process::nominate($this->eId, $values['position'], $values['contact'], $nominatorId, $values['reason'] ?? NULL);
       CRM_Core_Session::setStatus(E::ts('Nomination submitted.'), '', 'success');
     }
-    else {
-      $seconderParams['description'] = $values['reason'];
-      $nominationSeconder = civicrm_api3('ElectionNominationSeconder', 'create', $seconderParams);
-
-      $isEligibleCandidate = $this->markNominationAsEligibleCandidate($nominationId);
-      $this->createNominationActivity([
-        'nominator'              => $nominatorId,
-        'nomination_id'          => $nominationId,
-        'nominee'                => $values['contact'],
-        'nomination_seconder_id' => $nominationSeconder['id'],
-        'is_eligible_candidate'  => ($isEligibleCandidate) ? 1 : 0,
-      ]);
-      CRM_Core_Session::setStatus(E::ts('Nomination submitted.'), '', 'success');
+    catch (CRM_Core_Exception $e) {
+      CRM_Core_Session::setStatus($e->getMessage(), '', 'error');
     }
 
     parent::postProcess();
-
-    // Redirect back to the main election info view
-    $redirectUrl = Civi::url('current://civicrm/elections/view');
-    $redirectUrl->addQuery(['eid' => $this->eId]);
-
-    // Conditionally add contact ID and checksum
-    if ( $this->cid && $this->cs ) {
-        $redirectUrl->addQuery(['cid' => $this->cid]);
-        $redirectUrl->addQuery(['cs' => $this->cs]);
-    }
-    CRM_Utils_System::redirect( $redirectUrl );
-  }
-
-  private function createNominationActivity($params) {
-
-    $electionNomination = civicrm_api3('ElectionNomination', 'get', [
-      'sequential' => TRUE,
-      'return'     => ['member_nominee.display_name', 'election_position_id.name'],
-      'id'         => $params['nomination_id'],
-	  'options'    => ['limit' => 0],
-    ]);
-    $electionNomination = $electionNomination['values'][0];
-
-    $currentDateTime = (new DateTime())->format('Y-m-d H:i:s');
-    civicrm_api3('Activity', 'create', [
-      'source_contact_id' => $params['nominator'],
-      'activity_type_id' => 'Nomination',
-      'activity_date_time' => $currentDateTime,
-      'status_id' => 'Completed',
-      'assignee_id' => $params['nominator'],
-      'target_id' => $params['nominee'],
-      'source_record_id' => $params['nomination_seconder_id'],
-      'is_star'  => $params['is_eligible_candidate'],
-      'subject'  => E::ts('Nominated %1 for the position of %2', [1 => $electionNomination['member_nominee.display_name'], 2 => $electionNomination['election_position_id.name']]),
-    ]);
-  }
-
-  /**
-   * Mark nomination as eligible candidate if it has enough nominations.
-   *
-   * @param $nominationId
-   * @return bool
-   * @throws CRM_Core_Exception
-   */
-  private function markNominationAsEligibleCandidate($nominationId) {
-    $totalNominations = civicrm_api3('ElectionNominationSeconder', 'getcount', [
-      'election_nomination_id'  => $nominationId,
-    ]);
-    if ($totalNominations >= $this->election->required_nominations) {
-      civicrm_api3('ElectionNomination', 'create', [
-        'id'                    => $nominationId,
-        'is_eligible_candidate' => 1,
-      ]);
-      return TRUE;
-    }
-    return FALSE;
+    CRM_Utils_System::redirect($redirectUrl);
   }
 
 }

@@ -258,6 +258,19 @@ class api_v3_ElectionBaseTestCase extends \PHPUnit\Framework\TestCase implements
   }
 
   /**
+   * Make a nomination an eligible candidate who has accepted, so it can be voted for.
+   *
+   * @param int $nominationId
+   */
+  public function makeCandidate($nominationId) {
+    $this->callAPISuccess('ElectionNomination', 'create', [
+      'id' => $nominationId,
+      'is_eligible_candidate' => 1,
+      'has_accepted_nomination' => 1,
+    ]);
+  }
+
+  /**
    * Create successful nomination.
    *
    * @return array
