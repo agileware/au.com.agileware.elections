@@ -238,6 +238,7 @@ class CRM_Elections_Test_CouncilFixture {
   public function runNominations() {
     foreach (self::PLAN as [$position, $nominee, $nominators]) {
       foreach ($nominators as $nominator) {
+        // Safe to run after some people have already nominated in the browser.
         $result = CRM_Elections_Helper_Process::nominate(
           $this->electionId,
           $this->positions[$position],
@@ -250,6 +251,7 @@ class CRM_Elections_Test_CouncilFixture {
     }
   }
 
+
   /**
    * Nominees respond, each as themselves.
    */
@@ -257,6 +259,10 @@ class CRM_Elections_Test_CouncilFixture {
     foreach (self::PLAN as [$position, $nominee, , $outcome]) {
       $nominationId = $this->nominations["$position|$nominee"];
       $contactId = $this->id($nominee);
+      if ($this->hasResponded($nominationId)) {
+        // Already done, for example in the browser.
+        continue;
+      }
       switch ($outcome) {
         case 'accept':
         case 'accept_then_withdraw':
@@ -324,6 +330,10 @@ class CRM_Elections_Test_CouncilFixture {
    */
   public function castBallots() {
     foreach ($this->ballots() as $persona => $ballot) {
+      if (CRM_Elections_Helper_Eligibility::hasVoted($this->electionId, $this->id($persona))) {
+        // Already voted, for example in the browser.
+        continue;
+      }
       CRM_Elections_Helper_Process::vote($this->electionId, $this->id($persona), $this->ranksForApi($ballot));
     }
   }
@@ -343,6 +353,54 @@ class CRM_Elections_Test_CouncilFixture {
       }
     }
     return $ranks;
+  }
+
+  private function hasResponded($nominationId) {
+    $nomination = civicrm_api3('ElectionNomination', 'getsingle', ['id' => $nominationId, 'return' => ['has_accepted_nomination', 'has_rejected_nomination']]);
+    return !empty($nomination['has_accepted_nomination']) || !empty($nomination['has_rejected_nomination']);
+  }
+
+  /**
+   * Remember the fixture so a later script (for example browser testing) can carry on with it.
+   *
+   * @return array
+   */
+  public function toArray() {
+    return [
+      'election_id' => $this->electionId,
+      'group_id' => $this->groupId,
+      'personas' => $this->personas,
+      'positions' => $this->positions,
+    ];
+  }
+
+  /**
+   * @param array $data
+   *   As returned by toArray().
+   *
+   * @return static
+   */
+  public static function fromArray(array $data) {
+    $fixture = new static();
+    $fixture->electionId = $data['election_id'];
+    $fixture->groupId = $data['group_id'];
+    $fixture->personas = $data['personas'];
+    $fixture->positions = $data['positions'];
+    $fixture->reloadNominations();
+    return $fixture;
+  }
+
+  /**
+   * Find the nominations made so far, keyed "Position|Nominee".
+   */
+  public function reloadNominations() {
+    $byContact = array_flip($this->personas);
+    $byPosition = array_flip($this->positions);
+    $this->nominations = [];
+    $nominations = civicrm_api3('ElectionNomination', 'get', ['election_position_id' => ['IN' => array_values($this->positions)], 'options' => ['limit' => 0]]);
+    foreach ($nominations['values'] as $nomination) {
+      $this->nominations[$byPosition[$nomination['election_position_id']] . '|' . $byContact[$nomination['member_nominee']]] = $nomination['id'];
+    }
   }
 
   public function generateResults() {
