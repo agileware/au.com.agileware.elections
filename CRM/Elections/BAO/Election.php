@@ -32,9 +32,9 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
    */
   public static function getStatementDisplayOptions() {
     return [
-      self::STATEMENTS_NONE => E::ts('Do not show statements'),
-      self::STATEMENTS_LINK => E::ts('Show a link to read each statement'),
-      self::STATEMENTS_INLINE => E::ts('Show each statement in full'),
+      self::STATEMENTS_NONE => E::ts('Not on the ballot'),
+      self::STATEMENTS_LINK => E::ts('Expandable "Read statement" on the ballot'),
+      self::STATEMENTS_INLINE => E::ts('In full on the ballot'),
     ];
   }
 
@@ -95,6 +95,21 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
     $this->isVotingStarted = self::isTodayBetweenDates($this->voting_start_date, NULL);
     $this->isVotingEnded = self::isTodayBetweenDates($this->voting_end_date, NULL);
     $this->isResultsOut = (self::isTodayBetweenDates($this->result_date, NULL) && $this->has_results_generated);
+    $this->assignDisplayOptions();
+  }
+
+  /**
+   * Resolve the display options of the election for templates.
+   *
+   * An empty value means the option was never set (older elections or API
+   * callers), in which case the pre-2.0 behaviour applies.
+   */
+  public function assignDisplayOptions() {
+    $this->showPhotos = ($this->show_photos === NULL || $this->show_photos === '') ? TRUE : (bool) $this->show_photos;
+    $this->showNominators = ($this->show_nominators === NULL || $this->show_nominators === '') ? TRUE : (bool) $this->show_nominators;
+    $statements = $this->show_statements;
+    $this->statementDisplay = array_key_exists($statements ?? '', self::getStatementDisplayOptions()) ? $statements : self::STATEMENTS_NONE;
+    $this->showStatements = ($this->statementDisplay !== self::STATEMENTS_NONE);
   }
 
   /**

@@ -84,6 +84,13 @@
     <access_callback>CRM_Elections_Permission::check</access_callback>
   </item>
   <item>
+    <path>civicrm/elections/candidate/statement</path>
+    <page_callback>CRM_Elections_Form_EditStatement</page_callback>
+    <title>Candidate Statement</title>
+    <access_arguments>view Elections</access_arguments>
+    <access_callback>CRM_Elections_Permission::check</access_callback>
+  </item>
+  <item>
     <path>civicrm/elections/summary</path>
     <page_callback>CRM_Elections_Page_ElectionSummary</page_callback>
     <title>ElectionSummary</title>

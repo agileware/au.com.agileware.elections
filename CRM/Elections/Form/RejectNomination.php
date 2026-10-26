@@ -23,10 +23,17 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
       return;
     }
 
+    // The nominee is the logged in contact, or the contact identified by a valid checksum link.
+    $nomineeId = CRM_Elections_Helper_Eligibility::getActingContactId();
+    if (empty($nomineeId)) {
+      throwAccessDeniedPage($this);
+      return;
+    }
+
     try {
       $this->electionNomination = civicrm_api3('ElectionNomination', 'getsingle', [
         'id' => $this->enId,
-        'member_nominee' => CRM_Core_Session::singleton()->getLoggedInContactID(),
+        'member_nominee' => $nomineeId,
         'return' => ['has_accepted_nomination', 'is_eligible_candidate', 'election_position_id.name', 'election_position_id.election_id.name', 'has_rejected_nomination', 'election_position_id.election_id'],
       ]);
     }

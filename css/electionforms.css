@@ -406,3 +406,19 @@ ul#errorList {
 .crm-election-date {
     font-weight: bold;
 }
+
+/* Candidate statements */
+.election-statement {
+    margin-top: 10px;
+    max-width: 40em;
+}
+.election-statement summary {
+    cursor: pointer;
+    text-decoration: underline;
+}
+.election-statement p {
+    margin: 8px 0;
+}
+.vote-candidate-row.no-photo .right-info-block {
+    max-width: 100%;
+}

@@ -37,13 +37,59 @@ class CRM_Elections_Helper_Candidate {
   }
 
   /**
-   * The name format currently configured for the site.
+   * The name format configured for the site.
    *
    * @return string
    */
   public static function getNameFormat() {
     $format = Civi::settings()->get('elections_name_format');
     return array_key_exists($format ?? '', self::getNameFormats()) ? $format : self::NAME_DISPLAY;
+  }
+
+  /**
+   * The name format for an election: its own choice, otherwise the site setting.
+   *
+   * @param int|null $electionId
+   *
+   * @return string
+   */
+  public static function getNameFormatForElection($electionId) {
+    if ($electionId) {
+      $format = CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $electionId, 'name_format');
+      if (!empty($format) && array_key_exists($format, self::getNameFormats())) {
+        return $format;
+      }
+    }
+    return self::getNameFormat();
+  }
+
+  /**
+   * The name format for the election a position belongs to.
+   *
+   * @param int $positionId
+   *
+   * @return string
+   */
+  public static function getNameFormatForPosition($positionId) {
+    return self::getNameFormatForElection(CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_ElectionPosition', $positionId, 'election_id'));
+  }
+
+  /**
+   * Is the value usable as a statement link? Empty, or a web address using http(s).
+   *
+   * @param string|null $url
+   *
+   * @return bool
+   */
+  public static function isValidStatementUrl($url) {
+    $url = trim((string) $url);
+    if ($url === '') {
+      return TRUE;
+    }
+    if (filter_var($url, FILTER_VALIDATE_URL) === FALSE) {
+      return FALSE;
+    }
+    return in_array(strtolower((string) parse_url($url, PHP_URL_SCHEME)), ['http', 'https'], TRUE);
   }
 
   /**

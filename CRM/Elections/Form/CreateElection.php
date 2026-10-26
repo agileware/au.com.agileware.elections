@@ -65,6 +65,12 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       $defaults['allowed_groups'] = $election->allowed_groups;
 
       $defaults['allow_checksum_access'] = $election->allow_checksum_access;
+
+      $election->assignDisplayOptions();
+      $defaults['show_photos'] = (int) $election->showPhotos;
+      $defaults['show_statements'] = $election->statementDisplay;
+      $defaults['show_nominators'] = (int) $election->showNominators;
+      $defaults['name_format'] = $election->name_format ?? '';
     }
     else {
       $this->eId = 0;
@@ -72,6 +78,10 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       $defaults['allow_revote'] = 0;
       $defaults['required_nominations'] = 2;
       $defaults['allowed_groups'] = '';
+      $defaults['show_photos'] = 1;
+      $defaults['show_statements'] = CRM_Elections_BAO_Election::STATEMENTS_LINK;
+      $defaults['show_nominators'] = 1;
+      $defaults['name_format'] = '';
     }
 
     return $defaults;
@@ -129,6 +139,12 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       ],
     ], TRUE);
 
+    // Display options.
+    $this->add('advcheckbox', 'show_photos', E::ts('Show candidate photos'));
+    $this->add('select', 'show_statements', E::ts('Candidate statements'), CRM_Elections_BAO_Election::getStatementDisplayOptions(), TRUE);
+    $this->add('advcheckbox', 'show_nominators', E::ts('Show who nominated each candidate'));
+    $this->add('select', 'name_format', E::ts('Candidate name format'), ['' => E::ts('Use the site setting')] + CRM_Elections_Helper_Candidate::getNameFormats());
+
     // Submit button
     $this->addButtons([
       [
@@ -169,6 +185,10 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       'is_visible'                  => 0,
       'required_nominations'        => $values['required_nominations'],
       'allowed_groups'              => $values['allowed_groups'],
+      'show_photos'                 => !empty($values['show_photos']) ? 1 : 0,
+      'show_statements'             => $values['show_statements'],
+      'show_nominators'             => !empty($values['show_nominators']) ? 1 : 0,
+      'name_format'                 => $values['name_format'] !== '' ? $values['name_format'] : NULL,
       'created_by'                  => CRM_Core_Session::singleton()->getLoggedInContactID(),
     ];
 

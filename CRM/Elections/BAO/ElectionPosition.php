@@ -6,12 +6,12 @@ class CRM_Elections_BAO_ElectionPosition extends CRM_Elections_DAO_ElectionPosit
   public static function findWithNominationsByElectionId($electionId) {
     $nominations = civicrm_api3('ElectionNomination', 'get', [
       'election_position_id.election_id'  => $electionId,
-      'return' => array_merge(['member_nominee.image_URL', 'election_position_id', 'comments', 'is_eligible_candidate', 'id', 'has_rejected_nomination', 'rejection_comments', 'has_accepted_nomination', 'member_nominee'], CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS),
+      'return' => array_merge(['member_nominee.image_URL', 'election_position_id', 'comments', 'statement_url', 'is_eligible_candidate', 'id', 'has_rejected_nomination', 'rejection_comments', 'has_accepted_nomination', 'member_nominee'], CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS),
       'options' => ['limit' => 0],
     ]);
 
     $nominations = elections_shuffle_assoc($nominations['values']);
-    CRM_Elections_Helper_Candidate::applyNameFormatToAll($nominations);
+    CRM_Elections_Helper_Candidate::applyNameFormatToAll($nominations, CRM_Elections_Helper_Candidate::getNameFormatForElection($electionId));
 
     $nominationIds = array_column($nominations, 'id');
 

@@ -133,6 +133,41 @@
         </tr>
 
 
+        <tr>
+            <td colspan="2">
+                <h2>{ts}Display options{/ts}</h2>
+                <p class="description">{ts}Choose what voters see about candidates in this election.{/ts}</p>
+            </td>
+        </tr>
+        <tr class="crm-create-election-form-block-display">
+            <td class="label">{$form.show_photos.label}</td>
+            <td>
+                {$form.show_photos.html}<br>
+                <span class="description">{ts}Untick to hide candidate photos everywhere in this election (nominations, ballot, candidate pages and results).{/ts}</span>
+            </td>
+        </tr>
+        <tr class="crm-create-election-form-block-display">
+            <td class="label">{$form.show_statements.label}</td>
+            <td>
+                {$form.show_statements.html}<br>
+                <span class="description">{ts}Candidates write a statement when they accept a nomination. It is always shown on the candidate's own page; choose whether it is also shown on the ballot and, once voting starts, in the candidate list.{/ts}</span>
+            </td>
+        </tr>
+        <tr class="crm-create-election-form-block-display">
+            <td class="label">{$form.show_nominators.label}</td>
+            <td>
+                {$form.show_nominators.html}<br>
+                <span class="description">{ts}Untick to hide who nominated and seconded each candidate.{/ts}</span>
+            </td>
+        </tr>
+        <tr class="crm-create-election-form-block-display">
+            <td class="label label-select-col">{$form.name_format.label}</td>
+            <td>
+                {$form.name_format.html}<br>
+                <span class="description">{ts}How candidate names are shown. Nicknames are only used for contacts that have one.{/ts}</span>
+            </td>
+        </tr>
+
         <tr class="crm-create-election-form-block-buttons">
             <td colspan="2">
                 <div class="crm-submit-buttons">

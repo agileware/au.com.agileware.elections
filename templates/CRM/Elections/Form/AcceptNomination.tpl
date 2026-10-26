@@ -1,6 +1,6 @@
 {include file="CRM/Elections/Page/WelcomeMessage.tpl"}
 <div class="crm-elections-helptext-block">
-    <p>{ts}To accept your candidacy, add any comments and press the "Accept" button.{/ts}</p>
+    <p>{ts}To accept your candidacy, write a short statement for voters and press the "Accept" button. You can change your statement until voting starts.{/ts}</p>
 </div>
 
 <div class="crm-accept-nomination-form-block crm-election-form-block-container">
@@ -33,6 +33,15 @@
         </div>
         <div class="crm-election-form-col-right custom_accept">
             {$form.nominationcomments.html}
+        </div>
+    </div><!-- ending of crm-election-form-row -->
+
+    <div class="crm-election-form-row">
+        <div class="crm-election-form-col-left">
+            {$form.statement_url.label}
+        </div>
+        <div class="crm-election-form-col-right">
+            {$form.statement_url.html}
         </div>
     </div><!-- ending of crm-election-form-row -->
 
