@@ -259,9 +259,11 @@ class CRM_Elections_Helper_Results {
     $positions = $this->getPositions($electionId);
     foreach ($positions as $position) {
       $this->generateResultsForPosition($position, $electionId);
-      if ($anonymizeVotes == 1) {
-        $this->removeVotes($electionId);
-      }
+    }
+
+    // Anonymise only once every position has been counted, as counting needs the voter ids.
+    if ($anonymizeVotes == 1) {
+      $this->removeVotes($electionId);
     }
 
     civicrm_api3('Election', 'create', [
@@ -271,15 +273,13 @@ class CRM_Elections_Helper_Results {
   }
 
   public function removeVotes($electionId) {
-    $votes = civicrm_api3('ElectionVote', 'get', [
-      'election_nomination_id.election_position_id.election_id.id' => $electionId,
-	  'options' => ['limit' => 0],
-    ]);
-    $votes = $votes['values'];
-    foreach ($votes as $vote) {
-      $query = 'UPDATE civicrm_election_vote SET member_id = NULL WHERE id = ' . $vote['id'];
-      CRM_Core_DAO::executeQuery($query);
-    }
+    CRM_Core_DAO::executeQuery('
+      UPDATE civicrm_election_vote v
+      INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id
+      INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
+      SET v.member_id = NULL
+      WHERE p.election_id = %1
+    ', [1 => [(int) $electionId, 'Integer']]);
   }
 
 }

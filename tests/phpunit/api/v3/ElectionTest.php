@@ -68,7 +68,7 @@ class api_v3_ElectionTest extends api_v3_ElectionBaseTestCase {
    * Test that a election should not be edit/delete if it has been started and active.
    */
   public function testEditDeleteActiveStartedElection() {
-    $election = $this->createElection([], api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS);
+    $election = $this->createElection(['is_visible' => 1], api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS);
     $election['name'] = 'Deleting started election';
     $election['is_deleted'] = 1;
     $this->callAPIFailure('election', 'create', $election);

@@ -389,6 +389,9 @@ function isLoggedInMemberAllowedToVote($electionId, $contactId = NULL) {
   if ($contactId == NULL) {
     $contactId = CRM_Core_Session::singleton()->getLoggedInContactID();
   }
+  if (empty($contactId)) {
+    return FALSE;
+  }
   $election = findElectionById($electionId);
   $groupIds = $election->allowed_groups;
   if (!empty($groupIds)) {
@@ -408,7 +411,7 @@ function isLoggedInMemberAllowedToVote($electionId, $contactId = NULL) {
 
   // Check if contact belongs to any of the selected smart groups.
   if ($groupsCount == 0) {
-    $smartGroups = CRM_Contact_BAO_GroupContactCache::contactGroup(CRM_Core_Session::singleton()->getLoggedInContactID());
+    $smartGroups = CRM_Contact_BAO_GroupContactCache::contactGroup((int) $contactId);
     if (isset($smartGroups['group'])) {
       $smartGroups = array_column($smartGroups['group'], 'id');
       $groupsCount = count(array_intersect($smartGroups, $groupIds));
