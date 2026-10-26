@@ -19,6 +19,25 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
     ];
   }
 
+  const STATEMENTS_NONE = 'none';
+
+  const STATEMENTS_LINK = 'link';
+
+  const STATEMENTS_INLINE = 'inline';
+
+  /**
+   * Options for how candidate statements are shown on ballots and nominations.
+   *
+   * @return array
+   */
+  public static function getStatementDisplayOptions() {
+    return [
+      self::STATEMENTS_NONE => E::ts('Do not show statements'),
+      self::STATEMENTS_LINK => E::ts('Show a link to read each statement'),
+      self::STATEMENTS_INLINE => E::ts('Show each statement in full'),
+    ];
+  }
+
   /**
    * Check if user is allowed to edit an election.
    *

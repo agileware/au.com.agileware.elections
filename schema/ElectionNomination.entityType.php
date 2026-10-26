@@ -45,6 +45,15 @@ return [
         'duplicate_matching',
       ],
     ],
+    'statement_url' => [
+      'title' => E::ts('Statement Link'),
+      'sql_type' => 'varchar(2048)',
+      'input_type' => 'Text',
+      'description' => E::ts('Link to a longer candidate statement or CV.'),
+      'add' => '2.0',
+      'default' => NULL,
+      'usage' => ['export'],
+    ],
     'is_eligible_candidate' => [
       'title' => E::ts('Is Eligible Candidate'),
       'sql_type' => 'boolean',
