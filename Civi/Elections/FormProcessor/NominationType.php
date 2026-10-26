@@ -93,10 +93,16 @@ class NominationType extends AbstractType implements OptionListInterface {
     foreach($nominationsApi['values'] as $nomination) {
       $display_name = $nomination['id'];
       try {
-        $display_name = civicrm_api3('Contact', 'getvalue', [
+        $contact = civicrm_api3('Contact', 'getsingle', [
           'id' => $nomination['member_nominee'],
-          'return' => 'display_name'
+          'return' => ['display_name', 'first_name', 'last_name', 'nick_name'],
         ]);
+        $display_name = \CRM_Elections_Helper_Candidate::formatName(
+          $contact['display_name'],
+          $contact['first_name'] ?? NULL,
+          $contact['last_name'] ?? NULL,
+          $contact['nick_name'] ?? NULL
+        );
       } catch (\CRM_Core_Exception $ex) {
         // Do nothing.
       }

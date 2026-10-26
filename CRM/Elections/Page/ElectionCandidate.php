@@ -21,7 +21,7 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
     try {
       $this->electionNomination = civicrm_api3('ElectionNomination', 'getsingle', [
         'id' => $this->enId,
-        'return' => ['has_accepted_nomination', 'comments', 'election_position_id.name', 'election_position_id.election_id.name', 'election_position_id.election_id', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL'],
+        'return' => array_merge(['has_accepted_nomination', 'comments', 'election_position_id.name', 'election_position_id.election_id.name', 'election_position_id.election_id', 'member_nominee', 'member_nominee.image_URL'], CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS),
       ]);
     }
     catch (CRM_Core_Exception $e) {
@@ -37,6 +37,7 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
       return;
     }
 
+    CRM_Elections_Helper_Candidate::applyNameFormat($this->electionNomination);
     CRM_Elections_Helper_Utils::replaceSingleProfilePic($this->electionNomination, 'member_nominee.image_URL', 'member_nominee');
     $this->assign('nomination', $this->electionNomination);
     $positionsWithNominations = CRM_Elections_BAO_ElectionPosition::findWithNominationsByElectionId($this->electionNomination['election_position_id.election_id']);

@@ -44,7 +44,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
 
     // Already voted
     if ( !isMemberAllowedToReVote( $this->eId ) && hasLoggedInUserAlreadyVoted( $this->eId ) ) {
-      throwAccessDeniedException( $this, 'You have already voted in this election.' );
+      throwAccessDeniedException( $this, E::ts('You have already voted in this election.') );
     }
 
     // Check if there are positions or candidates
@@ -54,7 +54,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     }
 
     if ( $this->election->isVotingEnded ) {
-      throwAccessDeniedException($this, 'Voting is closed on ' . CRM_Utils_Date::customFormat($this->election->voting_end_date));
+      throwAccessDeniedException($this, E::ts('Voting is closed on %1', [1 => CRM_Utils_Date::customFormat($this->election->voting_end_date)]));
       return;
     }
 
@@ -82,7 +82,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       ],
     ]);
 
-    CRM_Utils_System::setTitle('You are Voting for ' . $this->election->name);
+    CRM_Utils_System::setTitle(E::ts('You are Voting for %1', [1 => $this->election->name]));
 
     parent::buildQuickForm();
   }
@@ -97,7 +97,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     }
 
     if (!$hasCandidatesInOnePosition) {
-      throwAccessDeniedException($this, 'Candidates are not available in election for voting.');
+      throwAccessDeniedException($this, E::ts('Candidates are not available in election for voting.'));
       return TRUE;
     }
     return FALSE;
@@ -154,7 +154,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     ]);
 
     if ($this->electionPositions['count'] == 0) {
-      throwAccessDeniedException($this, 'Positions are not added in election for voting.');
+      throwAccessDeniedException($this, E::ts('Positions are not added in election for voting.'));
       return FALSE;
     }
 
@@ -166,17 +166,18 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     $this->electionCandidates = civicrm_api3('ElectionNomination', 'get', [
       'is_eligible_candidate' => 1,
       'has_accepted_nomination' => 1,
-      'return' => ['id', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL', 'election_position_id'],
+      'return' => array_merge(['id', 'member_nominee', 'member_nominee.image_URL', 'election_position_id'], CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS),
       'election_position_id' => ['IN' => array_column($this->electionPositions, 'id')],
       'options' => ['limit' => 0],
     ]);
 
     if ($this->electionCandidates == 0) {
-      throwAccessDeniedException($this, 'Nominations are not added in election for voting.');
+      throwAccessDeniedException($this, E::ts('Nominations are not added in election for voting.'));
       return FALSE;
     }
 
     $this->electionCandidates = $this->electionCandidates['values'];
+    CRM_Elections_Helper_Candidate::applyNameFormatToAll($this->electionCandidates);
     $this->mapCandidatesWithPosition();
     return TRUE;
   }
@@ -211,7 +212,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
         }
         $value = $values[$key];
         if ($value != '' && !CRM_Utils_Rule::positiveInteger($value)) {
-          $this->_errors[$key] = 'Rank must be a valid positive integer.';
+          $this->_errors[$key] = E::ts('Rank must be a valid positive integer.');
         }
 
         // Similar ranks to different candidates are not allowed.
@@ -219,7 +220,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
           $voteRanksByPosition[$element['position_id']][] = $value;
         }
         elseif ($value != '') {
-          $this->_errors[$key] = 'Rank must be different for each candidate.';
+          $this->_errors[$key] = E::ts('Rank must be different for each candidate.');
         }
 
       }
@@ -229,7 +230,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       if (array_filter($ranksByPosition)) {
         $ranks = array_values($ranksByPosition);
         if (!in_array(1, $ranks)) {
-          $this->_errors['_qf_default'] = 'For each position, You may or may not assign a number to candidates. But if you are assigning numbers for a position, you must assign number 1 to at least one candidate';
+          $this->_errors['_qf_default'] = E::ts('For each position, you may or may not assign a number to candidates. But if you are assigning numbers for a position, you must assign number 1 to at least one candidate.');
         }
       }
     }
@@ -293,9 +294,9 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
                                     ->execute()
                                     ->first();
 
-      CRM_Core_Session::setStatus('You have successfully voted as ' . $contact['display_name'] . ' in the election.', '', 'success');
+      CRM_Core_Session::setStatus(E::ts('You have successfully voted as %1 in the election.', [1 => $contact['display_name']]), '', 'success');
     } else {
-      CRM_Core_Session::setStatus('You have successfully voted in the election.', '', 'success');
+      CRM_Core_Session::setStatus(E::ts('You have successfully voted in the election.'), '', 'success');
     }
 
     parent::postProcess();
@@ -322,7 +323,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       'assignee_id' => $params['member_cid'],
       'target_id' => $params['member_cid'],
       'source_record_id' => $this->eId,
-      'subject'  => 'Voted in an election : ' . $this->election->name,
+      'subject'  => E::ts('Voted in an election : %1', [1 => $this->election->name]),
     ]);
   }
 
