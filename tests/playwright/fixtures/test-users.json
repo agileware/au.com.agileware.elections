@@ -1,4 +1,9 @@
 {
+  "admin": {
+    "username": "elections_admin",
+    "password": "Elections-Test-Admin-1!",
+    "email": "elections-admin@example.test"
+  },
   "manager": {
     "username": "elections_manager",
     "password": "Elections-Test-Manager-1!",

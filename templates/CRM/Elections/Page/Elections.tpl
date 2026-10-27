@@ -14,12 +14,12 @@
 
             <div class="crm-accordion-wrapper">
                 <div class="crm-accordion-header">
-                    <span>{$election.name}</span>
+                    <span>{$election.name|escape}</span>
                     <span></span>
                 </div><!-- /.crm-accordion-header -->
                 <div class="crm-accordion-body">
 
-                    <p>{$election.description|nl2br}</p>
+                    <p>{$election.description|escape|nl2br}</p>
 
                     {assign var="viewBtnTxt" value=""}
                     {assign var="electionProgressTxt" value=""}
@@ -74,7 +74,7 @@
                         {if !$viewAction}
                             <a href="{crmURL p="civicrm/elections/view" q="eid=`$election.id`"}" class="election-btn">{$viewBtnTxt}</a><br>
                         {else}
-                            <a href="{$viewAction}?eid={$election.id}" class="election-btn">{$viewBtnTxt}</a><br>
+                            <a href="{$viewAction|escape}?eid={$election.id|escape}" class="election-btn">{$viewBtnTxt}</a><br>
                         {/if}
                     {/if}
 

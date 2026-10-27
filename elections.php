@@ -56,6 +56,7 @@ function elections_civicrm_enable() {
  * API, or an inline edit in a SearchKit list.
  */
 function elections_civicrm_pre($op, $objectName, $id, &$params) {
+  CRM_Elections_Helper_Guard::pre($op, $objectName, $id, $params);
   if ($objectName === 'ElectionPosition' && in_array($op, ['create', 'edit', 'delete'], TRUE)) {
     $changesThePosition = TRUE;
     if ($op === 'edit' && $id) {
@@ -79,7 +80,14 @@ function elections_civicrm_pre($op, $objectName, $id, &$params) {
       if ($op === 'edit' && $id && isset($params['sortorder']) && $params['sortorder'] !== '') {
         $oldOrder = (int) $current->sortorder;
         $newOrder = (int) $params['sortorder'];
-        if ($oldOrder !== $newOrder) {
+        // APIv4 (SortableEntity) has already made room by the time this runs; other routes have not,
+        // and then another position of the election still holds the place being moved into.
+        $placeTaken = (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_position WHERE election_id = %1 AND sortorder = %2 AND id <> %3', [
+          1 => [(int) $current->election_id, 'Integer'],
+          2 => [$newOrder, 'Integer'],
+          3 => [(int) $id, 'Integer'],
+        ]);
+        if ($oldOrder !== $newOrder && $placeTaken > 0) {
           CRM_Utils_Weight::updateOtherWeights('CRM_Elections_DAO_ElectionPosition', $oldOrder, $newOrder, ['election_id' => (int) $current->election_id], 'sortorder');
         }
       }
@@ -95,6 +103,29 @@ function elections_civicrm_pre($op, $objectName, $id, &$params) {
       CRM_Elections_BAO_Election::assertCanActivate($id);
     }
   }
+}
+
+/**
+ * Implements hook_civicrm_post(): the audit log.
+ */
+function elections_civicrm_post($op, $objectName, $objectId, &$objectRef) {
+  CRM_Elections_Helper_Guard::post($op, $objectName, $objectId, $objectRef);
+}
+
+/**
+ * Implements hook_civicrm_merge(): when two contacts are merged, move what they did in elections to the
+ * contact that is kept, so deleting the other contact does not remove or change anything.
+ */
+function elections_civicrm_merge($type, &$data, $mainId = NULL, $otherId = NULL, $tables = NULL) {
+  if ($type !== 'sqls' || !$mainId || !$otherId) {
+    return;
+  }
+  $main = (int) $mainId;
+  $other = (int) $otherId;
+  $data[] = "UPDATE civicrm_election_nomination SET member_nominee = $main WHERE member_nominee = $other";
+  $data[] = "UPDATE civicrm_election_nomination_seconder SET member_nominator = $main WHERE member_nominator = $other";
+  // A ballot the kept contact also cast stays where it is: one ballot for each person.
+  $data[] = "UPDATE IGNORE civicrm_election_vote SET member_id = $main WHERE member_id = $other";
 }
 
 /**

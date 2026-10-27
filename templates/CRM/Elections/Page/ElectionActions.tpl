@@ -29,8 +29,5 @@
         {if $election->isVotingStarted and !$election->isVotingEnded and $isUserAllowedToVote and $isAllowedToNominate}
             <a href="{crmURL p="civicrm/elections/vote" q="`$checksum_query['query']`"}" class="election-btn">{ts}Vote Now{/ts}</a>
         {/if}
-        {if $election->isResultsOut}
-            <a href="{crmURL p='civicrm/elections/results' q="eid=`$election->id`"}" class="election-btn">{ts}Check Results{/ts}</a>
-        {/if}
     </div>
 {/if}

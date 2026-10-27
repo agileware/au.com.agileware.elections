@@ -99,12 +99,20 @@ function civicrm_api3_election_generateresults($params) {
 
   $elections = $elections['values'];
   $electionResults = new CRM_Elections_Helper_Results();
+  $generated = 0;
   foreach ($elections as $election) {
-    $electionResults->generateResult($election['id'], $election['anonymize_votes']);
+    try {
+      $electionResults->generateResult($election['id'], $election['anonymize_votes']);
+      $generated++;
+    }
+    catch (CRM_Core_Exception $e) {
+      // One election that is not ready (or has a problem) must not stop the others.
+      CRM_Core_Error::debug_log_message('Elections: results for election ' . $election['id'] . ' not generated: ' . $e->getMessage());
+    }
   }
 
   return civicrm_api3_create_success(1, [], NULL, NULL, $dao, [
-     'message' => E::ts('Successfully generated results for %1 elections.', [1 => count($elections)]),
+     'message' => E::ts('Successfully generated results for %1 elections.', [1 => $generated]),
   ]);
 
 }

@@ -14,7 +14,7 @@
         </div>
         <div class="crm-election-form-col-right">
             {assign var='sKey' value='election_position_id.election_id.name'}
-            {$electionNomination.$sKey}
+            {$electionNomination.$sKey|escape}
         </div>
     </div><!-- ending of crm-election-form-row -->
 
@@ -23,7 +23,7 @@
             <label>{ts}Position{/ts}</label>
         </div>
         <div class="crm-election-form-col-right">
-            {$electionNomination.$spKey}
+            {$electionNomination.$spKey|escape}
         </div>
     </div><!-- ending of crm-election-form-row -->
 

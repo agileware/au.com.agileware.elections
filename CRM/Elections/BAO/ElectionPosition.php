@@ -23,6 +23,37 @@ class CRM_Elections_BAO_ElectionPosition extends CRM_Elections_DAO_ElectionPosit
   }
 
   /**
+   * The same rule for a position written through APIv4, checked before CiviCRM moves any other position.
+   *
+   * @param array $item
+   *   The values being written, with the position's id when it already exists.
+   *
+   * @throws CRM_Core_Exception
+   */
+  public static function assertItemCanChange(array $item) {
+    $electionId = $item['election_id'] ?? NULL;
+    if (!empty($item['id'])) {
+      $current = CRM_Core_DAO::executeQuery('SELECT name, quantity, sortorder, description, election_id FROM civicrm_election_position WHERE id = %1', [1 => [(int) $item['id'], 'Positive']]);
+      if (!$current->fetch()) {
+        return;
+      }
+      $changes = FALSE;
+      foreach (['name', 'quantity', 'sortorder', 'description', 'election_id'] as $field) {
+        if (array_key_exists($field, $item) && (string) $item[$field] !== (string) $current->$field) {
+          $changes = TRUE;
+        }
+      }
+      if (!$changes) {
+        return;
+      }
+      $electionId = $electionId ?: $current->election_id;
+    }
+    if ($electionId) {
+      self::assertCanChange($electionId);
+    }
+  }
+
+  /**
    * Copy a position to the end of its election's list.
    *
    * @param int $positionId

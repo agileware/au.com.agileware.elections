@@ -4,13 +4,13 @@
     <div class="candidate-details-left-block">
         {assign var='imgKey' value='member_nominee.image_URL'}
         {assign var='profilePicUrl' value=$nomination.$imgKey}
-        <img src="{$profilePicUrl}" alt="" /><br>
+        <img src="{$profilePicUrl|escape}" alt="" /><br>
     </div><!-- ending of candidate-details-left-block -->
     {/if}
 
     <div class="candidate-details-right-block">
         {assign var='displayname' value='member_nominee.display_name'}
-        <h2>{$nomination.$displayname}</h2>
+        <h2>{$nomination.$displayname|escape}</h2>
     </div><!-- ending of candidate-details-right-block -->
 </div><!-- ending of candidate-details-block -->
 
@@ -53,12 +53,12 @@
         {if $election->showNominators}
         <div class="candidate-details-right-block">
             {foreach from=$position.nominations item=positionNomination}
-                <h3>{ts}Was nominated by{/ts}</h3>
-                {if $positionNomination.member_nominee == $nomination.member_nominee}
+                {if $positionNomination.member_nominee == $nomination.member_nominee and !empty($positionNomination.seconders)}
+                    <h3>{ts}Was nominated by{/ts}</h3>
                     {foreach from=$positionNomination.seconders|default:[] item=seconder}
                         {assign var='nominatorName' value='member_nominator.display_name'}
-                        <p>{$seconder.$nominatorName}<br>
-                        {$seconder.description}</p>
+                        <p>{$seconder.$nominatorName|escape}<br>
+                        {$seconder.description|escape|nl2br}</p>
                     {/foreach}
                 {/if}
             {/foreach}

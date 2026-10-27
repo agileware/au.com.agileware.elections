@@ -14,7 +14,9 @@ class CRM_Elections_Page_Elections extends CRM_Elections_Page_Base {
     $this->assign('isElectionAdmin', $this->isElectionAdmin);
     $this->isFromShortCode = isRequestUsingShortCode();
     $this->electionsAction = CRM_Utils_Request::retrieve('eaction', 'String');
-    $this->viewAction = CRM_Utils_Request::retrieve('evaction', 'String');
+    // The page that shows one election: only an address on this site is accepted, so the parameter
+    // cannot be used to send people elsewhere or to run script (it is a link target, not text).
+    $this->viewAction = CRM_Elections_Helper_Utils::localUrlOrNull(CRM_Utils_Request::retrieve('evaction', 'String'));
     $this->assign('viewAction', $this->viewAction);
 
     if ($this->electionsAction === NULL) {

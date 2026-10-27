@@ -143,7 +143,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     }
     $elements = $this->getFormElementsByCandidates();
     foreach ($elements as $element) {
-      $this->add('select2', $element['key'], $element['name'], $this->getVoteSelectionByPosition($element['position_id']), FALSE, ['placeholder' => E::ts('- Rank -')]);
+      $this->add('select2', $element['key'], htmlspecialchars((string) $element['name'], ENT_QUOTES, 'UTF-8'), $this->getVoteSelectionByPosition($element['position_id']), FALSE, ['placeholder' => E::ts('- Rank -')]);
     }
   }
 

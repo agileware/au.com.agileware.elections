@@ -26,7 +26,13 @@ class api_v3_ElectionBaseTestCase extends \PHPUnit\Framework\TestCase implements
   }
 
   public function setUpHeadless() {
-    return \Civi\Test::headless()->installMe(__DIR__)->apply();
+    $env = \Civi\Test::headless()->installMe(__DIR__)->apply();
+    // The shared test database may have been copied from an older site: make sure it has every 2.0 change.
+    $upgrader = new CRM_Elections_Upgrader();
+    $upgrader->init(['key' => 'au.com.agileware.elections']);
+    $upgrader->upgrade_20000();
+    $upgrader->upgrade_20010();
+    return $env;
   }
 
   /**

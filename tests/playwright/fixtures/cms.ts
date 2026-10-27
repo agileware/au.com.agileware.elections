@@ -38,3 +38,23 @@ export function frontUrl(civiPath: string, params: Record<string, string | numbe
       return `/${civiPath}/?${query.toString()}`;
   }
 }
+
+/** Address of a CiviCRM page in the back office (the administrator's view). */
+export function adminUrl(civiPath: string, params: Record<string, string | number> = {}): string {
+  const query = new URLSearchParams();
+  switch (CMS) {
+    case 'drupal':
+      for (const [k, v] of Object.entries(params)) query.set(k, String(v));
+      return `/${civiPath}?${query.toString()}`;
+    case 'joomla':
+      query.set('option', 'com_civicrm');
+      query.set('task', civiPath);
+      for (const [k, v] of Object.entries(params)) query.set(k, String(v));
+      return `/administrator/index.php?${query.toString()}`;
+    default:
+      query.set('page', 'CiviCRM');
+      query.set('q', civiPath);
+      for (const [k, v] of Object.entries(params)) query.set(k, String(v));
+      return `/wp-admin/admin.php?${query.toString()}`;
+  }
+}

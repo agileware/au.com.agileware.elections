@@ -1,4 +1,4 @@
-import { test, expect, civiAdminUrl, expectNoPhpOutput } from '../../fixtures/base';
+import { test, expect, civiAdminUrl, expectNoPhpOutput, optionalAdminPage } from '../../fixtures/base';
 import { advanceCouncil, civiApi4, councilNominationIds, moveToStage, reseedCouncil } from '../../fixtures/civi';
 import { accept, ballotFor, nominate, vote, withdraw } from '../../fixtures/council-ui';
 import { council, POSITIONS, voters, nominees } from '../../fixtures/personas';
@@ -29,13 +29,15 @@ test.afterAll(() => {
   reseedCouncil();
 });
 
-test('the election has been set up with six roles and is open for nominations', async ({ adminPage }) => {
+test('the election has been set up with six roles and is open for nominations', async ({ browser }) => {
   expect(Object.keys(council().positions)).toEqual(POSITIONS);
   expect(voters).toHaveLength(30);
 
-  if (!adminPage) {
-    return; // back end checks need an administrator session (WordPress only)
+  const admin = await optionalAdminPage(browser);
+  if (!admin) {
+    return; // the back end checks need a saved administrator session
   }
+  const adminPage = admin.page;
   await adminPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
   const row = adminPage.locator('tr', { hasText: 'Playwright Council Election' });
   await expect(row).toBeVisible();
@@ -46,6 +48,7 @@ test('the election has been set up with six roles and is open for nominations', 
   await expect(adminPage.locator('.election-stage')).toHaveText('Nominations open');
   await expect(adminPage.locator('.election-count-positions')).toHaveText('6');
   await expectNoPhpOutput(adminPage);
+  await admin.close();
 });
 
 test('nominators nominate and second, and the outsider cannot take part', async ({ persona, personaGoto }) => {
@@ -156,7 +159,7 @@ test('thirty voters and the nominees vote, one changes their vote, the outsider 
   await expect(outsider.getByText('You may only see this page if you are a member.')).toBeVisible();
 });
 
-test('results follow the ballots: clear winners, a tie and an uncontested role', async ({ personaGoto, adminPage }) => {
+test('results follow the ballots: clear winners, a tie and an uncontested role', async ({ personaGoto, browser }) => {
   test.setTimeout(5 * 60 * 1000);
   const data = council();
   moveToStage('results');
@@ -200,9 +203,11 @@ test('results follow the ballots: clear winners, a tie and an uncontested role',
   await expect(summary.getByRole('heading', { name: 'President' })).toBeVisible();
 
   // The administrator sees the turnout on the back end.
-  if (!adminPage) {
+  const admin = await optionalAdminPage(browser);
+  if (!admin) {
     return;
   }
+  const adminPage = admin.page;
   await adminPage.goto(civiAdminUrl('civicrm/elections/overview', { reset: 1, eid: data.election_id }));
   await expect(adminPage.locator('.election-stage')).toHaveText('Results published');
   await expect(adminPage.locator('.election-count-ballots')).toHaveText(String(Object.keys(data.ballots).length));
@@ -218,7 +223,8 @@ test('results follow the ballots: clear winners, a tie and an uncontested role',
   await adminPage.getByRole('link', { name: 'Results' }).click();
   await expect(adminPage.getByRole('columnheader', { name: 'Candidate' })).toBeVisible();
   for (const position of POSITIONS) {
-    await expect(adminPage.locator('tbody tr', { hasText: position }).first()).toBeVisible();
+    await expect(adminPage.locator('crm-search-display-table tbody tr', { hasText: position }).first()).toBeVisible();
   }
   await expectNoPhpOutput(adminPage);
+  await admin.close();
 });
