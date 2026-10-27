@@ -44,6 +44,14 @@ class CRM_Elections_Helper_Guard {
    */
   private static $before = [];
 
+  /**
+   * TRUE only while a ballot is being saved by ElectionVote.addvotes, which checks who may vote, the
+   * candidates and the method's rules. Ballot rows cannot be added any other way.
+   *
+   * @var bool
+   */
+  public static $castingBallot = FALSE;
+
   public static function pre($op, $objectName, $id, &$params) {
     switch ($objectName) {
       case 'ElectionVote':
@@ -133,6 +141,9 @@ class CRM_Elections_Helper_Guard {
     if ($election->is_deleted || !$election->is_visible || !$election->isVotingStarted || $election->isVotingEnded || $election->has_results_generated) {
       throw new CRM_Core_Exception(E::ts('Votes can only be added or removed while voting is open.'));
     }
+    if ($op === 'create' && !self::$castingBallot) {
+      throw new CRM_Core_Exception(E::ts('A vote can only be cast through the ballot (ElectionVote.addvotes), which checks who may vote and what may be chosen.'));
+    }
   }
 
   // ----------------------------------------------------------------- election settings
@@ -166,6 +177,9 @@ class CRM_Elections_Helper_Guard {
   }
 
   private static function normalise($field, $value) {
+    if ($field === 'voting_method') {
+      return CRM_Elections_VotingMethod::normalise($value);
+    }
     if ($value === NULL || $value === '') {
       return '';
     }

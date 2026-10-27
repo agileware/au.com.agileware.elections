@@ -130,7 +130,9 @@ class CRM_Elections_Upgrader extends CRM_Extension_Upgrader_Base {
    */
   public function upgrade_20030() {
     Civi::log()->info('Applying update 20030');
-    $this->ensureColumn('civicrm_election', 'voting_method', "VARCHAR(32) NOT NULL DEFAULT 'irv'");
+    // Nullable like the other election settings: an update that leaves it out stores NULL, which means ranked choice.
+    $this->ensureColumn('civicrm_election', 'voting_method', "VARCHAR(32) NULL DEFAULT 'irv'");
+    CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_election MODIFY COLUMN voting_method VARCHAR(32) NULL DEFAULT 'irv'");
     return TRUE;
   }
 

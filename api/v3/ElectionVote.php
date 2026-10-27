@@ -159,12 +159,15 @@ function civicrm_api3_election_vote_addvotes($params) {
         ]);
         CRM_Elections_Helper_Integrity::$replacingBallot = FALSE;
       }
+      CRM_Elections_Helper_Guard::$castingBallot = TRUE;
       foreach ($votes as $vote) {
         $vote['member_id'] = $params['member_id'];
         civicrm_api3('ElectionVote', 'create', $vote);
       }
+      CRM_Elections_Helper_Guard::$castingBallot = FALSE;
     }
     catch (Exception $e) {
+      CRM_Elections_Helper_Guard::$castingBallot = FALSE;
       CRM_Elections_Helper_Integrity::$replacingBallot = FALSE;
       $transaction->rollback();
       throw $e;

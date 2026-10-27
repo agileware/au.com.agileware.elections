@@ -41,6 +41,25 @@ class CRM_Elections_SecurityTest extends api_v3_ElectionBaseTestCase {
     }, 'while voting is open', 'a vote before voting opens');
   }
 
+  public function testABallotRowCanOnlyBeAddedThroughTheBallotCheck() {
+    $fixture = $this->fixture(CRM_Elections_Test_CouncilFixture::STAGE_ADVERTISE);
+    $fixture->moveToStage(CRM_Elections_Test_CouncilFixture::STAGE_VOTING);
+    $nomination = (int) $fixture->nominations['President|N01'];
+    $this->refused(function () use ($nomination, $fixture) {
+      civicrm_api3('ElectionVote', 'create', ['election_nomination_id' => $nomination, 'rank' => 1, 'member_id' => $fixture->id('V01')]);
+    }, 'cast through the ballot', 'a vote written directly while voting is open');
+    $this->refused(function () use ($nomination, $fixture) {
+      \Civi\Api4\ElectionVote::create(FALSE)->addValue('election_nomination_id', $nomination)->addValue('rank', 1)->addValue('member_id', $fixture->id('V01'))->execute();
+    }, 'cast through the ballot', 'a vote written directly through APIv4');
+    $this->refused(function () use ($nomination, $fixture) {
+      // Even a member who may not vote cannot be given a ballot.
+      civicrm_api3('ElectionVote', 'addvotes', ['election_id' => $fixture->electionId, 'member_id' => $fixture->id('OUT'), 'votes' => [['election_nomination_id' => $nomination, 'rank' => 1]]]);
+    }, 'not allowed to vote');
+    $this->assertSame(0, (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote'));
+    CRM_Elections_Helper_Process::vote($fixture->electionId, $fixture->id('V01'), [$nomination => 1]);
+    $this->assertSame(1, (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote'));
+  }
+
   public function testABallotCannotBeEditedAndCannotBeRemovedOutsideVoting() {
     $fixture = $this->fixture(CRM_Elections_Test_CouncilFixture::STAGE_VOTING);
     $vote = $this->firstVote($fixture->electionId);
