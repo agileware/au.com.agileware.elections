@@ -519,6 +519,7 @@ ul#errorList {
 .crm-container .crm-election-form-block-container button.crm-button.crm-button {
     --election-btn-bg: var(--wp--preset--color--contrast, var(--color--primary-40, var(--cassiopeia-color-primary, var(--crm-primary-color, #333))));
     --election-btn-color: var(--wp--preset--color--base, #fff);
+    --election-btn-hover-bg: color-mix(in srgb, var(--election-btn-bg) 82%, #000);
     /* Where the browser can, the text colour is worked out from the button colour (white on dark, black on
        light), so any theme colour, and any colour a site picks, stays readable. */
     color: var(--election-btn-color);
@@ -544,35 +545,47 @@ ul#errorList {
     cursor: pointer;
     box-shadow: none;
 }
+/* Text colour. Links inside status boxes would otherwise take the box's text colour (CiviCRM's alert rule). */
 .crm-container .messages a.election-btn.election-btn,
-.crm-container .messages a.election-btn.election-btn:hover,
-@supports (color: lch(from red l c h)) {
-    .crm-container .election-btn.election-btn,
-    .crm-container .election-btn.election-btn:visited,
-    .crm-container .election-btn.election-btn:hover,
-    .crm-container .election-btn.election-btn:focus-visible,
-    .crm-container .messages a.election-btn.election-btn,
-    .crm-container .crm-election-form-block-container button.crm-button.crm-button,
-    .crm-container .crm-election-form-block-container button.crm-button.crm-button:hover {
-        color: lch(from var(--election-btn-bg) clamp(0, (49.5 - l) * 1000, 100) 0 0);
-    }
-}
+.crm-container .messages a.election-btn.election-btn:visited,
 .crm-container .election-btn.election-btn:visited {
     color: var(--election-btn-color);
 }
 .crm-container .election-btn.election-btn:hover,
 .crm-container .election-btn.election-btn:focus-visible,
+.crm-container .messages a.election-btn.election-btn:hover,
+.crm-container .messages a.election-btn.election-btn:focus-visible,
 .crm-container .crm-election-form-block-container button.crm-button.crm-button:hover,
 .crm-container .crm-election-form-block-container button.crm-button.crm-button:focus-visible {
-    background: color-mix(in srgb, var(--election-btn-bg) 82%, #000);
-    border-color: color-mix(in srgb, var(--election-btn-bg) 82%, #000);
+    background: var(--election-btn-hover-bg);
+    border-color: var(--election-btn-hover-bg);
     color: var(--election-btn-color);
     text-decoration: none;
 }
+/* Where the browser can, the text colour is worked out from the button's own colour (white on dark, black
+   on light) so any colour a theme or a site picks stays readable. */
+@supports (color: lch(from red l c h)) {
+    .crm-container .election-btn.election-btn,
+    .crm-container .election-btn.election-btn:visited,
+    .crm-container .messages a.election-btn.election-btn,
+    .crm-container .messages a.election-btn.election-btn:visited,
+    .crm-container .crm-election-form-block-container button.crm-button.crm-button {
+        color: lch(from var(--election-btn-bg) clamp(0, (49.5 - l) * 1000, 100) 0 0);
+    }
+    .crm-container .election-btn.election-btn:hover,
+    .crm-container .election-btn.election-btn:focus-visible,
+    .crm-container .messages a.election-btn.election-btn:hover,
+    .crm-container .messages a.election-btn.election-btn:focus-visible,
+    .crm-container .crm-election-form-block-container button.crm-button.crm-button:hover,
+    .crm-container .crm-election-form-block-container button.crm-button.crm-button:focus-visible {
+        color: lch(from var(--election-btn-hover-bg) clamp(0, (49.5 - l) * 1000, 100) 0 0);
+    }
+}
 .crm-container .election-btn.election-btn:focus-visible,
 .crm-container .crm-election-form-block-container button.crm-button.crm-button:focus-visible {
-    outline: 3px solid currentColor;
-    outline-offset: 2px;
+    /* A ring in the button's own colour, a little away from it: visible on the page whatever the text colour. */
+    outline: 3px solid var(--election-btn-bg);
+    outline-offset: 3px;
 }
 .crm-container .election-btn.election-btn:active {
     transform: translateY(1px);
