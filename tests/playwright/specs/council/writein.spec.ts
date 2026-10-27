@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from '../../fixtures/base';
-import { advanceCouncil, civiApi4, civiEval, civiSql, councilNominationIds, reseedCouncil } from '../../fixtures/civi';
+import { advanceCouncil, civiApi4, civiEval, civiSql, councilNominationIds, moveToStage, reseedCouncil } from '../../fixtures/civi';
 import { accept } from '../../fixtures/council-ui';
 import { council, personaUrl } from '../../fixtures/personas';
 
@@ -111,4 +111,28 @@ test('someone who declines cannot be written in again', async ({ persona }) => {
   await page.context().close();
   const rows = civiApi4<any[]>('ElectionNomination.get', { select: ['has_rejected_nomination'], where: [['id', '=', nomination.id]] });
   expect(rows[0].has_rejected_nomination).toBeTruthy();
+});
+
+test('once voting has closed the person who never answered is told, and cannot accept', async ({ persona }) => {
+  const data = council();
+  // V20 is written in and never answers.
+  civiEval(`
+    civicrm_api3('ElectionVote', 'addvotes', ['election_id' => ${data.election_id}, 'member_id' => ${data.links.V05.cid}, 'votes' => [['election_nomination_id' => ${ids['President|N01']}, 'rank' => 1]], 'write_ins' => [['position_id' => ${data.positions['President']}, 'contact_id' => ${data.links.V20.cid}, 'rank' => 2]]]);
+  `);
+  const [nomination] = civiApi4<Array<{ id: number }>>('ElectionNomination.get', { select: ['id'], where: [['is_write_in', '=', true], ['member_nominee', '=', data.links.V20.cid]] });
+  moveToStage('results');
+
+  // The scheduled job tells them, once.
+  const sent = civiEval(`echo civicrm_api3('Election', 'sendwriteinclosednotices')['values'] ? '' : ''; echo CRM_Core_DAO::singleValueQuery("SELECT COUNT(*) FROM civicrm_election_nomination WHERE write_in_closed_notified_date IS NOT NULL AND id = ${nomination.id}");`);
+  expect(sent.trim()).toBe('1');
+
+  const page = await persona('V20');
+  await page.goto(personaUrl('V20', 'civicrm/elections/nominations/accept', { enid: nomination.id }));
+  await expect(page.locator('.crm-container')).toContainText('opportunity to answer this nomination has passed');
+  await expect(page.locator('.crm-container')).toContainText('You are not on the ballot');
+  await expect(page.getByRole('button', { name: 'Accept' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'View the election' })).toBeVisible();
+  await page.context().close();
+  const rows = civiApi4<any[]>('ElectionNomination.get', { select: ['has_accepted_nomination'], where: [['id', '=', nomination.id]] });
+  expect(rows[0].has_accepted_nomination).toBeFalsy();
 });
