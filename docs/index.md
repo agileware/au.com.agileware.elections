@@ -86,6 +86,8 @@ For more information, see [How to add a position](admin_add_position.md)
 A position only can be added before the **Nomination Start Date** or if the election is inactive.
 For more information, see [How to edit a position](admin_edit_position.md)
 
+Positions can allow voters to write people in during voting - see [Write-ins](admin_write_ins.md).
+
 ## Deleting a Position
 
 A position only can be deleted before the **Nomination Start Date** or if the election is inactive.

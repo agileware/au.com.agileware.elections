@@ -11,6 +11,7 @@ To add a position, you need to have CiviCRM admin access and follow these steps:
 ![Set position name](images/admin_add/02.gif)  
 -  **Seats**: The total number seats available for the position  
 ![Set number of people](images/admin_add/03.gif)  
+-  **Write-ins per seat**: How many people a voter may write in for each seat, from 0 to 10. 0 (the default) means write-ins are off for this position. See [Write-ins](admin_write_ins.md).
 -  **Order**: The position's order relative to other positions, for example when listing positions for nomination, voting and results. Positions can also be reordered afterwards - see [How to reorder positions](admin_reorder_positions.md).
 -  **Description**: A short description of the position  
 ![Add Description](images/admin_add/04.gif)  
