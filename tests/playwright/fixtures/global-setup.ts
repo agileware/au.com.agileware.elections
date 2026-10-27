@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import users from './test-users.json';
 import { adminUrl, CMS } from './cms';
+import { civiApi4 } from './civi';
 
 /**
  * Logs each test user in once, one after the other, and saves the session.
@@ -34,6 +35,15 @@ async function warmUp(page: Page) {
 }
 
 export default async function globalSetup(config: FullConfig) {
+  // Right after the caches were cleared, two workers that both need CiviCRM's metadata can try to write the
+  // same cache row at the same moment. Build it once here, before any test runs.
+  try {
+    civiApi4('Contact.get', { select: ['id'], limit: 1 });
+    civiApi4('ElectionVote.get', { select: ['id'], limit: 1 });
+  }
+  catch (e) {
+    // Not fatal: the tests will say if CiviCRM is really not reachable.
+  }
   const baseURL = config.projects[0].use.baseURL as string;
   fs.mkdirSync(AUTH_DIR, { recursive: true });
   const browser = await chromium.launch();
