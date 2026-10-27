@@ -14,9 +14,13 @@ class CRM_Elections_Helper_Eligibility {
    * This is the logged in contact or, when nobody is logged in, the contact
    * identified by a valid checksum link (`cid` and `cs` URL parameters).
    *
+   * @param bool $useReferer
+   *   For AJAX calls made by a page opened with a checksum link: take the
+   *   `cid` and `cs` from the page's own address (the Referer header).
+   *
    * @return int|null
    */
-  public static function getActingContactId() {
+  public static function getActingContactId($useReferer = FALSE) {
     $loggedIn = CRM_Core_Session::singleton()->getLoggedInContactID();
     if (!empty($loggedIn)) {
       return (int) $loggedIn;
@@ -24,6 +28,9 @@ class CRM_Elections_Helper_Eligibility {
 
     $contactId = CRM_Utils_Request::retrieve('cid', 'Positive');
     $checksum = CRM_Utils_Request::retrieve('cs', 'String');
+    if ((!$contactId || !$checksum) && $useReferer) {
+      [$contactId, $checksum] = self::getChecksumFromReferer();
+    }
     if (!$contactId || !$checksum) {
       return NULL;
     }
@@ -33,6 +40,24 @@ class CRM_Elections_Helper_Eligibility {
       ->execute()
       ->first();
     return !empty($result['valid']) ? (int) $contactId : NULL;
+  }
+
+  /**
+   * @return array
+   *   The contact id and checksum in the address of the page that made this request.
+   */
+  private static function getChecksumFromReferer() {
+    $referer = $_SERVER['HTTP_REFERER'] ?? (CRM_Utils_System::getRequestHeaders()['Referer'] ?? NULL);
+    if (!$referer || !filter_var($referer, FILTER_VALIDATE_URL)) {
+      return [NULL, NULL];
+    }
+    parse_str((string) parse_url($referer, PHP_URL_QUERY), $query);
+    $contactId = $query['cid'] ?? NULL;
+    $checksum = $query['cs'] ?? NULL;
+    if (!CRM_Utils_Rule::positiveInteger($contactId) || !is_string($checksum) || $checksum === '') {
+      return [NULL, NULL];
+    }
+    return [(int) $contactId, $checksum];
   }
 
   /**

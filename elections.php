@@ -466,38 +466,39 @@ function elections_shuffle_assoc($list) {
  * Implements hook_civicrm_alterAPIPermissions().
  */
 function elections_civicrm_alterAPIPermissions($entity, $action, &$params, &$permissions) {
+  // Logged in users need 'view Elections'. People using a personal checksum link are granted
+  // it for the nominee search only, see elections_civicrm_permission_check().
   $permissions['election_nominee']['getlist'] = ['view Elections'];
+}
 
-  if ( $entity !== 'election_nominee' && $action !== 'getlist' ) {
+/**
+ * Implements hook_civicrm_permission_check().
+ *
+ * Someone using a personal link (checksum) is not logged in, so the nominee search on the
+ * nomination form would be refused. The search page carries the link's `cid` and `cs` in its
+ * address, repeated in the Referer of the search request. With a valid checksum the person is
+ * granted just the permissions that one search needs, for that request only, rather than
+ * granting them to everybody who is not logged in.
+ */
+function elections_civicrm_permission_check($permission, &$granted, $contactId) {
+  static $checking = FALSE;
+  if ($granted || $checking || !in_array($permission, ['access AJAX API', 'view Elections'], TRUE)) {
     return;
   }
-
-  // Default to logged in permissions
-  if ( !empty( CRM_Core_Session::getLoggedInContactID() ) ) {
+  if (!empty(CRM_Core_Session::getLoggedInContactID())) {
     return;
   }
-
-  // Get cs and cid parameters via referer in AJAX calls
-  $referer = CRM_Utils_System::getRequestHeaders()['Referer'] ?? NULL;
-  if ( !filter_var( $referer, FILTER_VALIDATE_URL) ) {
-    // Do nothing if not a URL
+  if (strtolower($_REQUEST['entity'] ?? '') !== 'electionnominee' || strtolower($_REQUEST['action'] ?? '') !== 'getlist') {
     return;
   }
-  $referer_parsed = parse_url($referer);
-  parse_str($referer_parsed['query'], $query_params);
-
-  // Bypass 'view Elections' permissions if we have a validated checksum.
-  // Defer to AJAX API permissions.
-  if ( $query_params['cid'] && $query_params['cs'] ) {
-    $results = \Civi\Api4\Contact::validateChecksum(FALSE)
-                                  ->setContactId($query_params['cid'])
-                                  ->setChecksum($query_params['cs'])
-                                  ->execute()
-                                  ->first();
-
-    if ( $results['valid'] ) {
-      $permissions['election_nominee']['getlist'] = ['access AJAX API'];
+  $checking = TRUE;
+  try {
+    if (CRM_Elections_Helper_Eligibility::getActingContactId(TRUE)) {
+      $granted = TRUE;
     }
+  }
+  finally {
+    $checking = FALSE;
   }
 }
 
