@@ -3,12 +3,8 @@
 </div>
 
 <div class="crm-block crm-form-block crm-create-election-form-block crm-election-form-block-container">
+    <div class="election-form-panel" id="election-panel-election" data-title="{ts escape='htmlattribute'}Election{/ts}">
     <table class="form-layout">
-        <tr>
-            <td colspan="2">
-                <h2>{ts}Election Information{/ts}</h2>
-            </td>
-        </tr>
         <tr class="crm-create-election-form-block-name">
             <td class="label">{$form.name.label}</td>
             <td>{$form.name.html}</td>
@@ -18,9 +14,13 @@
             <td>{$form.description.html}</td>
         </tr>
 
+    </table>
+    </div>
+    <div class="election-form-panel" id="election-panel-dates" data-title="{ts escape='htmlattribute'}Dates{/ts}">
+    <table class="form-layout">
         <tr>
             <td colspan="2">
-                <h2>{ts}Visibility{/ts}</h2>
+                <h3>{ts}Visibility{/ts}</h3>
 				<p class="description">{ts}Set the range of dates when this election can be seen by voters.{/ts}</p>
             </td>
         </tr>
@@ -36,7 +36,7 @@
 
         <tr>
             <td colspan="2">
-                <h2>{ts}Nominations{/ts}</h2>
+                <h3>{ts}Nominations{/ts}</h3>
 				<p class="description">{ts}Set the range of dates when voters can submit nominations.{/ts}</p>
             </td>
         </tr>
@@ -51,7 +51,7 @@
 
         <tr>
             <td colspan="2">
-                <h2>{ts}Advertise Candidates{/ts}</h2>
+                <h3>{ts}Advertise Candidates{/ts}</h3>
 				<p class="description">{ts}Set the date from which candidates are advertised to voters before voting begins.{/ts}</p>
             </td>
         </tr>
@@ -62,7 +62,7 @@
 
         <tr>
             <td colspan="2">
-                <h2>{ts}Voting{/ts}</h2>
+                <h3>{ts}Voting{/ts}</h3>
 				<p class="description">{ts}Set the range of dates when voters can submit their votes.{/ts}</p>
             </td>
         </tr>
@@ -77,7 +77,7 @@
 
         <tr>
             <td colspan="2">
-                <h2>{ts}Results{/ts}</h2>
+                <h3>{ts}Results{/ts}</h3>
 				<p class="description">{ts}Set the date from which the final results are displayed to voters.{/ts}</p>
             </td>
         </tr>
@@ -86,11 +86,17 @@
             <td>{$form.result_date.html}</td>
         </tr>
 
-        <tr>
+        <tr class="election-timeline-row">
             <td colspan="2">
-                <h2>{ts}Settings{/ts}</h2>
+                <h3>{ts}Timeline{/ts}</h3>
+                <p class="description">{ts 1=$siteTimeZone}How the dates above line up (times are in %1). Problems are marked as you change a date.{/ts}</p>
+                <ol class="election-timeline-preview" aria-live="polite"></ol>
             </td>
         </tr>
+    </table>
+    </div>
+    <div class="election-form-panel" id="election-panel-participation" data-title="{ts escape='htmlattribute'}Participation{/ts}">
+    <table class="form-layout">
 
         <tr class="crm-create-election-form-block-results">
             <td class="label label-select-col">{$form.required_nominations.label}</td>
@@ -133,9 +139,12 @@
         </tr>
 
 
+    </table>
+    </div>
+    <div class="election-form-panel" id="election-panel-display" data-title="{ts escape='htmlattribute'}Display{/ts}">
+    <table class="form-layout">
         <tr>
             <td colspan="2">
-                <h2>{ts}Display options{/ts}</h2>
                 <p class="description">{ts}Choose what voters see about candidates in this election.{/ts}</p>
             </td>
         </tr>
@@ -168,14 +177,9 @@
             </td>
         </tr>
 
-        <tr class="crm-create-election-form-block-buttons">
-            <td colspan="2">
-                <div class="crm-submit-buttons">
-                    {include file="CRM/common/formButtons.tpl" location="bottom"}
-                </div>
-            </td>
-        </tr>
-
-
     </table>
+    </div>
+    <div class="crm-submit-buttons">
+        {include file="CRM/common/formButtons.tpl" location="bottom"}
+    </div>
 </div>

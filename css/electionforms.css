@@ -574,3 +574,85 @@ ul#errorList {
     gap: 0.75rem;
     padding: 0.5rem 0 0;
 }
+
+/* Election form: tabs, date problems and the timeline preview */
+.election-form-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--election-border, rgba(0, 0, 0, 0.18));
+}
+.crm-container .election-form-tabs .election-form-tab {
+    margin: 0 0 -2px;
+    padding: 0.5rem 1rem;
+    border: 2px solid transparent;
+    border-radius: var(--election-radius, 4px) var(--election-radius, 4px) 0 0;
+    background: transparent;
+    color: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+.crm-container .election-form-tabs .election-form-tab[aria-selected="true"] {
+    border-color: var(--election-border, rgba(0, 0, 0, 0.18));
+    border-bottom-color: var(--crm-container-bg-color, #fff);
+    background: var(--crm-container-bg-color, #fff);
+}
+.crm-container .election-form-tabs .election-form-tab.has-problem::after {
+    content: " !";
+    color: #b3261e;
+}
+.election-form-panel[hidden] {
+    display: none;
+}
+.election-form-panel h3 {
+    margin: 1.25rem 0 0.25rem;
+}
+.election-date-problem {
+    display: block;
+    margin-top: 0.25rem;
+}
+.election-timeline-preview {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+}
+.election-timeline-preview li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid var(--election-border, #ddd);
+}
+.election-timeline-preview .election-timeline-label {
+    flex: 0 0 11rem;
+    font-weight: 600;
+}
+.election-timeline-preview .election-timeline-range {
+    flex: 1 1 14rem;
+}
+.election-timeline-preview .election-timeline-note {
+    flex: 1 1 100%;
+    font-size: 0.9em;
+}
+.election-timeline-preview .election-timeline-problem {
+    border-left: 4px solid #b3261e;
+}
+.election-timeline-preview .election-timeline-problem .election-timeline-note {
+    color: #b3261e;
+}
+.election-timeline-preview .election-timeline-current {
+    border-left: 4px solid #2e7d32;
+    background: rgba(46, 125, 50, 0.08);
+}
+
+.election-overview-turnout {
+    margin-top: 1.5em;
+}
+.election-turnout-table {
+    width: 100%;
+    max-width: 40em;
+}
+.election-turnout-table th {
+    text-align: left;
+}

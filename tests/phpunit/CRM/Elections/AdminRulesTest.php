@@ -182,4 +182,38 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame(38, $counts['ballots']);
   }
 
+  public function testTurnoutPerPositionShowsCountsOnly() {
+    $fixture = CRM_Elections_Test_CouncilFixture::create()->playUntil(CRM_Elections_Test_CouncilFixture::STAGE_VOTING);
+    $turnout = CRM_Elections_BAO_Election::getTurnout($fixture->electionId);
+    $this->assertSame(['President', 'Secretary', 'Treasurer', 'Council Member 1', 'Council Member 2', 'Council Member 3'], array_column($turnout, 'name'));
+    foreach ($turnout as $row) {
+      $this->assertSame(['name', 'candidates', 'ballots'], array_keys($row), 'No voter or candidate choice appears in the turnout');
+      $this->assertGreaterThan(0, $row['ballots'], $row['name']);
+      $this->assertLessThanOrEqual(38, $row['ballots'], $row['name']);
+    }
+    $this->assertSame(11, array_sum(array_column($turnout, 'candidates')));
+  }
+
+  public function testBallotsAreStillCountedAfterTheVotesAreAnonymised() {
+    $fixture = CRM_Elections_Test_CouncilFixture::create()->playUntil(CRM_Elections_Test_CouncilFixture::STAGE_VOTING);
+    foreach (range(1, 5) as $i) {
+      $contactId = civicrm_api3('Contact', 'create', ['contact_type' => 'Individual', 'first_name' => 'Voter', 'last_name' => 'Activity' . $i])['id'];
+      civicrm_api3('Activity', 'create', [
+        'source_contact_id' => $contactId,
+        'activity_type_id' => 'Vote',
+        'status_id' => 'Completed',
+        'source_record_id' => $fixture->electionId,
+        'subject' => 'Voted in an election',
+      ]);
+    }
+    $this->assertSame(5, CRM_Elections_BAO_Election::countVoters($fixture->electionId));
+
+    (new CRM_Elections_Helper_Results())->removeVotes($fixture->electionId);
+
+    $this->assertSame(5, CRM_Elections_BAO_Election::getCounts($fixture->electionId)['ballots'], 'Counted from the Vote activities once votes no longer say who voted');
+    foreach (CRM_Elections_BAO_Election::getTurnout($fixture->electionId) as $row) {
+      $this->assertNull($row['ballots'], $row['name'] . ' cannot be counted once anonymised');
+    }
+  }
+
 }

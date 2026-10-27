@@ -1,0 +1,6 @@
+<div af-fieldset="">
+  <p>
+    <a class="af-button btn btn-default" crm-icon="fa-arrow-left" ng-href="{{ crmUrl('civicrm/elections/overview', {reset: 1, eid: routeParams.eid}) }}">{{:: ts('Back to the election') }}</a>
+  </p>
+  <crm-search-display-table search-name="ElectionResults" display-name="ElectionResults_Table_1" filters="{'election_position_id.election_id': routeParams.eid}"></crm-search-display-table>
+</div>

@@ -15,7 +15,8 @@ test.describe('election administration', () => {
 
   test('the create election form offers the display options', async ({ adminPage }) => {
     await adminPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
-    await expect(adminPage.getByText('Display options')).toBeVisible();
+    await adminPage.getByRole('tab', { name: 'Display' }).click();
+    await expect(adminPage.getByText('Choose what voters see about candidates in this election.')).toBeVisible();
     await expect(adminPage.getByLabel('Show candidate photos')).toBeChecked();
     await expect(adminPage.getByLabel('Candidate statements')).toBeVisible();
     await expect(adminPage.getByLabel('Candidate name format')).toBeVisible();
