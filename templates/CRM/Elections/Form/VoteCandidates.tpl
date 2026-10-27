@@ -6,7 +6,7 @@
   {assign var='imgKey' value='member_nominee.image_URL'}
 
   {foreach from=$positions item=position}
-    {if $position.candidates|@count > 0}
+    {if $position.candidates|@count > 0 or $position.writeInPlaces > 0}
       <div class="crm-vote-election-form-block" data-position="{$position.name|escape}" data-seats="{$position.seats|escape}">
           <p><strong>{$position.prompt|escape}</strong></p>
             {foreach from=$position.candidates item=candidate}
@@ -30,6 +30,21 @@
                 </div><!-- ending of vote-candidate-row --> <div class="clearfix"></div>
 
             {/foreach}
+            {if $position.writeInPlaces > 0}
+              <fieldset class="election-writein" data-places="{$position.writeInPlaces|escape}">
+                <legend>{ts}Write in a candidate{/ts}</legend>
+                <p class="election-writein-note">{if $votingMethod == 'plurality'}{ts}Know someone who is not listed? Type a name to write them in. They are told straight away and must accept before voting closes. Your vote for them counts only if they accept; if they do not, it is dropped.{/ts}{else}{ts}Know someone who is not listed? Type a name and give them a rank to write them in. They are told straight away and must accept before voting closes. Your vote for them counts only if they accept; if they do not, your ballot moves to your next choice.{/ts}{/if}</p>
+                {foreach from=$position.writeInRows item=row}
+                  {assign var="pKey" value=$row.person}
+                  {assign var="rKey" value=$row.rank}
+                  <div class="election-writein-row" data-row="{$row.number|escape}">
+                    <div class="election-writein-person">{$form.$pKey.label}{$form.$pKey.html}</div>
+                    {if $votingMethod != 'plurality'}<div class="election-writein-rank">{$form.$rKey.label}{$form.$rKey.html}</div>{/if}
+                  </div>
+                {/foreach}
+                {if $position.writeInPlaces > 1}<button type="button" class="election-writein-add election-btn election-btn-quiet" hidden>{ts}Add another write-in{/ts}</button>{/if}
+              </fieldset>
+            {/if}
       </div><br>
     {/if}
   {/foreach}

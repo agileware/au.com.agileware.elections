@@ -15,7 +15,7 @@ return [
         'api_entity' => 'ElectionPosition',
         'api_params' => [
           'version' => 4,
-          'select' => ['id', 'election_id', 'name', 'quantity', 'description', 'sortorder'],
+          'select' => ['id', 'election_id', 'name', 'quantity', 'write_ins_per_seat', 'description', 'sortorder'],
           'orderBy' => [],
           'where' => [],
           'groupBy' => [],
@@ -40,7 +40,7 @@ return [
         'saved_search_id.name' => 'ElectionPositions',
         'type' => 'table',
         'settings' => [
-          'description' => E::ts('Drag a row to change the order positions are shown in on nominations and the ballot. Select a name, seats or description to edit it. Positions can only be changed before the election starts.'),
+          'description' => E::ts('Drag a row to change the order positions are shown in on nominations and the ballot. Select a name, seats, write-ins per seat (0 to 10, 0 means off) or description to edit it. Positions can only be changed before the election starts.'),
           'sort' => [['sortorder', 'ASC']],
           'draggable' => 'sortorder',
           'limit' => 100,
@@ -49,6 +49,7 @@ return [
           'columns' => [
             ['type' => 'field', 'key' => 'name', 'dataType' => 'String', 'label' => E::ts('Position'), 'sortable' => FALSE, 'editable' => TRUE],
             ['type' => 'field', 'key' => 'quantity', 'dataType' => 'Integer', 'label' => E::ts('Seats'), 'sortable' => FALSE, 'editable' => TRUE],
+            ['type' => 'field', 'key' => 'write_ins_per_seat', 'dataType' => 'Integer', 'label' => E::ts('Write-ins per seat'), 'sortable' => FALSE, 'editable' => TRUE],
             ['type' => 'field', 'key' => 'description', 'dataType' => 'Text', 'label' => E::ts('Description'), 'sortable' => FALSE, 'editable' => TRUE],
             [
               'size' => 'btn-xs',

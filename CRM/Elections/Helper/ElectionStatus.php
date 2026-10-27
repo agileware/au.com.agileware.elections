@@ -74,6 +74,15 @@ class CRM_Elections_Helper_ElectionStatus {
     }
 
     if ($election->isVotingStarted) {
+      // Someone a voter has written in is asked to answer, whether or not they can vote themselves.
+      $writtenIn = $contactId ? self::nominationsAwaitingAnswer($election->id, $contactId, TRUE) : [];
+      if ($writtenIn) {
+        return [
+          'type' => 'action',
+          'message' => E::ts('A voter has written you in for %1. Votes for you count only if you accept before voting closes on %2.', [1 => implode(', ', array_column($writtenIn, 'position')), 2 => $date($election->voting_end_date)]),
+          'actions' => [$link(E::ts('Respond to Nomination'), 'civicrm/elections/nominations/accept', '&enid=' . (int) $writtenIn[0]['id'])],
+        ];
+      }
       if (!$state['canVote']) {
         return ['type' => 'closed', 'message' => E::ts('Voting is open until %1. Only members can vote in this election.', [1 => $date($election->voting_end_date)]), 'actions' => []];
       }
@@ -163,7 +172,7 @@ class CRM_Elections_Helper_ElectionStatus {
       return [];
     }
     $dao = CRM_Core_DAO::executeQuery('
-      SELECT n.id, p.name AS position, n.is_eligible_candidate, n.has_accepted_nomination, n.has_rejected_nomination,
+      SELECT n.id, p.name AS position, n.is_eligible_candidate, n.has_accepted_nomination, n.has_rejected_nomination, n.is_write_in,
              (SELECT COUNT(DISTINCT s.member_nominator) FROM civicrm_election_nomination_seconder s WHERE s.election_nomination_id = n.id) AS nominators
       FROM civicrm_election_nomination n
       INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
@@ -192,8 +201,9 @@ class CRM_Elections_Helper_ElectionStatus {
       }
       elseif ($dao->is_eligible_candidate) {
         $state = 'respond';
-        $label = E::ts('Waiting for your answer');
-        if ($beforeVoting) {
+        $label = $dao->is_write_in ? E::ts('A voter has written you in: waiting for your answer') : E::ts('Waiting for your answer');
+        // A person written in can answer until voting closes.
+        if ($beforeVoting || ($dao->is_write_in && !$election->isVotingEnded)) {
           $actions[] = $link(E::ts('Accept Nomination'), 'civicrm/elections/nominations/accept', $dao->id);
           $actions[] = $link(E::ts('Withdraw Nomination'), 'civicrm/elections/nominations/reject', $dao->id, TRUE);
         }
@@ -220,12 +230,12 @@ class CRM_Elections_Helper_ElectionStatus {
    * @return array[]
    *   Each with id and position.
    */
-  public static function nominationsAwaitingAnswer($electionId, $contactId) {
+  public static function nominationsAwaitingAnswer($electionId, $contactId, $writeInsOnly = FALSE) {
     $dao = CRM_Core_DAO::executeQuery('
       SELECT n.id, p.name AS position
       FROM civicrm_election_nomination n
       INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
-      WHERE p.election_id = %1 AND n.member_nominee = %2
+      WHERE p.election_id = %1 AND n.member_nominee = %2' . ($writeInsOnly ? ' AND n.is_write_in = 1' : '') . '
         AND n.is_eligible_candidate = 1 AND IFNULL(n.has_accepted_nomination, 0) = 0 AND IFNULL(n.has_rejected_nomination, 0) = 0
       ORDER BY p.sortorder, n.id
     ', [1 => [(int) $electionId, 'Integer'], 2 => [(int) $contactId, 'Integer']]);

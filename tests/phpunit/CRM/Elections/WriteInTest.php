@@ -152,6 +152,41 @@ class CRM_Elections_WriteInTest extends api_v3_ElectionBaseTestCase {
     $this->refused(fn() => $this->ballot($fixture, 'V01', ['N01' => 1], ['N01' => 2]), 'only be ranked once');
   }
 
+  // ------------------------------------------------------------------ searching
+
+  private function search(Council $fixture, $voter, $input) {
+    CRM_Core_Session::singleton()->set('userID', $fixture->id($voter));
+    try {
+      return civicrm_api3('ElectionNominee', 'getlist', ['election_id' => $fixture->electionId, 'input' => $input, 'page_num' => 1, 'write_in' => 1]);
+    }
+    finally {
+      CRM_Core_Session::singleton()->set('userID', NULL);
+    }
+  }
+
+  public function testTheSearchNeedsAFewLettersAndShowsOnlyNames() {
+    $fixture = $this->voting();
+    $this->assertCount(0, $this->search($fixture, 'V01', 'No')['values'], 'Two letters find nothing');
+    $found = $this->search($fixture, 'V01', 'Nominee');
+    $this->assertGreaterThan(5, count($found['values']));
+    foreach ($found['values'] as $row) {
+      $this->assertArrayNotHasKey('description', $row);
+      $this->assertArrayNotHasKey('email', $row);
+    }
+  }
+
+  public function testTheSearchIsLimitedAndOnlyForVotersWhileVotingIsOpen() {
+    $fixture = $this->voting();
+    $this->assertCount(0, $this->search($fixture, 'OUT', 'Nominee')['values'], 'Not someone who can vote');
+    for ($i = 0; $i < 30; $i++) {
+      $this->search($fixture, 'V01', 'Nominee');
+    }
+    $this->assertCount(0, $this->search($fixture, 'V01', 'Nominee')['values'], 'A limit on searches a minute');
+    $closed = $this->voting();
+    $closed->moveToStage(Council::STAGE_RESULTS);
+    $this->assertCount(0, $this->search($closed, 'V02', 'Nominee')['values'], 'Not once voting has closed');
+  }
+
   // ------------------------------------------------------------------ answering
 
   public function testAPersonWhoAcceptsBecomesACandidateAndTheirVotesCount() {

@@ -35,6 +35,21 @@
     </div>
   </div>
 
+  {if $writeInsWithoutRevote}
+  <div class="messages status no-popup election-writein-warning">{ts}Write-ins are allowed but members cannot change their vote. People who voted before a person written in accepted will not see them on the ballot. Consider turning on &quot;Allow Members to Change Vote&quot;.{/ts}</div>
+  {/if}
+  {if $writeIns}
+  <div class="election-overview-writeins">
+    <h3>{ts}People written in{/ts}</h3>
+    <p class="description">{ts}A person written in must accept before voting closes. Votes for anyone who does not accept are dropped. This list never shows who wrote someone in.{/ts}</p>
+    <table class="election-writein-table">
+      <thead><tr><th>{ts}Position{/ts}</th><th>{ts}Person{/ts}</th><th>{ts}Status{/ts}</th></tr></thead>
+      <tbody>
+        {foreach from=$writeIns item=w}<tr><td>{$w.position|escape}</td><td>{$w.name|escape}</td><td>{$w.status|escape}</td></tr>{/foreach}
+      </tbody>
+    </table>
+  </div>
+  {/if}
   {if $eligibleRoles}
   <div class="election-overview-roles">
     <h3>{ts}Who can take part{/ts}</h3>
