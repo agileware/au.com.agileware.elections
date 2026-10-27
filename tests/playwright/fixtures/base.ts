@@ -2,6 +2,7 @@ import { test as base, expect, type Browser, type BrowserContext, type Page } fr
 import path from 'node:path';
 import { AUTH_DIR } from './global-setup';
 import { personaUrl } from './personas';
+import { CMS } from './cms';
 
 /** PHP and template output that must never reach a visitor. */
 const PHP_OUTPUT = /(?:Warning|Notice|Deprecated|Fatal error|Parse error)\s*:|Undefined (?:array key|variable|index|property)|Smarty/;
@@ -79,6 +80,12 @@ export const test = base.extend<Fixtures>({
   ],
 
   adminPage: async ({ browser, guards }, use) => {
+    // Admin sessions are saved for WordPress only (global-setup.ts); on Drupal and Joomla the back end
+    // checks are skipped by the specs, which test `if (adminPage)`.
+    if (CMS !== 'wordpress') {
+      await use(undefined as unknown as Page);
+      return;
+    }
     const { context, page } = await loggedInPage(browser, 'admin');
     watch(page, 'admin', guards);
     await use(page);

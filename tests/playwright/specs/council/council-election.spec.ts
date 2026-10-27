@@ -33,6 +33,9 @@ test('the election has been set up with six roles and is open for nominations', 
   expect(Object.keys(council().positions)).toEqual(POSITIONS);
   expect(voters).toHaveLength(30);
 
+  if (!adminPage) {
+    return; // back end checks need an administrator session (WordPress only)
+  }
   await adminPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
   const row = adminPage.locator('tr', { hasText: 'Playwright Council Election' });
   await expect(row).toBeVisible();
@@ -55,6 +58,7 @@ test('nominators nominate and second, and the outsider cannot take part', async 
       const page = await persona(nominator);
       await nominate(page, nominator, position, nominee, data.links[nominee].cid, `${nominator} nominates ${nominee} for ${position}`, first ? { search: 'Nominee' } : {});
       first = false;
+      await page.context().close();
     }
   }
 
@@ -90,11 +94,12 @@ test('nominees accept, withdraw or stay silent, and six people end up standing',
     if (outcome === 'withdraw' || outcome === 'accept_then_withdraw') {
       await withdraw(page, nominee, id, 'Changed my mind');
     }
+    await page.context().close();
   }
 
   // A nominee who was not seconded enough has nothing to accept.
   const unseconded = await personaGoto('N08', 'civicrm/elections/view');
-  await expect(unseconded.getByRole('button', { name: 'Accept Nomination' })).toHaveCount(0);
+  await expect(unseconded.getByRole('link', { name: 'Accept Nomination' })).toHaveCount(0);
 
   // Who is standing, role by role.
   const standing = civiApi4<Array<{ 'election_position_id.name': string; 'member_nominee.last_name': string }>>('ElectionNomination.get', {
@@ -124,6 +129,7 @@ test('thirty voters and the nominees vote, one changes their vote, the outsider 
     await Promise.all(voting.slice(i, i + 4).map(async (name) => {
       const page = await persona(name);
       await vote(page, name, ballotFor(name, nominationIds));
+      await page.context().close(); // keeps the number of open browsers down
     }));
   }
 
@@ -194,6 +200,9 @@ test('results follow the ballots: clear winners, a tie and an uncontested role',
   await expect(summary.getByRole('heading', { name: 'President' })).toBeVisible();
 
   // The administrator sees the turnout on the back end.
+  if (!adminPage) {
+    return;
+  }
   await adminPage.goto(civiAdminUrl('civicrm/elections/overview', { reset: 1, eid: data.election_id }));
   await expect(adminPage.locator('.election-stage')).toHaveText('Results published');
   await expect(adminPage.locator('.election-count-ballots')).toHaveText(String(Object.keys(data.ballots).length));

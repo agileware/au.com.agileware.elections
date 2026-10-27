@@ -1,5 +1,5 @@
 import { test, expect } from '../../fixtures/base';
-import { frontUrl } from '../../fixtures/cms';
+import { CMS, frontUrl } from '../../fixtures/cms';
 
 /**
  * Front end smoke tests: a voter and an outsider using personal links, at the
@@ -11,7 +11,7 @@ test.describe('election front end (nominations stage)', () => {
     const page = await personaGoto('V01', 'civicrm/elections/view');
     await expect(page.getByText('Welcome, Voter 01.')).toBeVisible();
     await expect(page.getByText('This Election is currently in the Nominations phase.')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Submit Nomination' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Submit Nomination' })).toBeVisible();
     for (const role of ['President', 'Secretary', 'Treasurer', 'Council Member 1', 'Council Member 2', 'Council Member 3']) {
       await expect(page.getByRole('heading', { name: `Nominations for ${role}` })).toBeVisible();
     }
@@ -24,10 +24,12 @@ test.describe('election front end (nominations stage)', () => {
   });
 
   test('a link with a wrong checksum is refused', async ({ persona, allowedProblems }) => {
-    allowedProblems.push(/403/);
+    // CiviCRM on Joomla reports a refused page as HTTP 500 (its fatal error page) where WordPress and Drupal send 403.
+    allowedProblems.push(CMS === 'joomla' ? /403|500/ : /403/);
     const page = await persona('V01');
     const response = await page.goto(frontUrl('civicrm/elections/view', { eid: 1, cid: 1, cs: 'wrong' }));
     await expect(page.locator('body')).not.toContainText('Welcome,');
-    expect([200, 403]).toContain(response?.status());
+    await expect(page.locator('body')).toContainText(/do not have permission|not authorized|access denied/i);
+    expect(CMS === 'joomla' ? [403, 500] : [200, 403]).toContain(response?.status());
   });
 });
