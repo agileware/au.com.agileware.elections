@@ -4,11 +4,13 @@ This page documents the initial steps that need to be performed to configure you
 
 ## Scheduled Jobs
 
-CiviElections creates a new CiviCRM Scheduled Job, **Elections Results Job** on installation.
-This Scheduled Job calculates the [election results](user_view_results.md) which are then displayed on the election results page.
-This Scheduled Job is configured to execute **Always** and is **Enabled** by default.
+The extension creates three CiviCRM Scheduled Jobs on installation, all **Enabled** by default:
 
-If this Scheduled Job is not enabled or executed, then no election results will be calculated.  
+- **Elections Results Job** (Always): calculates the [election results](user_view_results.md) shown on the results page. If it is not enabled or executed, no election results will be calculated.
+- **Elections Write-in Reminders** (Hourly): reminds people written in who have not answered, in the last day before voting closes.
+- **Elections Write-in Closed Notices** (Always): tells people written in who never answered that voting has closed and the opportunity to accept has passed.
+
+CiviCRM's cron must be running for them to execute. See [Emails and scheduled jobs](reference_emails_and_jobs.md).
 
 ## CiviCRM Permissions
 

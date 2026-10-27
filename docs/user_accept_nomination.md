@@ -9,3 +9,9 @@ Accepting is done by the nominee themselves. The election page shows **Your nomi
 If the nominee does not accept a nomination, then they will not be listed as a candidate when voting starts, after the **Voting Start Date**.
 
 A nominee can instead [withdraw a nomination](user_withdraw_nomination.md) if they do not want to be a candidate for the position.
+
+## If you were written in by a voter
+
+If a voter writes you in during voting, you are emailed with links to accept or decline. You can answer until voting closes: if you accept, you become a candidate and appear on the ballot, and the votes already written in for you count; if you decline, or do not answer, those votes are dropped. You will get one reminder in the last day. Once you have accepted you cannot withdraw. See [Write-ins](admin_write_ins.md).
+
+If you open the link after voting has closed you will see a message saying the opportunity to answer has passed and that you are not on the ballot. If you never answered, you are also sent an email to say so. Nothing more is needed from you.
