@@ -897,33 +897,86 @@ ul#errorList {
     padding-left: 1.5rem;
 }
 .election-review-buttons {
+    position: sticky;
+    bottom: -1.5rem;
+    z-index: 1;
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
-    margin: 1.5rem 0 0;
+    margin: 1.5rem -1.5rem -1.5rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--election-border, rgba(0, 0, 0, 0.18));
+    background: var(--crm-container-bg-color, Canvas);
 }
-.election-review-confirm,
-.election-review-back {
+.election-review-none {
+    margin: 1rem 0 0;
+}
+.crm-container .election-review-dialog .election-review-confirm,
+.crm-container .election-review-dialog .election-review-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
     min-height: 2.75rem;
+    margin: 0;
     padding: 0.5rem 1.5rem;
     border: 2px solid var(--election-btn-bg, #333);
     border-radius: var(--election-radius, 4px);
+    height: auto;
+    max-width: none;
     font: inherit;
     font-weight: 600;
+    line-height: 1.25;
+    text-transform: none;
     cursor: pointer;
 }
-.election-review-confirm {
+.crm-container .election-review-dialog .election-review-confirm {
     background: var(--election-btn-bg, #333);
     color: var(--election-btn-color, #fff);
 }
-.election-review-back {
+.crm-container .election-review-dialog .election-review-back {
     background: transparent;
-    color: inherit;
+    color: var(--election-btn-bg, #333);
+}
+.crm-container .election-review-dialog .election-review-confirm:hover,
+.crm-container .election-review-dialog .election-review-confirm:focus-visible {
+    background: var(--election-btn-hover-bg);
+    border-color: var(--election-btn-hover-bg);
+}
+.crm-container .election-review-dialog .election-review-back:hover,
+.crm-container .election-review-dialog .election-review-back:focus-visible {
+    background: color-mix(in srgb, var(--election-btn-bg, #333) 12%, transparent);
+}
+.crm-container .election-review-dialog button:focus-visible {
+    outline: 3px solid var(--election-btn-bg, #333);
+    outline-offset: 3px;
 }
 @supports (color: lch(from red l c h)) {
-    .election-review-confirm {
+    .crm-container .election-review-dialog .election-review-confirm {
         color: lch(from var(--election-btn-bg, #333) clamp(0, (49.5 - l) * 1000, 100) 0 0);
     }
+    .crm-container .election-review-dialog .election-review-confirm:hover,
+    .crm-container .election-review-dialog .election-review-confirm:focus-visible {
+        color: lch(from var(--election-btn-hover-bg) clamp(0, (49.5 - l) * 1000, 100) 0 0);
+    }
+}
+.election-review-dialog h2:focus {
+    outline: none;
+}
+
+/* The choices are listed in order, so the numbers are shown whatever the theme does to lists. */
+.crm-container .election-review-position ol,
+.crm-container .election-your-vote-position ol {
+    list-style: decimal;
+}
+.crm-container .election-review-position li,
+.crm-container .election-your-vote-position li {
+    display: list-item;
+}
+
+/* The help text above the ballot and the first position: room between them. */
+.crm-vote-election-form-block:first-of-type {
+    margin-top: 1.25rem;
 }
 
 /* Election page: the person's own ballot */

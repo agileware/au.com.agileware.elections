@@ -65,25 +65,29 @@
     return !anyProblem;
   }
 
-  /** The choices, in order, for each position. */
+  /** The choices, in order, for each position; positions with no choice are named together on one line. */
   function summary($form) {
     var $list = $('<div class="election-review-list"></div>');
+    var skipped = [];
     $.each(positions($form), function (i, position) {
       var ranked = $.grep(position.rows, function (row) { return rankOf(row) !== null; });
+      var title = position.title.replace(/\.\s*Please number.*$/, '').replace(/^Vote for\s+/i, '');
+      if (!ranked.length) {
+        skipped.push(title);
+        return;
+      }
       ranked.sort(function (a, b) { return rankOf(a) - rankOf(b); });
       var $section = $('<section class="election-review-position"></section>');
-      $('<h3></h3>').text(position.title.replace(/\.\s*Please number.*$/, '')).appendTo($section);
-      if (!ranked.length) {
-        $('<p class="election-review-none"></p>').text(text.noPreference).appendTo($section);
-      }
-      else {
-        var $ol = $('<ol></ol>').appendTo($section);
-        $.each(ranked, function (j, row) {
-          $('<li></li>').text(row.name + ' – ' + text.rank.replace('%1', rankOf(row))).appendTo($ol);
-        });
-      }
+      $('<h3></h3>').text(text.positionTitle.replace('%1', title)).appendTo($section);
+      var $ol = $('<ol></ol>').appendTo($section);
+      $.each(ranked, function (j, row) {
+        $('<li></li>').text(row.name + ' \u2013 ' + text.rank.replace('%1', rankOf(row))).appendTo($ol);
+      });
       $list.append($section);
     });
+    if (skipped.length) {
+      $('<p class="election-review-none"></p>').text(text.noPreference.replace('%1', skipped.join(', '))).appendTo($list);
+    }
     return $list;
   }
 
@@ -92,7 +96,7 @@
     dialog.className = 'election-review-dialog';
     dialog.setAttribute('aria-labelledby', 'election-review-title');
     var $dialog = $(dialog);
-    $('<h2 id="election-review-title"></h2>').text(text.reviewTitle).appendTo($dialog);
+    $('<h2 id="election-review-title" tabindex="-1"></h2>').text(text.reviewTitle).appendTo($dialog);
     $('<p></p>').text(text.reviewIntro).appendTo($dialog);
     $dialog.append(summary($form));
     var $buttons = $('<p class="election-review-buttons"></p>').appendTo($dialog);
@@ -118,7 +122,8 @@
       }
     });
     dialog.showModal();
-    $confirm.trigger('focus');
+    // Start at the top, so the title and the choices are read first; the buttons are next in the tab order.
+    $dialog.find('h2').trigger('focus');
   }
 
   $(function () {
