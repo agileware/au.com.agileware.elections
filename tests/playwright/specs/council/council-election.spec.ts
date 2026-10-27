@@ -13,12 +13,12 @@ import { council, POSITIONS, voters, nominees } from '../../fixtures/personas';
  *
  * The stages are moved by changing the election's dates, as the passing of time would.
  */
-test.describe.configure({ mode: 'serial' });
+test.describe.configure({ mode: 'serial', retries: 0 });
 
 let nominationIds: Record<string, number> = {};
 
 // A nominee's name as it may appear: the dev site may show nicknames, CI does not.
-const NAME: Record<string, RegExp> = Object.fromEntries(nominees.map((n) => [n, new RegExp(`Nominee (".*?" )?${n.slice(1)}`)]));
+const NAME: Record<string, RegExp> = Object.fromEntries(nominees.map((n) => [n, new RegExp(`Nominee (["\u201c].*?["\u201d] )?${n.slice(1)}`)]));
 
 test.beforeAll(() => {
   reseedCouncil();

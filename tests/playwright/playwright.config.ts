@@ -17,12 +17,23 @@ export default defineConfig({
   reporter: process.env.CI ? [['html', { open: 'never' }], ['list']] : 'list',
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:8080',
+    // A step that cannot be done fails in seconds, not after the whole test timeout.
+    actionTimeout: 20000,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
   projects: [
     {
       name: 'chromium',
+      testIgnore: /council\//,
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      // The council election moves the shared election through its stages, so it runs on its own,
+      // after everything else, and puts the election back at the nominations stage when it is done.
+      name: 'council',
+      testMatch: /council\//,
+      dependencies: ['chromium'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],

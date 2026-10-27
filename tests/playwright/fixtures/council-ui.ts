@@ -16,7 +16,8 @@ export async function nominate(page: Page, persona: string, position: string, no
     // Use the nominee search as a person would: this is the path that needs the personal link's access.
     await page.locator('#s2id_contact').click();
     await page.locator('.select2-input:visible').fill(options.search);
-    await page.locator('.select2-result-label', { hasText: nominee }).first().click();
+    // Search results show the sort name, for example "01, Nominee".
+    await page.locator('.select2-result-label', { hasText: `${nominee.slice(1)}, Nominee` }).first().click();
   }
   else {
     await page.evaluate((id) => { (document.querySelector('#contact') as HTMLInputElement).value = String(id); }, nomineeContactId);
