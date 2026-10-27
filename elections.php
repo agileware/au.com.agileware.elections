@@ -85,6 +85,10 @@ function elections_civicrm_pre($op, $objectName, $id, &$params) {
       }
     }
   }
+  if ($objectName === 'ElectionNomination' && $op === 'edit' && $id) {
+    CRM_Elections_BAO_ElectionNomination::assertCanChange($id, (array) $params);
+  }
+
   if ($objectName === 'Election' && $op === 'edit' && $id && !empty($params['is_visible'])) {
     $isVisibleNow = CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $id, 'is_visible');
     if (!$isVisibleNow) {

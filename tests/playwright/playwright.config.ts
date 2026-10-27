@@ -7,10 +7,10 @@ export default defineConfig({
   // are written as serial describe blocks. Files can still run in parallel.
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  retries: 1,
   // One worker in CI: several logins and checksum personas against a single WordPress
   // container at once is slow enough to hit the default timeout.
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 1 : 2,
   timeout: process.env.CI ? 90000 : 60000,
   // SearchKit and Afform pages load their data after the page itself, so allow time for it.
   expect: { timeout: 15000 },

@@ -17,6 +17,14 @@ class CRM_Elections_UpgraderTest extends \PHPUnit\Framework\TestCase implements 
     return $upgrader;
   }
 
+  /**
+   * Whatever happens in a test, leave the shared test database with the full 2.0 schema.
+   */
+  public function tearDown(): void {
+    $this->upgrader()->upgrade_20000();
+    parent::tearDown();
+  }
+
   public function setUpHeadless() {
     return \Civi\Test::headless()->installMe(__DIR__)->apply();
   }

@@ -103,6 +103,12 @@
     <access_arguments>administer Elections</access_arguments>
   </item>
   <item>
+    <path>civicrm/elections/candidates/add</path>
+    <page_callback>CRM_Elections_Form_AddCandidate</page_callback>
+    <title>Add Candidate</title>
+    <access_arguments>administer Elections</access_arguments>
+  </item>
+  <item>
     <path>civicrm/elections/summary</path>
     <page_callback>CRM_Elections_Page_ElectionSummary</page_callback>
     <title>ElectionSummary</title>

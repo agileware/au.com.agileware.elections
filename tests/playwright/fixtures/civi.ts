@@ -57,3 +57,8 @@ export function civiSql(sql: string, params: Record<string, string | number> = {
   const php = `CRM_Core_DAO::executeQuery(${JSON.stringify(sql)}, json_decode(${JSON.stringify(JSON.stringify(typed))}, TRUE));`;
   run(['cv', 'ev', php]);
 }
+
+/** Evaluate PHP inside CiviCRM (`cv ev`) and return what it prints. */
+export function civiEval(php: string): string {
+  return run(['cv', 'ev', php]);
+}
