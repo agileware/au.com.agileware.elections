@@ -31,6 +31,14 @@ export default async function globalSetup(config: FullConfig) {
     await page.locator('#wp-submit').click();
     await page.waitForURL(/wp-admin\//);
     await page.locator('#wpadminbar').waitFor();
+    if (name === 'admin') {
+      // The first visit to a SearchKit page after the caches were cleared is slow while CiviCRM
+      // builds its templates; do it once here rather than inside the first test.
+      for (const url of ['/wp-admin/admin.php?page=CiviCRM&q=civicrm%2Felections%2Fmanage&reset=1', '/wp-admin/admin.php?page=CiviCRM&q=civicrm%2Felections%2Fposition-list&reset=1', '/wp-admin/admin.php?page=CiviCRM&q=civicrm%2Felections%2Fcandidate-list&reset=1']) {
+        await page.goto(url);
+        await page.waitForLoadState('networkidle', { timeout: 120000 }).catch(() => {});
+      }
+    }
     await context.storageState({ path: path.join(AUTH_DIR, `${name}.json`) });
     await context.close();
   }
