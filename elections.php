@@ -129,6 +129,34 @@ function elections_civicrm_merge($type, &$data, $mainId = NULL, $otherId = NULL,
 }
 
 /**
+ * Election pages and forms can carry a personal link (the contact id and checksum are in the address).
+ * Ask the browser not to pass that address on to any other site (through the Referer header, for
+ * example when a candidate's statement link is followed). Requests inside this site still carry it,
+ * which the nominee search relies on.
+ */
+function elections_send_referrer_policy() {
+  CRM_Utils_System::setHttpHeader('Referrer-Policy', 'same-origin');
+}
+
+/**
+ * Implements hook_civicrm_pageRun().
+ */
+function elections_civicrm_pageRun(&$page) {
+  if ($page instanceof CRM_Elections_Page_Base) {
+    elections_send_referrer_policy();
+  }
+}
+
+/**
+ * Implements hook_civicrm_buildForm().
+ */
+function elections_civicrm_buildForm($formName, &$form) {
+  if ($form instanceof CRM_Elections_Form_Base) {
+    elections_send_referrer_policy();
+  }
+}
+
+/**
  * Implements hook_civicrm_preProcess().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess

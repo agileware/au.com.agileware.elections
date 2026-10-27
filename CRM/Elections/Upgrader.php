@@ -82,6 +82,50 @@ class CRM_Elections_Upgrader extends CRM_Extension_Upgrader_Base {
   }
 
   /**
+   * Version 2.0.0 security hardening, part 2.
+   *
+   * - One nomination for each person and position, and one nominator row for each nominator and
+   *   nomination, so that a repeated request can never count as a second nominator. Duplicates from
+   *   earlier versions are merged first (keeping the oldest row and what hangs off the others).
+   */
+  public function upgrade_20020() {
+    Civi::log()->info('Applying update 20020');
+    $duplicates = CRM_Core_DAO::executeQuery('
+      SELECT election_position_id, member_nominee, MIN(id) AS keep_id
+      FROM civicrm_election_nomination
+      GROUP BY election_position_id, member_nominee
+      HAVING COUNT(*) > 1
+    ');
+    while ($duplicates->fetch()) {
+      $keep = (int) $duplicates->keep_id;
+      $others = CRM_Core_DAO::executeQuery('SELECT id FROM civicrm_election_nomination WHERE election_position_id = %1 AND member_nominee = %2 AND id <> %3', [
+        1 => [(int) $duplicates->election_position_id, 'Integer'],
+        2 => [(int) $duplicates->member_nominee, 'Integer'],
+        3 => [$keep, 'Integer'],
+      ])->fetchAll();
+      foreach (array_column($others, 'id') as $other) {
+        $other = (int) $other;
+        CRM_Core_DAO::executeQuery("UPDATE IGNORE civicrm_election_nomination_seconder SET election_nomination_id = $keep WHERE election_nomination_id = $other");
+        CRM_Core_DAO::executeQuery("UPDATE IGNORE civicrm_election_vote SET election_nomination_id = $keep WHERE election_nomination_id = $other");
+        CRM_Core_DAO::executeQuery("UPDATE civicrm_election_nomination k INNER JOIN civicrm_election_nomination o ON o.id = $other SET k.is_eligible_candidate = GREATEST(IFNULL(k.is_eligible_candidate, 0), IFNULL(o.is_eligible_candidate, 0)), k.has_accepted_nomination = GREATEST(IFNULL(k.has_accepted_nomination, 0), IFNULL(o.has_accepted_nomination, 0)), k.has_rejected_nomination = GREATEST(IFNULL(k.has_rejected_nomination, 0), IFNULL(o.has_rejected_nomination, 0)) WHERE k.id = $keep");
+        CRM_Core_DAO::executeQuery("DELETE FROM civicrm_election_nomination WHERE id = $other");
+      }
+    }
+    CRM_Core_DAO::executeQuery('
+      DELETE s1 FROM civicrm_election_nomination_seconder s1
+      INNER JOIN civicrm_election_nomination_seconder s2
+        ON s1.member_nominator = s2.member_nominator AND s1.election_nomination_id = s2.election_nomination_id AND s1.id > s2.id
+    ');
+    if (!CRM_Core_BAO_SchemaHandler::checkIfIndexExists('civicrm_election_nomination', 'UI_election_nomination_position_nominee')) {
+      CRM_Core_DAO::executeQuery('ALTER TABLE civicrm_election_nomination ADD UNIQUE INDEX `UI_election_nomination_position_nominee` (`election_position_id`, `member_nominee`)');
+    }
+    if (!CRM_Core_BAO_SchemaHandler::checkIfIndexExists('civicrm_election_nomination_seconder', 'UI_election_nomination_seconder_nominator_nomination')) {
+      CRM_Core_DAO::executeQuery('ALTER TABLE civicrm_election_nomination_seconder ADD UNIQUE INDEX `UI_election_nomination_seconder_nominator_nomination` (`member_nominator`, `election_nomination_id`)');
+    }
+    return TRUE;
+  }
+
+  /**
    * Add a column unless it already exists, so upgrade steps can safely be re-run.
    *
    * @param string $table

@@ -48,6 +48,21 @@ class CRM_Elections_Helper_Process {
       throw new CRM_Core_Exception(E::ts('Only people who can take part in this election can be nominated.'));
     }
 
+    // One request at a time for each person and position: a repeated or simultaneous request must not
+    // find "nothing there yet" twice and write two rows (the database refuses them too).
+    $lock = Civi::lockManager()->acquire('data.elections.nominate.' . (int) $positionId . '.' . (int) $nomineeId, 10);
+    if (!$lock->isAcquired()) {
+      throw new CRM_Core_Exception(E::ts('This nomination is being saved. Please wait a moment and try again.'));
+    }
+    try {
+      return self::nominateLocked($election, $electionId, $positionId, $nomineeId, $nominatorId, $reason);
+    }
+    finally {
+      $lock->release();
+    }
+  }
+
+  private static function nominateLocked($election, $electionId, $positionId, $nomineeId, $nominatorId, $reason) {
     $existing = civicrm_api3('ElectionNomination', 'get', [
       'member_nominee' => $nomineeId,
       'election_position_id' => $positionId,
@@ -83,7 +98,8 @@ class CRM_Elections_Helper_Process {
     $seconder = civicrm_api3('ElectionNominationSeconder', 'create', $seconderParams);
 
     $isEligible = FALSE;
-    $totalNominations = civicrm_api3('ElectionNominationSeconder', 'getcount', ['election_nomination_id' => $nominationId]);
+    // Counted by distinct nominator, so nobody counts twice whatever happened to the rows.
+    $totalNominations = (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(DISTINCT member_nominator) FROM civicrm_election_nomination_seconder WHERE election_nomination_id = %1', [1 => [$nominationId, 'Integer']]);
     if ($totalNominations >= $election->required_nominations) {
       civicrm_api3('ElectionNomination', 'create', ['id' => $nominationId, 'is_eligible_candidate' => 1]);
       $isEligible = TRUE;

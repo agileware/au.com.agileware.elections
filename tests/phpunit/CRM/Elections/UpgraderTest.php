@@ -23,6 +23,7 @@ class CRM_Elections_UpgraderTest extends \PHPUnit\Framework\TestCase implements 
   public function tearDown(): void {
     $this->upgrader()->upgrade_20000();
     $this->upgrader()->upgrade_20010();
+    $this->upgrader()->upgrade_20020();
     parent::tearDown();
   }
 
@@ -121,6 +122,65 @@ class CRM_Elections_UpgraderTest extends \PHPUnit\Framework\TestCase implements 
       if (CRM_Core_BAO_SchemaHandler::checkIfIndexExists('civicrm_election_vote', 'tmp_member')) {
         CRM_Core_DAO::executeQuery('ALTER TABLE civicrm_election_vote DROP INDEX `tmp_member`');
       }
+    }
+  }
+
+  /**
+   * Version 1.x allowed a person to be nominated twice for a position and a nominator to count twice:
+   * upgrading merges the duplicate nominations (keeping what hangs off them) and removes the extra
+   * nominator rows, then adds the unique keys.
+   */
+  public function testUpgrade20020MergesDuplicateNominationsAndNominators() {
+    try {
+      // The foreign keys need an index of their own while the unique keys are dropped. (These helper
+      // indexes are harmless and are left in the test database.)
+      $this->ensureIndex('civicrm_election_nomination', 'tmp_position', 'election_position_id');
+      $this->ensureIndex('civicrm_election_nomination', 'tmp_nominee', 'member_nominee');
+      CRM_Core_DAO::executeQuery('ALTER TABLE civicrm_election_nomination DROP INDEX `UI_election_nomination_position_nominee`');
+      $this->ensureIndex('civicrm_election_nomination_seconder', 'tmp_nominator', 'member_nominator');
+      $this->ensureIndex('civicrm_election_nomination_seconder', 'tmp_nomination', 'election_nomination_id');
+      CRM_Core_DAO::executeQuery('ALTER TABLE civicrm_election_nomination_seconder DROP INDEX `UI_election_nomination_seconder_nominator_nomination`');
+
+      CRM_Core_DAO::executeQuery("INSERT INTO civicrm_election (name, visibility_start_date, visibility_end_date, nomination_start_date, nomination_end_date, advertise_candidates_date, voting_start_date, voting_end_date, result_date) VALUES ('Dupes2', NOW(), NOW(), NOW(), NOW(), NOW(), NOW(), NOW(), NOW())");
+      $electionId = (int) CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_election WHERE name = "Dupes2"');
+      CRM_Core_DAO::executeQuery("INSERT INTO civicrm_election_position (election_id, name, quantity, sortorder) VALUES ($electionId, 'Chair', 1, 1)");
+      $positionId = (int) CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_election_position WHERE election_id = $electionId");
+      $nominee = (int) civicrm_api3('Contact', 'create', ['contact_type' => 'Individual', 'first_name' => 'Dup', 'last_name' => 'Nominee'])['id'];
+      $nominator = (int) civicrm_api3('Contact', 'create', ['contact_type' => 'Individual', 'first_name' => 'Dup', 'last_name' => 'Nominator'])['id'];
+      $other = (int) civicrm_api3('Contact', 'create', ['contact_type' => 'Individual', 'first_name' => 'Dup', 'last_name' => 'Other'])['id'];
+      CRM_Core_DAO::executeQuery("INSERT INTO civicrm_election_nomination (election_position_id, member_nominee, is_eligible_candidate, has_accepted_nomination) VALUES ($positionId, $nominee, 0, 0), ($positionId, $nominee, 1, 1)");
+      $ids = array_column(CRM_Core_DAO::executeQuery("SELECT id FROM civicrm_election_nomination WHERE election_position_id = $positionId ORDER BY id")->fetchAll(), 'id');
+      [$keep, $extra] = array_map('intval', $ids);
+      CRM_Core_DAO::executeQuery("INSERT INTO civicrm_election_nomination_seconder (member_nominator, election_nomination_id) VALUES ($nominator, $keep), ($nominator, $keep), ($nominator, $extra), ($other, $extra)");
+
+      $this->assertTrue($this->upgrader()->upgrade_20020());
+      $this->assertTrue($this->upgrader()->upgrade_20020(), 'Can be repeated');
+
+      $this->assertSame(1, (int) CRM_Core_DAO::singleValueQuery("SELECT COUNT(*) FROM civicrm_election_nomination WHERE election_position_id = $positionId"));
+      $merged = CRM_Core_DAO::executeQuery("SELECT * FROM civicrm_election_nomination WHERE id = $keep");
+      $merged->fetch();
+      $this->assertEquals(1, $merged->is_eligible_candidate, 'The merged nomination keeps what either had');
+      $this->assertEquals(1, $merged->has_accepted_nomination);
+      $this->assertSame(2, (int) CRM_Core_DAO::singleValueQuery("SELECT COUNT(*) FROM civicrm_election_nomination_seconder WHERE election_nomination_id = $keep"), 'One row for each nominator');
+      $this->assertTrue(CRM_Core_BAO_SchemaHandler::checkIfIndexExists('civicrm_election_nomination', 'UI_election_nomination_position_nominee'));
+      $this->assertTrue(CRM_Core_BAO_SchemaHandler::checkIfIndexExists('civicrm_election_nomination_seconder', 'UI_election_nomination_seconder_nominator_nomination'));
+
+      CRM_Core_DAO::executeQuery("DELETE FROM civicrm_election_nomination_seconder WHERE election_nomination_id = $keep");
+      CRM_Core_DAO::executeQuery("DELETE FROM civicrm_election_nomination WHERE id = $keep");
+      CRM_Core_DAO::executeQuery("DELETE FROM civicrm_election_position WHERE id = $positionId");
+      CRM_Core_DAO::executeQuery("DELETE FROM civicrm_election WHERE id = $electionId");
+      foreach ([$nominee, $nominator, $other] as $contactId) {
+        civicrm_api3('Contact', 'delete', ['id' => $contactId, 'skip_undelete' => 1]);
+      }
+    }
+    finally {
+      $this->upgrader()->upgrade_20020();
+    }
+  }
+
+  private function ensureIndex($table, $name, $column) {
+    if (!CRM_Core_BAO_SchemaHandler::checkIfIndexExists($table, $name)) {
+      CRM_Core_DAO::executeQuery("ALTER TABLE $table ADD INDEX `$name` (`$column`)");
     }
   }
 

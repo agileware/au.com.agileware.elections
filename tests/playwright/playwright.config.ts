@@ -47,14 +47,20 @@ export default defineConfig({
     },
     {
       name: 'security',
-      testMatch: /security\//,
+      testMatch: /security\/xss/,
       dependencies: ['accessibility'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'tampering',
+      testMatch: /security\/tampering/,
+      dependencies: ['security'],
       use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'council',
       testMatch: /council\//,
-      dependencies: ['security'],
+      dependencies: ['tampering'],
       use: { ...devices['Desktop Chrome'] },
     },
     {

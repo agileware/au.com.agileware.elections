@@ -32,6 +32,7 @@ class api_v3_ElectionBaseTestCase extends \PHPUnit\Framework\TestCase implements
     $upgrader->init(['key' => 'au.com.agileware.elections']);
     $upgrader->upgrade_20000();
     $upgrader->upgrade_20010();
+    $upgrader->upgrade_20020();
     return $env;
   }
 

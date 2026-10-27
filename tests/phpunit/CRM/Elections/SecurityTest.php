@@ -88,6 +88,73 @@ class CRM_Elections_SecurityTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame(0, $removed, 'A voter replacing their own ballot is not an administrator removing votes');
   }
 
+  // ------------------------------------------------------------------ nominations
+
+  public function testANominatorCanNeverCountTwice() {
+    $fixture = $this->fixture(CRM_Elections_Test_CouncilFixture::STAGE_NOMINATIONS);
+    $positionId = (int) CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_election_position WHERE election_id = %1 ORDER BY sortorder LIMIT 1', [1 => [$fixture->electionId, 'Integer']]);
+    $nominee = $fixture->id('N09');
+    $nominator = $fixture->id('V07');
+    $this->assertGreaterThan(1, (int) CRM_Core_DAO::singleValueQuery('SELECT required_nominations FROM civicrm_election WHERE id = %1', [1 => [$fixture->electionId, 'Integer']]));
+
+    $first = CRM_Elections_Helper_Process::nominate($fixture->electionId, $positionId, $nominee, $nominator, 'first');
+    $again = CRM_Elections_Helper_Process::nominate($fixture->electionId, $positionId, $nominee, $nominator, 'again');
+    $this->assertTrue($again['already_nominated']);
+    $this->assertFalse($again['is_eligible_candidate'], 'One nominator, however many requests, is one nomination');
+    $this->assertSame(1, (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_nomination_seconder WHERE election_nomination_id = %1', [1 => [$first['nomination_id'], 'Integer']]));
+
+    // Even a row written straight to the database is refused.
+    $this->refused(function () use ($first, $nominator) {
+      CRM_Core_DAO::executeQuery('INSERT INTO civicrm_election_nomination_seconder (member_nominator, election_nomination_id, description) VALUES (%1, %2, "again")', [1 => [$nominator, 'Integer'], 2 => [(int) $first['nomination_id'], 'Integer']]);
+    }, 'already exists', 'a second row for the same nominator');
+    $this->refused(function () use ($positionId, $nominee) {
+      CRM_Core_DAO::executeQuery('INSERT INTO civicrm_election_nomination (election_position_id, member_nominee) VALUES (%1, %2)', [1 => [$positionId, 'Integer'], 2 => [$nominee, 'Integer']]);
+    }, 'already exists', 'a second nomination for the same person and position');
+
+    // A second, different nominator does count.
+    $second = CRM_Elections_Helper_Process::nominate($fixture->electionId, $positionId, $nominee, $fixture->id('V08'), 'second');
+    $this->assertTrue($second['is_eligible_candidate']);
+  }
+
+  public function testNominationsOutsideTheRulesAreRefused() {
+    $fixture = $this->fixture(CRM_Elections_Test_CouncilFixture::STAGE_NOMINATIONS);
+    $positionId = (int) CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_election_position WHERE election_id = %1 ORDER BY sortorder LIMIT 1', [1 => [$fixture->electionId, 'Integer']]);
+    // Someone who is not allowed to take part cannot nominate, or be nominated.
+    $this->refused(function () use ($fixture, $positionId) {
+      CRM_Elections_Helper_Process::nominate($fixture->electionId, $positionId, $fixture->id('N01'), $fixture->id('OUT'));
+    }, 'not allowed to nominate');
+    $this->refused(function () use ($fixture, $positionId) {
+      CRM_Elections_Helper_Process::nominate($fixture->electionId, $positionId, $fixture->id('OUT'), $fixture->id('V01'));
+    }, 'can be nominated');
+    // A position of another election.
+    $other = CRM_Elections_Test_CouncilFixture::create(['name' => 'Another council']);
+    $otherPosition = (int) CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_election_position WHERE election_id = %1 LIMIT 1', [1 => [$other->electionId, 'Integer']]);
+    $this->refused(function () use ($fixture, $otherPosition) {
+      CRM_Elections_Helper_Process::nominate($fixture->electionId, $otherPosition, $fixture->id('N01'), $fixture->id('V01'));
+    }, 'not part of this election');
+    // Not while nominations are closed.
+    $fixture->moveToStage(CRM_Elections_Test_CouncilFixture::STAGE_ADVERTISE);
+    $this->refused(function () use ($fixture, $positionId) {
+      CRM_Elections_Helper_Process::nominate($fixture->electionId, $positionId, $fixture->id('N01'), $fixture->id('V01'));
+    }, 'not open');
+  }
+
+  public function testNomineesCanOnlyActOnTheirOwnNominations() {
+    $fixture = $this->fixture(CRM_Elections_Test_CouncilFixture::STAGE_ADVERTISE);
+    $nomination = CRM_Core_DAO::executeQuery('SELECT id, member_nominee FROM civicrm_election_nomination WHERE is_eligible_candidate = 1 AND IFNULL(has_accepted_nomination, 0) = 0 AND IFNULL(has_rejected_nomination, 0) = 0 AND election_position_id IN (SELECT id FROM civicrm_election_position WHERE election_id = %1) LIMIT 1', [1 => [$fixture->electionId, 'Integer']]);
+    $nomination->fetch();
+    $someoneElse = $fixture->id('V01');
+    $this->refused(function () use ($nomination, $someoneElse) {
+      CRM_Elections_Helper_Process::accept($nomination->id, $someoneElse, 'I accept for them');
+    }, 'not authorized', 'accepting for someone else');
+    $this->refused(function () use ($nomination, $someoneElse) {
+      CRM_Elections_Helper_Process::withdraw($nomination->id, $someoneElse, 'I withdraw them');
+    }, 'not authorized', 'withdrawing someone else');
+    $this->refused(function () use ($nomination) {
+      CRM_Elections_Helper_Process::accept($nomination->id, NULL);
+    }, 'not authorized', 'no one');
+  }
+
   // ------------------------------------------------------------------ results
 
   public function testResultsCannotBeWrittenOrResetByAnythingElse() {
@@ -255,6 +322,13 @@ class CRM_Elections_SecurityTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame("https://$host/page", CRM_Elections_Helper_Utils::localUrlOrNull("https://$host/page"));
     foreach (['javascript:alert(1)', 'https://evil.example/x', '//evil.example/x', "/x\" onmouseover=\"y", 'data:text/html,x', '', NULL, '\\\\evil.example', "/path\nHeader: x"] as $bad) {
       $this->assertNull(CRM_Elections_Helper_Utils::localUrlOrNull($bad), var_export($bad, TRUE));
+    }
+  }
+
+  public function testOnlyHttpAndHttpsAddressesBecomeLinks() {
+    $this->assertSame('https://example.org/cv', CRM_Elections_Helper_Utils::safeHttpUrl('https://example.org/cv'));
+    foreach (['javascript:alert(1)', 'data:text/html,x', 'ftp://example.org/x', '/relative', '', NULL, "https://exa mple.org", "http://x.org/\nSet-Cookie: a=b"] as $bad) {
+      $this->assertSame('', CRM_Elections_Helper_Utils::safeHttpUrl($bad), var_export($bad, TRUE));
     }
   }
 

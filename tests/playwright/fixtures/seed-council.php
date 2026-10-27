@@ -12,6 +12,15 @@ use CRM_Elections_Test_CouncilFixture as Council;
 
 // Remove an earlier run.
 CRM_Core_DAO::executeQuery("DELETE FROM civicrm_election WHERE name LIKE 'Playwright%'");
+// The election of the last run, whatever a test renamed it to. The rows are removed directly: the
+// rules that protect a running election from changes are for people, not for test set-up.
+$previous = __DIR__ . '/.generated/council.json';
+if (is_file($previous)) {
+  $previousId = (int) (json_decode(file_get_contents($previous), TRUE)['election_id'] ?? 0);
+  if ($previousId) {
+    CRM_Core_DAO::executeQuery('DELETE FROM civicrm_election WHERE id = %1', [1 => [$previousId, 'Integer']]);
+  }
+}
 foreach (['Voter', 'Nominee', 'Outsider'] as $firstName) {
   foreach (civicrm_api3('Contact', 'get', ['first_name' => $firstName, 'email' => ['LIKE' => '%@example.org'], 'options' => ['limit' => 0], 'return' => ['id']])['values'] as $contact) {
     civicrm_api3('Contact', 'delete', ['id' => $contact['id'], 'skip_undelete' => 1]);

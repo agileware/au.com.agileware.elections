@@ -1,5 +1,7 @@
 {* Candidate statement. Expects $statementText, $statementUrl and $statementDisplay (link|inline). *}
-{assign var=safeStatementUrl value=$statementUrl|default:''|elections_safe_url}
+{* Only an http or https address becomes a link, so a javascript: or data: address stored in the field never does. *}
+{assign var=statementUrlStart value=$statementUrl|default:''|lower|truncate:8:''}
+{if $statementUrlStart == 'https://' or $statementUrlStart|truncate:7:'' == 'http://'}{assign var=safeStatementUrl value=$statementUrl}{else}{assign var=safeStatementUrl value=''}{/if}
 {if $statementText or $safeStatementUrl}
   {if $statementDisplay == 'inline'}
     <div class="election-statement">
