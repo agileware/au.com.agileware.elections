@@ -189,7 +189,7 @@ test('results follow the ballots: clear winners, a tie and an uncontested role',
       expect(block, position).toMatch(NAME[ranked[0][0]]);
     }
     else if (ranked[0][1] === ranked[1][1]) {
-      expect(block, `${position} is a tie`).toContain('no clear majority');
+      expect(block, `${position} is a tie`).toContain('result was a tie');
     }
     else {
       expect(block, position).toContain('Winner by clear majority');

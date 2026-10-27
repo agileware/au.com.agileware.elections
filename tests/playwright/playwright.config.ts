@@ -65,15 +65,22 @@ export default defineConfig({
     },
     {
       name: 'council',
-      testMatch: /council\//,
+      testMatch: /council\/council-election/,
       dependencies: ['tampering'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      // The same council counted by most votes. Its own project, as both use the one election.
+      name: 'plurality',
+      testMatch: /council\/plurality/,
+      dependencies: ['council'],
       use: { ...devices['Desktop Chrome'] },
     },
     {
       // Pictures of every page (SCREENS=1 only).
       name: 'screens',
       testMatch: /frontend\/screens/,
-      dependencies: ['council'],
+      dependencies: ['plurality'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],
