@@ -44,7 +44,7 @@ export function council(): CouncilData {
   return cached!;
 }
 
-/** Front end CiviCRM address for a persona: /?page=CiviCRM&q=<path>&eid=..&cid=..&cs=.. */
+/** Front end CiviCRM address for a persona: (see fixtures/cms.ts) with eid, cid and cs */
 export function personaUrl(persona: string, civiPath: string, params: Record<string, string | number> = {}): string {
   const data = council();
   const link = data.links[persona];

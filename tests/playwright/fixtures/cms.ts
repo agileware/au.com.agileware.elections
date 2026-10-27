@@ -1,7 +1,8 @@
 /**
  * Which CMS the site under test runs on, and how it addresses CiviCRM pages.
  *
- *   CMS=wordpress (default)  /?page=CiviCRM&q=civicrm/elections/view&eid=1
+ *   CMS=wordpress (default)  /civicrm/elections/view/?eid=1  (the CiviCRM base page, clean URLs;
+ *                            WP_CLEAN_URLS=0 gives /?page=CiviCRM&q=civicrm/elections/view&eid=1)
  *   CMS=drupal               /civicrm/elections/view?eid=1
  *   CMS=joomla               /index.php?option=com_civicrm&task=civicrm/elections/view&eid=1
  *
@@ -26,9 +27,14 @@ export function frontUrl(civiPath: string, params: Record<string, string | numbe
       for (const [k, v] of Object.entries(params)) query.set(k, String(v));
       return `/index.php?${query.toString()}`;
     default:
-      query.set('page', 'CiviCRM');
-      query.set('q', civiPath);
+      // Sites without pretty permalinks (WP_CLEAN_URLS=0) use the query form, which WordPress shows in the home template.
+      if (process.env.WP_CLEAN_URLS === '0') {
+        query.set('page', 'CiviCRM');
+        query.set('q', civiPath);
+        for (const [k, v] of Object.entries(params)) query.set(k, String(v));
+        return `/?${query.toString()}`;
+      }
       for (const [k, v] of Object.entries(params)) query.set(k, String(v));
-      return `/?${query.toString()}`;
+      return `/${civiPath}/?${query.toString()}`;
   }
 }
