@@ -95,7 +95,7 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     $fixture = Council::create();
     $position = $fixture->positions['President'];
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('N01'), $fixture->id('OUT')), 'not allowed to nominate');
-    $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('OUT'), $fixture->id('V01')), 'can take part');
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('OUT'), $fixture->id('V01')), 'can stand');
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('N01'), NULL));
   }
 
