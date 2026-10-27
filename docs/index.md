@@ -26,6 +26,10 @@ Before creating an election, follow these [initial set up steps](setup.md) to co
 
 A single, site-wide settings page controls where candidate and nominee photos are sourced from. For more information, see [Elections Settings](admin_election_settings.md).
 
+# Managing Elections
+
+**Elections** in the CiviCRM menu opens [Manage Elections](admin_manage_elections.md), where each election can be activated, duplicated, edited and deleted, and its positions and candidates managed. Each election also has an [overview](admin_election_overview.md) with its stage, timeline and numbers. Candidates can be reviewed, corrected and added by an administrator - see [Candidates](admin_candidates.md).
+
 # Creating an Election
 To create a new election, you should identify the date of each stage in the election's process as well as name and description of the election.   
 - **Name and Description**: Title the election and provide a brief description of the reason for the election. For example, Name: 2020 Legislative Assembly election; Description: Election of the Legislative Assembly for the 5 electorates of the ACT: Brindabella, Ginninderra, Kurrajong, Murrumbidgee and Yerrabi.  

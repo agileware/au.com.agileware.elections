@@ -3,7 +3,7 @@
     <a class="button" href="{crmURL p='civicrm/elections/manage' q='reset=1'}"><span><i class="crm-i fa-arrow-left" role="img" aria-hidden="true"></i> {ts}Back to Manage Elections{/ts}</span></a>
   </p>
 
-  <h2>{$election->name} <span class="election-stage election-stage-{$stage.key}">{$stage.label}</span></h2>
+  <p><span class="election-stage election-stage-{$stage.key}">{$stage.label}</span></p>
   {if $election->description}<p>{$election->description|escape|nl2br}</p>{/if}
 
   <div class="messages status no-popup election-next-step">
