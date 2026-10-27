@@ -99,7 +99,9 @@ class CRM_Elections_Helper_Referendum {
     }
     $yes = 100 * (int) $tally['yes'];
     $needed = $threshold * $decided;
-    $passes = ($threshold == 50) ? ($yes > $needed) : ($yes >= $needed);
+    // Exactly half is not more than half. Other thresholds are "at least", and a share kept to two decimals
+    // (66.67 for two thirds) must not fail a result that is exactly two thirds, so it allows for the rounding.
+    $passes = ($threshold == 50) ? ($yes > $needed) : ($yes + 0.01 * $decided >= $needed);
     return $passes ? CRM_Elections_BAO_Election::$RESULTS_PASSED : CRM_Elections_BAO_Election::$RESULTS_FAILED;
   }
 
