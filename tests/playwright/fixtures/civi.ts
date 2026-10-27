@@ -23,7 +23,7 @@ function run(args: string[], env: Record<string, string> = {}): string {
   }
   parts.push(...args);
   const [cmd, ...rest] = parts;
-  return execFileSync(cmd, rest, { encoding: 'utf-8', env: { ...process.env, ...env } });
+  return execFileSync(cmd, rest, { encoding: 'utf-8', env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
 }
 
 export function civiApi4<T = any>(entityDotAction: string, params: Record<string, unknown> = {}): T {

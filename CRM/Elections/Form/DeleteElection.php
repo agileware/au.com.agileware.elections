@@ -60,7 +60,7 @@ class CRM_Elections_Form_DeleteElection extends CRM_Elections_Form_Base {
       }
     }
     parent::postProcess();
-    CRM_Utils_System::redirect(Civi::url('current://civicrm/elections'));
+    $this->finish(CRM_Utils_System::url('civicrm/elections/manage', 'reset=1'));
   }
 
 }

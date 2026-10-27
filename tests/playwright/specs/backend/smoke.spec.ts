@@ -6,8 +6,8 @@ import { test, expect, civiAdminUrl, expectNoPhpOutput } from '../../fixtures/ba
  */
 test.describe('election administration', () => {
   test('the administrator sees the elections list with the seeded election', async ({ adminPage }) => {
-    await adminPage.goto(civiAdminUrl('civicrm/elections', { reset: 1 }));
-    await expect(adminPage.getByRole('heading', { name: 'Elections' }).first()).toBeVisible();
+    await adminPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
+    await expect(adminPage.getByRole('heading', { name: 'Manage Elections' })).toBeVisible();
     await expect(adminPage.getByRole('link', { name: 'Create Election' })).toBeVisible();
     await expect(adminPage.getByText('Playwright Council Election')).toBeVisible();
     await expectNoPhpOutput(adminPage);
@@ -23,7 +23,7 @@ test.describe('election administration', () => {
   });
 
   test('a manager with only the administer Elections permission can open the list', async ({ managerPage }) => {
-    await managerPage.goto(civiAdminUrl('civicrm/elections', { reset: 1 }));
+    await managerPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
     await expect(managerPage.getByRole('link', { name: 'Create Election' })).toBeVisible();
     await expectNoPhpOutput(managerPage);
   });

@@ -16,6 +16,18 @@ namespace Civi\Api4;
 class Election extends Generic\DAOEntity {
 
   /**
+   * Copy an election and its positions as a new, inactive election.
+   *
+   * @param bool $checkPermissions
+   *
+   * @return \Civi\Api4\Action\Election\Duplicate
+   */
+  public static function duplicate($checkPermissions = TRUE) {
+    return (new Action\Election\Duplicate(static::class, __FUNCTION__))
+      ->setCheckPermissions($checkPermissions);
+  }
+
+  /**
    * @return array
    */
   public static function permissions(): array {

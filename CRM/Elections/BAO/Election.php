@@ -39,6 +39,82 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
   }
 
   /**
+   * Activating an election (making it visible) needs at least one position.
+   *
+   * Used by every write path - the activate form, the API and inline edits in
+   * SearchKit - so the rule cannot be bypassed.
+   *
+   * @param int $electionId
+   *
+   * @throws CRM_Core_Exception
+   */
+  public static function assertCanActivate($electionId) {
+    $positions = (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_position WHERE election_id = %1', [1 => [$electionId, 'Positive']]);
+    if ($positions < 1) {
+      throw new CRM_Core_Exception(E::ts('At least one Position must be defined before the Election can be active.'));
+    }
+  }
+
+  /**
+   * Copy an election, with its positions, as a new inactive election.
+   *
+   * Nominations, votes and results are not copied. All dates move by the same
+   * amount so the stages keep their spacing.
+   *
+   * @param int $electionId
+   *   The election to copy.
+   * @param string|null $name
+   *   Name of the copy. Defaults to "Copy of <name>".
+   * @param int|null $shiftSeconds
+   *   How far to move the dates. Defaults to the time left until the copy's
+   *   visibility start would be a day from now.
+   *
+   * @return array
+   *   The new election.
+   *
+   * @throws CRM_Core_Exception
+   */
+  public static function duplicate($electionId, $name = NULL, $shiftSeconds = NULL) {
+    $source = civicrm_api3('Election', 'getsingle', ['id' => $electionId]);
+    $dateFields = ['visibility_start_date', 'visibility_end_date', 'nomination_start_date', 'nomination_end_date', 'advertise_candidates_date', 'voting_start_date', 'voting_end_date', 'result_date'];
+
+    if ($shiftSeconds === NULL) {
+      $shiftSeconds = strtotime('+1 day') - strtotime($source['visibility_start_date']);
+    }
+    $values = [
+      'name' => $name ?: E::ts('Copy of %1', [1 => $source['name']]),
+      'description' => $source['description'] ?? NULL,
+      'is_visible' => 0,
+      'is_deleted' => 0,
+      'has_results_generated' => 0,
+      'created_by' => CRM_Core_Session::singleton()->getLoggedInContactID(),
+    ];
+    foreach ($dateFields as $field) {
+      $values[$field] = date('Y-m-d H:i:s', strtotime($source[$field]) + $shiftSeconds);
+    }
+    foreach (['anonymize_votes', 'required_nominations', 'allow_revote', 'allow_checksum_access', 'allowed_groups', 'show_photos', 'show_statements', 'show_nominators', 'name_format'] as $field) {
+      if (array_key_exists($field, $source)) {
+        $values[$field] = $source[$field];
+      }
+    }
+    $copy = civicrm_api3('Election', 'create', $values);
+    $copyId = (int) $copy['id'];
+
+    $positions = civicrm_api3('ElectionPosition', 'get', ['election_id' => $electionId, 'options' => ['limit' => 0, 'sort' => 'sortorder ASC']]);
+    foreach ($positions['values'] as $position) {
+      civicrm_api3('ElectionPosition', 'create', [
+        'election_id' => $copyId,
+        'name' => $position['name'],
+        'quantity' => $position['quantity'],
+        'sortorder' => $position['sortorder'],
+        'description' => $position['description'] ?? NULL,
+      ]);
+    }
+
+    return civicrm_api3('Election', 'getsingle', ['id' => $copyId]);
+  }
+
+  /**
    * Check if user is allowed to edit an election.
    *
    * @return bool|string TRUE if election is allowed to be edited, An error string if it's not.
