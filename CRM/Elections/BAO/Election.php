@@ -9,6 +9,9 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
   public static $RESULTS_NO_NOMINATIONS  = 'nonominations';
   public static $RESULTS_NO_MAJORITY = 'tie';
   public static $RESULTS_MOST_VOTES = 'mostvotes';
+  public static $RESULTS_PASSED = 'passed';
+  public static $RESULTS_FAILED = 'failed';
+  public static $RESULTS_NO_QUORUM = 'noquorum';
 
   public static function getResultStatues() {
     return [
@@ -18,6 +21,9 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
       'results_majority' => self::$RESULTS_MAJORITY,
       'results_no_nominations' => self::$RESULTS_NO_NOMINATIONS,
       'results_most_votes' => self::$RESULTS_MOST_VOTES,
+      'results_passed' => self::$RESULTS_PASSED,
+      'results_failed' => self::$RESULTS_FAILED,
+      'results_no_quorum' => self::$RESULTS_NO_QUORUM,
     ];
   }
 
@@ -87,11 +93,16 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
       'eligible' => (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_nomination n INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1 AND n.is_eligible_candidate = 1', $p),
       'candidates' => (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_nomination n INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1 AND n.is_eligible_candidate = 1 AND n.has_accepted_nomination = 1', $p),
       'ballots' => max(
-        (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(DISTINCT v.member_id) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1 AND v.member_id IS NOT NULL', $p),
+        (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(DISTINCT member_id) FROM (
+          SELECT v.member_id FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1
+          UNION
+          SELECT ov.member_id FROM civicrm_election_option_vote ov INNER JOIN civicrm_election_position pos ON pos.id = ov.election_position_id WHERE pos.election_id = %1
+        ) t WHERE member_id IS NOT NULL', $p),
         // Anonymised votes no longer say who cast them, but each voter still has a Vote activity.
         self::countVoters($electionId)
       ),
-      'votes' => (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1', $p),
+      'votes' => (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1', $p)
+        + (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_option_vote ov INNER JOIN civicrm_election_position pos ON pos.id = ov.election_position_id WHERE pos.election_id = %1', $p),
     ];
   }
 
@@ -130,10 +141,15 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
    */
   public static function getTurnout($electionId) {
     $dao = CRM_Core_DAO::executeQuery('
-      SELECT pos.id, pos.name,
+      SELECT pos.id, pos.name, pos.position_type,
         (SELECT COUNT(*) FROM civicrm_election_nomination n WHERE n.election_position_id = pos.id AND n.is_eligible_candidate = 1 AND n.has_accepted_nomination = 1) AS candidates,
-        (SELECT COUNT(*) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id WHERE n.election_position_id = pos.id) AS vote_rows,
-        (SELECT COUNT(DISTINCT v.member_id) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id WHERE n.election_position_id = pos.id AND v.member_id IS NOT NULL) AS ballots
+        (SELECT COUNT(*) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id WHERE n.election_position_id = pos.id)
+          + (SELECT COUNT(*) FROM civicrm_election_option_vote ov WHERE ov.election_position_id = pos.id) AS vote_rows,
+        (SELECT COUNT(DISTINCT member_id) FROM (
+          SELECT v.member_id, n.election_position_id FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id
+          UNION
+          SELECT ov.member_id, ov.election_position_id FROM civicrm_election_option_vote ov
+        ) t WHERE t.election_position_id = pos.id AND t.member_id IS NOT NULL) AS ballots
       FROM civicrm_election_position pos
       WHERE pos.election_id = %1
       ORDER BY pos.sortorder ASC, pos.id ASC
@@ -142,6 +158,7 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
     while ($dao->fetch()) {
       $rows[] = [
         'name' => $dao->name,
+        'isQuestion' => $dao->position_type === CRM_Elections_BAO_ElectionPosition::TYPE_REFERENDUM,
         'candidates' => (int) $dao->candidates,
         'ballots' => ((int) $dao->vote_rows > 0 && (int) $dao->ballots === 0) ? NULL : (int) $dao->ballots,
       ];

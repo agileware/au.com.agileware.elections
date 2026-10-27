@@ -6,7 +6,17 @@
   {assign var='imgKey' value='member_nominee.image_URL'}
 
   {foreach from=$positions item=position}
-    {if $position.candidates|@count > 0 or $position.writeInPlaces > 0}
+    {if $position.isQuestion|default:false}
+      {assign var="qKey" value=$position.questionKey}
+      <div class="crm-vote-election-form-block election-question-block" data-type="question" data-position="{$position.name|escape}">
+        <fieldset class="election-question-fieldset">
+          <legend>{$position.name|escape}</legend>
+          {if $position.resolution_text}<p class="election-question-resolution">{$position.resolution_text|escape|nl2br}</p>{/if}
+          {if $position.description}<p>{$position.description|escape|nl2br}</p>{/if}
+          <div class="election-question-choices">{$form.$qKey.html}</div>
+        </fieldset>
+      </div><br>
+    {elseif $position.candidates|@count > 0 or $position.writeInPlaces > 0}
       <div class="crm-vote-election-form-block" data-position="{$position.name|escape}" data-seats="{$position.seats|escape}">
           <p><strong>{$position.prompt|escape}</strong></p>
             {foreach from=$position.candidates item=candidate}

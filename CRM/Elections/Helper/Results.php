@@ -34,8 +34,20 @@ class CRM_Elections_Helper_Results {
     return $nominations;
   }
 
+  /**
+   * The people allowed to vote when the results are generated, for the quorum of a referendum question.
+   *
+   * @var int
+   */
+  private $eligibleVoters = 0;
+
   private function generateResultsForPosition($position, $electionId) {
     $positionId = $position['id'];
+    if (($position['position_type'] ?? '') === CRM_Elections_BAO_ElectionPosition::TYPE_REFERENDUM) {
+      // A question has no candidates and no ranks: the result is whether it passed.
+      $this->saveResultAndAssignRanks(CRM_Elections_Helper_Referendum::count($positionId, $this->eligibleVoters), [], $positionId, $electionId);
+      return;
+    }
     $nominations = $this->getCandidateNominations($positionId);
 
     $resultStatus = NULL;
@@ -328,11 +340,16 @@ class CRM_Elections_Helper_Results {
         // Start from nothing, so a run that stopped half way cannot leave results from two runs.
         CRM_Core_DAO::executeQuery('DELETE r FROM civicrm_election_result r INNER JOIN civicrm_election_position p ON p.id = r.election_position_id WHERE p.election_id = %1', [1 => [(int) $electionId, 'Integer']]);
 
+        $this->eligibleVoters = CRM_Elections_Helper_Eligibility::countContactsInGroups($election->allowed_groups);
         $positions = $this->getPositions($electionId);
         foreach ($positions as $position) {
           $this->generateResultsForPosition($position, $electionId);
         }
-        $ballots = (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(DISTINCT v.member_id) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position p ON p.id = n.election_position_id WHERE p.election_id = %1', [1 => [(int) $electionId, 'Integer']]);
+        $ballots = (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(DISTINCT member_id) FROM (
+          SELECT v.member_id FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position p ON p.id = n.election_position_id WHERE p.election_id = %1
+          UNION
+          SELECT ov.member_id FROM civicrm_election_option_vote ov INNER JOIN civicrm_election_position p ON p.id = ov.election_position_id WHERE p.election_id = %1
+        ) t', [1 => [(int) $electionId, 'Integer']]);
 
         civicrm_api3('Election', 'create', [
           'id' => $electionId,
@@ -388,22 +405,46 @@ class CRM_Elections_Helper_Results {
       // Rows of one voter stay together; rows with no voter already are each their own.
       $ballots[$dao->member_id === NULL ? 'row' . $dao->id : 'member' . $dao->member_id][] = [(int) $dao->election_nomination_id, (int) $dao->rank];
     }
-    if (!$ids) {
-      return;
+    if ($ids) {
+      $order = array_keys($ballots);
+      for ($i = count($order) - 1; $i > 0; $i--) {
+        $j = random_int(0, $i);
+        [$order[$i], $order[$j]] = [$order[$j], $order[$i]];
+      }
+      CRM_Core_DAO::executeQuery('DELETE FROM civicrm_election_vote WHERE id IN (' . implode(',', $ids) . ')');
+      foreach ($order as $key) {
+        $rows = $ballots[$key];
+        shuffle($rows);
+        foreach ($rows as [$nominationId, $rank]) {
+          CRM_Core_DAO::executeQuery('INSERT INTO civicrm_election_vote (election_nomination_id, `rank`, member_id, created_at) VALUES (%1, %2, NULL, %3)', [
+            1 => [$nominationId, 'Integer'],
+            2 => [$rank, 'Integer'],
+            3 => [$closed, 'String'],
+          ]);
+        }
+      }
     }
-    $order = array_keys($ballots);
-    for ($i = count($order) - 1; $i > 0; $i--) {
-      $j = random_int(0, $i);
-      [$order[$i], $order[$j]] = [$order[$j], $order[$i]];
+
+    // The choices on referendum questions the same way: no voter, the time voting closed, a random order.
+    $choices = CRM_Core_DAO::executeQuery('
+      SELECT ov.id, ov.election_option_id, ov.election_position_id
+      FROM civicrm_election_option_vote ov
+      INNER JOIN civicrm_election_position p ON p.id = ov.election_position_id
+      WHERE p.election_id = %1
+    ', $params);
+    $rows = [];
+    $choiceIds = [];
+    while ($choices->fetch()) {
+      $choiceIds[] = (int) $choices->id;
+      $rows[] = [(int) $choices->election_option_id, (int) $choices->election_position_id];
     }
-    CRM_Core_DAO::executeQuery('DELETE FROM civicrm_election_vote WHERE id IN (' . implode(',', $ids) . ')');
-    foreach ($order as $key) {
-      $rows = $ballots[$key];
+    if ($choiceIds) {
       shuffle($rows);
-      foreach ($rows as [$nominationId, $rank]) {
-        CRM_Core_DAO::executeQuery('INSERT INTO civicrm_election_vote (election_nomination_id, `rank`, member_id, created_at) VALUES (%1, %2, NULL, %3)', [
-          1 => [$nominationId, 'Integer'],
-          2 => [$rank, 'Integer'],
+      CRM_Core_DAO::executeQuery('DELETE FROM civicrm_election_option_vote WHERE id IN (' . implode(',', $choiceIds) . ')');
+      foreach ($rows as [$optionId, $positionId]) {
+        CRM_Core_DAO::executeQuery('INSERT INTO civicrm_election_option_vote (election_option_id, election_position_id, member_id, created_at) VALUES (%1, %2, NULL, %3)', [
+          1 => [$optionId, 'Integer'],
+          2 => [$positionId, 'Integer'],
           3 => [$closed, 'String'],
         ]);
       }

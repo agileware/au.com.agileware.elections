@@ -111,6 +111,10 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     $electionPositions = $electionPositions['values'];
     $positions = [];
     foreach ($electionPositions as $electionPosition) {
+      if (($electionPosition['position_type'] ?? '') === CRM_Elections_BAO_ElectionPosition::TYPE_REFERENDUM) {
+        // A question has no candidates.
+        continue;
+      }
       $positions[] = [
         'text' => $electionPosition['name'],
         'id'   => $electionPosition['id'],

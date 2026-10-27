@@ -208,12 +208,10 @@ class CRM_Elections_Helper_Eligibility {
     if (empty($contactId)) {
       return FALSE;
     }
-    $votesCount = civicrm_api3('ElectionVote', 'getcount', [
-      'sequential' => TRUE,
-      'member_id' => $contactId,
-      'election_nomination_id.election_position_id.election_id.id' => $electionId,
-      'options' => ['limit' => 0],
-    ]);
+    $votesCount = (int) CRM_Core_DAO::singleValueQuery('
+      SELECT (SELECT COUNT(*) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position p ON p.id = n.election_position_id WHERE p.election_id = %1 AND v.member_id = %2)
+           + (SELECT COUNT(*) FROM civicrm_election_option_vote ov INNER JOIN civicrm_election_position p ON p.id = ov.election_position_id WHERE p.election_id = %1 AND ov.member_id = %2)
+    ', [1 => [(int) $electionId, 'Integer'], 2 => [(int) $contactId, 'Integer']]);
     return ($votesCount > 0);
   }
 
@@ -229,14 +227,14 @@ class CRM_Elections_Helper_Eligibility {
     if (empty($contactId)) {
       return NULL;
     }
-    $voteDate = civicrm_api3('ElectionVote', 'get', [
-      'sequential' => TRUE,
-      'return' => ['created_at'],
-      'options' => ['limit' => 0],
-      'member_id' => $contactId,
-      'election_nomination_id.election_position_id.election_id.id' => $electionId,
-    ]);
-    return $voteDate['values'][0]['created_at'] ?? NULL;
+    $voteDate = CRM_Core_DAO::singleValueQuery('
+      SELECT MIN(created_at) FROM (
+        SELECT v.created_at FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position p ON p.id = n.election_position_id WHERE p.election_id = %1 AND v.member_id = %2
+        UNION ALL
+        SELECT ov.created_at FROM civicrm_election_option_vote ov INNER JOIN civicrm_election_position p ON p.id = ov.election_position_id WHERE p.election_id = %1 AND ov.member_id = %2
+      ) t
+    ', [1 => [(int) $electionId, 'Integer'], 2 => [(int) $contactId, 'Integer']]);
+    return $voteDate ?: NULL;
   }
 
 }

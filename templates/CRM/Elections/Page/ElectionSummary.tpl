@@ -11,9 +11,10 @@
 
 {foreach from=$positions item=position}
     <h2>{$position.name|escape}</h2>
+    {if $position.resolution_text|default:''}<p class="election-question-resolution">{$position.resolution_text|escape|nl2br}</p>{/if}
     <p>{include file="CRM/Elections/Page/PositionResultTypeMessage.tpl"}</p>
 
-    {if $position.result_status != $resultStatuses.results_no_nominations}
+    {if $position.position_type|default:'election' != 'referendum' and $position.result_status != $resultStatuses.results_no_nominations}
 
         {assign var="memberdisplayname" value="member_nominee.display_name"}
 

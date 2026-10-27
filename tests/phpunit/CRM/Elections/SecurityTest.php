@@ -284,10 +284,11 @@ class CRM_Elections_SecurityTest extends api_v3_ElectionBaseTestCase {
   public function testMergingContactsMovesWhatTheyDidInElections() {
     $data = [];
     elections_civicrm_merge('sqls', $data, 11, 22);
-    $this->assertCount(3, $data);
+    $this->assertCount(4, $data);
     $this->assertStringContainsString('member_nominee = 11 WHERE member_nominee = 22', $data[0]);
     $this->assertStringContainsString('member_nominator = 11 WHERE member_nominator = 22', $data[1]);
     $this->assertStringContainsString('UPDATE IGNORE civicrm_election_vote SET member_id = 11 WHERE member_id = 22', $data[2]);
+    $this->assertStringContainsString('UPDATE IGNORE civicrm_election_option_vote SET member_id = 11 WHERE member_id = 22', $data[3]);
     $other = [];
     elections_civicrm_merge('other', $other, 11, 22);
     $this->assertSame([], $other);

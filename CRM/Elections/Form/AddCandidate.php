@@ -22,6 +22,9 @@ class CRM_Elections_Form_AddCandidate extends CRM_Elections_Form_Base {
 
     $positions = [];
     foreach (civicrm_api3('ElectionPosition', 'get', ['election_id' => $this->eId, 'options' => ['limit' => 0, 'sort' => 'sortorder ASC']])['values'] as $position) {
+      if (($position['position_type'] ?? '') === CRM_Elections_BAO_ElectionPosition::TYPE_REFERENDUM) {
+        continue;
+      }
       $positions[$position['id']] = $position['name'];
     }
     $groups = array_filter(explode(',', CRM_Elections_Helper_Eligibility::groupsFor($this->election, 'candidate')));

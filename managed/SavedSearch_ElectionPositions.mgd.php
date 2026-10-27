@@ -15,7 +15,7 @@ return [
         'api_entity' => 'ElectionPosition',
         'api_params' => [
           'version' => 4,
-          'select' => ['id', 'election_id', 'name', 'quantity', 'write_ins_per_seat', 'description', 'sortorder'],
+          'select' => ['id', 'election_id', 'name', 'position_type:label', 'quantity', 'write_ins_per_seat', 'description', 'sortorder'],
           'orderBy' => [],
           'where' => [],
           'groupBy' => [],
@@ -48,6 +48,7 @@ return [
           'placeholder' => 5,
           'columns' => [
             ['type' => 'field', 'key' => 'name', 'dataType' => 'String', 'label' => E::ts('Position'), 'sortable' => FALSE, 'editable' => TRUE],
+            ['type' => 'field', 'key' => 'position_type:label', 'dataType' => 'String', 'label' => E::ts('Type'), 'sortable' => FALSE],
             ['type' => 'field', 'key' => 'quantity', 'dataType' => 'Integer', 'label' => E::ts('Seats'), 'sortable' => FALSE, 'editable' => TRUE],
             ['type' => 'field', 'key' => 'write_ins_per_seat', 'dataType' => 'Integer', 'label' => E::ts('Write-ins per seat'), 'sortable' => FALSE, 'editable' => TRUE],
             ['type' => 'field', 'key' => 'description', 'dataType' => 'Text', 'label' => E::ts('Description'), 'sortable' => FALSE, 'editable' => TRUE],

@@ -78,6 +78,9 @@ class CRM_Elections_BAO_ElectionNomination extends CRM_Elections_DAO_ElectionNom
     if (!$electionId) {
       throw new CRM_Core_Exception(E::ts('The selected position is not part of this election.'));
     }
+    if (CRM_Elections_BAO_ElectionPosition::isReferendum($positionId)) {
+      throw new CRM_Core_Exception(E::ts('A referendum question has no candidates.'));
+    }
     $election = findElectionById($electionId);
     if ($election->is_deleted) {
       throw new CRM_Core_Exception(E::ts('Candidates cannot be added to a deleted election.'));

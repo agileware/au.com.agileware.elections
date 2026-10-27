@@ -21,3 +21,15 @@
 {if $position.result_status == $resultStatuses.results_equal_seats}
     <p>{ts}The number of candidates remaining equals the number of position holders. These candidates are the winners.{/ts}</p>
 {/if}
+
+{if $position.result_status == $resultStatuses.results_passed}
+    <p>{ts}The question passed.{/ts}</p>
+{/if}
+
+{if $position.result_status == $resultStatuses.results_failed}
+    <p>{ts}The question did not pass.{/ts}</p>
+{/if}
+
+{if $position.result_status == $resultStatuses.results_no_quorum}
+    <p>{ts}Not enough people took part (no quorum), so the question was not decided.{/ts}</p>
+{/if}

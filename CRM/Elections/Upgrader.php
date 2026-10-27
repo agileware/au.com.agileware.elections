@@ -170,6 +170,46 @@ class CRM_Elections_Upgrader extends CRM_Extension_Upgrader_Base {
   }
 
   /**
+   * Version 2.0.0: referenda. A position can be a yes or no question (off for every existing position) with its
+   * own options and ballot rows, counted by a pass threshold and an optional quorum.
+   */
+  public function upgrade_20070() {
+    Civi::log()->info('Applying update 20070');
+    $this->ensureColumn('civicrm_election_position', 'position_type', "VARCHAR(16) NULL DEFAULT 'election'");
+    $this->ensureColumn('civicrm_election_position', 'pass_threshold', 'DECIMAL(5,2) NULL DEFAULT 50');
+    $this->ensureColumn('civicrm_election_position', 'quorum_percent', 'DECIMAL(5,2) NULL DEFAULT NULL');
+    $this->ensureColumn('civicrm_election_position', 'resolution_text', 'TEXT NULL');
+    CRM_Core_DAO::executeQuery('
+      CREATE TABLE IF NOT EXISTS `civicrm_election_option` (
+        `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT \'Unique ElectionOption ID\',
+        `election_position_id` int unsigned NULL COMMENT \'FK to the referendum question this is a choice of.\',
+        `kind` varchar(16) NULL COMMENT \'yes, no or abstain.\',
+        `label` varchar(255) NULL COMMENT \'The wording shown to voters.\',
+        `weight` int NULL DEFAULT 0 COMMENT \'Order on the ballot.\',
+        `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT \'Date on which the option was created.\',
+        PRIMARY KEY (`id`),
+        UNIQUE INDEX `UI_election_option_position_kind` (`election_position_id`, `kind`),
+        CONSTRAINT `FK_civicrm_election_option_election_position_id` FOREIGN KEY (`election_position_id`) REFERENCES `civicrm_election_position`(`id`) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+    ');
+    CRM_Core_DAO::executeQuery('
+      CREATE TABLE IF NOT EXISTS `civicrm_election_option_vote` (
+        `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT \'Unique ElectionOptionVote ID\',
+        `election_option_id` int unsigned NULL COMMENT \'FK to the option chosen.\',
+        `election_position_id` int unsigned NULL COMMENT \'FK to the question answered.\',
+        `member_id` int unsigned NULL COMMENT \'FK to Contact who made this choice.\',
+        `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT \'Date on which the choice was made.\',
+        PRIMARY KEY (`id`),
+        UNIQUE INDEX `UI_election_option_vote_member_position` (`member_id`, `election_position_id`),
+        CONSTRAINT `FK_civicrm_election_option_vote_election_option_id` FOREIGN KEY (`election_option_id`) REFERENCES `civicrm_election_option`(`id`) ON DELETE CASCADE,
+        CONSTRAINT `FK_civicrm_election_option_vote_election_position_id` FOREIGN KEY (`election_position_id`) REFERENCES `civicrm_election_position`(`id`) ON DELETE CASCADE,
+        CONSTRAINT `FK_civicrm_election_option_vote_member_id` FOREIGN KEY (`member_id`) REFERENCES `civicrm_contact`(`id`) ON DELETE SET NULL
+      ) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+    ');
+    return TRUE;
+  }
+
+  /**
    * Add a column unless it already exists, so upgrade steps can safely be re-run.
    *
    * @param string $table

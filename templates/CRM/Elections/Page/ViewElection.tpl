@@ -15,6 +15,8 @@
         {include file="CRM/Elections/Page/ViewElectionBlocks/positions.tpl"}
     {/if}
 
+    {include file="CRM/Elections/Page/ViewElectionBlocks/questions.tpl"}
+
     {if $election->isNominationsStarted}
         {include file="CRM/Elections/Page/ViewElectionBlocks/nominations.tpl"}
     {/if}
