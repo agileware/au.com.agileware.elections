@@ -1071,3 +1071,10 @@ ul#errorList {
         border-color: #000;
     }
 }
+
+/* Links inside a sentence must be told apart from the text round them without relying on colour. */
+.crm-container .election-stepper-note a,
+.crm-container .election-card-line a,
+.crm-container .election-next-message a {
+    text-decoration: underline;
+}
