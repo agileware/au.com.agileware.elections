@@ -244,7 +244,7 @@ class CRM_Elections_WriteInTest extends api_v3_ElectionBaseTestCase {
     $this->ballot($fixture, 'V01', ['N01' => 2], ['N09' => 1]);
     $nomination = $this->nomination($fixture, 'President', 'N09');
     $fixture->moveToStage(Council::STAGE_RESULTS);
-    $this->refused(fn() => CRM_Elections_Helper_Process::accept($nomination, $fixture->id('N09')), 'Voting has closed');
+    $this->refused(fn() => CRM_Elections_Helper_Process::accept($nomination, $fixture->id('N09')), 'opportunity to answer this nomination has passed');
   }
 
   public function testOnlyTheWriteInProcessCanChangeWhoIsStandingOnceVotingHasStarted() {
@@ -268,6 +268,36 @@ class CRM_Elections_WriteInTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame(1, CRM_Elections_Helper_Mailer::sendWriteInReminders());
     $this->assertSame(0, CRM_Elections_Helper_Mailer::sendWriteInReminders(), 'Only once');
     $this->assertStringContainsString('reminder', strtolower($this->mails()[0]['body']));
+  }
+
+  public function testAPersonWhoNeverAnsweredIsToldOnceWhenVotingCloses() {
+    $fixture = $this->voting();
+    $this->ballot($fixture, 'V01', ['N01' => 2], ['N09' => 1]);
+    CRM_Core_DAO::executeQuery('DELETE FROM civicrm_mailing_spool');
+    $this->assertSame(0, CRM_Elections_Helper_Mailer::sendWriteInClosedNotices(), 'Voting is still open: nothing to say yet');
+    $fixture->moveToStage(Council::STAGE_RESULTS);
+    $this->assertSame(1, CRM_Elections_Helper_Mailer::sendWriteInClosedNotices());
+    $this->assertSame(0, CRM_Elections_Helper_Mailer::sendWriteInClosedNotices(), 'Only once');
+    $mails = $this->mails();
+    $this->assertCount(1, $mails);
+    $this->assertStringContainsString('no longer accept', $mails[0]['body']);
+    $this->assertStringNotContainsString('civicrm/elections/nominations/accept', $mails[0]['body'], 'No link to accept, the chance has passed');
+  }
+
+  public function testAWriteInWhoAnsweredIsNotToldVotingClosed() {
+    $fixture = $this->voting();
+    $this->ballot($fixture, 'V01', ['N01' => 2], ['N09' => 1, 'N10' => 3]);
+    CRM_Elections_Helper_Process::accept($this->nomination($fixture, 'President', 'N09'), $fixture->id('N09'));
+    CRM_Core_DAO::executeQuery('DELETE FROM civicrm_mailing_spool');
+    $fixture->moveToStage(Council::STAGE_RESULTS);
+    $this->assertSame(1, CRM_Elections_Helper_Mailer::sendWriteInClosedNotices(), 'Only the person who has not answered');
+  }
+
+  public function testAnElectionThatClosedLongAgoIsNotAnnounced() {
+    $fixture = $this->voting();
+    $this->ballot($fixture, 'V01', ['N01' => 2], ['N09' => 1]);
+    CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET voting_end_date = %2 WHERE id = %1', [1 => [$fixture->electionId, 'Integer'], 2 => [date('Y-m-d H:i:s', time() - 86400 * 60), 'String']]);
+    $this->assertSame(0, CRM_Elections_Helper_Mailer::sendWriteInClosedNotices());
   }
 
   public function testAnAcceptedWriteInIsNotReminded() {

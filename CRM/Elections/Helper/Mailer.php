@@ -95,6 +95,61 @@ class CRM_Elections_Helper_Mailer {
   }
 
   /**
+   * Tell a person who was written in and never answered that voting has closed and they can no longer accept.
+   *
+   * @param int $nominationId
+   *
+   * @return bool
+   */
+  public static function writeInClosed($nominationId) {
+    $nomination = civicrm_api3('ElectionNomination', 'getsingle', [
+      'id' => $nominationId,
+      'return' => ['member_nominee', 'member_nominee.display_name', 'is_write_in', 'election_position_id.name', 'election_position_id.election_id'],
+    ]);
+    if (empty($nomination['is_write_in'])) {
+      return FALSE;
+    }
+    $election = findElectionById($nomination['election_position_id.election_id']);
+    return self::send('elections_write_in_closed', $election, (int) $nomination['member_nominee'], [
+      'nomineeName' => $nomination['member_nominee.display_name'],
+      'positionName' => $nomination['election_position_id.name'],
+    ]);
+  }
+
+  /**
+   * Tell the people written in who never answered that voting has closed, so they know the opportunity has
+   * passed. Each is told once, and only when voting has just closed (not for an election that closed long ago).
+   *
+   * @param int $withinDays
+   *
+   * @return int
+   *   How many emails were sent.
+   */
+  public static function sendWriteInClosedNotices($withinDays = 14) {
+    $now = date('Y-m-d H:i:s');
+    $since = date('Y-m-d H:i:s', time() - $withinDays * 86400);
+    $dao = CRM_Core_DAO::executeQuery('
+      SELECT n.id
+      FROM civicrm_election_nomination n
+      INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
+      INNER JOIN civicrm_election e ON e.id = p.election_id
+      WHERE n.is_write_in = 1 AND IFNULL(n.has_accepted_nomination, 0) = 0 AND IFNULL(n.has_rejected_nomination, 0) = 0
+        AND n.write_in_closed_notified_date IS NULL
+        AND e.is_deleted = 0 AND e.is_visible = 1
+        AND e.voting_end_date <= %1 AND e.voting_end_date > %2
+    ', [1 => [$now, 'String'], 2 => [$since, 'String']]);
+    $sent = 0;
+    while ($dao->fetch()) {
+      // Marked first, so a failure cannot lead to the same person being emailed over and over.
+      CRM_Core_DAO::executeQuery('UPDATE civicrm_election_nomination SET write_in_closed_notified_date = %2 WHERE id = %1', [1 => [(int) $dao->id, 'Integer'], 2 => [$now, 'String']]);
+      if (self::writeInClosed((int) $dao->id)) {
+        $sent++;
+      }
+    }
+    return $sent;
+  }
+
+  /**
    * A link to an election page for one person: with their personal checksum when the election allows
    * access without logging in, otherwise a plain link (they log in first).
    *

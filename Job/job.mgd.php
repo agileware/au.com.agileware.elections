@@ -30,4 +30,17 @@ return [
             'run_frequency' => 'Hourly',
         ],
     ],
+    2 => [
+        'name' => 'Elections Write-in Closed Notices',
+        'entity' => 'Job',
+        'update' => 'never',
+        'params' => [
+            'version' => 3,
+            'name' => 'Elections Write-in Closed Notices',
+            'description' => 'Tell people written in by a voter, who never answered, that voting has closed and they can no longer accept.',
+            'api_entity' => 'Election',
+            'api_action' => 'sendwriteinclosednotices',
+            'run_frequency' => 'Always',
+        ],
+    ],
 ];

@@ -30,6 +30,7 @@ class CRM_Elections_UpgraderTest extends \PHPUnit\Framework\TestCase implements 
     $this->upgrader()->upgrade_20060();
     $this->upgrader()->upgrade_20070();
     $this->upgrader()->upgrade_20080();
+    $this->upgrader()->upgrade_20090();
     parent::tearDown();
   }
 
