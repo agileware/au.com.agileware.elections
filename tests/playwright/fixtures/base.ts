@@ -1,5 +1,6 @@
 import { test as base, expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
-import users from './test-users.json';
+import path from 'node:path';
+import { AUTH_DIR } from './global-setup';
 import { personaUrl } from './personas';
 
 /** PHP and template output that must never reach a visitor. */
@@ -38,12 +39,10 @@ export async function expectNoPhpOutput(page: Page) {
   expect(match, `PHP output on the page ${page.url()}: ${match ? text.slice(Math.max(0, match.index! - 60), match.index! + 200) : ''}`).toBeNull();
 }
 
-async function login(page: Page, username: string, password: string) {
-  await page.goto('/wp-login.php');
-  await page.locator('#user_login').fill(username);
-  await page.locator('#user_pass').fill(password);
-  await page.locator('#wp-submit').click();
-  await page.waitForURL(/wp-admin/);
+/** A page for a WordPress user, using the session saved by global-setup.ts. */
+async function loggedInPage(browser: Browser, name: 'admin' | 'manager' | 'member') {
+  const context = await browser.newContext({ storageState: path.join(AUTH_DIR, `${name}.json`) });
+  return { context, page: await context.newPage() };
 }
 
 type Fixtures = {
@@ -80,28 +79,22 @@ export const test = base.extend<Fixtures>({
   ],
 
   adminPage: async ({ browser, guards }, use) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    const { context, page } = await loggedInPage(browser, 'admin');
     watch(page, 'admin', guards);
-    await login(page, process.env.WP_ADMIN_USER || 'admin', process.env.WP_ADMIN_PASS || 'admin');
     await use(page);
     await context.close();
   },
 
   managerPage: async ({ browser, guards }, use) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    const { context, page } = await loggedInPage(browser, 'manager');
     watch(page, 'manager', guards);
-    await login(page, users.manager.username, users.manager.password);
     await use(page);
     await context.close();
   },
 
   memberPage: async ({ browser, guards }, use) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    const { context, page } = await loggedInPage(browser, 'member');
     watch(page, 'member', guards);
-    await login(page, users.member.username, users.member.password);
     await use(page);
     await context.close();
   },
