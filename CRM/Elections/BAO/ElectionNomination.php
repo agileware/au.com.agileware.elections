@@ -49,6 +49,10 @@ class CRM_Elections_BAO_ElectionNomination extends CRM_Elections_DAO_ElectionNom
     if ($election->isVotingEnded) {
       throw new CRM_Core_Exception(E::ts('Nominations cannot be changed once voting has ended.'));
     }
+    // A person written in answers during voting, through the write-in process only.
+    if ($election->isVotingStarted && CRM_Elections_Helper_Guard::$writeIn) {
+      return;
+    }
     if ($election->isVotingStarted && array_intersect($changed, self::BALLOT_FIELDS)) {
       throw new CRM_Core_Exception(E::ts('Who is standing cannot be changed once voting has started.'));
     }

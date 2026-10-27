@@ -75,6 +75,20 @@ function civicrm_api3_election_get($params) {
 }
 
 /**
+ * Election.sendwriteinreminders API
+ *
+ * Reminds people written in who have not answered, in the day before voting closes.
+ *
+ * @param array $params
+ * @return array API result descriptor
+ */
+function civicrm_api3_election_sendwriteinreminders($params) {
+  $sent = CRM_Elections_Helper_Mailer::sendWriteInReminders();
+  $dao = NULL;
+  return civicrm_api3_create_success([], $params, 'Election', 'sendwriteinreminders', $dao, ['message' => E::ts('%1 write-in reminders sent.', [1 => $sent])]);
+}
+
+/**
  * Election.generateresults API
  *
  * @param array $params

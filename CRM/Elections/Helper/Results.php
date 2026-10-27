@@ -90,7 +90,7 @@ class CRM_Elections_Helper_Results {
     }
 
     $nominationIds = array_column($nominations, 'id');
-    $votes = $this->getVotesByNominationIds($nominationIds);
+    $votes = $this->compactRanks($this->getVotesByNominationIds($nominationIds));
     foreach ($votes as $vote) {
       $nominations[$vote['election_nomination_id']]['votes'][$vote['rank']]++;
       $nominations[$vote['election_nomination_id']]['preferences'][$vote['rank']][] = $vote['member_id'];
@@ -104,6 +104,33 @@ class CRM_Elections_Helper_Results {
     foreach ($candidateVotes as $index => $candidateVote) {
       ksort($candidateVotes[$index]);
     }
+  }
+
+  /**
+   * Number each voter's choices 1, 2, 3 in the order they gave them, over the candidates who are on the count.
+   *
+   * A voter may have ranked someone who is not a candidate at the end (a person written in who did not accept,
+   * or one who withdrew). Their ballot moves on to the next choice: the gap closes, so a first choice that is
+   * not a candidate makes the second choice the first.
+   *
+   * @param array $votes
+   *   Ballot rows, each with member_id, election_nomination_id and rank.
+   *
+   * @return array
+   */
+  private function compactRanks(array $votes) {
+    $byMember = [];
+    foreach ($votes as $key => $vote) {
+      $byMember[$vote['member_id']][$key] = (int) $vote['rank'];
+    }
+    foreach ($byMember as $member => $rows) {
+      asort($rows);
+      $next = 1;
+      foreach (array_keys($rows) as $key) {
+        $votes[$key]['rank'] = $next++;
+      }
+    }
+    return $votes;
   }
 
   private function generateVotesPlaceholder(&$nominations) {
@@ -311,6 +338,7 @@ class CRM_Elections_Helper_Results {
           'id' => $electionId,
           'has_results_generated' => 1,
         ]);
+        CRM_Elections_Helper_WriteIn::logSummary($electionId);
         // The fingerprints of the ballots and the results, kept in the audit log, show any later change.
         CRM_Elections_Helper_Integrity::recordGeneration($electionId, $ballots);
 

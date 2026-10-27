@@ -157,6 +157,19 @@ class CRM_Elections_Upgrader extends CRM_Extension_Upgrader_Base {
   }
 
   /**
+   * Version 2.0.0: write-ins. A position can allow voters to write people in (off for every existing
+   * position); a person written in is a nomination marked as a write-in until they accept.
+   */
+  public function upgrade_20060() {
+    Civi::log()->info('Applying update 20060');
+    $this->ensureColumn('civicrm_election_position', 'write_ins_per_seat', 'INT UNSIGNED NULL DEFAULT 0');
+    $this->ensureColumn('civicrm_election_nomination', 'is_write_in', 'TINYINT NULL DEFAULT 0');
+    $this->ensureColumn('civicrm_election_nomination', 'write_in_notified_date', 'DATETIME NULL DEFAULT NULL');
+    $this->ensureColumn('civicrm_election_nomination', 'write_in_reminded_date', 'DATETIME NULL DEFAULT NULL');
+    return TRUE;
+  }
+
+  /**
    * Add a column unless it already exists, so upgrade steps can safely be re-run.
    *
    * @param string $table

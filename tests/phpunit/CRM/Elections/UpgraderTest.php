@@ -27,6 +27,7 @@ class CRM_Elections_UpgraderTest extends \PHPUnit\Framework\TestCase implements 
     $this->upgrader()->upgrade_20030();
     $this->upgrader()->upgrade_20040();
     $this->upgrader()->upgrade_20050();
+    $this->upgrader()->upgrade_20060();
     parent::tearDown();
   }
 
@@ -65,6 +66,45 @@ class CRM_Elections_UpgraderTest extends \PHPUnit\Framework\TestCase implements 
     $this->assertNull($row->name_format, 'Name format follows the site setting');
     $this->assertTrue(CRM_Core_BAO_SchemaHandler::checkIfFieldExists('civicrm_election_nomination', 'statement_url'));
     CRM_Core_DAO::executeQuery("DELETE FROM civicrm_election WHERE name = 'Existing'");
+  }
+
+  /**
+   * Elections made before the voting method, separate groups, emails and write-ins keep behaving as they did:
+   * ranked choice, the voting groups for every role, no emails, no write-ins.
+   */
+  public function testLaterStepsKeepExistingElectionsBehavingAsBefore() {
+    try {
+      foreach (['voting_method', 'nomination_groups', 'candidate_groups', 'send_emails'] as $column) {
+        CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_election DROP COLUMN `$column`");
+      }
+      CRM_Core_DAO::executeQuery('ALTER TABLE civicrm_election_position DROP COLUMN write_ins_per_seat');
+      foreach (['is_write_in', 'write_in_notified_date', 'write_in_reminded_date'] as $column) {
+        CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_election_nomination DROP COLUMN `$column`");
+      }
+      CRM_Core_DAO::executeQuery("INSERT INTO civicrm_election (name, allowed_groups, visibility_start_date, visibility_end_date, nomination_start_date, nomination_end_date, advertise_candidates_date, voting_start_date, voting_end_date, result_date) VALUES ('Existing later', '12', NOW(), NOW(), NOW(), NOW(), NOW(), NOW(), NOW(), NOW())");
+      $electionId = CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_election WHERE name = 'Existing later'");
+      CRM_Core_DAO::executeQuery("INSERT INTO civicrm_election_position (name, quantity, sortorder, election_id) VALUES ('Chair', 1, 1, %1)", [1 => [(int) $electionId, 'Integer']]);
+
+      foreach (['20030', '20040', '20050', '20060'] as $step) {
+        $this->assertTrue($this->upgrader()->{'upgrade_' . $step}());
+        $this->assertTrue($this->upgrader()->{'upgrade_' . $step}(), "Step $step can be repeated");
+      }
+
+      $election = CRM_Core_DAO::executeQuery("SELECT * FROM civicrm_election WHERE name = 'Existing later'");
+      $election->fetch();
+      $this->assertSame('irv', $election->voting_method);
+      $this->assertNull($election->nomination_groups);
+      $this->assertNull($election->candidate_groups);
+      $this->assertEquals(0, $election->send_emails);
+      $this->assertSame('12', (string) CRM_Elections_Helper_Eligibility::groupsFor(findElectionById($electionId), 'nominating'));
+      $this->assertEquals(0, CRM_Core_DAO::singleValueQuery('SELECT write_ins_per_seat FROM civicrm_election_position WHERE election_id = %1', [1 => [(int) $electionId, 'Integer']]));
+    }
+    finally {
+      CRM_Core_DAO::executeQuery("DELETE FROM civicrm_election WHERE name = 'Existing later'");
+      foreach (['20030', '20040', '20050', '20060'] as $step) {
+        $this->upgrader()->{'upgrade_' . $step}();
+      }
+    }
   }
 
   /**

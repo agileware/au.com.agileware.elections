@@ -23,6 +23,18 @@ class CRM_Elections_BAO_ElectionPosition extends CRM_Elections_DAO_ElectionPosit
   }
 
   /**
+   * A position's value as it is compared to see whether it changed. An empty number of write-ins is 0.
+   *
+   * @param string $field
+   * @param mixed $value
+   *
+   * @return string
+   */
+  public static function normalise($field, $value) {
+    return $field === 'write_ins_per_seat' ? (string) (int) $value : (string) $value;
+  }
+
+  /**
    * The same rule for a position written through APIv4, checked before CiviCRM moves any other position.
    *
    * @param array $item
@@ -33,13 +45,13 @@ class CRM_Elections_BAO_ElectionPosition extends CRM_Elections_DAO_ElectionPosit
   public static function assertItemCanChange(array $item) {
     $electionId = $item['election_id'] ?? NULL;
     if (!empty($item['id'])) {
-      $current = CRM_Core_DAO::executeQuery('SELECT name, quantity, sortorder, description, election_id FROM civicrm_election_position WHERE id = %1', [1 => [(int) $item['id'], 'Positive']]);
+      $current = CRM_Core_DAO::executeQuery('SELECT name, quantity, sortorder, description, election_id, write_ins_per_seat FROM civicrm_election_position WHERE id = %1', [1 => [(int) $item['id'], 'Positive']]);
       if (!$current->fetch()) {
         return;
       }
       $changes = FALSE;
-      foreach (['name', 'quantity', 'sortorder', 'description', 'election_id'] as $field) {
-        if (array_key_exists($field, $item) && (string) $item[$field] !== (string) $current->$field) {
+      foreach (['name', 'quantity', 'sortorder', 'description', 'election_id', 'write_ins_per_seat'] as $field) {
+        if (array_key_exists($field, $item) && self::normalise($field, $item[$field]) !== self::normalise($field, $current->$field)) {
           $changes = TRUE;
         }
       }
@@ -69,6 +81,7 @@ class CRM_Elections_BAO_ElectionPosition extends CRM_Elections_DAO_ElectionPosit
       'election_id' => $source['election_id'],
       'name' => $name ?: E::ts('Copy of %1', [1 => $source['name']]),
       'quantity' => $source['quantity'] ?? 1,
+      'write_ins_per_seat' => $source['write_ins_per_seat'] ?? 0,
       'description' => $source['description'] ?? NULL,
       'sortorder' => $last + 1,
     ]);

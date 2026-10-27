@@ -132,7 +132,8 @@ class CRM_Elections_Helper_Process {
   public static function accept($nominationId, $contactId, $statement = NULL, $statementUrl = NULL) {
     $nomination = self::loadOwnNomination($nominationId, $contactId);
     $election = findElectionById($nomination['election_position_id.election_id']);
-    self::assertElectionOpenToNominees($election);
+    $writeIn = !empty($nomination['is_write_in']);
+    self::assertElectionOpenToNominees($election, NULL, $writeIn);
 
     if (!CRM_Elections_Helper_Eligibility::canBeNominated($election->id, $contactId)) {
       throw new CRM_Core_Exception(E::ts('Only people who can stand in this election can accept a nomination.'));
@@ -151,12 +152,19 @@ class CRM_Elections_Helper_Process {
     }
 
     $statementUrl = trim((string) $statementUrl);
-    civicrm_api3('ElectionNomination', 'create', [
-      'id' => $nominationId,
-      'comments' => $statement,
-      'statement_url' => $statementUrl !== '' ? $statementUrl : NULL,
-      'has_accepted_nomination' => 1,
-    ]);
+    // A person written in answers during voting: the one change to who is standing that is allowed then.
+    CRM_Elections_Helper_Guard::$writeIn = $writeIn && $election->isVotingStarted;
+    try {
+      civicrm_api3('ElectionNomination', 'create', [
+        'id' => $nominationId,
+        'comments' => $statement,
+        'statement_url' => $statementUrl !== '' ? $statementUrl : NULL,
+        'has_accepted_nomination' => 1,
+      ]);
+    }
+    finally {
+      CRM_Elections_Helper_Guard::$writeIn = FALSE;
+    }
   }
 
   /**
@@ -171,18 +179,29 @@ class CRM_Elections_Helper_Process {
   public static function withdraw($nominationId, $contactId, $comments = NULL) {
     $nomination = self::loadOwnNomination($nominationId, $contactId);
     $election = findElectionById($nomination['election_position_id.election_id']);
-    self::assertElectionOpenToNominees($election, E::ts('You cannot withdraw the nomination once voting is started.'));
+    $writeIn = !empty($nomination['is_write_in']);
+    self::assertElectionOpenToNominees($election, E::ts('You cannot withdraw the nomination once voting is started.'), $writeIn);
 
     if ($nomination['has_rejected_nomination'] == 1) {
       throw new CRM_Core_Exception(E::ts('You have withdrawn this nomination.'));
     }
+    if ($writeIn && $election->isVotingStarted && $nomination['has_accepted_nomination'] == 1) {
+      // Voters have seen them on the ballot since they accepted, as with any other candidate.
+      throw new CRM_Core_Exception(E::ts('You cannot withdraw the nomination once voting is started.'));
+    }
 
-    civicrm_api3('ElectionNomination', 'create', [
-      'id' => $nominationId,
-      'rejection_comments' => $comments,
-      'has_rejected_nomination' => 1,
-      'has_accepted_nomination' => 0,
-    ]);
+    CRM_Elections_Helper_Guard::$writeIn = $writeIn && $election->isVotingStarted;
+    try {
+      civicrm_api3('ElectionNomination', 'create', [
+        'id' => $nominationId,
+        'rejection_comments' => $comments,
+        'has_rejected_nomination' => 1,
+        'has_accepted_nomination' => 0,
+      ]);
+    }
+    finally {
+      CRM_Elections_Helper_Guard::$writeIn = FALSE;
+    }
   }
 
   /**
@@ -222,7 +241,7 @@ class CRM_Elections_Helper_Process {
     $nominations = civicrm_api3('ElectionNomination', 'get', [
       'id' => $nominationId,
       'member_nominee' => $contactId,
-      'return' => ['is_eligible_candidate', 'has_accepted_nomination', 'has_rejected_nomination', 'election_position_id.election_id'],
+      'return' => ['is_eligible_candidate', 'has_accepted_nomination', 'has_rejected_nomination', 'is_write_in', 'election_position_id.election_id'],
     ]);
     if ($nominations['count'] != 1) {
       throw new CRM_Core_Exception(E::ts('You are not authorized to access this page.'));
@@ -236,9 +255,16 @@ class CRM_Elections_Helper_Process {
    *
    * @throws CRM_Core_Exception
    */
-  private static function assertElectionOpenToNominees($election, $votingStartedMessage = NULL) {
+  private static function assertElectionOpenToNominees($election, $votingStartedMessage = NULL, $writeIn = FALSE) {
     if (!$election->isVisible || $election->is_deleted) {
       throw new CRM_Core_Exception(E::ts('You are not authorized to access this page.'));
+    }
+    if ($writeIn) {
+      // A person written in can answer until voting closes.
+      if ($election->isVotingEnded) {
+        throw new CRM_Core_Exception(E::ts('Voting has closed, so this can no longer be answered.'));
+      }
+      return;
     }
     if ($election->isVotingStarted) {
       throw new CRM_Core_Exception($votingStartedMessage ?: E::ts('You cannot accept the nomination once voting has started.'));
