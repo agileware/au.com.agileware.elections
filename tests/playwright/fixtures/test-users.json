@@ -1,0 +1,18 @@
+{
+  "manager": {
+    "username": "elections_manager",
+    "password": "Elections-Test-Manager-1!",
+    "email": "elections-manager@example.test",
+    "role": "elections_manager"
+  },
+  "member": {
+    "username": "elections_member",
+    "password": "Elections-Test-Member-1!",
+    "email": "elections-member@example.test",
+    "role": "elections_member"
+  },
+  "pages": {
+    "listingSlug": "elections",
+    "infoSlug": "election"
+  }
+}
