@@ -3,7 +3,7 @@
         {if $election->isNominationsInProgress or ($election->isNominationsStarted and !$election->isVotingStarted)}
           {if !empty($nominations)}
           {foreach from = $nominations key = k item = nomination}
-                {foreach from = $nomination.nominations key = sk item = seconder}
+                {foreach from = $nomination.nominations|default:[] key = sk item = seconder}
                         {if $seconder.is_eligible_candidate == 1 and $seconder.has_accepted_nomination == 0 and $seconder.has_rejected_nomination == 0 and $loggedInContactId == $seconder.member_nominee}
                             <div class="messages status no-popup">
                                 <span class="eligible-block">{ts 1=$nomination.name}You are an eligible candidate for %1{/ts}</span> <input type="button" value="{ts escape='htmlattribute'}Accept Nomination{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/accept" q="`$checksum_query['query']`&enid=`$seconder.id`"}'" class="election-action-button" /> <span><input type="button" value="{ts escape='htmlattribute'}Withdraw Nomination{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/nominations/reject" q="`$checksum_query['query']`&enid=`$seconder.id`"}'" class="election-action-button" /></span>

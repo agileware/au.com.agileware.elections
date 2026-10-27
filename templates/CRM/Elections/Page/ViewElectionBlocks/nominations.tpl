@@ -60,6 +60,7 @@
                             {if $election->showStatements and $election->isVotingStarted and $seconder.has_accepted_nomination == 1}
                                 {include file="CRM/Elections/Page/CandidateStatement.tpl" statementText=$seconder.comments|default:'' statementUrl=$seconder.statement_url|default:'' statementDisplay=$election->statementDisplay}
                             {/if}
+                            {if $isAllowedToNominate}
                             {if $election->isNominationsInProgress and $election->required_nominations >= 2 and $seconder.is_eligible_candidate != 1}
                                 <div class="clearfix"></div>
                                 <input type="button" value="{ts escape='htmlattribute'}Need Second{/ts}"
@@ -73,6 +74,7 @@
                                        class="election-action-button"/>
                             {/if}
 
+                            {/if}
                         </div>
                     {/if}
 

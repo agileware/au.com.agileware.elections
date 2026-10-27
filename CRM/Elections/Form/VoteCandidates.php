@@ -36,8 +36,8 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       return;
     }
 
-    // Logged in but not allowed to vote
-    if ( !empty( \CRM_Core_Session::getLoggedInContactID() ) && !isLoggedInMemberAllowedToVote( $this->eId ) ) {
+    // Not allowed to take part (logged in, or using a personal link)
+    if ( !isLoggedInMemberAllowedToVote( $this->eId ) ) {
       throwNonMemberAccessDenied($this);
       return;
     }
