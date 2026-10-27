@@ -12,7 +12,8 @@ Once the election results have been published, then this information is availabl
 Each position's results show a status describing how the result was reached:
 
 - **Winner by clear majority**: the winning candidate(s) received an outright majority of votes once preferences were distributed.
-- **There was no clear majority winner between two candidates...**: after preferences were distributed, the final two candidates were tied, so both are shown as joint winners.
+- **Elected by the most votes**: (elections counted by most votes) the candidates with the most votes fill the seats.
+- **The result was a tie...**: the candidates were level across the last seat, so every tied candidate is listed with a **Tied** badge and none is chosen over the others. Candidates who clearly won keep the **Winner** badge.
 - **The number of candidates remaining equals the number of position holders**: enough candidates were eliminated during the count that all remaining candidates fill the available seats.
 - **Not all seats were filled for this position**: there were not enough eligible candidates to fill every seat for the position.
 - **There are not enough candidates for this position to generate a result**: no candidates had accepted their nomination for this position.

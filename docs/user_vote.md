@@ -19,3 +19,7 @@ As you choose ranks, a message under each position tells you how many candidates
 8. After voting, the election page shows **Your vote**: what was recorded, position by position. Only you see it, and only while voting is open.
 
 If the election's settings allow it, you can vote again at any time before **Voting End Date** to change your vote - your latest vote replaces your previous one. If changing your vote is not allowed, you cannot vote again once you have voted.
+
+## Elections counted by most votes
+
+Some elections are counted by most votes instead of ranking. The ballot then has a tick box for each candidate and each position says how many you can choose (one for a single seat, up to the number of seats otherwise). A message under the position tells you how many you have chosen and warns you at once if you choose too many. You do not have to choose anyone in a position. The review step lists the candidates you ticked before anything is saved.
