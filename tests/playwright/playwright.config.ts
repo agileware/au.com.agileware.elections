@@ -27,15 +27,35 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: /council\//,
+      testIgnore: /council\/|frontend\/(layout|accessibility|screens)/,
+      use: { ...devices['Desktop Chrome'] },
+    },
+    // The specs below move the one shared election through its stages (nominations, advertise, voting,
+    // results) and put it back at the nominations stage when they finish, so each runs on its own,
+    // one after the other, once everything else is done.
+    {
+      name: 'layout',
+      testMatch: /frontend\/layout/,
+      dependencies: ['chromium'],
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      // The council election moves the shared election through its stages, so it runs on its own,
-      // after everything else, and puts the election back at the nominations stage when it is done.
+      name: 'accessibility',
+      testMatch: /frontend\/accessibility/,
+      dependencies: ['layout'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       name: 'council',
       testMatch: /council\//,
-      dependencies: ['chromium'],
+      dependencies: ['accessibility'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      // Pictures of every page (SCREENS=1 only).
+      name: 'screens',
+      testMatch: /frontend\/screens/,
+      dependencies: ['council'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],
