@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import users from './test-users.json';
 import { adminUrl, CMS } from './cms';
-import { civiApi4 } from './civi';
+import { civiApi4, reseedCouncil } from './civi';
 
 /**
  * Logs each test user in once, one after the other, and saves the session.
@@ -40,6 +40,9 @@ export default async function globalSetup(config: FullConfig) {
   try {
     civiApi4('Contact.get', { select: ['id'], limit: 1 });
     civiApi4('ElectionVote.get', { select: ['id'], limit: 1 });
+    // Start from the council election at the nominations stage, whatever an earlier run (or a person
+    // looking around the site) left behind.
+    reseedCouncil();
   }
   catch (e) {
     // Not fatal: the tests will say if CiviCRM is really not reachable.
