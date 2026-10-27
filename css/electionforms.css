@@ -892,7 +892,8 @@ ul#errorList {
     margin: 1rem 0 0.25rem;
     font-size: 1.05rem;
 }
-.election-review-position ol {
+.election-review-position ol,
+.election-review-position ul {
     margin: 0.25rem 0 0;
     padding-left: 1.5rem;
 }
@@ -969,6 +970,10 @@ ul#errorList {
 .crm-container .election-your-vote-position ol {
     list-style: decimal;
 }
+.crm-container .election-review-position ul,
+.crm-container .election-your-vote-position ul {
+    list-style: disc;
+}
 .crm-container .election-review-position li,
 .crm-container .election-your-vote-position li {
     display: list-item;
@@ -1008,7 +1013,8 @@ ul#errorList {
     font-size: 1rem;
     background: none;
 }
-.election-your-vote-position ol {
+.election-your-vote-position ol,
+.election-your-vote-position ul {
     margin: 0;
     padding-left: 1.4rem;
 }

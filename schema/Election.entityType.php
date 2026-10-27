@@ -288,6 +288,18 @@ return [
       ],
       'usage' => ['export'],
     ],
+    'voting_method' => [
+      'title' => E::ts('Voting Method'),
+      'sql_type' => 'varchar(32)',
+      'input_type' => 'Select',
+      'description' => E::ts('How votes are cast and counted: irv (ranked choice) or plurality (most votes win).'),
+      'add' => '2.0',
+      'default' => 'irv',
+      'pseudoconstant' => [
+        'callback' => 'CRM_Elections_VotingMethod::getOptions',
+      ],
+      'usage' => ['export'],
+    ],
     'allowed_groups' => [
       'title' => E::ts('Allowed Groups'),
       'sql_type' => 'text',

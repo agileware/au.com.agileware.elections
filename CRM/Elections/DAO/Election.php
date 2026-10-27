@@ -26,6 +26,7 @@
  * @property bool|string $anonymize_votes
  * @property string $required_nominations
  * @property bool|string $allow_revote
+ * @property string $voting_method
  * @property string $allowed_groups
  * @property string $created_at
  * @property string $updated_at

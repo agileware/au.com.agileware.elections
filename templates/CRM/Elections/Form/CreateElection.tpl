@@ -115,6 +115,14 @@
         </tr>
 
         <tr class="crm-create-election-form-block-results">
+            <td class="label label-select-col">{$form.voting_method.label}</td>
+            <td>
+                {$form.voting_method.html}<br>
+                <span class="description">{ts}Ranked choice: voters number the candidates in order of preference and the count passes votes on until someone has a majority. Most votes win: voters tick up to as many candidates as there are seats and the candidates with the most votes win. This cannot be changed once people have voted.{/ts}</span>
+            </td>
+        </tr>
+
+        <tr class="crm-create-election-form-block-results">
             <td class="label label-select-col">{$form.allow_revote.label}</td>
             <td>
                 {$form.allow_revote.html}<br>

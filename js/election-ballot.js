@@ -6,30 +6,38 @@
   'use strict';
 
   var text = (CRM.vars && CRM.vars.electionsBallot) || {};
+  var plurality = text.method === 'plurality';
 
   /** The groups of rows on the ballot, one for each position. */
   function positions($form) {
     return $form.find('.crm-vote-election-form-block').map(function () {
       var $block = $(this);
-      var title = $.trim($block.find('> p').first().text());
+      var title = $block.attr('data-position') || $.trim($block.find('> p').first().text());
       var rows = $block.find('.vote-candidate-row').map(function () {
         var $row = $(this);
         return {
-          $field: $row.find('input[name^="candidate_"]'),
+          $field: $row.find(plurality ? 'input[type="checkbox"][name^="candidate_"]' : 'input[name^="candidate_"]'),
           name: $.trim($row.find('label').first().text())
         };
       }).get();
-      return {$block: $block, title: title, rows: rows};
+      return {$block: $block, title: title, rows: rows, seats: parseInt($block.data('seats'), 10) || 1};
     }).get();
   }
 
   function rankOf(row) {
+    if (plurality) {
+      return row.$field.prop('checked') ? 1 : null;
+    }
     var value = parseInt(row.$field.val(), 10);
     return isNaN(value) ? null : value;
   }
 
   /** What is wrong with the ranks in one position, in plain words (empty when nothing is). */
   function problemsIn(position) {
+    if (plurality) {
+      var ticked = $.grep(position.rows, function (row) { return rankOf(row) !== null; }).length;
+      return {problems: ticked > position.seats ? [text.tooMany.replace('%1', position.seats)] : [], ranked: ticked};
+    }
     var problems = [];
     var seen = {};
     var ranked = 0;
@@ -59,7 +67,8 @@
         $status = $('<p class="election-rank-status" aria-live="polite"></p>').appendTo(position.$block.find('> p').first().parent()).insertAfter(position.$block.find('> p').first());
       }
       $status.toggleClass('election-rank-problem', result.problems.length > 0);
-      $status.text(result.problems.length ? result.problems.join(' ') : text.counted.replace('%1', result.ranked).replace('%2', position.rows.length));
+      var counted = plurality ? text.chosen.replace('%1', result.ranked).replace('%2', position.seats) : text.counted.replace('%1', result.ranked).replace('%2', position.rows.length);
+      $status.text(result.problems.length ? result.problems.join(' ') : counted);
       anyProblem = anyProblem || result.problems.length > 0;
     });
     return !anyProblem;
@@ -71,7 +80,7 @@
     var skipped = [];
     $.each(positions($form), function (i, position) {
       var ranked = $.grep(position.rows, function (row) { return rankOf(row) !== null; });
-      var title = position.title.replace(/\.\s*Please number.*$/, '').replace(/^Vote for\s+/i, '');
+      var title = position.title;
       if (!ranked.length) {
         skipped.push(title);
         return;
@@ -79,9 +88,9 @@
       ranked.sort(function (a, b) { return rankOf(a) - rankOf(b); });
       var $section = $('<section class="election-review-position"></section>');
       $('<h3></h3>').text(text.positionTitle.replace('%1', title)).appendTo($section);
-      var $ol = $('<ol></ol>').appendTo($section);
+      var $ol = $(plurality ? '<ul></ul>' : '<ol></ol>').appendTo($section);
       $.each(ranked, function (j, row) {
-        $('<li></li>').text(row.name + ' \u2013 ' + text.rank.replace('%1', rankOf(row))).appendTo($ol);
+        $('<li></li>').text(plurality ? row.name : row.name + ' \u2013 ' + text.rank.replace('%1', rankOf(row))).appendTo($ol);
       });
       $list.append($section);
     });

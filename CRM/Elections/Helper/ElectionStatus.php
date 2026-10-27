@@ -84,7 +84,7 @@ class CRM_Elections_Helper_ElectionStatus {
         }
         return ['type' => 'done', 'message' => $message . ' ' . E::ts('Thank you for voting.'), 'actions' => []];
       }
-      return ['type' => 'action', 'message' => E::ts('Voting is open until %1. Rank the candidates for each position to cast your vote.', [1 => $date($election->voting_end_date)]), 'actions' => [$link(E::ts('Vote Now'), 'civicrm/elections/vote')]];
+      return ['type' => 'action', 'message' => (CRM_Elections_VotingMethod::normalise($election->voting_method) === CRM_Elections_VotingMethod::PLURALITY ? E::ts('Voting is open until %1. Choose the candidates for each position to cast your vote.', [1 => $date($election->voting_end_date)]) : E::ts('Voting is open until %1. Rank the candidates for each position to cast your vote.', [1 => $date($election->voting_end_date)])), 'actions' => [$link(E::ts('Vote Now'), 'civicrm/elections/vote')]];
     }
 
     // Before voting: nominees who have been nominated are asked to respond.

@@ -13,7 +13,7 @@ class CRM_Elections_Helper_Guard {
   /**
    * Election settings that cannot change once ballots have been cast.
    */
-  const LOCKED_ONCE_VOTED = ['allowed_groups', 'anonymize_votes', 'allow_revote', 'required_nominations'];
+  const LOCKED_ONCE_VOTED = ['allowed_groups', 'anonymize_votes', 'allow_revote', 'required_nominations', 'voting_method'];
 
   /**
    * Election settings that also cannot change once the results are generated. (Dates before that can
@@ -29,7 +29,7 @@ class CRM_Elections_Helper_Guard {
     'nomination_start_date', 'nomination_end_date', 'advertise_candidates_date', 'voting_start_date',
     'voting_end_date', 'result_date', 'allowed_groups', 'anonymize_votes', 'allow_revote',
     'allow_checksum_access', 'required_nominations', 'has_results_generated', 'show_photos',
-    'show_statements', 'show_nominators', 'name_format',
+    'show_statements', 'show_nominators', 'name_format', 'voting_method',
   ];
 
   const DATE_FIELDS = [
@@ -57,6 +57,9 @@ class CRM_Elections_Helper_Guard {
         break;
 
       case 'Election':
+        if (in_array($op, ['create', 'edit'], TRUE) && !empty($params['voting_method']) && !array_key_exists($params['voting_method'], CRM_Elections_VotingMethod::getOptions())) {
+          throw new CRM_Core_Exception(E::ts('Unknown voting method.'));
+        }
         if ($op === 'edit' && $id) {
           self::guardElectionEdit($id, (array) $params);
         }
