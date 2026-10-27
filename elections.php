@@ -136,6 +136,9 @@ function elections_civicrm_merge($type, &$data, $mainId = NULL, $otherId = NULL,
  */
 function elections_send_referrer_policy() {
   CRM_Utils_System::setHttpHeader('Referrer-Policy', 'same-origin');
+  // Some sites (Joomla's HTTP headers plugin, for one) send their own header after ours, so the policy is
+  // also given in the page itself, which the browser applies whatever the headers say.
+  Civi::resources()->addMarkup('<meta name="referrer" content="same-origin">', ['region' => 'html-header', 'weight' => -100]);
 }
 
 /**
