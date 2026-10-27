@@ -18,7 +18,7 @@
                   {if $election->showPhotos}
                   <div class="left-profile-block">
                     {assign var='profilePicUrl' value=$candidate.$imgKey}
-                    <a href="{crmURL p="civicrm/elections/candidate" q="enid=`$candidate.id`"}">
+                    <a href="{crmURL p="civicrm/elections/candidate" q="enid=`$candidate.id`"}" aria-label="{ts 1=$form.$cKey.label|strip_tags|trim}About %1{/ts}">
                         <img src="{$profilePicUrl}" alt="" />
                     </a>
                   </div>

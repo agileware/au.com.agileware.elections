@@ -122,10 +122,10 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
       return;
     }
 
-    $this->add('select2', 'position', E::ts('Nominated Position'), $positions, TRUE);
+    $this->add('select2', 'position', E::ts('Nominated Position'), $positions, TRUE, ['placeholder' => E::ts('- Select Position -')]);
     $this->addEntityRef('contact', 'Nominee', [
       'entity' => 'ElectionNominee',
-      'placeholder' => '- Select Nominee -',
+      'placeholder' => E::ts('- Select Nominee -'),
       'api' => [
         'election_id' => $this->election->id,
       ],
