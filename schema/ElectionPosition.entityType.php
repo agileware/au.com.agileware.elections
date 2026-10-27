@@ -47,6 +47,15 @@ return [
         'duplicate_matching',
       ],
     ],
+    'write_ins_per_seat' => [
+      'title' => E::ts('Write-ins per Seat'),
+      'sql_type' => 'int unsigned',
+      'input_type' => 'Text',
+      'description' => E::ts('How many people a voter may write in for each seat, 0 to 10. 0 means write-ins are off.'),
+      'add' => '2.0',
+      'default' => 0,
+      'usage' => ['export'],
+    ],
     'sortorder' => [
       'title' => E::ts('Sortorder'),
       'sql_type' => 'int unsigned',

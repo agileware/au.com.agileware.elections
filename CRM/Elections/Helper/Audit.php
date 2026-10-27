@@ -21,11 +21,15 @@ class CRM_Elections_Helper_Audit {
    * @param array $details
    *   Anything that helps to understand the change. Must never contain how someone voted.
    * @param int|null $contactId
-   *   Defaults to the logged in contact (none for the scheduled job and checksum links).
+   *   Defaults to the logged in contact (none for the scheduled job and checksum links). FALSE records no contact at all.
    */
   public static function log($electionId, $action, array $details = [], $contactId = NULL) {
     if ($contactId === NULL) {
       $contactId = CRM_Core_Session::getLoggedInContactID() ?: NULL;
+    }
+    elseif ($contactId === FALSE) {
+      // Deliberately no contact: a record that must not say who acted (for example a voter writing someone in).
+      $contactId = NULL;
     }
     $lockName = 'elections_audit_chain';
     CRM_Core_DAO::singleValueQuery('SELECT GET_LOCK(%1, 10)', [1 => [self::lockKey($lockName), 'String']]);

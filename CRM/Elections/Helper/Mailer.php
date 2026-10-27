@@ -35,6 +35,66 @@ class CRM_Elections_Helper_Mailer {
   }
 
   /**
+   * Tell a person a voter has written them in, and that votes for them only count if they accept before
+   * voting closes. Sent whatever the election's email setting: the person cannot respond otherwise.
+   *
+   * @param int $nominationId
+   * @param string $workflow
+   *   elections_write_in_invited, or elections_write_in_reminder.
+   *
+   * @return bool
+   */
+  public static function writeInInvited($nominationId, $workflow = 'elections_write_in_invited') {
+    $nomination = civicrm_api3('ElectionNomination', 'getsingle', [
+      'id' => $nominationId,
+      'return' => ['member_nominee', 'member_nominee.display_name', 'is_write_in', 'election_position_id.name', 'election_position_id.election_id'],
+    ]);
+    if (empty($nomination['is_write_in'])) {
+      return FALSE;
+    }
+    $election = findElectionById($nomination['election_position_id.election_id']);
+    $contactId = (int) $nomination['member_nominee'];
+    return self::send($workflow, $election, $contactId, [
+      'nomineeName' => $nomination['member_nominee.display_name'],
+      'positionName' => $nomination['election_position_id.name'],
+      'acceptUrl' => self::link($election, $contactId, 'civicrm/elections/nominations/accept', ['enid' => (int) $nominationId]),
+      'declineUrl' => self::link($election, $contactId, 'civicrm/elections/nominations/reject', ['enid' => (int) $nominationId]),
+    ]);
+  }
+
+  /**
+   * Remind the people written in who have not answered, when voting is about to close. Each is reminded once.
+   *
+   * @param int $hoursBeforeClose
+   *
+   * @return int
+   *   How many reminders were sent.
+   */
+  public static function sendWriteInReminders($hoursBeforeClose = 24) {
+    $now = date('Y-m-d H:i:s');
+    $until = date('Y-m-d H:i:s', time() + $hoursBeforeClose * 3600);
+    $dao = CRM_Core_DAO::executeQuery('
+      SELECT n.id
+      FROM civicrm_election_nomination n
+      INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
+      INNER JOIN civicrm_election e ON e.id = p.election_id
+      WHERE n.is_write_in = 1 AND IFNULL(n.has_accepted_nomination, 0) = 0 AND IFNULL(n.has_rejected_nomination, 0) = 0
+        AND n.write_in_reminded_date IS NULL
+        AND e.is_deleted = 0 AND e.is_visible = 1
+        AND e.voting_start_date <= %1 AND e.voting_end_date > %1 AND e.voting_end_date <= %2
+    ', [1 => [$now, 'String'], 2 => [$until, 'String']]);
+    $sent = 0;
+    while ($dao->fetch()) {
+      // Marked first, so a failure cannot lead to the same person being reminded over and over.
+      CRM_Core_DAO::executeQuery('UPDATE civicrm_election_nomination SET write_in_reminded_date = %2 WHERE id = %1', [1 => [(int) $dao->id, 'Integer'], 2 => [$now, 'String']]);
+      if (self::writeInInvited((int) $dao->id, 'elections_write_in_reminder')) {
+        $sent++;
+      }
+    }
+    return $sent;
+  }
+
+  /**
    * A link to an election page for one person: with their personal checksum when the election allows
    * access without logging in, otherwise a plain link (they log in first).
    *

@@ -287,7 +287,7 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     $voter = $fixture->id('V29');
     $n01 = $fixture->nominations['President|N01'];
     $n02 = $fixture->nominations['President|N02'];
-    $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $voter, []), 'votes');
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $voter, []), 'at least one candidate');
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $voter, [$n01 => 1, $n02 => 1]), 'different');
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $voter, [$n01 => 0]), 'positive');
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $voter, [$n01 => 2]), 'rank 1');

@@ -7,6 +7,8 @@ use CRM_Elections_ExtensionUtil as E;
  */
 $templates = [
   'elections_nominee_invited' => E::ts('Elections - Nominee invited to respond'),
+  'elections_write_in_invited' => E::ts('Elections - Person written in by a voter'),
+  'elections_write_in_reminder' => E::ts('Elections - Reminder to a person written in'),
 ];
 
 $entities = [

@@ -255,6 +255,7 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
         'election_id' => $copyId,
         'name' => $position['name'],
         'quantity' => $position['quantity'] ?? 1,
+        'write_ins_per_seat' => $position['write_ins_per_seat'] ?? 0,
         'sortorder' => $position['sortorder'] ?? NULL,
         'description' => $position['description'] ?? NULL,
       ]);

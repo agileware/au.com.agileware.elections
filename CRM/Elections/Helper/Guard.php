@@ -52,6 +52,15 @@ class CRM_Elections_Helper_Guard {
    */
   public static $castingBallot = FALSE;
 
+  /**
+   * TRUE only while a write-in is being created or answered through CRM_Elections_Helper_WriteIn and
+   * CRM_Elections_Helper_Process. It is the one way the candidates of an election can change once
+   * voting has started.
+   *
+   * @var bool
+   */
+  public static $writeIn = FALSE;
+
   public static function pre($op, $objectName, $id, &$params) {
     switch ($objectName) {
       case 'ElectionVote':
@@ -76,6 +85,14 @@ class CRM_Elections_Helper_Guard {
 
       case 'ElectionPosition':
       case 'ElectionNomination':
+        if ($objectName === 'ElectionPosition' && in_array($op, ['create', 'edit'], TRUE) && array_key_exists('write_ins_per_seat', (array) $params) && $params['write_ins_per_seat'] !== NULL && $params['write_ins_per_seat'] !== '') {
+          if (!CRM_Utils_Rule::positiveInteger($params['write_ins_per_seat']) && (string) $params['write_ins_per_seat'] !== '0' || (int) $params['write_ins_per_seat'] > CRM_Elections_Helper_WriteIn::MAX_PER_SEAT) {
+            throw new CRM_Core_Exception(E::ts('Write-ins per seat must be a whole number from 0 to %1.', [1 => CRM_Elections_Helper_WriteIn::MAX_PER_SEAT]));
+          }
+        }
+        if ($objectName === 'ElectionNomination' && $op === 'create') {
+          self::guardNominationCreate((array) $params);
+        }
         if ($objectName === 'ElectionNomination' && in_array($op, ['create', 'edit'], TRUE) && !empty($params['statement_url']) && !CRM_Elections_Helper_Candidate::isValidStatementUrl($params['statement_url'])) {
           throw new CRM_Core_Exception(E::ts('Enter a web address starting with http:// or https://'));
         }
@@ -103,7 +120,7 @@ class CRM_Elections_Helper_Guard {
         break;
 
       case 'ElectionNomination':
-        self::auditChange($op, 'nomination', $id, self::electionOf('nomination', $id, $object), ['member_nominee', 'is_eligible_candidate', 'has_accepted_nomination', 'has_rejected_nomination', 'comments', 'statement_url', 'rejection_comments'], $object);
+        self::auditChange($op, 'nomination', $id, self::electionOf('nomination', $id, $object), ['member_nominee', 'is_eligible_candidate', 'has_accepted_nomination', 'has_rejected_nomination', 'comments', 'statement_url', 'rejection_comments', 'is_write_in'], $object);
         break;
 
       case 'ElectionVote':
@@ -143,6 +160,23 @@ class CRM_Elections_Helper_Guard {
     }
     if ($op === 'create' && !self::$castingBallot) {
       throw new CRM_Core_Exception(E::ts('A vote can only be cast through the ballot (ElectionVote.addvotes), which checks who may vote and what may be chosen.'));
+    }
+  }
+
+  /**
+   * Once voting has started nobody can be added to the ballot, except a person a voter writes in.
+   */
+  private static function guardNominationCreate(array $params) {
+    if (self::$writeIn || empty($params['election_position_id'])) {
+      return;
+    }
+    $electionId = (int) CRM_Core_DAO::singleValueQuery('SELECT election_id FROM civicrm_election_position WHERE id = %1', [1 => [(int) $params['election_position_id'], 'Integer']]);
+    if (!$electionId) {
+      return;
+    }
+    $election = findElectionById($electionId, FALSE);
+    if ($election->isVotingStarted) {
+      throw new CRM_Core_Exception(E::ts('Who is standing cannot be changed once voting has started.'));
     }
   }
 
@@ -249,6 +283,11 @@ class CRM_Elections_Helper_Guard {
   }
 
   private static function auditChange($op, $kind, $id, $electionId, array $fields, $object) {
+    if ($kind === 'nomination' && $op === 'create' && self::$writeIn) {
+      // A voter writing someone in is not recorded when it happens: the time and the acting person would say
+      // whom that voter chose. The write-ins and how each ended are summarised when the results are generated.
+      return;
+    }
     $key = ['election' => 'Election', 'position' => 'ElectionPosition', 'nomination' => 'ElectionNomination'][$kind];
     $before = self::$before[$key][(int) $id] ?? [];
     $changes = [];

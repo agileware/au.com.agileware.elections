@@ -49,7 +49,12 @@ function _civicrm_api3_election_vote_addvotes_spec(&$spec) {
   ];
   $spec['votes'] = [
     'title'        => 'Votes',
-    'api.required' => 1,
+    'api.required' => 0,
+  ];
+  $spec['write_ins'] = [
+    'title'        => 'Write-ins',
+    'description'  => 'People written in: each with position_id, contact_id and rank.',
+    'api.required' => 0,
   ];
 }
 
@@ -143,11 +148,20 @@ function civicrm_api3_election_vote_addvotes($params) {
       return civicrm_api3_create_error('Member has already voted in given election.');
     }
 
-    $votes = $params['votes'];
-    $voteError = _civicrm_api3_election_vote_validate_ballot($election->id, $votes);
+    $votes = $params['votes'] ?? [];
+    $writeIns = $params['write_ins'] ?? [];
+    if (!is_array($writeIns)) {
+      return civicrm_api3_create_error('Write-ins must be a list.');
+    }
+    $resolved = CRM_Elections_Helper_WriteIn::resolve($election, $writeIns);
+    if ($resolved['error']) {
+      return civicrm_api3_create_error($resolved['error']);
+    }
+    $voteError = _civicrm_api3_election_vote_validate_ballot($election->id, $votes, $resolved['items']);
     if ($voteError) {
       return civicrm_api3_create_error($voteError);
     }
+    $invite = [];
 
     $transaction = new CRM_Core_Transaction();
     try {
@@ -158,6 +172,16 @@ function civicrm_api3_election_vote_addvotes($params) {
           'member_id'   => $params['member_id'],
         ]);
         CRM_Elections_Helper_Integrity::$replacingBallot = FALSE;
+      }
+      // People written in: recorded once, the first time anyone writes them in. Their votes are ordinary ballot
+      // rows on that record and count only if the person accepts before voting closes.
+      foreach ($resolved['items'] as $item) {
+        $nominationId = $item['nomination_id'];
+        if ($item['kind'] === 'new') {
+          $nominationId = CRM_Elections_Helper_WriteIn::record($election, $item['position_id'], $item['contact_id']);
+          $invite[] = $nominationId;
+        }
+        $votes[] = ['election_nomination_id' => $nominationId, 'rank' => $item['rank']];
       }
       CRM_Elections_Helper_Guard::$castingBallot = TRUE;
       foreach ($votes as $vote) {
@@ -173,6 +197,10 @@ function civicrm_api3_election_vote_addvotes($params) {
       throw $e;
     }
     $transaction->commit();
+    // Told once the vote is safely saved. A failed email never undoes a vote.
+    foreach ($invite as $nominationId) {
+      CRM_Elections_Helper_Mailer::writeInInvited($nominationId);
+    }
   }
   finally {
     $lock->release();
@@ -200,13 +228,18 @@ function civicrm_api3_election_vote_get($params) {
  *
  * @param int $electionId
  * @param array $votes
- *   Each with election_nomination_id and rank.
+ *   Each with election_nomination_id and rank. Only candidates who are on the ballot (accepted) can be voted
+ *   for this way.
+ * @param array $writeIns
+ *   People written in, as worked out by CRM_Elections_Helper_WriteIn::resolve(): each with position_id,
+ *   rank, kind (new, pending or candidate) and the nomination_id when there is one.
  *
  * @return string|null
  *   An error message, or NULL when the ballot is fine.
  */
-function _civicrm_api3_election_vote_validate_ballot($electionId, $votes) {
-  if (!is_array($votes) || empty($votes)) {
+function _civicrm_api3_election_vote_validate_ballot($electionId, $votes, array $writeIns = []) {
+  $votes = is_array($votes) ? $votes : [];
+  if (empty($votes) && empty($writeIns)) {
     return 'A ballot must rank at least one candidate.';
   }
 
@@ -223,6 +256,20 @@ function _civicrm_api3_election_vote_validate_ballot($electionId, $votes) {
     }
     $nominationIds[] = $vote['election_nomination_id'];
   }
+  // A person written in who is already a candidate is a vote for that candidate; the rest are new places on the ballot.
+  $newPlaces = [];
+  foreach ($writeIns as $writeIn) {
+    if ($writeIn['kind'] === 'candidate') {
+      if (in_array($writeIn['nomination_id'], $nominationIds)) {
+        return 'A candidate can only be ranked once.';
+      }
+      $nominationIds[] = $writeIn['nomination_id'];
+      $votes[] = ['election_nomination_id' => $writeIn['nomination_id'], 'rank' => $writeIn['rank']];
+    }
+    else {
+      $newPlaces[] = $writeIn;
+    }
+  }
 
   $candidateCounts = CRM_Core_DAO::executeQuery('
     SELECT n.election_position_id, COUNT(*) AS total
@@ -232,31 +279,45 @@ function _civicrm_api3_election_vote_validate_ballot($electionId, $votes) {
       AND n.is_eligible_candidate = 1 AND n.has_accepted_nomination = 1 AND IFNULL(n.has_rejected_nomination, 0) = 0
     GROUP BY n.election_position_id
   ', [1 => [$electionId, 'Positive']])->fetchMap('election_position_id', 'total');
+  foreach ($newPlaces as $writeIn) {
+    // A person written in takes a place on this ballot, so ranks can reach them.
+    $candidateCounts[$writeIn['position_id']] = (int) ($candidateCounts[$writeIn['position_id']] ?? 0) + 1;
+  }
 
-  $candidates = CRM_Core_DAO::executeQuery('
-    SELECT n.id, n.election_position_id
-    FROM civicrm_election_nomination n
-    INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
-    WHERE p.election_id = %1
-      AND n.is_eligible_candidate = 1 AND n.has_accepted_nomination = 1 AND IFNULL(n.has_rejected_nomination, 0) = 0
-      AND n.id IN (' . implode(',', array_map('intval', $nominationIds)) . ')
-  ', [1 => [$electionId, 'Positive']])->fetchMap('id', 'election_position_id');
+  $candidates = [];
+  if ($nominationIds) {
+    $candidates = CRM_Core_DAO::executeQuery('
+      SELECT n.id, n.election_position_id
+      FROM civicrm_election_nomination n
+      INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
+      WHERE p.election_id = %1
+        AND n.is_eligible_candidate = 1 AND n.has_accepted_nomination = 1 AND IFNULL(n.has_rejected_nomination, 0) = 0
+        AND n.id IN (' . implode(',', array_map('intval', $nominationIds)) . ')
+    ', [1 => [$electionId, 'Positive']])->fetchMap('id', 'election_position_id');
+  }
 
   $method = CRM_Elections_VotingMethod::forElection($electionId);
   $ranksByPosition = [];
+  $choices = [];
   foreach ($votes as $vote) {
     $positionId = $candidates[$vote['election_nomination_id']] ?? NULL;
     if (!$positionId) {
       return 'You can only vote for candidates of this election.';
     }
-    if ((int) $vote['rank'] > (int) ($candidateCounts[$positionId] ?? 0)) {
+    $choices[] = [$positionId, $vote['rank']];
+  }
+  foreach ($newPlaces as $writeIn) {
+    $choices[] = [$writeIn['position_id'], $writeIn['rank']];
+  }
+  foreach ($choices as [$positionId, $rank]) {
+    if ((int) $rank > (int) ($candidateCounts[$positionId] ?? 0)) {
       return 'A rank cannot be higher than the number of candidates for the position.';
     }
     // Ranked choice gives each candidate a different rank; ticks all have rank 1.
-    if ($method !== CRM_Elections_VotingMethod::PLURALITY && in_array($vote['rank'], $ranksByPosition[$positionId] ?? [])) {
+    if ($method !== CRM_Elections_VotingMethod::PLURALITY && in_array($rank, $ranksByPosition[$positionId] ?? [])) {
       return 'Rank must be different for each candidate.';
     }
-    $ranksByPosition[$positionId][] = $vote['rank'];
+    $ranksByPosition[$positionId][] = $rank;
   }
   $seats = CRM_Core_DAO::executeQuery('SELECT id, quantity FROM civicrm_election_position WHERE election_id = %1', [1 => [$electionId, 'Positive']])->fetchMap('id', 'quantity');
   foreach ($ranksByPosition as $positionId => $ranks) {

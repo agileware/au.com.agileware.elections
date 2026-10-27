@@ -61,11 +61,11 @@ function elections_civicrm_pre($op, $objectName, $id, &$params) {
     $changesThePosition = TRUE;
     if ($op === 'edit' && $id) {
       // Writing a result (the status of the count) is not a change to the position itself.
-      $current = CRM_Core_DAO::executeQuery('SELECT name, quantity, sortorder, description, election_id FROM civicrm_election_position WHERE id = %1', [1 => [$id, 'Positive']]);
+      $current = CRM_Core_DAO::executeQuery('SELECT name, quantity, sortorder, description, election_id, write_ins_per_seat FROM civicrm_election_position WHERE id = %1', [1 => [$id, 'Positive']]);
       $current->fetch();
       $changesThePosition = FALSE;
-      foreach (['name', 'quantity', 'sortorder', 'description', 'election_id'] as $field) {
-        if (array_key_exists($field, (array) $params) && (string) $params[$field] !== (string) $current->$field) {
+      foreach (['name', 'quantity', 'sortorder', 'description', 'election_id', 'write_ins_per_seat'] as $field) {
+        if (array_key_exists($field, (array) $params) && CRM_Elections_BAO_ElectionPosition::normalise($field, $params[$field]) !== CRM_Elections_BAO_ElectionPosition::normalise($field, $current->$field)) {
           $changesThePosition = TRUE;
         }
       }
