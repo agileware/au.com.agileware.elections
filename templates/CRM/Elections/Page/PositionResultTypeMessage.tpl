@@ -3,7 +3,11 @@
 {/if}
 
 {if $position.result_status == $resultStatuses.results_no_majority}
-    <p>{ts}There was no clear majority winner between two candidates at the end of the result process.{/ts}</p>
+    <p>{ts}The result was a tie, so the tied candidates are listed and none of them is chosen over the others.{/ts}</p>
+{/if}
+
+{if $position.result_status == $resultStatuses.results_most_votes}
+    <p>{ts}Elected by the most votes.{/ts}</p>
 {/if}
 
 {if $position.result_status == $resultStatuses.results_no_nominations}

@@ -25,26 +25,27 @@
         </div>
 
         {if $position.result_status != $resultStatuses.results_no_nominations}
-                {assign var="positionscount" value=1}
                 {assign var="memberdisplayname" value="member_nominee.display_name"}
                 {assign var='memberdisplayimage' value='member_nominee.image_URL'}
                 <div class="election_row_style">
+                {assign var="filled" value=0}
                 {foreach from = $position.ranks key = k item = rank}
-                            {foreach from = $rank item = member}
-                                {if $positionscount <= $position.quantity}
-                                    <div class="election-positions-rank-block">
-                                        <a href="{crmURL p="civicrm/elections/candidate" q="`$checksum_query['query']`&enid=`$position.candidates.$member.id`"}">
-                                            <div class="crm-election-nominated-block">
-                                                {assign var='profilePicUrl' value=$position.candidates.$member.$memberdisplayimage}
-                                                {if $election->showPhotos}<img src="{$profilePicUrl|escape}" alt="" />{/if}
-                                                {$position.candidates.$member.$memberdisplayname|escape}
-                                                {if $position.result_status == $resultStatuses.results_no_majority}<span class="election-winner-badge election-winner-badge-tie">{ts}Tied{/ts}</span>{else}<span class="election-winner-badge">{ts}Winner{/ts}</span>{/if}
-                                            </div>
-                                        </a>
-                                    </div><!-- ending of election-positions-rank-block -->
-                                {/if}
-                                {assign var="positionscount" value=$positionscount+1}
-                            {/foreach}
+                    {if $filled < $position.quantity}
+                        {assign var="groupTied" value=($filled + $rank|@count > $position.quantity)}
+                        {foreach from = $rank item = member}
+                            <div class="election-positions-rank-block">
+                                <a href="{crmURL p="civicrm/elections/candidate" q="`$checksum_query['query']`&enid=`$position.candidates.$member.id`"}">
+                                    <div class="crm-election-nominated-block">
+                                        {assign var='profilePicUrl' value=$position.candidates.$member.$memberdisplayimage}
+                                        {if $election->showPhotos}<img src="{$profilePicUrl|escape}" alt="" />{/if}
+                                        {$position.candidates.$member.$memberdisplayname|escape}
+                                        {if $groupTied}<span class="election-winner-badge election-winner-badge-tie">{ts}Tied{/ts}</span>{else}<span class="election-winner-badge">{ts}Winner{/ts}</span>{/if}
+                                    </div>
+                                </a>
+                            </div><!-- ending of election-positions-rank-block -->
+                        {/foreach}
+                        {assign var="filled" value=$filled+$rank|@count}
+                    {/if}
                 {/foreach}
                 </div>
         {/if}

@@ -47,7 +47,9 @@ class CRM_Elections_Helper_Results {
       $resultStatus = CRM_Elections_BAO_Election::$RESULTS_NO_NOMINATIONS;
     }
     else {
-      $results = $this->generateResultsForNominations($nominations, $seats);
+      $results = (CRM_Elections_VotingMethod::forElection($electionId) === CRM_Elections_VotingMethod::PLURALITY)
+        ? $this->generateResultsByPlurality($nominations, $seats)
+        : $this->generateResultsForNominations($nominations, $seats);
 
       $resultStatus = $results['status'];
       $candidateRanks = $results['candidateranks'];
@@ -245,6 +247,17 @@ class CRM_Elections_Helper_Results {
     }
 
     return $this->assignRanksIfClearMajority($nominations, $candidateVotes, $candidateRanks, $removedNominations, $seats);
+  }
+
+  /**
+   * Count a position where every ballot row is a tick for a candidate: the most votes win.
+   */
+  private function generateResultsByPlurality($nominations, $seats) {
+    $votes = array_fill_keys(array_column($nominations, 'id'), 0);
+    foreach ($this->getVotesByNominationIds(array_keys($votes)) as $vote) {
+      $votes[$vote['election_nomination_id']]++;
+    }
+    return CRM_Elections_VotingMethod::countPlurality($votes, $seats);
   }
 
   private function generateResultsForNominations($nominations, $seats) {

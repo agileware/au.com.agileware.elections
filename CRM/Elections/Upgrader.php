@@ -126,6 +126,15 @@ class CRM_Elections_Upgrader extends CRM_Extension_Upgrader_Base {
   }
 
   /**
+   * Version 2.0.0: how each election is counted (ranked choice, which every existing election uses, or most votes win).
+   */
+  public function upgrade_20030() {
+    Civi::log()->info('Applying update 20030');
+    $this->ensureColumn('civicrm_election', 'voting_method', "VARCHAR(32) NOT NULL DEFAULT 'irv'");
+    return TRUE;
+  }
+
+  /**
    * Add a column unless it already exists, so upgrade steps can safely be re-run.
    *
    * @param string $table

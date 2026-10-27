@@ -54,9 +54,9 @@
       {foreach from=$ownBallot item=choice}
         <div class="election-your-vote-position">
           <h3>{$choice.position|escape}</h3>
-          <ol>
+          {if $election->voting_method == 'plurality'}<ul>{else}<ol>{/if}
             {foreach from=$choice.candidates item=candidateName}<li>{$candidateName|escape}</li>{/foreach}
-          </ol>
+          {if $election->voting_method == 'plurality'}</ul>{else}</ol>{/if}
         </div>
       {/foreach}
     </div>

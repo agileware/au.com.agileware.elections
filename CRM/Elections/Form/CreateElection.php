@@ -62,6 +62,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
 
       $defaults['anonymize_votes'] = $election->anonymize_votes;
       $defaults['allow_revote'] = $election->allow_revote;
+      $defaults['voting_method'] = CRM_Elections_VotingMethod::normalise($election->voting_method);
       $defaults['required_nominations'] = $election->required_nominations;
       $defaults['allowed_groups'] = $election->allowed_groups;
 
@@ -77,6 +78,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       $this->eId = 0;
       $defaults['anonymize_votes'] = 1;
       $defaults['allow_revote'] = 0;
+      $defaults['voting_method'] = CRM_Elections_VotingMethod::IRV;
       $defaults['required_nominations'] = 2;
       $defaults['allowed_groups'] = '';
       $defaults['show_photos'] = 1;
@@ -147,6 +149,8 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       'placeholder' => '- Select -',
     ]);
 
+    $this->add('select', 'voting_method', E::ts('Voting Method'), CRM_Elections_VotingMethod::getOptions(), TRUE);
+
     $this->add('select', 'allow_revote', E::ts('Allow Members to Change Vote'), CRM_Core_SelectValues::boolean(), TRUE, [
       'placeholder' => '- Select -',
     ]);
@@ -209,6 +213,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       'result_date'                 => $values['result_date'],
       'anonymize_votes'             => $values['anonymize_votes'],
       'allow_revote'                => $values['allow_revote'],
+      'voting_method'               => $values['voting_method'],
       'allow_checksum_access'       => $values['allow_checksum_access'],
       'is_visible'                  => 0,
       'required_nominations'        => $values['required_nominations'],

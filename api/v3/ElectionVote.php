@@ -239,6 +239,7 @@ function _civicrm_api3_election_vote_validate_ballot($electionId, $votes) {
       AND n.id IN (' . implode(',', array_map('intval', $nominationIds)) . ')
   ', [1 => [$electionId, 'Positive']])->fetchMap('id', 'election_position_id');
 
+  $method = CRM_Elections_VotingMethod::forElection($electionId);
   $ranksByPosition = [];
   foreach ($votes as $vote) {
     $positionId = $candidates[$vote['election_nomination_id']] ?? NULL;
@@ -248,14 +249,20 @@ function _civicrm_api3_election_vote_validate_ballot($electionId, $votes) {
     if ((int) $vote['rank'] > (int) ($candidateCounts[$positionId] ?? 0)) {
       return 'A rank cannot be higher than the number of candidates for the position.';
     }
-    if (in_array($vote['rank'], $ranksByPosition[$positionId] ?? [])) {
+    // Ranked choice gives each candidate a different rank; ticks all have rank 1.
+    if ($method !== CRM_Elections_VotingMethod::PLURALITY && in_array($vote['rank'], $ranksByPosition[$positionId] ?? [])) {
       return 'Rank must be different for each candidate.';
     }
     $ranksByPosition[$positionId][] = $vote['rank'];
   }
-  foreach ($ranksByPosition as $ranks) {
+  $seats = CRM_Core_DAO::executeQuery('SELECT id, quantity FROM civicrm_election_position WHERE election_id = %1', [1 => [$electionId, 'Positive']])->fetchMap('id', 'quantity');
+  foreach ($ranksByPosition as $positionId => $ranks) {
     if (!in_array(1, $ranks)) {
       return 'If you rank candidates for a position you must give one of them rank 1.';
+    }
+    $methodError = CRM_Elections_VotingMethod::validatePosition($method, $ranks, $seats[$positionId] ?? 1);
+    if ($methodError) {
+      return $methodError;
     }
   }
 

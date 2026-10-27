@@ -25,6 +25,8 @@
                     {foreach from=$position.candidates item=candidate}
                         {if $candidate.is_winner|default:false}
                             <li>{$candidate.$memberdisplayname|escape}</li>
+                        {elseif $candidate.is_tied|default:false}
+                            <li>{$candidate.$memberdisplayname|escape} {ts}(tied){/ts}</li>
                         {/if}
                     {/foreach}
                 </ul>

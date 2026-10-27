@@ -15,6 +15,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
   private $election = NULL;
   private $electionPositions = [];
   private $electionCandidates = [];
+  private $method = CRM_Elections_VotingMethod::IRV;
 
   public function buildQuickForm() {
     hideNonRequiredItemsOnPage($this);
@@ -23,6 +24,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       return;
     }
     $this->election = findElectionById($this->eId);
+    $this->method = CRM_Elections_VotingMethod::normalise($this->election->voting_method);
 
     // Election is not visible
     if ( !$this->election->isVisible ) {
@@ -86,6 +88,10 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
 
     Civi::resources()
       ->addVars('electionsBallot', [
+        'method' => $this->method,
+        'tooMany' => E::ts('You can choose no more than %1.'),
+        'chosen' => E::ts('%1 of %2 chosen.'),
+        'chosenOne' => E::ts('Chosen: %1.'),
         'duplicate' => E::ts('Rank %1 is given to more than one candidate.'),
         'needFirst' => E::ts('Give your first choice the rank 1.'),
         'counted' => E::ts('%1 of %2 candidates ranked.'),
@@ -150,7 +156,13 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
 
   private function assignFormElements() {
     CRM_Elections_BAO_ElectionResult::updateCandidateProfilePictures($this->electionPositions);
+    foreach ($this->electionPositions as $positionId => $position) {
+      $this->electionPositions[$positionId]['prompt'] = CRM_Elections_VotingMethod::positionPrompt($this->method, $position['name'], count($position['candidates'] ?? []), $position['quantity'] ?? 1);
+      $this->electionPositions[$positionId]['seats'] = max(1, (int) ($position['quantity'] ?? 1));
+    }
     $this->assign('positions', $this->electionPositions);
+    $this->assign('votingMethod', $this->method);
+    $this->assign('instructions', CRM_Elections_VotingMethod::instructions($this->method));
     $this->addElement('hidden', 'eid', $this->eId);
     if ( $this->cid && $this->cs ) {
       $this->addElement('hidden', 'cid', $this->cid);
@@ -158,6 +170,10 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     }
     $elements = $this->getFormElementsByCandidates();
     foreach ($elements as $element) {
+      if ($this->method === CRM_Elections_VotingMethod::PLURALITY) {
+        $this->addElement('checkbox', $element['key'], htmlspecialchars((string) $element['name'], ENT_QUOTES, 'UTF-8'));
+        continue;
+      }
       $this->add('select2', $element['key'], htmlspecialchars((string) $element['name'], ENT_QUOTES, 'UTF-8'), $this->getVoteSelectionByPosition($element['position_id']), FALSE, ['placeholder' => E::ts('- Rank -')]);
     }
   }
@@ -217,6 +233,22 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     $elements = $this->getFormElementsByCandidates();
     $values = $this->exportValues();
     $voteRanksByPosition = [];
+
+    if ($this->method === CRM_Elections_VotingMethod::PLURALITY) {
+      $ticks = [];
+      foreach ($elements as $element) {
+        if (!empty($values[$element['key']])) {
+          $ticks[$element['position_id']] = ($ticks[$element['position_id']] ?? 0) + 1;
+        }
+      }
+      foreach ($ticks as $positionId => $count) {
+        $seats = max(1, (int) ($this->electionPositions[$positionId]['quantity'] ?? 1));
+        if ($count > $seats) {
+          $this->_errors['_qf_default'] = E::ts('For %1 you can choose no more than %2.', [1 => $this->electionPositions[$positionId]['name'], 2 => $seats]);
+        }
+      }
+      return parent::validate();
+    }
 
     foreach ($elements as $element) {
       $key = $element['key'];
@@ -284,7 +316,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       $key = $element['key'];
       if (array_key_exists($key, $values)) {
         $nominationId = $element['nominationId'];
-        $rank = $values[$key];
+        $rank = ($this->method === CRM_Elections_VotingMethod::PLURALITY) ? (empty($values[$key]) ? '' : 1) : $values[$key];
         if ($rank != '') {
           $addVotesParams['votes'][] = [
             'election_nomination_id' => $nominationId,
