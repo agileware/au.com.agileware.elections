@@ -23,3 +23,7 @@ If the election's settings allow it, you can vote again at any time before **Vot
 ## Elections counted by most votes
 
 Some elections are counted by most votes instead of ranking. The ballot then has a tick box for each candidate and each position says how many you can choose (one for a single seat, up to the number of seats otherwise). A message under the position tells you how many you have chosen and warns you at once if you choose too many. You do not have to choose anyone in a position. The review step lists the candidates you ticked before anything is saved.
+
+## Writing in a candidate
+
+If a position allows write-ins, a **Write in a candidate** box appears under its candidates. Type at least three letters of a person's name and pick them from the list; in a ranked choice election give them a rank like any other candidate, and use **Add another write-in** if you have more places. The person is told straight away and must accept before voting closes. Your vote for them counts only if they accept; if they do not, it is dropped and your ballot moves on to your next choice. If you vote again later you will see them on the ballot once they have accepted.
