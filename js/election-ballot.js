@@ -48,7 +48,8 @@
 
   function rankOf(row) {
     if (plurality) {
-      return isChosen(row) ? 1 : null;
+      var picked = row.writeIn ? $.trim(String(row.$person.val() || '')) !== '' : row.$field.prop('checked');
+      return picked ? 1 : null;
     }
     var value = parseInt(row.$field.val(), 10);
     return isNaN(value) ? null : value;
