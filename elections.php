@@ -50,6 +50,21 @@ function elections_civicrm_enable() {
 // --- Functions below this ship commented out. Uncomment as required. ---
 
 /**
+ * Implements hook_civicrm_pre().
+ *
+ * Business rules that must hold however an election is changed - the forms, the
+ * API, or an inline edit in a SearchKit list.
+ */
+function elections_civicrm_pre($op, $objectName, $id, &$params) {
+  if ($objectName === 'Election' && $op === 'edit' && $id && !empty($params['is_visible'])) {
+    $isVisibleNow = CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $id, 'is_visible');
+    if (!$isVisibleNow) {
+      CRM_Elections_BAO_Election::assertCanActivate($id);
+    }
+  }
+}
+
+/**
  * Implements hook_civicrm_preProcess().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess
@@ -163,8 +178,9 @@ function elections_civicrm_navigationMenu(&$menu) {
     'label' => E::ts('Elections'),
     'name' => 'Elections',
     'icon'     => 'crm-i fa-check-square-o',
-    'url' => 'civicrm/elections',
-    'permission' => 'administer CiviCRM',
+    'url' => 'civicrm/elections/manage',
+    'permission' => 'access CiviCRM,administer Elections',
+    'operator' => 'AND',
     'weight' => 62,
 
   ]);

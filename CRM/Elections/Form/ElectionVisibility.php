@@ -47,38 +47,25 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
 
   public function postProcess() {
     $values = $this->exportValues();
-
     $this->eId = (isset($values['eid'])) ? $values['eid'] : 0;
-    $election = new CRM_Elections_BAO_Election();
-    $election->id = $this->eId;
+    $isActive = (bool) CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $this->eId, 'is_visible');
 
-    if ($election->is_visible != 1) {
-      $electionPostions = civicrm_api3('ElectionPosition', 'get', [
-        'election_id'  => $election->id,
-        'options' => ['limit' => 0],
-      ]);
-      if (empty($electionPostions['values'])) {
-        throwAccessDeniedException($this, E::ts('At least one Position must be defined before the Election can be active.'), [
-          'return_button_text'   => E::ts('Return to Elections'),
-          'return_button_action' => Civi::url('current://civicrm/elections'),
-        ]);
-        return;
+    try {
+      if (!$isActive) {
+        CRM_Elections_BAO_Election::assertCanActivate($this->eId);
       }
+      \Civi\Api4\Election::update(FALSE)
+        ->addWhere('id', '=', $this->eId)
+        ->addValue('is_visible', !$isActive)
+        ->execute();
+      CRM_Core_Session::setStatus($isActive ? E::ts('Election has been deactivated successfully.') : E::ts('Election has been activated successfully.'), '', 'success');
     }
-
-    if ($election->find(TRUE)) {
-      $election->is_visible = !($election->is_visible);
-      if ($election->save()) {
-        $successMessage = E::ts('Election has been activated successfully.');
-        if (!$election->is_visible) {
-          $successMessage = E::ts('Election has been deactivated successfully.');
-        }
-        CRM_Core_Session::setStatus($successMessage, '', 'success');
-      }
+    catch (CRM_Core_Exception $e) {
+      CRM_Core_Session::setStatus($e->getMessage(), E::ts('Election not changed'), 'error');
     }
 
     parent::postProcess();
-    CRM_Utils_System::redirect(Civi::url('current://civicrm/elections'));
+    $this->finish(CRM_Utils_System::url('civicrm/elections/manage', 'reset=1'));
   }
 
 }

@@ -74,7 +74,7 @@
     <path>civicrm/elections/visibility</path>
     <page_callback>CRM_Elections_Form_ElectionVisibility</page_callback>
     <title>ElectionVisibility</title>
-    <access_arguments>administer CiviCRM</access_arguments>
+    <access_arguments>administer Elections</access_arguments>
   </item>
   <item>
     <path>civicrm/elections/candidate</path>
@@ -89,6 +89,12 @@
     <title>Candidate Statement</title>
     <access_arguments>view Elections</access_arguments>
     <access_callback>CRM_Elections_Permission::check</access_callback>
+  </item>
+  <item>
+    <path>civicrm/elections/duplicate</path>
+    <page_callback>CRM_Elections_Form_DuplicateElection</page_callback>
+    <title>Duplicate Election</title>
+    <access_arguments>administer Elections</access_arguments>
   </item>
   <item>
     <path>civicrm/elections/summary</path>
