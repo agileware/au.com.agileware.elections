@@ -61,6 +61,11 @@ export async function vote(page: Page, persona: string, ranks: Record<number, nu
     }
   }, ranks);
   await page.getByRole('button', { name: 'Vote', exact: true }).click();
+  // The ballot shows the choices for review first; the vote is saved when it is confirmed.
+  const review = page.getByRole('dialog', { name: 'Check your vote' });
+  if (await review.waitFor({ state: 'visible', timeout: 3000 }).then(() => true, () => false)) {
+    await review.getByRole('button', { name: 'Confirm my vote' }).click();
+  }
   await expect(page.getByText(/You have successfully voted/)).toBeVisible();
 }
 
