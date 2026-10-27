@@ -98,6 +98,7 @@ class CRM_Elections_Helper_Process {
     $seconder = civicrm_api3('ElectionNominationSeconder', 'create', $seconderParams);
 
     $isEligible = FALSE;
+    $wasEligible = (bool) CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_ElectionNomination', $nominationId, 'is_eligible_candidate');
     // Counted by distinct nominator, so nobody counts twice whatever happened to the rows.
     $totalNominations = (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(DISTINCT member_nominator) FROM civicrm_election_nomination_seconder WHERE election_nomination_id = %1', [1 => [$nominationId, 'Integer']]);
     if ($totalNominations >= $election->required_nominations) {
@@ -106,6 +107,9 @@ class CRM_Elections_Helper_Process {
     }
 
     self::createNominationActivity($nominatorId, $nomineeId, $nominationId, $seconder['id'], $isEligible);
+    if ($isEligible && !$wasEligible) {
+      CRM_Elections_Helper_Mailer::nomineeInvited($nominationId);
+    }
 
     return [
       'nomination_id' => $nominationId,
