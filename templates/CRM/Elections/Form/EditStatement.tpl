@@ -10,7 +10,7 @@
         </div>
         <div class="crm-election-form-col-right">
             {assign var='spKey' value='election_position_id.name'}
-            {$electionNomination.$spKey}
+            {$electionNomination.$spKey|escape}
         </div>
     </div>
 

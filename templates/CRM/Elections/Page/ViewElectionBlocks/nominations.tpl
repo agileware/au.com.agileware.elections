@@ -33,8 +33,8 @@
                                 {assign var="candidatesCount" value=$candidatesCount+1}
                                 <div class="crm-election-nominated-block inside">
                                     {assign var='profilePicUrl' value=$seconder.$scImgKey}
-                                    {if $election->showPhotos}<img src="{$profilePicUrl}" alt=""/>{/if}
-                                    {$seconder.$scKey}<br>
+                                    {if $election->showPhotos}<img src="{$profilePicUrl|escape}" alt=""/>{/if}
+                                    {$seconder.$scKey|escape}<br>
 
                                     {if !$election->isVotingStarted and ($seconder.is_eligible_candidate == 1)}
                                         {ts}Candidate Status:{/ts}

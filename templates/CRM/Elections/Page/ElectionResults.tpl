@@ -1,7 +1,7 @@
 <div class="crm-election-view-block">
     {include file="CRM/Elections/Page/WelcomeMessage.tpl"}
 
-    <p>{$election->description|nl2br}</p>
+    <p>{$election->description|escape|nl2br}</p>
 
     {include file="CRM/Elections/Page/ElectionHelpText.tpl"}
 
@@ -36,8 +36,8 @@
                                         <a href="{crmURL p="civicrm/elections/candidate" q="`$checksum_query['query']`&enid=`$position.candidates.$member.id`"}">
                                             <div class="crm-election-nominated-block">
                                                 {assign var='profilePicUrl' value=$position.candidates.$member.$memberdisplayimage}
-                                                {if $election->showPhotos}<img src="{$profilePicUrl}" alt="" />{/if}
-                                                {$position.candidates.$member.$memberdisplayname}<br>
+                                                {if $election->showPhotos}<img src="{$profilePicUrl|escape}" alt="" />{/if}
+                                                {$position.candidates.$member.$memberdisplayname|escape}<br>
                                             </div>
                                         </a>
                                     </div><!-- ending of election-positions-rank-block -->

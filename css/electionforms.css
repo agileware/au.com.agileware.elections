@@ -656,3 +656,15 @@ ul#errorList {
 .election-turnout-table th {
     text-align: left;
 }
+
+.election-overview-integrity {
+    margin-top: 1.5em;
+}
+.election-audit-recent {
+    width: 100%;
+    max-width: 50em;
+    margin-bottom: 0.5em;
+}
+.election-audit-recent th {
+    text-align: left;
+}

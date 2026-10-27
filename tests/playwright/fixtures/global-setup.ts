@@ -1,11 +1,11 @@
-import { chromium, type FullConfig } from '@playwright/test';
+import { chromium, type FullConfig, type Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 import users from './test-users.json';
-import { CMS } from './cms';
+import { adminUrl, CMS } from './cms';
 
 /**
- * Logs each WordPress user in once, one after the other, and saves the session.
+ * Logs each test user in once, one after the other, and saves the session.
  *
  * WordPress keeps a user's sessions in one meta value, so several browsers logging in as the
  * same user at the same moment can overwrite each other's session and be sent back to the
@@ -19,30 +19,59 @@ export const logins: Record<string, { username: string; password: string }> = {
   member: { username: users.member.username, password: users.member.password },
 };
 
-export default async function globalSetup(config: FullConfig) {
-  // Back end logins below are for WordPress; the other CMS sites are covered by the front end specs.
-  if (CMS !== 'wordpress') {
-    return;
+/** Drupal and Joomla use test accounts created by fixtures/setup-accounts-<cms>.sh. */
+const testAdmin = { username: users.admin.username, password: users.admin.password };
+
+const WARM_UP = ['civicrm/elections/manage', 'civicrm/elections/position-list', 'civicrm/elections/candidate-list'];
+
+async function warmUp(page: Page) {
+  // The first visit to a SearchKit page after the caches were cleared is slow while CiviCRM
+  // builds its templates; do it once here rather than inside the first test.
+  for (const civiPath of WARM_UP) {
+    await page.goto(adminUrl(civiPath, { reset: 1 }));
+    await page.waitForLoadState('networkidle', { timeout: 120000 }).catch(() => {});
   }
+}
+
+export default async function globalSetup(config: FullConfig) {
   const baseURL = config.projects[0].use.baseURL as string;
   fs.mkdirSync(AUTH_DIR, { recursive: true });
   const browser = await chromium.launch();
-  for (const [name, { username, password }] of Object.entries(logins)) {
+
+  // Which sessions each CMS gets. Joomla has no manager or member session: CiviCRM permissions are
+  // set through Joomla's access levels there, so those specs are skipped on Joomla.
+  const sessions: Array<[string, { username: string; password: string }]> =
+    CMS === 'wordpress' ? Object.entries(logins)
+      : CMS === 'drupal' ? [['admin', testAdmin], ['manager', logins.manager], ['member', logins.member]]
+        : [['admin', testAdmin]];
+
+  for (const [name, { username, password }] of sessions) {
     const context = await browser.newContext({ baseURL });
     const page = await context.newPage();
-    await page.goto('/wp-login.php');
-    await page.locator('#user_login').fill(username);
-    await page.locator('#user_pass').fill(password);
-    await page.locator('#wp-submit').click();
-    await page.waitForURL(/wp-admin\//);
-    await page.locator('#wpadminbar').waitFor();
+    if (CMS === 'wordpress') {
+      await page.goto('/wp-login.php');
+      await page.locator('#user_login').fill(username);
+      await page.locator('#user_pass').fill(password);
+      await page.locator('#wp-submit').click();
+      await page.waitForURL(/wp-admin\//);
+      await page.locator('#wpadminbar').waitFor();
+    }
+    else if (CMS === 'drupal') {
+      await page.goto('/user/login');
+      await page.locator('#edit-name').fill(username);
+      await page.locator('#edit-pass').fill(password);
+      await page.locator('#edit-submit').click();
+      await page.waitForURL((u) => !u.pathname.startsWith('/user/login'));
+    }
+    else {
+      await page.goto('/administrator/index.php');
+      await page.locator('#mod-login-username').fill(username);
+      await page.locator('#mod-login-password').fill(password);
+      await page.locator('#btn-login-submit').click();
+      await page.waitForURL(/administrator\/index\.php(?!.*login)/, { timeout: 30000 });
+    }
     if (name === 'admin') {
-      // The first visit to a SearchKit page after the caches were cleared is slow while CiviCRM
-      // builds its templates; do it once here rather than inside the first test.
-      for (const url of ['/wp-admin/admin.php?page=CiviCRM&q=civicrm%2Felections%2Fmanage&reset=1', '/wp-admin/admin.php?page=CiviCRM&q=civicrm%2Felections%2Fposition-list&reset=1', '/wp-admin/admin.php?page=CiviCRM&q=civicrm%2Felections%2Fcandidate-list&reset=1']) {
-        await page.goto(url);
-        await page.waitForLoadState('networkidle', { timeout: 120000 }).catch(() => {});
-      }
+      await warmUp(page);
     }
     await context.storageState({ path: path.join(AUTH_DIR, `${name}.json`) });
     await context.close();

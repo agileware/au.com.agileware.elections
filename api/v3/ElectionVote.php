@@ -126,34 +126,54 @@ function civicrm_api3_election_vote_addvotes($params) {
     return civicrm_api3_create_error('Multiple members are not yet supported.');
   }
 
-  // Check everything before touching an earlier ballot, so a rejected ballot never costs someone their vote.
   if (!isLoggedInMemberAllowedToVote($election->id, $params['member_id'])) {
     return civicrm_api3_create_error('Member is not allowed to vote in given election.');
   }
 
-  $hasVoted = hasLoggedInUserAlreadyVoted($election->id, $params['member_id']);
-  if ($hasVoted && !$election->allow_revote) {
-    return civicrm_api3_create_error('Member has already voted in given election.');
+  // One ballot at a time for each member: two requests sent together (a double click, a second tab, a
+  // script) must not both find "has not voted yet" and both write a ballot.
+  $lock = Civi::lockManager()->acquire('data.elections.vote.' . (int) $election->id . '.' . (int) $params['member_id'], 10);
+  if (!$lock->isAcquired()) {
+    return civicrm_api3_create_error('Your ballot is already being saved. Please wait a moment and try again.');
   }
+  try {
+    // Check everything before touching an earlier ballot, so a rejected ballot never costs someone their vote.
+    $hasVoted = hasLoggedInUserAlreadyVoted($election->id, $params['member_id']);
+    if ($hasVoted && !$election->allow_revote) {
+      return civicrm_api3_create_error('Member has already voted in given election.');
+    }
 
-  $votes = $params['votes'];
-  $voteError = _civicrm_api3_election_vote_validate_ballot($election->id, $votes);
-  if ($voteError) {
-    return civicrm_api3_create_error($voteError);
-  }
+    $votes = $params['votes'];
+    $voteError = _civicrm_api3_election_vote_validate_ballot($election->id, $votes);
+    if ($voteError) {
+      return civicrm_api3_create_error($voteError);
+    }
 
-  $transaction = new CRM_Core_Transaction();
-  if ($hasVoted) {
-    civicrm_api3('ElectionVote', 'deletevotes', [
-      'election_id' => $election->id,
-      'member_id'   => $params['member_id'],
-    ]);
+    $transaction = new CRM_Core_Transaction();
+    try {
+      if ($hasVoted) {
+        CRM_Elections_Helper_Integrity::$replacingBallot = TRUE;
+        civicrm_api3('ElectionVote', 'deletevotes', [
+          'election_id' => $election->id,
+          'member_id'   => $params['member_id'],
+        ]);
+        CRM_Elections_Helper_Integrity::$replacingBallot = FALSE;
+      }
+      foreach ($votes as $vote) {
+        $vote['member_id'] = $params['member_id'];
+        civicrm_api3('ElectionVote', 'create', $vote);
+      }
+    }
+    catch (Exception $e) {
+      CRM_Elections_Helper_Integrity::$replacingBallot = FALSE;
+      $transaction->rollback();
+      throw $e;
+    }
+    $transaction->commit();
   }
-  foreach ($votes as $vote) {
-    $vote['member_id'] = $params['member_id'];
-    civicrm_api3('ElectionVote', 'create', $vote);
+  finally {
+    $lock->release();
   }
-  $transaction->commit();
 
   return civicrm_api3_create_success([
     'message' => count($votes) . ' has been added successfully.',
@@ -201,6 +221,15 @@ function _civicrm_api3_election_vote_validate_ballot($electionId, $votes) {
     $nominationIds[] = $vote['election_nomination_id'];
   }
 
+  $candidateCounts = CRM_Core_DAO::executeQuery('
+    SELECT n.election_position_id, COUNT(*) AS total
+    FROM civicrm_election_nomination n
+    INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
+    WHERE p.election_id = %1
+      AND n.is_eligible_candidate = 1 AND n.has_accepted_nomination = 1 AND IFNULL(n.has_rejected_nomination, 0) = 0
+    GROUP BY n.election_position_id
+  ', [1 => [$electionId, 'Positive']])->fetchMap('election_position_id', 'total');
+
   $candidates = CRM_Core_DAO::executeQuery('
     SELECT n.id, n.election_position_id
     FROM civicrm_election_nomination n
@@ -215,6 +244,9 @@ function _civicrm_api3_election_vote_validate_ballot($electionId, $votes) {
     $positionId = $candidates[$vote['election_nomination_id']] ?? NULL;
     if (!$positionId) {
       return 'You can only vote for candidates of this election.';
+    }
+    if ((int) $vote['rank'] > (int) ($candidateCounts[$positionId] ?? 0)) {
+      return 'A rank cannot be higher than the number of candidates for the position.';
     }
     if (in_array($vote['rank'], $ranksByPosition[$positionId] ?? [])) {
       return 'Rank must be different for each candidate.';

@@ -1,8 +1,9 @@
 import { test as base, expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
+import fs from 'node:fs';
 import path from 'node:path';
 import { AUTH_DIR } from './global-setup';
 import { personaUrl } from './personas';
-import { CMS } from './cms';
+import { adminUrl } from './cms';
 
 /** PHP and template output that must never reach a visitor. */
 const PHP_OUTPUT = /(?:Warning|Notice|Deprecated|Fatal error|Parse error)\s*:|Undefined (?:array key|variable|index|property)|Smarty/;
@@ -42,6 +43,10 @@ export async function expectNoPhpOutput(page: Page) {
 
 /** A page for a WordPress user, using the session saved by global-setup.ts. */
 async function loggedInPage(browser: Browser, name: 'admin' | 'manager' | 'member') {
+  const state = path.join(AUTH_DIR, `${name}.json`);
+  if (!fs.existsSync(state)) {
+    base.skip(true, `No saved ${name} session on this CMS (see fixtures/global-setup.ts)`);
+  }
   const context = await browser.newContext({ storageState: path.join(AUTH_DIR, `${name}.json`) });
   return { context, page: await context.newPage() };
 }
@@ -80,12 +85,6 @@ export const test = base.extend<Fixtures>({
   ],
 
   adminPage: async ({ browser, guards }, use) => {
-    // Admin sessions are saved for WordPress only (global-setup.ts); on Drupal and Joomla the back end
-    // checks are skipped by the specs, which test `if (adminPage)`.
-    if (CMS !== 'wordpress') {
-      await use(undefined as unknown as Page);
-      return;
-    }
     const { context, page } = await loggedInPage(browser, 'admin');
     watch(page, 'admin', guards);
     await use(page);
@@ -136,11 +135,20 @@ export const test = base.extend<Fixtures>({
 
 export { expect };
 
-/** Back office CiviCRM address: /wp-admin/admin.php?page=CiviCRM&q=<path>&... */
-export function civiAdminUrl(civiPath: string, params: Record<string, string | number> = {}): string {
-  const query = new URLSearchParams({ page: 'CiviCRM', q: civiPath });
-  for (const [k, v] of Object.entries(params)) {
-    query.set(k, String(v));
+/**
+ * An administrator's page if this CMS has a saved administrator session, otherwise null, for specs
+ * whose front end checks must run everywhere and whose back end checks are a bonus.
+ */
+export async function optionalAdminPage(browser: Browser): Promise<{ page: Page; close: () => Promise<void> } | null> {
+  const state = path.join(AUTH_DIR, 'admin.json');
+  if (!fs.existsSync(state)) {
+    return null;
   }
-  return `/wp-admin/admin.php?${query.toString()}`;
+  const context = await browser.newContext({ storageState: state });
+  return { page: await context.newPage(), close: () => context.close() };
+}
+
+/** Back office CiviCRM address on the CMS under test (see adminUrl in cms.ts). */
+export function civiAdminUrl(civiPath: string, params: Record<string, string | number> = {}): string {
+  return adminUrl(civiPath, params);
 }

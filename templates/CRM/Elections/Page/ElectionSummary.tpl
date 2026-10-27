@@ -1,6 +1,6 @@
 {include file="CRM/Elections/Page/WelcomeMessage.tpl"}
 
-<p>{$election->description|nl2br}</p>
+<p>{$election->description|escape|nl2br}</p>
 
 <div class="crm-elections-helptext-block">
     <p>{ts}The votes have been counted for this election.  A breakdown of the nominations and results for each position is shown below.{/ts}</p>
@@ -10,7 +10,7 @@
 <p>{ts 1=$resultDate}Results published on %1{/ts}</p>
 
 {foreach from=$positions item=position}
-    <h2>{$position.name}</h2>
+    <h2>{$position.name|escape}</h2>
     <p>{include file="CRM/Elections/Page/PositionResultTypeMessage.tpl"}</p>
 
     {if $position.result_status != $resultStatuses.results_no_nominations}
@@ -24,7 +24,7 @@
                 <ul>
                     {foreach from=$position.candidates item=candidate}
                         {if $candidate.is_winner|default:false}
-                            <li>{$candidate.$memberdisplayname}</li>
+                            <li>{$candidate.$memberdisplayname|escape}</li>
                         {/if}
                     {/foreach}
                 </ul>
@@ -34,7 +34,7 @@
                 <h3>{ts}Candidates{/ts}</h3>
                 <ul>
                     {foreach from=$position.candidates item=candidate}
-                        <li>{$candidate.$memberdisplayname}</li>
+                        <li>{$candidate.$memberdisplayname|escape}</li>
                     {/foreach}
                 </ul>
             </div><!-- ending of election-position-summary-block -->
@@ -43,7 +43,7 @@
                 <h3>{ts}Nominations{/ts}</h3>
                 <ul>
                     {foreach from=$position.nominations item=nomination}
-                        <li>{$nomination.$memberdisplayname}</li>
+                        <li>{$nomination.$memberdisplayname|escape}</li>
                     {/foreach}
                 </ul>
             </div><!-- ending of election-position-summary-block -->

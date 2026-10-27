@@ -216,4 +216,63 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
     }
   }
 
+  public function testRefusedMoveOfAPositionLeavesTheOthersWhereTheyAre() {
+    $election = $this->inactiveElection();
+    foreach (['Chair', 'Secretary', 'Treasurer'] as $i => $name) {
+      civicrm_api3('ElectionPosition', 'create', ['election_id' => $election['id'], 'name' => $name, 'quantity' => 1, 'sortorder' => $i + 1]);
+    }
+    $before = $this->positionsInOrder($election['id']);
+    $election = $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $election);
+    $this->callAPISuccess('Election', 'create', ['id' => $election['id'], 'is_visible' => 1] + $election);
+    $last = civicrm_api3('ElectionPosition', 'getsingle', ['election_id' => $election['id'], 'name' => 'Treasurer']);
+    try {
+      \Civi\Api4\ElectionPosition::update(FALSE)->addWhere('id', '=', $last['id'])->addValue('sortorder', 1)->execute();
+      $this->fail('Moving a position once the election has started must be refused');
+    }
+    catch (CRM_Core_Exception $e) {
+      $this->assertStringContainsString('once election has been started', $e->getMessage());
+    }
+    $this->assertSame($before, $this->positionsInOrder($election['id']), 'The others were not shuffled by the refused move');
+    $orders = array_map('intval', array_column(civicrm_api3('ElectionPosition', 'get', ['election_id' => $election['id'], 'options' => ['limit' => 0]])['values'], 'sortorder'));
+    sort($orders);
+    $this->assertSame([1, 2, 3], $orders);
+  }
+
+  /**
+   * An ordinary member (can take part in elections, is not an administrator) must not be able to read
+   * how anybody voted, or the other election tables, through the APIs.
+   */
+  public function testMembersCannotReadBallotsThroughTheApis() {
+    $fixture = CRM_Elections_Test_CouncilFixture::create()->playUntil(CRM_Elections_Test_CouncilFixture::STAGE_VOTING);
+    $this->assertGreaterThan(0, CRM_Elections_BAO_Election::getCounts($fixture->electionId)['votes']);
+
+    $permissionClass = CRM_Core_Config::singleton()->userPermissionClass;
+    $original = $permissionClass->permissions ?? NULL;
+    $permissionClass->permissions = ['view Elections', 'access AJAX API', 'access uploaded files', 'profile view', 'profile edit'];
+    try {
+      foreach (['ElectionVote', 'ElectionResult', 'ElectionNomination', 'ElectionNominationSeconder', 'ElectionPosition', 'Election', 'ElectionAudit'] as $entity) {
+        if ($entity !== 'ElectionAudit') {
+          // (The audit log has no APIv3 entity.)
+          try {
+            civicrm_api3($entity, 'get', ['check_permissions' => 1, 'options' => ['limit' => 1]]);
+            $this->fail("APIv3 $entity.get must be refused to a member");
+          }
+          catch (CRM_Core_Exception $e) {
+            $this->assertStringContainsString('permission', strtolower($e->getMessage()), "APIv3 $entity.get");
+          }
+        }
+        try {
+          civicrm_api4($entity, 'get', ['checkPermissions' => TRUE, 'limit' => 1]);
+          $this->fail("APIv4 $entity.get must be refused to a member");
+        }
+        catch (\Civi\API\Exception\UnauthorizedException $e) {
+          $this->assertTrue(TRUE);
+        }
+      }
+    }
+    finally {
+      $permissionClass->permissions = $original;
+    }
+  }
+
 }

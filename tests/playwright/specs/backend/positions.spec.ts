@@ -13,7 +13,7 @@ test.describe('Election positions (SearchKit list)', () => {
     addPosition(id, 'Beta', 2, 2);
     await adminPage.goto(listUrl(id));
     await expect(adminPage.getByRole('heading', { name: 'Election Positions' })).toBeVisible();
-    const rows = adminPage.locator('tbody tr');
+    const rows = adminPage.locator('crm-search-display-table tbody tr');
     await expect(rows).toHaveCount(2);
     await expect(rows.nth(0)).toContainText('Alpha');
     await expect(rows.nth(1)).toContainText('Beta');
@@ -28,9 +28,13 @@ test.describe('Election positions (SearchKit list)', () => {
     addPosition(id, 'Beta', 2);
     addPosition(id, 'Gamma', 3);
     await adminPage.goto(listUrl(id));
-    const rows = adminPage.locator('tbody tr');
+    const rows = adminPage.locator('crm-search-display-table tbody tr');
     await expect(rows).toHaveCount(3);
 
+    // Themes with a tall header (Drupal Olivero) put the table below the fold: bring the rows into view.
+    await adminPage.waitForLoadState('networkidle');
+    await rows.nth(1).evaluate((el) => el.scrollIntoView({ block: 'center' }));
+    await adminPage.waitForTimeout(500); // let the layout settle (messages and placeholders above the table move it)
     const handle = rows.nth(2).locator('.crm-draggable');
     const from = (await handle.boundingBox())!;
     const top = (await rows.nth(0).boundingBox())!;
@@ -45,14 +49,14 @@ test.describe('Election positions (SearchKit list)', () => {
 
     await expect.poll(() => positionNames(id), { timeout: 15000 }).toEqual(['Gamma', 'Alpha', 'Beta']);
     await adminPage.reload();
-    await expect(adminPage.locator('tbody tr').first()).toContainText('Gamma');
+    await expect(adminPage.locator('crm-search-display-table tbody tr').first()).toContainText('Gamma');
   });
 
   test('a position name can be edited in place', async ({ adminPage }) => {
     const id = createElection(nm('Positions edit'));
     addPosition(id, 'Old name', 1);
     await adminPage.goto(listUrl(id));
-    const row = adminPage.locator('tbody tr').first();
+    const row = adminPage.locator('crm-search-display-table tbody tr').first();
     await row.locator('[data-field-name="name"] .crm-editable-enabled').click();
     await row.locator('input[type="text"]').fill('New name');
     await row.getByRole('button', { name: 'Save' }).click();
@@ -63,14 +67,14 @@ test.describe('Election positions (SearchKit list)', () => {
     const id = createElection(nm('Positions copy'));
     addPosition(id, 'Chair', 1);
     await adminPage.goto(listUrl(id));
-    await adminPage.locator('tbody tr', { hasText: 'Chair' }).getByRole('link', { name: 'Duplicate' }).click();
+    await adminPage.locator('crm-search-display-table tbody tr', { hasText: 'Chair' }).getByRole('link', { name: 'Duplicate' }).click();
     await adminPage.locator('.ui-dialog').getByRole('button', { name: 'Duplicate' }).click();
-    await expect(adminPage.locator('tbody tr', { hasText: 'Copy of Chair' })).toBeVisible();
+    await expect(adminPage.locator('crm-search-display-table tbody tr', { hasText: 'Copy of Chair' })).toBeVisible();
     expect(positionNames(id)).toEqual(['Chair', 'Copy of Chair']);
 
-    await adminPage.locator('tbody tr', { hasText: 'Copy of Chair' }).getByRole('link', { name: 'Delete' }).click();
+    await adminPage.locator('crm-search-display-table tbody tr', { hasText: 'Copy of Chair' }).getByRole('link', { name: 'Delete' }).click();
     await adminPage.locator('.ui-dialog').getByRole('button', { name: 'Delete' }).click();
-    await expect(adminPage.locator('tbody tr', { hasText: 'Copy of Chair' })).toHaveCount(0);
+    await expect(adminPage.locator('crm-search-display-table tbody tr', { hasText: 'Copy of Chair' })).toHaveCount(0);
     expect(positionNames(id)).toEqual(['Chair']);
   });
 
@@ -78,6 +82,7 @@ test.describe('Election positions (SearchKit list)', () => {
     // The rule is in the data layer, so inline edits, drag and drop and the API are all covered.
     const id = createElection(nm('Positions started'));
     const positionId = addPosition(id, 'Chair', 1);
+    addPosition(id, 'Treasurer', 2);
     startElection(id);
     const failure = (fn: () => void) => {
       try {
@@ -89,9 +94,9 @@ test.describe('Election positions (SearchKit list)', () => {
       return '';
     };
     expect(failure(() => civiApi4('ElectionPosition.update', { values: { name: 'Changed' }, where: [['id', '=', positionId]] }))).toContain('once election has been started');
-    expect(failure(() => civiApi4('ElectionPosition.update', { values: { sortorder: 9 }, where: [['id', '=', positionId]] }))).toContain('once election has been started');
+    expect(failure(() => civiApi4('ElectionPosition.update', { values: { sortorder: 2 }, where: [['id', '=', positionId]] }))).toContain('once election has been started');
     expect(failure(() => addPosition(id, 'Late', 2))).toContain('once election has been started');
     expect(failure(() => civiApi4('ElectionPosition.delete', { where: [['id', '=', positionId]] }))).toContain('once election has been started');
-    expect(positionNames(id)).toEqual(['Chair']);
+    expect(positionNames(id)).toEqual(['Chair', 'Treasurer']);
   });
 });

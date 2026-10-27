@@ -27,7 +27,7 @@ test.describe('Election candidates (SearchKit list)', () => {
     addNomination(chair, ids.Ada, { accepted: true, statement: 'Vote Ada' });
     addNomination(chair, ids.Bo, { accepted: false });
     await adminPage.goto(listUrl(election));
-    const rows = adminPage.locator('tbody tr');
+    const rows = adminPage.locator('crm-search-display-table tbody tr');
     await expect(rows).toHaveCount(2);
     await expect(rows.nth(0)).toContainText('Chair');
     await expect(rows.nth(0)).toContainText('Ada');
@@ -41,7 +41,7 @@ test.describe('Election candidates (SearchKit list)', () => {
     const election = createElection(nm('Cand edit'), { groupId });
     const nomination = addNomination(addPosition(election, 'Chair', 1), ids.Cy, { accepted: true, statement: 'Old words' });
     await adminPage.goto(listUrl(election));
-    const row = adminPage.locator('tbody tr').first();
+    const row = adminPage.locator('crm-search-display-table tbody tr').first();
     await row.locator('[data-field-name="comments"] .crm-editable-enabled').click();
     await row.locator('input[type="text"]').fill('New words from the administrator');
     await row.getByRole('button', { name: 'Save' }).click();
@@ -60,7 +60,7 @@ test.describe('Election candidates (SearchKit list)', () => {
     await adminPage.locator('.select2-result-label', { hasText: 'Di' }).first().click();
     await adminPage.getByLabel('Candidate statement').fill('Added by the board');
     await adminPage.getByRole('button', { name: 'Add Candidate' }).click();
-    await expect(adminPage.locator('tbody tr', { hasText: 'Di' })).toBeVisible();
+    await expect(adminPage.locator('crm-search-display-table tbody tr', { hasText: 'Di' })).toBeVisible();
     expect(nomineeNames(election).some((n) => n.includes('Di'))).toBe(true);
     const [nomination] = civiApi4<Array<{ id: number }>>('ElectionNomination.get', { select: ['id'], where: [['member_nominee', '=', ids.Di]] });
     expect(nominationFlags(nomination.id)).toMatchObject({ is_eligible_candidate: true, has_accepted_nomination: true, comments: 'Added by the board' });

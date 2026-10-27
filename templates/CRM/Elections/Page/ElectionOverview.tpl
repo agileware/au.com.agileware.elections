@@ -48,7 +48,7 @@
       <tbody>
         {foreach from=$turnout item=row}
           <tr>
-            <td>{$row.name}</td>
+            <td>{$row.name|escape}</td>
             <td>{$row.candidates}</td>
             <td>{if $row.ballots === NULL}<span class="description">{ts}Not shown: votes are anonymised{/ts}</span>{else}{$row.ballots}{/if}</td>
           </tr>
@@ -59,9 +59,28 @@
   </div>
   {/if}
 
+  <div class="election-overview-integrity">
+    <h3>{ts}Integrity{/ts}</h3>
+    <div class="messages {if $integrity.status == 'ok'}success{elseif $integrity.status == 'mismatch'}error{else}status{/if} no-popup election-integrity-{$integrity.status|escape}">
+      {$integrity.message|escape}
+    </div>
+    {if $auditRecent}
+    <table class="election-audit-recent">
+      <thead><tr><th>{ts}When{/ts}</th><th>{ts}Who{/ts}</th><th>{ts}What{/ts}</th></tr></thead>
+      <tbody>
+        {foreach from=$auditRecent item=entry}
+          <tr><td>{$entry.date|crmDate}</td><td>{if $entry.who}{$entry.who|escape}{else}{ts}System{/ts}{/if}</td><td>{$entry.action|escape}</td></tr>
+        {/foreach}
+      </tbody>
+    </table>
+    {/if}
+    <p class="description">{ts 1=$auditHead|truncate:16:''}Audit log fingerprint: %1... Note it down somewhere outside the website to be able to show later that nothing was removed from the log.{/ts}</p>
+  </div>
+
   <p class="election-overview-actions">
     <a class="button" href="{crmURL p='civicrm/elections/position-list' q='reset=1'}#/?eid={$election->id}"><span><i class="crm-i fa-list-ol" role="img" aria-hidden="true"></i> {ts}Positions{/ts}</span></a>
     <a class="button" href="{crmURL p='civicrm/elections/candidate-list' q='reset=1'}#/?eid={$election->id}"><span><i class="crm-i fa-users" role="img" aria-hidden="true"></i> {ts}Candidates{/ts}</span></a>
+    <a class="button" href="{crmURL p='civicrm/elections/audit-log' q='reset=1'}#/?eid={$election->id}"><span><i class="crm-i fa-shield" role="img" aria-hidden="true"></i> {ts}Audit log{/ts}</span></a>
     {if $hasResults}<a class="button" href="{crmURL p='civicrm/elections/result-list' q='reset=1'}#/?eid={$election->id}"><span><i class="crm-i fa-trophy" role="img" aria-hidden="true"></i> {ts}Results{/ts}</span></a>{/if}
     {if $canEdit}<a class="button" href="{crmURL p='civicrm/elections/create' q="eid=`$election->id`"}"><span><i class="crm-i fa-pencil" role="img" aria-hidden="true"></i> {ts}Edit settings{/ts}</span></a>{/if}
     <a class="button" href="{crmURL p='civicrm/elections/view' q="eid=`$election->id`"}"><span><i class="crm-i fa-eye" role="img" aria-hidden="true"></i> {ts}View as a voter{/ts}</span></a>
