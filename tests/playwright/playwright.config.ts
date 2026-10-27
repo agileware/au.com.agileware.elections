@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
+  globalSetup: './fixtures/global-setup.ts',
   testDir: './specs',
   // Election stages are time ordered, so specs that move the election between stages
   // are written as serial describe blocks. Files can still run in parallel.
