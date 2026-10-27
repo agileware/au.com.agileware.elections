@@ -517,7 +517,7 @@ ul#errorList {
  */
 .crm-container .election-btn.election-btn,
 .crm-container .crm-election-form-block-container button.crm-button.crm-button {
-    --election-btn-bg: var(--wp--preset--color--contrast, var(--color--primary-50, var(--cassiopeia-color-primary, var(--crm-primary-color, #333))));
+    --election-btn-bg: var(--wp--preset--color--contrast, var(--color--primary-40, var(--cassiopeia-color-primary, var(--crm-primary-color, #333))));
     --election-btn-color: var(--wp--preset--color--base, #fff);
     display: inline-flex;
     align-items: center;
@@ -541,6 +541,8 @@ ul#errorList {
     cursor: pointer;
     box-shadow: none;
 }
+.crm-container .messages a.election-btn.election-btn,
+.crm-container .messages a.election-btn.election-btn:hover,
 .crm-container .election-btn.election-btn:visited {
     color: var(--election-btn-color);
 }
