@@ -25,7 +25,7 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
       ]);
     }
     catch (CRM_Core_Exception $e) {
-      throwAccessDeniedException($this, $e->getMessage());
+      throwAccessDeniedException($this, E::ts('You are not authorized to access this page.'));
       parent::run();
       return;
     }

@@ -38,7 +38,7 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
         'return' => ['has_accepted_nomination', 'election_position_id.name', 'has_rejected_nomination', 'election_position_id.election_id.name', 'election_position_id.election_id'],
       ]);
     } catch (CRM_Core_Exception $e) {
-      throwAccessDeniedException($this, $e->getMessage());
+      throwAccessDeniedException($this, E::ts('You are not authorized to access this page.'));
       return;
     }
 
