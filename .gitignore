@@ -1,1 +1,7 @@
 .idea
+
+# Playwright
+tests/playwright/node_modules/
+tests/playwright/playwright-report/
+tests/playwright/test-results/
+tests/playwright/fixtures/.generated/
