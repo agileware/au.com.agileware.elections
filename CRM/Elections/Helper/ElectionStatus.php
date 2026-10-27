@@ -108,6 +108,10 @@ class CRM_Elections_Helper_ElectionStatus {
       ];
     }
 
+    $election->assignDisplayOptions();
+    if ($election->isNominationsInProgress && !$election->onlineNominations) {
+      return ['type' => 'info', 'message' => E::ts('The candidates for this election are chosen by the organisers. Anyone chosen is asked to accept, and the candidates are listed below once they are announced.'), 'actions' => []];
+    }
     if ($election->isNominationsInProgress) {
       if ($state['canNominate']) {
         return ['type' => 'action', 'message' => E::ts('Nominations are open until %1. Nominate someone, or second a nomination that needs a second.', [1 => $date($election->nomination_end_date)]), 'actions' => [$link(E::ts('Submit Nomination'), 'civicrm/elections/nominations/create')]];
@@ -289,7 +293,8 @@ class CRM_Elections_Helper_ElectionStatus {
       return ['stage' => 'advertise', 'stageLabel' => E::ts('Candidates announced'), 'line' => E::ts('Voting will open on %1', [1 => $date($election['voting_start_date'])]), 'button' => E::ts('View the Candidates')];
     }
     if (!empty($election['isNominationsInProgress'])) {
-      return ['stage' => 'nominations', 'stageLabel' => E::ts('Nominations open'), 'line' => E::ts('Nominations will close on %1', [1 => $date($election['nomination_end_date'])]), 'button' => E::ts('View and submit Nominations')];
+      $online = !array_key_exists('allow_online_nominations', $election) || $election['allow_online_nominations'] === NULL || $election['allow_online_nominations'] === '' || !empty($election['allow_online_nominations']);
+      return ['stage' => 'nominations', 'stageLabel' => E::ts('Nominations open'), 'line' => $online ? E::ts('Nominations will close on %1', [1 => $date($election['nomination_end_date'])]) : E::ts('The organisers are choosing the candidates'), 'button' => $online ? E::ts('View and submit Nominations') : E::ts('View the Nominations')];
     }
     if (!empty($election['hasNominationsStarted'])) {
       return ['stage' => 'advertise', 'stageLabel' => E::ts('Nominations closed'), 'line' => E::ts('Candidates will be advertised from %1', [1 => $date($election['advertise_candidates_date'])]), 'button' => E::ts('View the Nominations')];

@@ -2,7 +2,9 @@
     {if !$election->isNominationsStarted}
         <p>{ts}Nominations have not yet started for this election. The positions that will be open for nomination are listed below.{/ts}</p>
     {/if}
-    {if $election->isNominationsInProgress}
+    {if $election->isNominationsInProgress and !$election->onlineNominations}
+        <p>{ts}The candidates for this election are chosen by the organisers.{/ts}</p>
+    {elseif $election->isNominationsInProgress}
 			<p>{ts}This Election is currently in the Nominations phase.{/ts}</p>
 			<p>{ts}You can submit nominations for this Election using the button below, and see existing nominations for each position. If you have been nominated for any positions, you can see these and have the option of withdrawing them. Nominations that require one or persons to second them will also be marked as such – press the "Need second" button to add your nominations{/ts}</p>
     {/if}

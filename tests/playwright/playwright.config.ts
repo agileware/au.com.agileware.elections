@@ -98,10 +98,17 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
+      // An election whose organisers choose the candidates.
+      name: 'admin-managed',
+      testMatch: /council\/admin-managed/,
+      dependencies: ['referendum'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       // Pictures of every page (SCREENS=1 only).
       name: 'screens',
       testMatch: /frontend\/screens/,
-      dependencies: ['referendum'],
+      dependencies: ['admin-managed'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],

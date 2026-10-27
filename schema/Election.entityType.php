@@ -308,6 +308,15 @@ return [
       'add' => '5.3',
       'usage' => ['export'],
     ],
+    'allow_online_nominations' => [
+      'title' => E::ts('Allow Online Nominations'),
+      'sql_type' => 'boolean',
+      'input_type' => 'CheckBox',
+      'description' => E::ts('Let people nominate and second on the website. Off means the organisers add the candidates.'),
+      'add' => '2.0',
+      'default' => TRUE,
+      'usage' => ['export'],
+    ],
     'send_emails' => [
       'title' => E::ts('Send Emails'),
       'sql_type' => 'boolean',

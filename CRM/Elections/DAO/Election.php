@@ -29,6 +29,7 @@
  * @property string $voting_method
  * @property string $allowed_groups
  * @property bool|string $send_emails
+ * @property bool|string $allow_online_nominations
  * @property string $nomination_groups
  * @property string $candidate_groups
  * @property string $created_at
