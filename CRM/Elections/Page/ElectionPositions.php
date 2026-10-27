@@ -15,33 +15,14 @@ class CRM_Elections_Page_ElectionPositions extends CRM_Elections_Page_Base {
       parent::run();
       return;
     }
-    $this->election = findElectionById($this->eId);
-
-    $this->isElectionAdmin = isElectionAdmin();
-    $canEdit = $this->election->canEdit();
-    $this->isElectionRunning = ($canEdit !== TRUE) ? TRUE : FALSE;
-
-    if (!$this->isElectionAdmin && !$this->election->isVisible) {
+    if (!isElectionAdmin()) {
       throwAccessDeniedPage($this);
       parent::run();
       return;
     }
-
-    $this->assign('isElectionAdmin', $this->isElectionAdmin);
-    $this->assign('isElectionRunning', $this->isElectionRunning);
-    $this->assign('election', $this->election);
-
-    CRM_Utils_System::setTitle(E::ts('Election Positions for %1', [1 => $this->election->name]));
-
-    $electionPositions = civicrm_api3('ElectionPosition', 'get', [
-      'election_id' => $this->eId,
-      'options'     => ['limit' => 0, 'sort' => 'sortorder ASC'],
-      'sequential'  => TRUE,
-    ]);
-
-    $this->assign('positions', $electionPositions['values']);
-
-    parent::run();
+    // The positions list is a SearchKit page (drag to reorder, edit in place). This route is kept so
+    // existing links and redirects keep working.
+    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/position-list', 'reset=1', FALSE, '/?eid=' . (int) $this->eId));
   }
 
   public static function reOrder() {

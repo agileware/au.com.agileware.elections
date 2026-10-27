@@ -50,3 +50,10 @@ export function moveToStage(stage: Stage): void {
 export function countRows(entity: string, where: unknown[][] = []): number {
   return civiApi4<any[]>(`${entity}.get`, { select: ['id'], where, limit: 0 }).length;
 }
+
+/** Run SQL straight against the database, for clean-up that the election rules would otherwise block. */
+export function civiSql(sql: string, params: Record<string, string | number> = {}): void {
+  const typed = Object.fromEntries(Object.entries(params).map(([k, v]) => [k, [v, typeof v === 'number' ? 'Integer' : 'String']]));
+  const php = `CRM_Core_DAO::executeQuery(${JSON.stringify(sql)}, json_decode(${JSON.stringify(JSON.stringify(typed))}, TRUE));`;
+  run(['cv', 'ev', php]);
+}

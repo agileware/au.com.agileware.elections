@@ -1,46 +1,8 @@
 import { test, expect, civiAdminUrl, expectNoPhpOutput } from '../../fixtures/base';
 import { civiApi4 } from '../../fixtures/civi';
+import { addPosition, createElection, isActive, nm, positionNames, removeRunData, RUN } from '../../fixtures/data';
 
-// Each run uses its own names so a re-run never meets rows left by an earlier one.
-const RUN = Date.now().toString(36);
-const nm = (base: string) => `PW ${base} ${RUN}`;
-
-const day = (n: number) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 19).replace('T', ' ');
-
-function createElection(name: string): number {
-  const [created] = civiApi4<Array<{ id: number }>>('Election.create', {
-    values: {
-      name,
-      is_visible: false,
-      is_deleted: false,
-      visibility_start_date: day(-5),
-      nomination_start_date: day(1),
-      nomination_end_date: day(3),
-      advertise_candidates_date: day(4),
-      voting_start_date: day(5),
-      voting_end_date: day(9),
-      result_date: day(10),
-      visibility_end_date: day(30),
-      required_nominations: 2,
-    },
-  });
-  return created.id;
-}
-
-function addPosition(electionId: number, name: string, order: number) {
-  civiApi4('ElectionPosition.create', { values: { election_id: electionId, name, quantity: 1, sortorder: order } });
-}
-
-function isActive(electionId: number): boolean {
-  return civiApi4<Array<{ is_visible: boolean }>>('Election.get', { select: ['is_visible'], where: [['id', '=', electionId]] })[0].is_visible;
-}
-
-test.afterAll(() => {
-  // Remove what this run created.
-  civiApi4('ElectionPosition.delete', { where: [['election_id.name', 'LIKE', `PW % ${RUN}`]] });
-  civiApi4('Election.delete', { where: [['name', 'LIKE', `PW % ${RUN}`]] });
-  civiApi4('Election.delete', { where: [['name', 'LIKE', `Copy of PW % ${RUN}`]] });
-});
+test.afterAll(() => removeRunData());
 
 test.describe('Manage Elections (SearchKit list)', () => {
   test('lists every election with its dates and position count', async ({ adminPage }) => {

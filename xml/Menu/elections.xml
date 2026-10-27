@@ -97,6 +97,12 @@
     <access_arguments>administer Elections</access_arguments>
   </item>
   <item>
+    <path>civicrm/elections/positions/duplicate</path>
+    <page_callback>CRM_Elections_Form_DuplicateElectionPosition</page_callback>
+    <title>Duplicate Position</title>
+    <access_arguments>administer Elections</access_arguments>
+  </item>
+  <item>
     <path>civicrm/elections/summary</path>
     <page_callback>CRM_Elections_Page_ElectionSummary</page_callback>
     <title>ElectionSummary</title>
