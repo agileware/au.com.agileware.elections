@@ -100,3 +100,38 @@ test.describe('Election positions (SearchKit list)', () => {
     expect(positionNames(id)).toEqual(['Chair', 'Treasurer']);
   });
 });
+
+test.describe('Referendum questions', () => {
+  test('a question is added with its wording, threshold and quorum, and the position fields give way to the question fields', async ({ adminPage }) => {
+    const id = createElection(nm('Positions question'));
+    await adminPage.goto(civiAdminUrl('civicrm/elections/positions/create', { reset: 1, eid: id }));
+    await expect(adminPage.locator('#quantity')).toBeVisible();
+    await expect(adminPage.locator('#yes_label')).toBeHidden();
+
+    await adminPage.locator('#position_type').selectOption('referendum');
+    await expect(adminPage.locator('#quantity')).toBeHidden();
+    await expect(adminPage.locator('#yes_label')).toBeVisible();
+    await adminPage.locator('#name').fill('Adopt the new constitution?');
+    await adminPage.locator('#sortorder').fill('1');
+    await adminPage.locator('#yes_label').fill('For');
+    await adminPage.locator('#no_label').fill('Against');
+    await adminPage.locator('#abstain_label').fill('Abstain');
+    await adminPage.locator('#pass_threshold_choice').selectOption('66.67');
+    await adminPage.locator('#quorum_percent').fill('40');
+    await adminPage.locator('#resolution_text').fill('That the constitution be replaced.');
+    await adminPage.getByRole('button', { name: 'Create' }).click();
+
+    await expect.poll(() => civiApi4<any[]>('ElectionPosition.get', { select: ['position_type', 'pass_threshold', 'quorum_percent', 'resolution_text'], where: [['election_id', '=', id]] }).length).toBe(1);
+    const [position] = civiApi4<any[]>('ElectionPosition.get', { select: ['id', 'position_type', 'pass_threshold', 'quorum_percent', 'resolution_text'], where: [['election_id', '=', id]] });
+    expect(position.position_type).toBe('referendum');
+    expect(Number(position.pass_threshold)).toBeCloseTo(66.67);
+    expect(Number(position.quorum_percent)).toBe(40);
+    const options = civiApi4<any[]>('ElectionOption.get', { select: ['kind', 'label'], where: [['election_position_id', '=', position.id]], orderBy: { weight: 'ASC' } });
+    expect(options.map((o) => `${o.kind}:${o.label}`)).toEqual(['yes:For', 'no:Against', 'abstain:Abstain']);
+
+    // The list says which row is a question.
+    await adminPage.goto(listUrl(id));
+    await expect(adminPage.locator('crm-search-display-table tbody tr').first()).toContainText('Referendum question');
+    await expectNoPhpOutput(adminPage);
+  });
+});

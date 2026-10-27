@@ -27,3 +27,7 @@ Some elections are counted by most votes instead of ranking. The ballot then has
 ## Writing in a candidate
 
 If a position allows write-ins, a **Write in a candidate** box appears under its candidates. Type at least three letters of a person's name and pick them from the list; in a ranked choice election give them a rank like any other candidate, and use **Add another write-in** if you have more places. The person is told straight away and must accept before voting closes. Your vote for them counts only if they accept; if they do not, it is dropped and your ballot moves on to your next choice. If you vote again later you will see them on the ballot once they have accepted.
+
+## Questions
+
+Some elections also ask yes or no questions. Each appears as a box with the question, the full resolution if there is one, and a button for each answer (for example For, Against and Abstain). Choose one, or leave it unanswered. Your answer is shown in the review step with the rest of your vote.

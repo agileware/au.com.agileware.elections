@@ -17,3 +17,7 @@ Each position's results show a status describing how the result was reached:
 - **The number of candidates remaining equals the number of position holders**: enough candidates were eliminated during the count that all remaining candidates fill the available seats.
 - **Not all seats were filled for this position**: there were not enough eligible candidates to fill every seat for the position.
 - **There are not enough candidates for this position to generate a result**: no candidates had accepted their nomination for this position.
+
+## Questions
+
+A yes or no question shows **Passed**, **Not passed** (including a tie) or **No quorum**, with the resolution. Counts are not shown.

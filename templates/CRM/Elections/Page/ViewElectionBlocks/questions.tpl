@@ -4,8 +4,8 @@
   {foreach from=$questions item=question}
     <div class="election-question">
       <h3>{$question.name|escape}</h3>
-      {if $question.resolution_text}<p class="election-question-resolution">{$question.resolution_text|escape|nl2br}</p>{/if}
-      {if $question.description}<p>{$question.description|escape|nl2br}</p>{/if}
+      {if $question.resolution_text|default:''}<p class="election-question-resolution">{$question.resolution_text|default:''|escape|nl2br}</p>{/if}
+      {if $question.description|default:''}<p>{$question.description|default:''|escape|nl2br}</p>{/if}
       <p class="election-question-choices">{ts}You can choose:{/ts} {foreach from=$question.options item=option name=choices}{$option.label|escape}{if !$smarty.foreach.choices.last}, {/if}{/foreach}</p>
     </div>
   {/foreach}
