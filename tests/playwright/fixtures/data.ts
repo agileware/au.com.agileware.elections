@@ -4,7 +4,9 @@ import { civiApi4, civiSql } from './civi';
  * Throwaway elections for the back end specs. Every run uses its own names (suffix RUN) so a
  * re-run never meets rows left by an earlier one, and removeRunData() clears what it made.
  */
-export const RUN = Date.now().toString(36);
+// Unique per worker process: two workers can start in the same millisecond, and one worker's
+// clean-up must never remove another worker's data.
+export const RUN = `${Date.now().toString(36)}${process.pid.toString(36)}`;
 
 export const nm = (base: string) => `PW ${base} ${RUN}`;
 
