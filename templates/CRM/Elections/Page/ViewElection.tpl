@@ -9,10 +9,7 @@
 
     <p>{$election->description|escape|nl2br}</p>
 
-    {include file="CRM/Elections/Page/ElectionHelpText.tpl"}
-
-    {include file="CRM/Elections/Page/ElectionActions.tpl"}
-    {include file="CRM/Elections/Page/ElectionNotificationMessages.tpl"}
+    {include file="CRM/Elections/Page/ElectionStatus.tpl"}
 
     {if !$election->isNominationsStarted}
         {include file="CRM/Elections/Page/ViewElectionBlocks/positions.tpl"}

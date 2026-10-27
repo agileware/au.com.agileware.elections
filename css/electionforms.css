@@ -513,15 +513,16 @@ ul#errorList {
  * Buttons. The election's action links are plain <a class="election-btn"> elements (no JavaScript,
  * keyboard and screen reader friendly). Colours follow the active CMS theme where it publishes them
  * (WordPress block themes, Drupal Olivero, Joomla Cassiopeia) and fall back to CiviCRM's own button
- * colour, so no site customisation is needed. Override --election-btn-* to brand them.
+ * colour, so no site customisation is needed. Set --election-brand-bg (and --election-brand-color) to brand them.
  */
+.crm-container {
+    /* A site can set --election-brand-bg (and --election-brand-color) anywhere above this to brand the election. */
+    --election-btn-bg: var(--election-brand-bg, var(--wp--preset--color--contrast, var(--color--primary-40, var(--cassiopeia-color-primary, var(--crm-primary-color, #333)))));
+    --election-btn-color: var(--election-brand-color, var(--wp--preset--color--base, #fff));
+    --election-btn-hover-bg: color-mix(in srgb, var(--election-btn-bg) 82%, #000);
+}
 .crm-container .election-btn.election-btn,
 .crm-container .crm-election-form-block-container button.crm-button.crm-button {
-    --election-btn-bg: var(--wp--preset--color--contrast, var(--color--primary-40, var(--cassiopeia-color-primary, var(--crm-primary-color, #333))));
-    --election-btn-color: var(--wp--preset--color--base, #fff);
-    --election-btn-hover-bg: color-mix(in srgb, var(--election-btn-bg) 82%, #000);
-    /* Where the browser can, the text colour is worked out from the button colour (white on dark, black on
-       light), so any theme colour, and any colour a site picks, stays readable. */
     color: var(--election-btn-color);
     display: inline-flex;
     align-items: center;
@@ -694,4 +695,371 @@ ul#errorList {
 }
 .election-audit-recent th {
     text-align: left;
+}
+
+/* Election page: stage stepper and "what you can do now" */
+.election-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+.election-stepper-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 0;
+    margin: 1rem 0 0.25rem;
+    padding: 0;
+    list-style: none;
+}
+.election-step {
+    position: relative;
+    display: flex;
+    flex: 1 1 10rem;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+    padding: 0.5rem 0.75rem 0.25rem 1.75rem;
+    border-top: 3px solid var(--election-border, rgba(0, 0, 0, 0.18));
+}
+.election-step-marker {
+    position: absolute;
+    top: 0.65rem;
+    left: 0.4rem;
+    width: 0.8rem;
+    height: 0.8rem;
+    box-sizing: border-box;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    opacity: 0.55;
+}
+.election-step-label {
+    font-weight: 600;
+}
+.election-step-date {
+    font-size: 0.9em;
+    opacity: 0.85;
+}
+.election-step-passed .election-step-marker {
+    background: currentColor;
+}
+.election-step-passed {
+    border-top-color: var(--election-btn-bg, currentColor);
+}
+.election-step-current {
+    border-top-color: var(--election-btn-bg, currentColor);
+}
+.election-step-current .election-step-marker {
+    opacity: 1;
+    background: var(--election-btn-bg, currentColor);
+    border-color: var(--election-btn-bg, currentColor);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--election-btn-bg, currentColor) 25%, transparent);
+}
+.election-stepper-note {
+    margin: 0 0 1rem;
+    font-size: 0.85em;
+}
+.election-next-action {
+    margin: 0 0 1.5rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--election-border, rgba(0, 0, 0, 0.18));
+    border-left: 6px solid var(--election-btn-bg, currentColor);
+    border-radius: var(--election-radius, 4px);
+}
+.election-next-message {
+    margin: 0 0 0.75rem;
+    font-size: 1.05em;
+}
+.election-next-action .election-next-buttons {
+    margin: 0;
+}
+.election-next-action .election-next-message:last-child {
+    margin-bottom: 0;
+}
+@media only screen and (max-width: 600px) {
+    .election-stepper-list {
+        flex-direction: column;
+    }
+    .election-step {
+        flex-basis: auto;
+        border-top: 0;
+        border-left: 3px solid var(--election-border, rgba(0, 0, 0, 0.18));
+        padding-left: 1.5rem;
+    }
+    .election-step-marker {
+        left: -0.5rem;
+        background: var(--crm-container-bg-color, #fff);
+    }
+    .election-step-passed .election-step-marker {
+        background: currentColor;
+    }
+    .election-step-passed,
+    .election-step-current {
+        border-left-color: var(--election-btn-bg, currentColor);
+    }
+}
+
+/* Election list: cards */
+.election-card-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    gap: 1.25rem;
+    margin: 0;
+}
+.election-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 1.25rem;
+    border: 1px solid var(--election-border, rgba(0, 0, 0, 0.18));
+    border-top: 6px solid var(--election-card-accent, var(--election-btn-bg, currentColor));
+    border-radius: var(--election-radius, 4px);
+    overflow-wrap: anywhere;
+}
+.election-card-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+}
+.crm-container .election-card-title {
+    flex: 1 1 10rem;
+    margin: 0;
+    padding: 0;
+    background: none;
+    font-size: 1.25rem;
+    line-height: 1.25;
+    text-align: left;
+}
+.election-badge {
+    flex: 0 0 auto;
+    padding: 0.15rem 0.7rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: 0.85em;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.election-badge-nominations,
+.election-badge-voting {
+    background: color-mix(in srgb, var(--election-btn-bg, currentColor) 12%, transparent);
+}
+.election-card-description,
+.election-card-line {
+    margin: 0;
+}
+.election-card-actions {
+    margin: 0;
+    margin-top: auto;
+    padding-top: 0.5rem;
+}
+
+/* Ballot: rank checks and the review dialog */
+.election-rank-status {
+    margin: 0.25rem 0 0.75rem;
+    font-size: 0.9em;
+}
+.election-rank-status.election-rank-problem {
+    color: #b3261e;
+    font-weight: 600;
+}
+.election-review-dialog {
+    box-sizing: border-box;
+    width: min(40rem, calc(100vw - 2rem));
+    max-height: calc(100vh - 2rem);
+    padding: 1.5rem;
+    overflow: auto;
+    border: 1px solid var(--election-border, rgba(0, 0, 0, 0.3));
+    border-radius: var(--election-radius, 4px);
+    background: var(--crm-container-bg-color, Canvas);
+    color: var(--crm-container-text-color, CanvasText);
+}
+.election-review-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+.election-review-dialog h2 {
+    margin-top: 0;
+}
+.election-review-position h3 {
+    margin: 1rem 0 0.25rem;
+    font-size: 1.05rem;
+}
+.election-review-position ol {
+    margin: 0.25rem 0 0;
+    padding-left: 1.5rem;
+}
+.election-review-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 1.5rem 0 0;
+}
+.election-review-confirm,
+.election-review-back {
+    min-height: 2.75rem;
+    padding: 0.5rem 1.5rem;
+    border: 2px solid var(--election-btn-bg, #333);
+    border-radius: var(--election-radius, 4px);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+.election-review-confirm {
+    background: var(--election-btn-bg, #333);
+    color: var(--election-btn-color, #fff);
+}
+.election-review-back {
+    background: transparent;
+    color: inherit;
+}
+@supports (color: lch(from red l c h)) {
+    .election-review-confirm {
+        color: lch(from var(--election-btn-bg, #333) clamp(0, (49.5 - l) * 1000, 100) 0 0);
+    }
+}
+
+/* Election page: the person's own ballot */
+.election-your-vote {
+    margin: 0 0 1.5rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--election-border, rgba(0, 0, 0, 0.18));
+    border-radius: var(--election-radius, 4px);
+}
+.crm-container .election-your-vote-title {
+    margin: 0 0 0.25rem;
+    padding: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    text-align: left;
+}
+.election-your-vote-note {
+    margin: 0 0 0.75rem;
+    font-size: 0.9em;
+}
+.election-your-vote-positions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+    gap: 0.75rem 1.5rem;
+}
+.election-your-vote-position h3 {
+    margin: 0 0 0.25rem;
+    padding: 0;
+    font-size: 1rem;
+    background: none;
+}
+.election-your-vote-position ol {
+    margin: 0;
+    padding-left: 1.4rem;
+}
+
+/* Election page: your nominations */
+.election-my-nominations {
+    margin: 0 0 1.5rem;
+}
+.crm-container .election-my-nominations-title {
+    margin: 0 0 0.5rem;
+    padding: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    text-align: left;
+}
+.election-my-nomination-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.election-my-nomination {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--election-border, rgba(0, 0, 0, 0.18));
+    border-radius: var(--election-radius, 4px);
+}
+.election-my-nomination-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem 0.75rem;
+}
+.election-chip {
+    padding: 0.1rem 0.6rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: 0.85em;
+}
+.election-chip-respond {
+    font-weight: 600;
+}
+.election-my-nomination-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.75rem 0 0;
+}
+/* The quiet button: the same shape, outlined, for the choice that gives something up. */
+.crm-container .election-btn.election-btn.election-btn-quiet {
+    background: transparent;
+    color: var(--election-btn-bg);
+}
+.crm-container .election-btn.election-btn.election-btn-quiet:hover,
+.crm-container .election-btn.election-btn.election-btn-quiet:focus-visible {
+    background: color-mix(in srgb, var(--election-btn-bg) 12%, transparent);
+    color: var(--election-btn-bg);
+}
+
+/* Results */
+.election-result-position {
+    margin-top: 1.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--election-border, rgba(0, 0, 0, 0.18));
+}
+.election-winner-badge {
+    display: inline-block;
+    margin-top: 0.25rem;
+    padding: 0.1rem 0.7rem;
+    border: 1px solid var(--election-btn-bg, currentColor);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--election-btn-bg, currentColor) 12%, transparent);
+    font-size: 0.85em;
+    font-weight: 600;
+}
+.election-winner-badge-tie {
+    background: transparent;
+    font-weight: normal;
+}
+
+/* Printing: the content only, kept together, no buttons */
+@media print {
+    .crm-container .election-btn,
+    .election-review-dialog,
+    .election-stepper-note a,
+    .election-card-timezone {
+        display: none !important;
+    }
+    .election-card,
+    .election-my-nomination,
+    .election-result-position,
+    .crm-election-nominated-block,
+    .election-step {
+        break-inside: avoid;
+    }
+    .crm-election-nominated-block img,
+    .candidate-details-left-block img {
+        width: 3cm;
+    }
+    .election-next-action,
+    .election-your-vote,
+    .election-card {
+        border-color: #000;
+    }
 }

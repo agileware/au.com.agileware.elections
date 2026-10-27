@@ -17,7 +17,7 @@
     </center>
 
     {foreach from = $positions key = k item = position}
-        <div class="crm-election-position-result-block">
+        <div class="crm-election-position-result-block election-result-position">
             <h3>{if $position.quantity > 1}{ts 1=$position.name}Winners for %1{/ts}{else}{ts 1=$position.name}Winner for %1{/ts}{/if}</h3>
             <span class="winner-type-label">
                 {include file="CRM/Elections/Page/PositionResultTypeMessage.tpl"}
@@ -37,7 +37,8 @@
                                             <div class="crm-election-nominated-block">
                                                 {assign var='profilePicUrl' value=$position.candidates.$member.$memberdisplayimage}
                                                 {if $election->showPhotos}<img src="{$profilePicUrl|escape}" alt="" />{/if}
-                                                {$position.candidates.$member.$memberdisplayname|escape}<br>
+                                                {$position.candidates.$member.$memberdisplayname|escape}
+                                                {if $position.result_status == $resultStatuses.results_no_majority}<span class="election-winner-badge election-winner-badge-tie">{ts}Tied{/ts}</span>{else}<span class="election-winner-badge">{ts}Winner{/ts}</span>{/if}
                                             </div>
                                         </a>
                                     </div><!-- ending of election-positions-rank-block -->

@@ -10,7 +10,7 @@ test.describe('election front end (nominations stage)', () => {
   test('a voter sees the election, its six roles and the nomination button', async ({ personaGoto }) => {
     const page = await personaGoto('V01', 'civicrm/elections/view');
     await expect(page.getByText('Welcome, Voter 01.')).toBeVisible();
-    await expect(page.getByText('This Election is currently in the Nominations phase.')).toBeVisible();
+    await expect(page.getByText(/Nominations are open until/)).toBeVisible();
     await expect(page.getByRole('link', { name: 'Submit Nomination' })).toBeVisible();
     for (const role of ['President', 'Secretary', 'Treasurer', 'Council Member 1', 'Council Member 2', 'Council Member 3']) {
       await expect(page.getByRole('heading', { name: `Nominations for ${role}` })).toBeVisible();

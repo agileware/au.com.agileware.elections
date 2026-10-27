@@ -106,7 +106,31 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
       }
     }
 
+    if (!$this->election->has_results_generated) {
+      $this->assignStatus();
+    }
+
     parent::run();
+  }
+
+  /**
+   * The stage stepper and the "what you can do now" sentence for the person looking.
+   */
+  private function assignStatus() {
+    $contactId = CRM_Elections_Helper_Eligibility::getActingContactId();
+    $checksum = CRM_Core_Smarty::singleton()->getTemplateVars('checksum_query');
+    $voting = $this->getUserVotingVariables($this->election->isVotingStarted, $this->eId);
+    $this->assign('electionSteps', CRM_Elections_Helper_ElectionStatus::steps($this->election));
+    $this->assign('myNominations', CRM_Elections_Helper_ElectionStatus::ownNominations($this->election, $contactId, $checksum['query'] ?? sprintf('eid=%d', $this->eId)));
+    // The person's own ballot while voting is open (a receipt of what was recorded).
+    $this->assign('ownBallot', ($this->election->isVotingStarted && !$this->election->isVotingEnded && $voting['has_user_already_voted']) ? CRM_Elections_Helper_ElectionStatus::ownBallot($this->election, $contactId) : []);
+    $this->assign('electionNextAction', CRM_Elections_Helper_ElectionStatus::nextAction($this->election, $contactId, $checksum['query'] ?? sprintf('eid=%d', $this->eId), [
+      'canNominate' => (bool) isLoggedInMemberAllowedToVote($this->eId),
+      'canVote' => (bool) isLoggedInMemberAllowedToVote($this->eId),
+      'hasVoted' => (bool) $voting['has_user_already_voted'],
+      'voteDate' => $voting['user_vote_date'],
+      'allowedToChangeVote' => (bool) $voting['is_user_allowed_to_vote'],
+    ]));
   }
 
   private function assignPositions() {

@@ -27,7 +27,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: /council\/|security\/|frontend\/(layout|accessibility|screens)/,
+      testIgnore: /council\/|security\/|frontend\/(layout|election-page|accessibility|screens)/,
       use: { ...devices['Desktop Chrome'] },
     },
     // The specs below move the one shared election through its stages (nominations, advertise, voting,
@@ -40,9 +40,15 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
+      name: 'election-page',
+      testMatch: /frontend\/election-page/,
+      dependencies: ['layout'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       name: 'accessibility',
       testMatch: /frontend\/accessibility/,
-      dependencies: ['layout'],
+      dependencies: ['election-page'],
       use: { ...devices['Desktop Chrome'] },
     },
     {
