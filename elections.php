@@ -56,6 +56,35 @@ function elections_civicrm_enable() {
  * API, or an inline edit in a SearchKit list.
  */
 function elections_civicrm_pre($op, $objectName, $id, &$params) {
+  if ($objectName === 'ElectionPosition' && in_array($op, ['create', 'edit', 'delete'], TRUE)) {
+    $changesThePosition = TRUE;
+    if ($op === 'edit' && $id) {
+      // Writing a result (the status of the count) is not a change to the position itself.
+      $current = CRM_Core_DAO::executeQuery('SELECT name, quantity, sortorder, description, election_id FROM civicrm_election_position WHERE id = %1', [1 => [$id, 'Positive']]);
+      $current->fetch();
+      $changesThePosition = FALSE;
+      foreach (['name', 'quantity', 'sortorder', 'description', 'election_id'] as $field) {
+        if (array_key_exists($field, (array) $params) && (string) $params[$field] !== (string) $current->$field) {
+          $changesThePosition = TRUE;
+        }
+      }
+    }
+    if ($changesThePosition) {
+      $electionId = $params['election_id'] ?? ($id ? CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_ElectionPosition', $id, 'election_id') : NULL);
+      if ($electionId) {
+        CRM_Elections_BAO_ElectionPosition::assertCanChange($electionId);
+      }
+      // Moving a position (drag and drop sets its order to where it was dropped): make room by
+      // shifting the others, so every position keeps its own place.
+      if ($op === 'edit' && $id && isset($params['sortorder']) && $params['sortorder'] !== '') {
+        $oldOrder = (int) $current->sortorder;
+        $newOrder = (int) $params['sortorder'];
+        if ($oldOrder !== $newOrder) {
+          CRM_Utils_Weight::updateOtherWeights('CRM_Elections_DAO_ElectionPosition', $oldOrder, $newOrder, ['election_id' => (int) $current->election_id], 'sortorder');
+        }
+      }
+    }
+  }
   if ($objectName === 'Election' && $op === 'edit' && $id && !empty($params['is_visible'])) {
     $isVisibleNow = CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $id, 'is_visible');
     if (!$isVisibleNow) {

@@ -1,0 +1,7 @@
+<div af-fieldset="">
+  <p>
+    <a class="af-button btn btn-default" crm-icon="fa-arrow-left" ng-href="{{ crmUrl('civicrm/elections/manage') }}">{{:: ts('Back to Manage Elections') }}</a>
+    <a class="af-button btn btn-primary" crm-icon="fa-plus" ng-href="{{ crmUrl('civicrm/elections/positions/create', {eid: routeParams.eid}) }}">{{:: ts('Add Position') }}</a>
+  </p>
+  <crm-search-display-table search-name="ElectionPositions" display-name="ElectionPositions_Table_1" filters="{election_id: routeParams.eid}"></crm-search-display-table>
+</div>

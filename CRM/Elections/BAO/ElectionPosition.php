@@ -3,6 +3,47 @@ use CRM_Elections_ExtensionUtil as E;
 
 class CRM_Elections_BAO_ElectionPosition extends CRM_Elections_DAO_ElectionPosition {
 
+  /**
+   * Positions can only be added, changed, reordered or deleted before the election starts
+   * (or while it is inactive). Applies to every write path, including SearchKit inline edits
+   * and drag and drop reordering.
+   *
+   * @param int $electionId
+   *
+   * @throws CRM_Core_Exception
+   */
+  public static function assertCanChange($electionId) {
+    $election = findElectionById($electionId, FALSE);
+    if ($election->is_deleted) {
+      throw new CRM_Core_Exception(E::ts('Election position cannot be added/modified for deleted election.'));
+    }
+    if ($election->isNominationsStarted && $election->is_visible == 1) {
+      throw new CRM_Core_Exception(E::ts('Election position cannot be added/modified once election has been started.'));
+    }
+  }
+
+  /**
+   * Copy a position to the end of its election's list.
+   *
+   * @param int $positionId
+   * @param string|null $name
+   *
+   * @return array
+   * @throws CRM_Core_Exception
+   */
+  public static function duplicate($positionId, $name = NULL) {
+    $source = civicrm_api3('ElectionPosition', 'getsingle', ['id' => $positionId]);
+    $last = (int) CRM_Core_DAO::singleValueQuery('SELECT MAX(sortorder) FROM civicrm_election_position WHERE election_id = %1', [1 => [$source['election_id'], 'Positive']]);
+    $copy = civicrm_api3('ElectionPosition', 'create', [
+      'election_id' => $source['election_id'],
+      'name' => $name ?: E::ts('Copy of %1', [1 => $source['name']]),
+      'quantity' => $source['quantity'] ?? 1,
+      'description' => $source['description'] ?? NULL,
+      'sortorder' => $last + 1,
+    ]);
+    return civicrm_api3('ElectionPosition', 'getsingle', ['id' => $copy['id']]);
+  }
+
   public static function findWithNominationsByElectionId($electionId) {
     $nominations = civicrm_api3('ElectionNomination', 'get', [
       'election_position_id.election_id'  => $electionId,
