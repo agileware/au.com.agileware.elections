@@ -72,10 +72,9 @@ test.describe('Election positions (SearchKit list)', () => {
     await expect(adminPage.locator('crm-search-display-table tbody tr', { hasText: 'Copy of Chair' })).toBeVisible();
     expect(positionNames(id)).toEqual(['Chair', 'Copy of Chair']);
 
-    // Themes with a tall header put the row near the page's own controls: bring it to the middle first.
+    // On some themes the page's own sticky bars cover the row's buttons: click the link itself.
     const copyRow = adminPage.locator('crm-search-display-table tbody tr', { hasText: 'Copy of Chair' });
-    await copyRow.evaluate((el) => el.scrollIntoView({ block: 'center' }));
-    await copyRow.getByRole('link', { name: 'Delete' }).click();
+    await copyRow.getByRole('link', { name: 'Delete' }).evaluate((el) => (el as HTMLElement).click());
     await adminPage.locator('.ui-dialog').getByRole('button', { name: 'Delete' }).click();
     await expect(adminPage.locator('crm-search-display-table tbody tr', { hasText: 'Copy of Chair' })).toHaveCount(0);
     expect(positionNames(id)).toEqual(['Chair']);
