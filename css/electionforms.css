@@ -1023,18 +1023,26 @@ ul#errorList {
     padding-bottom: 0.25rem;
     border-bottom: 1px solid var(--election-border, rgba(0, 0, 0, 0.18));
 }
-.election-winner-badge {
+.crm-container .election-winner-badge {
     display: inline-block;
     margin-top: 0.25rem;
     padding: 0.1rem 0.7rem;
     border: 1px solid var(--election-btn-bg, currentColor);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--election-btn-bg, currentColor) 12%, transparent);
+    background: var(--election-btn-bg, #333);
+    color: var(--election-btn-color, #fff);
     font-size: 0.85em;
     font-weight: 600;
+    text-decoration: none;
 }
-.election-winner-badge-tie {
+@supports (color: lch(from red l c h)) {
+    .crm-container .election-winner-badge {
+        color: lch(from var(--election-btn-bg) clamp(0, (49.5 - l) * 1000, 100) 0 0);
+    }
+}
+.crm-container .election-winner-badge.election-winner-badge-tie {
     background: transparent;
+    color: var(--election-btn-bg, #333);
     font-weight: normal;
 }
 
