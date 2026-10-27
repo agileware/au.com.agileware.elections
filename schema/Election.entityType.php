@@ -308,6 +308,15 @@ return [
       'add' => '5.3',
       'usage' => ['export'],
     ],
+    'send_emails' => [
+      'title' => E::ts('Send Emails'),
+      'sql_type' => 'boolean',
+      'input_type' => 'CheckBox',
+      'description' => E::ts('Email people about their nominations (the message templates can be edited).'),
+      'add' => '2.0',
+      'default' => FALSE,
+      'usage' => ['export'],
+    ],
     'nomination_groups' => [
       'title' => E::ts('Nomination Groups'),
       'sql_type' => 'text',

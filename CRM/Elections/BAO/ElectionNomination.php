@@ -101,7 +101,12 @@ class CRM_Elections_BAO_ElectionNomination extends CRM_Elections_DAO_ElectionNom
     }
     // APIv4 skips the nomination window rule of APIv3: an administrator may add candidates at any time before voting.
     $result = civicrm_api4('ElectionNomination', empty($values['id']) ? 'create' : 'update', empty($values['id']) ? ['values' => $values, 'checkPermissions' => FALSE] : ['values' => $values, 'where' => [['id', '=', $values['id']]], 'checkPermissions' => FALSE]);
-    return $result->first();
+    $nomination = $result->first();
+    if (!$accepted) {
+      // An administrator added them but they have not said yes: ask them to respond.
+      CRM_Elections_Helper_Mailer::nomineeInvited($nomination['id']);
+    }
+    return $nomination;
   }
 
 }

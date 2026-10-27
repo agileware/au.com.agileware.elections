@@ -115,6 +115,14 @@
         </tr>
 
         <tr class="crm-create-election-form-block-results">
+            <td class="label label-select-col">{$form.send_emails.label}</td>
+            <td>
+                {$form.send_emails.html}<br>
+                <span class="description">{ts}Email a nominee when they have enough nominations to stand, asking them to accept or withdraw. The emails come from the message templates called &quot;Elections&quot; (Administer, Communications, Message Templates), which you can edit.{/ts}</span>
+            </td>
+        </tr>
+
+        <tr class="crm-create-election-form-block-results">
             <td class="label label-select-col">{$form.nomination_groups.label}</td>
             <td>
                 {$form.nomination_groups.html}<br>

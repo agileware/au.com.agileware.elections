@@ -148,6 +148,15 @@ class CRM_Elections_Upgrader extends CRM_Extension_Upgrader_Base {
   }
 
   /**
+   * Version 2.0.0: emails about nominations, switched on for each election (off for every existing election).
+   */
+  public function upgrade_20050() {
+    Civi::log()->info('Applying update 20050');
+    $this->ensureColumn('civicrm_election', 'send_emails', 'TINYINT NULL DEFAULT 0');
+    return TRUE;
+  }
+
+  /**
    * Add a column unless it already exists, so upgrade steps can safely be re-run.
    *
    * @param string $table

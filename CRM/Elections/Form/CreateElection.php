@@ -66,6 +66,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       $defaults['required_nominations'] = $election->required_nominations;
       $defaults['allowed_groups'] = $election->allowed_groups;
       $defaults['nomination_groups'] = $election->nomination_groups;
+      $defaults['send_emails'] = (int) $election->send_emails;
       $defaults['candidate_groups'] = $election->candidate_groups;
 
       $defaults['allow_checksum_access'] = $election->allow_checksum_access;
@@ -84,6 +85,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       $defaults['required_nominations'] = 2;
       $defaults['allowed_groups'] = '';
       $defaults['nomination_groups'] = '';
+      $defaults['send_emails'] = 1;
       $defaults['candidate_groups'] = '';
       $defaults['show_photos'] = 1;
       $defaults['show_statements'] = CRM_Elections_BAO_Election::STATEMENTS_LINK;
@@ -175,6 +177,8 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       ],
     ], TRUE);
 
+    $this->add('advcheckbox', 'send_emails', E::ts('Email people about their nominations'));
+
     // Who may nominate, and who may stand, when that is not the same as who may vote.
     foreach (['nomination_groups' => E::ts('Nomination Groups'), 'candidate_groups' => E::ts('Candidate Groups')] as $field => $label) {
       $this->addEntityRef($field, $label, [
@@ -237,6 +241,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       'is_visible'                  => 0,
       'required_nominations'        => $values['required_nominations'],
       'allowed_groups'              => $values['allowed_groups'],
+      'send_emails'                 => !empty($values['send_emails']) ? 1 : 0,
       'nomination_groups'           => $values['nomination_groups'] ?? '',
       'candidate_groups'            => $values['candidate_groups'] ?? '',
       'show_photos'                 => !empty($values['show_photos']) ? 1 : 0,
