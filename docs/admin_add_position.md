@@ -4,7 +4,7 @@ To add a position, you need to have CiviCRM admin access and follow these steps:
 
 1. Go to **Elections**
 ![Click Elections](images/admin_election/01.gif)  
-2. Go to **Positions > Add Position**     
+2. Click **Positions** for the election, then **Add Position**     
 ![Click Positions](images/admin_add/01.gif)  
 3. Enter new information for an existing position  
 -  **Position Name**: The title of the position  

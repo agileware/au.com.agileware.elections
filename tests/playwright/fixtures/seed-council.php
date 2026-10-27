@@ -46,6 +46,10 @@ foreach ($data['personas'] as $key => $cid) {
   $data['links'][$key] = ['cid' => $cid, 'cs' => CRM_Contact_BAO_Contact_Utils::generateChecksum($cid, NULL, 24 * 30)];
 }
 unset($data['personas']);
+// The plan and ballots the browser tests act out (see CouncilFixture).
+$data['plan'] = Council::PLAN;
+$data['candidates'] = Council::CANDIDATES;
+$data['ballots'] = $fixture->ballots();
 
 $dir = __DIR__ . '/.generated';
 if (!is_dir($dir)) {

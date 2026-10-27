@@ -468,7 +468,7 @@ ul#errorList {
     opacity: 0.6;
 }
 .election-timeline-passed .election-timeline-label::before {
-    content: "¹3 a0";
+    content: "\2713\00a0";
 }
 .election-counts th {
     text-align: left;
@@ -477,4 +477,8 @@ ul#errorList {
 }
 .election-overview-actions {
     margin-top: 1.5em;
+}
+.election-overview-actions .button {
+    display: inline-block;
+    margin: 0 0.5em 0.5em 0;
 }

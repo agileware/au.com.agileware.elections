@@ -8,16 +8,29 @@ import path from 'node:path';
  */
 export type Persona = { cid: number; cs: string };
 
+/** [position, nominee, nominators, what the nominee does] */
+export type PlanRow = [string, string, string[], 'accept' | 'withdraw' | 'ignore' | 'accept_then_withdraw' | 'unseconded'];
+
 export type CouncilData = {
   election_id: number;
   group_id: number;
   positions: Record<string, number>;
   links: Record<string, Persona>;
+  plan: PlanRow[];
+  /** Candidates expected in each position once the nominees have responded. */
+  candidates: Record<string, string[]>;
+  /** Each member's ballot: persona -> position -> candidate persona -> rank. */
+  ballots: Record<string, Record<string, Record<string, number>>>;
 };
 
 export const POSITIONS = ['President', 'Secretary', 'Treasurer', 'Council Member 1', 'Council Member 2', 'Council Member 3'];
 
 let cached: CouncilData | undefined;
+
+/** Read the persona file again (after the election has been seeded again). */
+export function forgetCouncil() {
+  cached = undefined;
+}
 
 export function council(): CouncilData {
   if (!cached) {

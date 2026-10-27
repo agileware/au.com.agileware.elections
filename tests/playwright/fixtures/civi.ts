@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
+import { forgetCouncil } from './personas';
 
 /**
  * Shells out to `cv` to read and change CiviCRM data directly, bypassing the browser,
@@ -61,4 +62,26 @@ export function civiSql(sql: string, params: Record<string, string | number> = {
 /** Evaluate PHP inside CiviCRM (`cv ev`) and return what it prints. */
 export function civiEval(php: string): string {
   return run(['cv', 'ev', php]);
+}
+
+/** Seed the council election again, at the nominations stage (see fixtures/seed-council.php). */
+export function reseedCouncil(): void {
+  run(['cv', 'scr', path.resolve(__dirname, 'seed-council.php')]);
+  forgetCouncil();
+}
+
+/** Ids of the nominations in the council election, keyed "Position|Nominee". */
+export function councilNominationIds(electionId: number): Record<string, number> {
+  const rows = civiApi4<Array<{ id: number; 'election_position_id.name': string; 'member_nominee.last_name': string; 'member_nominee.first_name': string }>>('ElectionNomination.get', {
+    select: ['id', 'election_position_id.name', 'member_nominee.first_name', 'member_nominee.last_name'],
+    where: [['election_position_id.election_id', '=', electionId]],
+    limit: 0,
+  });
+  const ids: Record<string, number> = {};
+  for (const row of rows) {
+    // Nominees are named "Nominee 01" .. "Nominee 10" by the fixture.
+    const persona = `N${row['member_nominee.last_name']}`;
+    ids[`${row['election_position_id.name']}|${persona}`] = row.id;
+  }
+  return ids;
 }
