@@ -16,8 +16,8 @@ test.beforeAll(() => {
   const cid = (p: string) => data.links[p].cid;
   // V01 and V02 may nominate; only N01 and N02 may stand.
   civiEval(`
-    $n = civicrm_api3('Group', 'create', ['title' => 'PW Nominators', 'name' => 'pw_nominators_' . uniqid()])['id'];
-    $c = civicrm_api3('Group', 'create', ['title' => 'PW Candidates', 'name' => 'pw_candidates_' . uniqid()])['id'];
+    $n = civicrm_api3('Group', 'create', ['title' => 'PW Nominators ' . uniqid(), 'name' => 'pw_nominators_' . uniqid()])['id'];
+    $c = civicrm_api3('Group', 'create', ['title' => 'PW Candidates ' . uniqid(), 'name' => 'pw_candidates_' . uniqid()])['id'];
     foreach ([${cid('V01')}, ${cid('V02')}] as $id) { civicrm_api3('GroupContact', 'create', ['group_id' => $n, 'contact_id' => $id]); }
     foreach ([${cid('N01')}, ${cid('N02')}] as $id) { civicrm_api3('GroupContact', 'create', ['group_id' => $c, 'contact_id' => $id]); }
     civicrm_api3('Election', 'create', ['nomination_groups' => (string) $n, 'candidate_groups' => (string) $c] + civicrm_api3('Election', 'getsingle', ['id' => ${data.election_id}]));
@@ -26,6 +26,7 @@ test.beforeAll(() => {
 
 test.afterAll(() => {
   reseedCouncil();
+  civiEval(`foreach (civicrm_api3('Group', 'get', ['name' => ['LIKE' => 'pw_%'], 'options' => ['limit' => 0]])['values'] as $g) { civicrm_api3('Group', 'delete', ['id' => $g['id']]); }`);
 });
 
 test('someone who can only vote is told they cannot nominate', async ({ personaGoto }) => {
