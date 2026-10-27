@@ -44,7 +44,7 @@ Installation
 Getting Started
 -------------
 
-Read the [documentation](docs/index.md)  to get started setting up your first election. This includes a [workflow diagram](docs/index.md#election-workflow-overview) showing the stages, date gates and nomination process of an election.
+Read the [documentation](docs/index.md)  to get started setting up your first election. It covers the [types of elections and options](docs/election_types.md) (ranked choice, most votes, write-ins and referendum questions) and has [workflow diagrams](docs/workflows.md) of the stages, nominations, voting and results.
 
 Settings
 -------------
