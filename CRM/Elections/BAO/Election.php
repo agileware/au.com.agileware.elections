@@ -268,14 +268,25 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
 
     $positions = civicrm_api3('ElectionPosition', 'get', ['election_id' => $electionId, 'options' => ['limit' => 0, 'sort' => 'sortorder ASC']]);
     foreach ($positions['values'] as $position) {
-      civicrm_api3('ElectionPosition', 'create', [
+      $newPosition = civicrm_api3('ElectionPosition', 'create', [
         'election_id' => $copyId,
         'name' => $position['name'],
         'quantity' => $position['quantity'] ?? 1,
         'write_ins_per_seat' => $position['write_ins_per_seat'] ?? 0,
+        'position_type' => $position['position_type'] ?? CRM_Elections_BAO_ElectionPosition::TYPE_ELECTION,
+        'pass_threshold' => $position['pass_threshold'] ?? 50,
+        'quorum_percent' => $position['quorum_percent'] ?? NULL,
+        'resolution_text' => $position['resolution_text'] ?? NULL,
         'sortorder' => $position['sortorder'] ?? NULL,
         'description' => $position['description'] ?? NULL,
       ]);
+      if (($position['position_type'] ?? '') === CRM_Elections_BAO_ElectionPosition::TYPE_REFERENDUM) {
+        $labels = [];
+        foreach (CRM_Elections_BAO_ElectionPosition::getOptions($position['id']) as $option) {
+          $labels[$option['kind']] = $option['label'];
+        }
+        CRM_Elections_BAO_ElectionPosition::saveOptions((int) $newPosition['id'], $labels);
+      }
     }
 
     return civicrm_api3('Election', 'getsingle', ['id' => $copyId]);
