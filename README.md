@@ -31,7 +31,7 @@ Viewing election results are shown below as an example.
 Prerequisites
 -------------
 
-  * [CiviCRM](https://www.civicrm.org) 5.73 or greater, verified compatible up to 6.16.5  
+  * [CiviCRM](https://www.civicrm.org) 6.16 or greater, verified compatible up to 6.19.2 (version 2 of this extension; use version 1.x for older CiviCRM)  
 
 Installation
 -------------
