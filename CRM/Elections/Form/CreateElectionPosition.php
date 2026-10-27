@@ -44,6 +44,11 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
 
   public function setDefaultValues() {
     $default = parent::setDefaultValues();
+    // For a new position. A question has no seats or write-ins, so these are filled in for the fields it hides.
+    $default['quantity'] = 1;
+    $default['write_ins_per_seat'] = 0;
+    $default['position_type'] = CRM_Elections_BAO_ElectionPosition::TYPE_ELECTION;
+    $default['pass_threshold_choice'] = '50';
     if ($this->epId) {
       $this->electionPosition = civicrm_api3('ElectionPosition', 'get', [
         'id'         => $this->epId,

@@ -11,8 +11,8 @@
       <div class="crm-vote-election-form-block election-question-block" data-type="question" data-position="{$position.name|escape}">
         <fieldset class="election-question-fieldset">
           <legend>{$position.name|escape}</legend>
-          {if $position.resolution_text}<p class="election-question-resolution">{$position.resolution_text|escape|nl2br}</p>{/if}
-          {if $position.description}<p>{$position.description|escape|nl2br}</p>{/if}
+          {if $position.resolution_text|default:''}<p class="election-question-resolution">{$position.resolution_text|default:''|escape|nl2br}</p>{/if}
+          {if $position.description|default:''}<p>{$position.description|default:''|escape|nl2br}</p>{/if}
           <div class="election-question-choices">{$form.$qKey.html}</div>
         </fieldset>
       </div><br>

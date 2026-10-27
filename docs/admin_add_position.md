@@ -7,6 +7,7 @@ To add a position, you need to have CiviCRM admin access and follow these steps:
 2. Click **Positions** for the election, then **Add Position**     
 ![Click Positions](images/admin_add/01.gif)  
 3. Enter new information for an existing position  
+-  **Type**: *Election position* (people stand for it) or *Referendum question* (a yes or no question, see [Referendum questions](admin_referendum.md))  
 -  **Position Name**: The title of the position  
 ![Set position name](images/admin_add/02.gif)  
 -  **Seats**: The total number seats available for the position  

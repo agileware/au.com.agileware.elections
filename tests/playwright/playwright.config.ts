@@ -91,10 +91,17 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
+      // A referendum question on the same ballot, on the same election again.
+      name: 'referendum',
+      testMatch: /council\/referendum/,
+      dependencies: ['writein'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       // Pictures of every page (SCREENS=1 only).
       name: 'screens',
       testMatch: /frontend\/screens/,
-      dependencies: ['writein'],
+      dependencies: ['referendum'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],
