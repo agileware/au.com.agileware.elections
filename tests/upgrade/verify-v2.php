@@ -22,7 +22,7 @@ function q($sql, $params = []) {
 $like = "WHERE e.name LIKE 'Upgrade %'";
 
 // --- the schema
-foreach (['civicrm_election' => ['voting_method', 'nomination_groups', 'candidate_groups', 'send_emails', 'allow_online_nominations', 'show_photos', 'show_statements', 'name_format'], 'civicrm_election_position' => ['write_ins_per_seat', 'position_type', 'pass_threshold', 'quorum_percent', 'resolution_text'], 'civicrm_election_nomination' => ['is_write_in', 'write_in_notified_date', 'write_in_reminded_date', 'statement_url']] as $table => $columns) {
+foreach (['civicrm_election' => ['voting_method', 'nomination_groups', 'candidate_groups', 'send_emails', 'allow_online_nominations', 'show_photos', 'show_statements', 'name_format'], 'civicrm_election_position' => ['write_ins_per_seat', 'position_type', 'pass_threshold', 'quorum_percent', 'resolution_text'], 'civicrm_election_nomination' => ['is_write_in', 'write_in_notified_date', 'write_in_reminded_date', 'write_in_closed_notified_date', 'statement_url']] as $table => $columns) {
   foreach ($columns as $column) {
     check("column $table.$column exists", CRM_Core_BAO_SchemaHandler::checkIfFieldExists($table, $column));
   }

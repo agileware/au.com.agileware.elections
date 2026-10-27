@@ -1,0 +1,62 @@
+site_name: Elections for CiviCRM
+repo_url: https://github.com/agileware/au.com.agileware.elections
+site_description: 'A guide for the Elections CiviCRM extension.'
+site_author: 'agileware'
+theme:
+  name: material
+
+nav:
+  - 'Home': index.md
+  - 'About this extension': README.md
+  - '1. Introduction':
+      - 'Types of elections and options': election_types.md
+      - 'Workflows': workflows.md
+  - '2. Set up your site':
+      - 'Initial set up': setup.md
+      - 'Elections settings': admin_election_settings.md
+  - '3. Running an election':
+      - 'Manage elections': admin_manage_elections.md
+      - 'Create an election': admin_create_election.md
+      - 'Add a position': admin_add_position.md
+      - 'Edit a position': admin_edit_position.md
+      - 'Reorder positions': admin_reorder_positions.md
+      - 'Delete a position': admin_delete_position.md
+      - 'Write-ins': admin_write_ins.md
+      - 'Referendum questions': admin_referendum.md
+      - 'Activate an election': admin_activate_election.md
+      - 'Election overview': admin_election_overview.md
+      - 'Candidates': admin_candidates.md
+      - 'Edit an election': admin_edit_election.md
+      - 'Duplicate an election': admin_duplicate_election.md
+      - 'Delete an election': admin_delete_election.md
+  - '4. Taking part':
+      - 'Nominate someone': user_nominate.md
+      - 'Second a nomination': user_second_nomination.md
+      - 'Accept a nomination': user_accept_nomination.md
+      - 'Withdraw a nomination': user_withdraw_nomination.md
+      - 'Vote': user_vote.md
+      - 'View the results': user_view_results.md
+  - '5. Reference':
+      - 'Emails and scheduled jobs': reference_emails_and_jobs.md
+      - 'Security and audit': reference_security_and_audit.md
+
+markdown_extensions:
+  - attr_list
+  - admonition
+  - def_list
+  - codehilite
+  - toc:
+      permalink: True
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.inlinehilite
+  - pymdownx.tilde
+  - pymdownx.betterem
+  - pymdownx.mark
+
+plugins:
+  - search:
+      lang: en

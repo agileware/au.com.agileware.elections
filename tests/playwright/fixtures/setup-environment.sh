@@ -59,5 +59,10 @@ if [ -z "$(run wp post list --post_type=page --name="$LISTING_SLUG" --field=ID |
     --post_content="[civicrm component=\"elections\" hijack=\"0\" action=\"visible\" viewpageid=\"$INFO_ID\"]"
 fi
 
+echo "Redirecting CiviCRM's outgoing email to the database (no mail server needed)..."
+# Nominations and write-ins send email while the tests run. Redirecting to the database (option 5) keeps
+# the tests independent of whether the site has a mail server; nothing is delivered.
+run cv api4 Setting.set '{"values":{"mailing_backend":{"outBound_option":5}}}' >/dev/null
+
 echo "Seeding the council election..."
 run cv scr "$SCRIPT_DIR/seed-council.php"
