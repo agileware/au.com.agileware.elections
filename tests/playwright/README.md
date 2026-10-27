@@ -26,6 +26,12 @@ voters.
 - Stages are moved with `civi.ts` helpers (`moveToStage`, `advanceCouncil`) that run
   `fixtures/advance-council.php` through `cv scr`, like the passing of time.
 
+## Specs
+
+- `specs/frontend/` – members acting as personas through their personal links.
+- `specs/backend/` – administrators: Manage Elections (activate, deactivate, duplicate), positions (drag to reorder, edit in place, duplicate, delete, locked once started), candidates (edit statements, add a candidate, frozen once voting starts), the election overview, permissions.
+- `specs/council/council-election.spec.ts` – a complete mock council election: six roles, 30 voters, 10 nominees, 6 candidates. The administrator checks the election on the back end; every nominator nominates and seconds, every nominee accepts or withdraws, 38 members vote (one changes their vote) and the results are checked against ballots worked out independently. It runs on its own after the other specs (project `council`) and seeds the election again when done.
+
 ## Personas
 
 `V01`..`V30` voters, `N01`..`N10` nominees (`N01`..`N06` become candidates), `OUT` an outsider who
