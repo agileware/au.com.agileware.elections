@@ -77,10 +77,17 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
+      // Separate groups for nominating and standing, on the same election again.
+      name: 'groups',
+      testMatch: /council\/groups/,
+      dependencies: ['plurality'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       // Pictures of every page (SCREENS=1 only).
       name: 'screens',
       testMatch: /frontend\/screens/,
-      dependencies: ['plurality'],
+      dependencies: ['groups'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],

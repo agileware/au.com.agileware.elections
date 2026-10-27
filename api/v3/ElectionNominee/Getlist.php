@@ -46,7 +46,7 @@ function civicrm_api3_election_nominee_Getlist($params) {
     return civicrm_api3_create_success([], $params, 'ElectionNominee', 'getlist');
   }
 
-  $allowedGroupIds = $election->allowed_groups;
+  $allowedGroupIds = CRM_Elections_Helper_Eligibility::groupsFor($election, 'candidate');
   if (!empty($allowedGroupIds)) {
     $allowedGroupIds = explode(',', $allowedGroupIds);
   }

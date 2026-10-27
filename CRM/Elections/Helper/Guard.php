@@ -13,7 +13,7 @@ class CRM_Elections_Helper_Guard {
   /**
    * Election settings that cannot change once ballots have been cast.
    */
-  const LOCKED_ONCE_VOTED = ['allowed_groups', 'anonymize_votes', 'allow_revote', 'required_nominations', 'voting_method'];
+  const LOCKED_ONCE_VOTED = ['allowed_groups', 'nomination_groups', 'candidate_groups', 'anonymize_votes', 'allow_revote', 'required_nominations', 'voting_method'];
 
   /**
    * Election settings that also cannot change once the results are generated. (Dates before that can
@@ -27,7 +27,7 @@ class CRM_Elections_Helper_Guard {
   const AUDITED_ELECTION_FIELDS = [
     'name', 'description', 'is_visible', 'is_deleted', 'visibility_start_date', 'visibility_end_date',
     'nomination_start_date', 'nomination_end_date', 'advertise_candidates_date', 'voting_start_date',
-    'voting_end_date', 'result_date', 'allowed_groups', 'anonymize_votes', 'allow_revote',
+    'voting_end_date', 'result_date', 'allowed_groups', 'nomination_groups', 'candidate_groups', 'anonymize_votes', 'allow_revote',
     'allow_checksum_access', 'required_nominations', 'has_results_generated', 'show_photos',
     'show_statements', 'show_nominators', 'name_format', 'voting_method',
   ];
@@ -194,7 +194,7 @@ class CRM_Elections_Helper_Guard {
       $value = implode(',', $value);
     }
     $value = (string) $value;
-    if ($field === 'allowed_groups') {
+    if (in_array($field, ['allowed_groups', 'nomination_groups', 'candidate_groups'], TRUE)) {
       $parts = array_filter(array_map('trim', explode(',', str_replace(CRM_Core_DAO::VALUE_SEPARATOR, ',', $value))), 'strlen');
       sort($parts);
       return implode(',', $parts);

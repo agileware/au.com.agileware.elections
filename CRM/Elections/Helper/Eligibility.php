@@ -142,9 +142,29 @@ class CRM_Elections_Helper_Eligibility {
   }
 
   /**
+   * The groups for a role in the election: the election's own groups for that role, or the voting groups
+   * when it has none (every election made before 2.0, and any election that does not need separate groups).
+   *
+   * @param CRM_Elections_BAO_Election|object $election
+   * @param string $role
+   *   voting, nominating or candidate.
+   *
+   * @return string
+   *   Group ids, comma separated.
+   */
+  public static function groupsFor($election, $role) {
+    $own = [
+      'nominating' => $election->nomination_groups ?? NULL,
+      'candidate' => $election->candidate_groups ?? NULL,
+    ][$role] ?? NULL;
+    $own = trim(str_replace(CRM_Core_DAO::VALUE_SEPARATOR, ',', (string) $own), ',');
+    return $own !== '' ? $own : (string) $election->allowed_groups;
+  }
+
+  /**
    * Is the contact allowed to nominate (and second) in the election?
    *
-   * At present the same groups apply as for voting.
+   * Uses the nomination groups, or the voting groups when the election has none.
    *
    * @param int $electionId
    * @param int|null $contactId
@@ -152,7 +172,24 @@ class CRM_Elections_Helper_Eligibility {
    * @return bool
    */
   public static function canNominate($electionId, $contactId = NULL) {
-    return self::canVote($electionId, $contactId);
+    if (empty($contactId)) {
+      $contactId = self::getActingContactId();
+    }
+    return self::isContactInGroups($contactId, self::groupsFor(findElectionById($electionId), 'nominating'));
+  }
+
+  /**
+   * Can the contact be nominated, stand as a candidate, or be added as one by an administrator?
+   *
+   * Uses the candidate groups, or the voting groups when the election has none.
+   *
+   * @param int $electionId
+   * @param int|null $contactId
+   *
+   * @return bool
+   */
+  public static function canBeNominated($electionId, $contactId = NULL) {
+    return self::isContactInGroups($contactId, self::groupsFor(findElectionById($electionId), 'candidate'));
   }
 
   /**

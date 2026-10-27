@@ -44,8 +44,8 @@ class CRM_Elections_Helper_Process {
     ])) {
       throw new CRM_Core_Exception(E::ts('The selected position is not part of this election.'));
     }
-    if (!CRM_Elections_Helper_Eligibility::canVote($electionId, $nomineeId)) {
-      throw new CRM_Core_Exception(E::ts('Only people who can take part in this election can be nominated.'));
+    if (!CRM_Elections_Helper_Eligibility::canBeNominated($electionId, $nomineeId)) {
+      throw new CRM_Core_Exception(E::ts('Only people who can stand in this election can be nominated.'));
     }
 
     // One request at a time for each person and position: a repeated or simultaneous request must not
@@ -130,6 +130,9 @@ class CRM_Elections_Helper_Process {
     $election = findElectionById($nomination['election_position_id.election_id']);
     self::assertElectionOpenToNominees($election);
 
+    if (!CRM_Elections_Helper_Eligibility::canBeNominated($election->id, $contactId)) {
+      throw new CRM_Core_Exception(E::ts('Only people who can stand in this election can accept a nomination.'));
+    }
     if (empty($nomination['is_eligible_candidate'])) {
       throw new CRM_Core_Exception(E::ts('This nomination has not received enough nominations to be accepted.'));
     }

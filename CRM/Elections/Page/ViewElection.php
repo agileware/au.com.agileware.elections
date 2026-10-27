@@ -52,7 +52,7 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
 
       $this->assign('isElectionAdmin', $this->isElectionAdmin);
       $this->assign('isElectionRunning', $this->isElectionRunning);
-      $this->assign('isAllowedToNominate', isLoggedInMemberAllowedToVote($this->eId));
+      $this->assign('isAllowedToNominate', CRM_Elections_Helper_Eligibility::canNominate($this->eId));
       $this->assignPositions();
       $positionsWithNominations = CRM_Elections_BAO_ElectionPosition::findWithNominationsByElectionId($this->eId);
       CRM_Elections_BAO_ElectionResult::updateCandidateProfilePictures($positionsWithNominations, FALSE, TRUE);
@@ -125,7 +125,7 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
     // The person's own ballot while voting is open (a receipt of what was recorded).
     $this->assign('ownBallot', ($this->election->isVotingStarted && !$this->election->isVotingEnded && $voting['has_user_already_voted']) ? CRM_Elections_Helper_ElectionStatus::ownBallot($this->election, $contactId) : []);
     $this->assign('electionNextAction', CRM_Elections_Helper_ElectionStatus::nextAction($this->election, $contactId, $checksum['query'] ?? sprintf('eid=%d', $this->eId), [
-      'canNominate' => (bool) isLoggedInMemberAllowedToVote($this->eId),
+      'canNominate' => (bool) CRM_Elections_Helper_Eligibility::canNominate($this->eId),
       'canVote' => (bool) isLoggedInMemberAllowedToVote($this->eId),
       'hasVoted' => (bool) $voting['has_user_already_voted'],
       'voteDate' => $voting['user_vote_date'],
