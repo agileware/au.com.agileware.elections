@@ -72,7 +72,7 @@ test.describe('Election candidates (SearchKit list)', () => {
     const positionId = addPosition(election, 'Chair', 1);
     const [outsider] = civiApi4<Array<{ id: number }>>('Contact.create', { values: { contact_type: 'Individual', first_name: 'Fay', last_name: `Member ${RUN}` } });
     // The same method the Add Candidate form calls.
-    expect(failure(() => civiEval(`CRM_Elections_BAO_ElectionNomination::addCandidate(${positionId}, ${outsider.id});`))).toContain('Only people who can take part');
+    expect(failure(() => civiEval(`CRM_Elections_BAO_ElectionNomination::addCandidate(${positionId}, ${outsider.id});`))).toContain('Only people who can stand');
     expect(nomineeNames(election)).toEqual([]);
   });
 
