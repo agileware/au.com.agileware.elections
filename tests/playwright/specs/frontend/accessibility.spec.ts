@@ -15,6 +15,10 @@ import { CMS } from '../../fixtures/cms';
 test.describe.configure({ mode: 'serial', retries: 0 });
 
 const OUT = path.resolve(__dirname, '../../test-results/axe');
+// Widths to scan, for example A11Y_WIDTHS=375,768,1280. The keyboard checks run at the first width only.
+const WIDTHS = (process.env.A11Y_WIDTHS || '1280').split(',').map((w) => parseInt(w, 10));
+// A label for the theme variation being checked (see fixtures/theme-variants.sh), kept in the results file name.
+const VARIANT = process.env.THEME_VARIANT || 'default';
 
 type Found = { page: string; id: string; impact: string; help: string; nodes: string[] };
 const found: Found[] = [];
@@ -58,13 +62,15 @@ test('accessibility of the whole election process', async ({ browser }) => {
   const keyboardProblems: string[] = [];
 
   async function visit(label: string, persona: string, civiPath: string, params: Record<string, string | number> = {}, keyboard?: (page: Page) => Promise<void>) {
-    const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, ignoreHTTPSErrors: true });
-    const page = await context.newPage();
-    await page.goto(personaUrl(persona, civiPath, params));
-    await page.waitForLoadState('networkidle');
-    await axeScan(page, label);
-    if (keyboard) await keyboard(page).catch((e) => keyboardProblems.push(`${label}: ${e.message.split('\n')[0]}`));
-    await context.close();
+    for (const [index, width] of WIDTHS.entries()) {
+      const context = await browser.newContext({ viewport: { width, height: 900 }, ignoreHTTPSErrors: true });
+      const page = await context.newPage();
+      await page.goto(personaUrl(persona, civiPath, params));
+      await page.waitForLoadState('networkidle');
+      await axeScan(page, WIDTHS.length > 1 ? `${label} @${width}px` : label);
+      if (keyboard && index === 0) await keyboard(page).catch((e) => keyboardProblems.push(`${label}: ${e.message.split('\n')[0]}`));
+      await context.close();
+    }
   }
 
   /** Every .election-btn is reachable by Tab, has a focus indicator, and Enter follows it. */
@@ -123,7 +129,7 @@ test('accessibility of the whole election process', async ({ browser }) => {
   reseedCouncil();
 
   fs.mkdirSync(OUT, { recursive: true });
-  fs.writeFileSync(path.join(OUT, `${CMS}.json`), JSON.stringify({ axe: found, keyboard: keyboardProblems }, null, 2));
+  fs.writeFileSync(path.join(OUT, `${CMS}${VARIANT === 'default' ? '' : '-' + VARIANT}.json`), JSON.stringify({ axe: found, keyboard: keyboardProblems }, null, 2));
   const blocking = found.filter((f) => f.impact === 'serious' || f.impact === 'critical');
   const summary = [...blocking.map((f) => `${f.impact} ${f.id} on ${f.page}: ${f.help} [${f.nodes[0]}]`), ...keyboardProblems];
   expect(summary, `accessibility problems on ${CMS} (all findings in test-results/axe/${CMS}.json)`).toEqual([]);
