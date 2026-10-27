@@ -12,6 +12,14 @@ return [
     'log' => TRUE,
     'add' => '5.3',
   ],
+  'getIndices' => fn() => [
+    // One nomination for each person and position, however many people nominate them.
+    'UI_election_nomination_position_nominee' => [
+      'fields' => ['election_position_id' => TRUE, 'member_nominee' => TRUE],
+      'unique' => TRUE,
+      'add' => '2.0',
+    ],
+  ],
   'getFields' => fn() => [
     'id' => [
       'title' => E::ts('ID'),

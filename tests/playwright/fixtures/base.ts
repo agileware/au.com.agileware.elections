@@ -6,7 +6,7 @@ import { personaUrl } from './personas';
 import { adminUrl } from './cms';
 
 /** PHP and template output that must never reach a visitor. */
-const PHP_OUTPUT = /(?:Warning|Notice|Deprecated|Fatal error|Parse error)\s*:|Undefined (?:array key|variable|index|property)|Smarty/;
+const PHP_OUTPUT = /(?:Warning|Notice|Deprecated|Fatal error|Parse error)\s*:|Undefined (?:array key|variable|index|property)|Smarty|Syntax error in template|unknown modifier|unknown tag/i;
 
 /** Console/network noise that is not the extension's. */
 const IGNORED_CONSOLE = [/favicon/i, /Failed to load resource: the server responded with a status of 404/];

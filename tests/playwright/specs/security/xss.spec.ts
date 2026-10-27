@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { expectNoPhpOutput } from '../../fixtures/base';
 import { advanceCouncil, civiEval, civiSql, councilNominationIds, moveToStage, reseedCouncil } from '../../fixtures/civi';
 import { council, personaUrl } from '../../fixtures/personas';
 import { frontUrl } from '../../fixtures/cms';
@@ -44,20 +45,25 @@ test('script and markup in any field are shown as text, never run', async ({ bro
   civiEval(`Civi::settings()->set('elections_name_format', 'first_nick_last');`);
 
   const problems: string[] = [];
-  async function visit(label: string, persona: string, civiPath: string, params: Record<string, string | number> = {}) {
+  async function visit(label: string, persona: string, civiPath: string, params: Record<string, string | number> = {}, interact?: (page: import('@playwright/test').Page) => Promise<void>) {
     const context = await browser.newContext();
     const page = await context.newPage();
     page.on('dialog', (d) => { problems.push(`${label}: a dialog opened: ${d.message()}`); d.dismiss(); });
     await page.goto(personaUrl(persona, civiPath, params));
     await page.waitForLoadState('networkidle');
+    if (interact) await interact(page);
     await page.waitForTimeout(300);
+    // A page that fails to draw would also show no script: it must have drawn.
+    await expectNoPhpOutput(page);
     const found = await page.evaluate(() => {
       const out: string[] = [];
       if ((window as any).__xss) out.push(`script ran (${(window as any).__xss})`);
       const content = document.querySelector('.crm-container') || document.body;
       if (content.querySelector('[onerror], [onload], img[src^="x"]')) out.push('markup from a field became an element');
       content.querySelectorAll('script').forEach((s) => { if ((s.textContent || '').includes('__xss')) out.push('script element from a field'); });
-      content.querySelectorAll('a[href]').forEach((a) => { if (/^\s*javascript:/i.test(a.getAttribute('href') || '')) out.push('javascript: link'); });
+      content.querySelectorAll('a[href]').forEach((a) => { const href = (a.getAttribute('href') || '').trim();
+        // CiviCRM's own select boxes use javascript:void(0); anything else would come from a field.
+        if (/^javascript:/i.test(href) && href.replace(/\s/g, '') !== 'javascript:void(0)') out.push('javascript: link'); });
       return out;
     });
     for (const f of found) problems.push(`${label}: ${f}`);
@@ -77,6 +83,14 @@ test('script and markup in any field are shown as text, never run', async ({ bro
   await visit('withdraw form', 'N02', 'civicrm/elections/nominations/reject', { enid: ids['President|N02'] });
   moveToStage('nominations');
   await visit('nominations (nominate form)', 'V03', 'civicrm/elections/nominations/create');
+  await visit('nominations (nominee search)', 'V03', 'civicrm/elections/nominations/create', {}, async (page) => {
+    // The search box lists people by name: names with markup in them must be shown as text.
+    await page.locator('#s2id_position').click();
+    await page.locator('.select2-result-label').first().click();
+    await page.locator('#s2id_contact').click();
+    await page.locator('.select2-input:visible').fill('Payload');
+    await page.waitForTimeout(2500);
+  });
   await visit('nominations (election page)', 'V03', 'civicrm/elections/view');
   moveToStage('results');
   advanceCouncil('generate');

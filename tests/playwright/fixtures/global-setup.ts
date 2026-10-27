@@ -22,7 +22,7 @@ export const logins: Record<string, { username: string; password: string }> = {
 /** Drupal and Joomla use test accounts created by fixtures/setup-accounts-<cms>.sh. */
 const testAdmin = { username: users.admin.username, password: users.admin.password };
 
-const WARM_UP = ['civicrm/elections/manage', 'civicrm/elections/position-list', 'civicrm/elections/candidate-list'];
+const WARM_UP = ['civicrm/elections/manage', 'civicrm/elections/position-list', 'civicrm/elections/candidate-list', 'civicrm/elections/create', 'civicrm/elections/result-list', 'civicrm/elections/audit-log'];
 
 async function warmUp(page: Page) {
   // The first visit to a SearchKit page after the caches were cleared is slow while CiviCRM
