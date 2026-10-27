@@ -118,6 +118,55 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $fixture->positions['Treasurer'], $fixture->id('N07'), $fixture->id('V30')), 'withdrawn');
   }
 
+  // ------------------------------------------------- nominee search (browser)
+
+  /**
+   * Pretend to be the browser of a persona using their personal link: the page's address
+   * (with cid and cs) is the Referer of the search request.
+   */
+  private function searchAs($fixture, $persona, $term) {
+    $_SERVER['HTTP_REFERER'] = 'https://example.org/?page=CiviCRM&q=civicrm/elections/nominations/create&eid=' . $fixture->electionId
+      . ($persona ? '&cid=' . $fixture->id($persona) . '&cs=' . CRM_Contact_BAO_Contact_Utils::generateChecksum($fixture->id($persona)) : '');
+    try {
+      return civicrm_api3('ElectionNominee', 'getlist', ['election_id' => $fixture->electionId, 'input' => $term, 'page_num' => 1])['values'];
+    }
+    finally {
+      unset($_SERVER['HTTP_REFERER']);
+    }
+  }
+
+  public function testMembersUsingTheirLinkCanSearchForNomineesOutsidersCannot() {
+    $fixture = Council::create();
+    $found = $this->searchAs($fixture, 'V01', 'Nominee');
+    $this->assertCount(10, $found, 'A voter sees the ten nominees (and no outsider)');
+    $this->assertCount(0, $this->searchAs($fixture, 'OUT', 'Nominee'));
+    $this->assertCount(0, $this->searchAs($fixture, NULL, 'Nominee'));
+    $this->assertCount(0, $this->searchAs($fixture, 'V01', 'Outsider'), 'People outside the group are never listed');
+  }
+
+  public function testTheSearchPermissionIsOnlyGrantedForTheNomineeSearch() {
+    $fixture = Council::create();
+    $granted = FALSE;
+    $_SERVER['HTTP_REFERER'] = 'https://example.org/?cid=' . $fixture->id('V01') . '&cs=' . CRM_Contact_BAO_Contact_Utils::generateChecksum($fixture->id('V01'));
+    try {
+      $_REQUEST['entity'] = 'Contact';
+      $_REQUEST['action'] = 'getlist';
+      elections_civicrm_permission_check('access AJAX API', $granted, NULL);
+      $this->assertFalse($granted, 'Not for other searches');
+
+      $_REQUEST['entity'] = 'ElectionNominee';
+      elections_civicrm_permission_check('access AJAX API', $granted, NULL);
+      $this->assertTrue($granted);
+
+      $granted = FALSE;
+      elections_civicrm_permission_check('administer CiviCRM', $granted, NULL);
+      $this->assertFalse($granted, 'Not for any other permission');
+    }
+    finally {
+      unset($_SERVER['HTTP_REFERER'], $_REQUEST['entity'], $_REQUEST['action']);
+    }
+  }
+
   // ---------------------------------------------------------- acceptances
 
   public function testNomineesRespondAndSixCandidatesStand() {

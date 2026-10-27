@@ -39,6 +39,13 @@ function _civicrm_api3_election_nominee_Getlist_spec(&$spec) {
 function civicrm_api3_election_nominee_Getlist($params) {
   $electionId = $params['election_id'];
   $election = findElectionById($electionId);
+
+  // Only people who can nominate in the election may search for nominees.
+  $actingContactId = CRM_Elections_Helper_Eligibility::getActingContactId(TRUE);
+  if (!$actingContactId || !CRM_Elections_Helper_Eligibility::canNominate($electionId, $actingContactId)) {
+    return civicrm_api3_create_success([], $params, 'ElectionNominee', 'getlist');
+  }
+
   $allowedGroupIds = $election->allowed_groups;
   if (!empty($allowedGroupIds)) {
     $allowedGroupIds = explode(',', $allowedGroupIds);
