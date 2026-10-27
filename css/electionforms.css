@@ -14,10 +14,9 @@
     display: block;
 }
 .crm-election-position-nominations-block {
-    padding-bottom: 25px;
+    padding-bottom: 1.5rem;
     display: block;
-    float: left;
-    width: 100%;
+    clear: both;
 }
 .crm-container .status span.msg-title:after {
     content: "";
@@ -33,9 +32,9 @@
 .crm-container .crm-elections-list-block .status.election-visibility-message {
     margin-bottom: 0px;
 }
-.crm-election-position-nominations-block a {
-    text-decoration: none !important;
-    color: inherit !important;
+.crm-election-position-nominations-block a:not(.election-btn) {
+    text-decoration: none;
+    color: inherit;
 }
 .crm-election-position-nominations-block table.dataTable th {
     color: #444;
@@ -65,11 +64,13 @@
     font-weight: normal;
 }
 .crm-container .status .eligible-block {
-    /*display: inline-block;*/
-    width: 350px;
+    flex: 1 1 14rem;
 }
-.crm-container .status input {
-    margin-left: 20px;
+.crm-container .status:has(> .eligible-block) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
 }
 .crm-container .status span.msg-title {
     font-weight: bold;
@@ -96,8 +97,15 @@
 }
 .crm-election-view-block h2 {
     padding: 0;
-    margin: 0;
+    margin: 0 0 0.5rem;
     text-align: center;
+}
+.crm-container .welcome-message h2 {
+    margin: 0 0 0.5rem;
+    padding: 0;
+    font-size: 1.25rem;
+    line-height: 1.3;
+    text-align: left;
 }
 .crm-election-view-block h3 {
     padding: 0;
@@ -107,7 +115,15 @@
     padding-bottom: 10px;
 }
 .crm-elections-action-block {
-    padding-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 1.25rem;
+}
+.crm-elections-action-block .messages.status {
+    flex: 1 1 100%;
+    margin: 0;
 }
 .crm-elections-helptext-block {
     font-style: italic;
@@ -122,49 +138,45 @@
 }
 
 .election_row_style {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+    gap: 1.25rem;
+    align-items: stretch;
 }
-
-@media only screen and (max-width: 412px) {
-    .election_row_style > div {
-        flex:0 0 200px;
-        text-align: center;
-        margin: 0 auto;
-    }
-
-    .election_row_style > a {
-        flex:0 0 200px;
-        text-align: center;
-        margin: 0 auto;
-    }
-}
-
-@media only screen and (min-width: 413px) {
-
-    .election_row_style > div {
-        flex: 0 0 320px;
-        text-align: center;
-        margin: 0 auto;
-    }
-
-    .election_row_style > a {
-        flex: 0 0 320px;
-        text-align: center;
-        margin: 0 auto;
-    }
+.election_row_style > .crm-election-nominated-block {
+    margin: 0;
 }
 
 .crm-election-nominated-block {
-    float: left;
-    width: 100%;
-    margin-top: 15px;
-    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    box-sizing: border-box;
+    padding: 1rem;
+    border: 1px solid var(--election-border, rgba(0, 0, 0, 0.18));
+    border-radius: var(--election-radius, 4px);
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+.crm-election-nominated-block .crm-election-nominated-block.inside {
+    padding: 0;
+    border: 0;
+    flex: 1 1 auto;
+}
+.crm-election-nominated-block a {
+    display: block;
 }
 .crm-election-nominated-block img {
-    display: inline-block;
-    max-width: 80%;
-    max-height: 200px;
+    display: block;
+    width: 8rem;
+    max-width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    margin: 0 auto 0.5rem;
+    border-radius: var(--election-radius, 4px);
+}
+.crm-election-nominated-block .election-btn {
+    align-self: center;
 }
 .clearfix {
     clear: both;
@@ -175,9 +187,15 @@
 }
 .election-positions-rank-block {
     display: block;
-    width: 100%;
-    float: left;
-    padding-top: 20px;
+    min-width: 0;
+}
+.election-positions-rank-block > a {
+    display: block;
+    height: 100%;
+    text-decoration: none;
+}
+.election-positions-rank-block .crm-election-nominated-block {
+    height: 100%;
 }
 
 .winner-type-label {
@@ -188,58 +206,45 @@
 }
 
 .candidate-details-block {
-    float: left;
-    width: 100%;
-    display: block;
-    padding-bottom: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    padding-bottom: 1.5rem;
 }
-
+.candidate-details-left-block {
+    flex: 0 1 16rem;
+    min-width: 0;
+}
+.candidate-details-right-block {
+    flex: 1 1 18rem;
+    min-width: 0;
+}
 .candidate-details-left-block img {
-    display: inline-block;
+    display: block;
+    width: 12rem;
     max-width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--election-radius, 4px);
 }
-
-@media only screen and (max-width: 748px) {
-    .candidate-details-left-block {
-        width: 50%;
-        float: left;
-        padding-right: 30px;
-    }
-
-    .candidate-details-right-block {
-        width: initial !important;
-        float: left;
-    }
-}
-
-@media only screen and (min-width: 749px) {
-    .candidate-details-left-block {
-        width: 300px;
-        float: left;
-        padding-right: 30px;
-    }
-
-    .candidate-details-right-block {
-        width: calc(100% - 330px);
-        float: left;
-    }
-}
-
 
 .vote-candidate-row {
-    display: block;
-    width: 100%;
-    float: left;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
-    border-bottom: solid 1px #dddddd;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.75rem 1.25rem;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.25rem;
+    border-bottom: solid 1px var(--election-border, #ddd);
 }
 
 .crm-election-form-row {
-    display: block;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.25rem 1.25rem;
     width: 100%;
     padding-bottom: 15px;
-    float: left;
 }
 
 .crm-election-form-row:last-child {
@@ -248,28 +253,48 @@
 
 .vote-candidate-row label {
     font-weight: normal;
-    padding-bottom: 10px;
+    padding-bottom: 0.5rem;
     display: block !important;
 }
 
-.vote-candidate-row .left-profile-block, .crm-election-form-col-left {
-    width: 90px;
-    float: left;
-    margin-right: 30px;
+.vote-candidate-row .left-profile-block {
+    flex: 0 0 5rem;
+}
+.crm-election-form-col-left {
+    flex: 0 0 10rem;
+    max-width: 100%;
 }
 .crm-election-form-col-left.full {
-    width: 100%;
-    margin-right: 0;
+    flex-basis: 100%;
 }
 
 .vote-candidate-row .left-profile-block img {
+    display: block;
+    width: 5rem;
     max-width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--election-radius, 4px);
 }
 
-.vote-candidate-row .right-info-block, .crm-election-form-col-right {
-    float: left;
-    width: 400px;
-    max-width: calc(100% - 120px);
+.vote-candidate-row .right-info-block {
+    flex: 1 1 14rem;
+    min-width: 0;
+}
+.crm-election-form-col-right {
+    flex: 1 1 16rem;
+    min-width: 0;
+    max-width: 40rem;
+}
+.crm-election-form-col-right textarea,
+.crm-election-form-col-right input[type="text"],
+.crm-election-form-col-right input[type="url"] {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+}
+.vote-candidate-row select {
+    max-width: 100%;
 }
 
 .messages.crm-error {
@@ -279,7 +304,7 @@
 }
 
 .crm-election-form-col-right.half {
-    width: 50%;
+    flex-basis: 50%;
 }
 
 .crm-election-form-row div.error {
@@ -481,4 +506,69 @@ ul#errorList {
 .election-overview-actions .button {
     display: inline-block;
     margin: 0 0.5em 0.5em 0;
+}
+
+
+/*
+ * Buttons. The election's action links are plain <a class="election-btn"> elements (no JavaScript,
+ * keyboard and screen reader friendly). Colours follow the active CMS theme where it publishes them
+ * (WordPress block themes, Drupal Olivero, Joomla Cassiopeia) and fall back to CiviCRM's own button
+ * colour, so no site customisation is needed. Override --election-btn-* to brand them.
+ */
+.crm-container .election-btn.election-btn,
+.crm-container .crm-election-form-block-container button.crm-button.crm-button {
+    --election-btn-bg: var(--wp--preset--color--contrast, var(--color--primary-50, var(--cassiopeia-color-primary, var(--crm-primary-color, #333))));
+    --election-btn-color: var(--wp--preset--color--base, #fff);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 2.75rem;
+    max-width: 100%;
+    margin: 0;
+    padding: 0.5rem 1.5rem;
+    border: 2px solid var(--election-btn-bg);
+    border-radius: var(--election-radius, 4px);
+    background: var(--election-btn-bg);
+    color: var(--election-btn-color);
+    font: inherit;
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: center;
+    text-decoration: none;
+    text-transform: none;
+    white-space: normal;
+    cursor: pointer;
+    box-shadow: none;
+}
+.crm-container .election-btn.election-btn:visited {
+    color: var(--election-btn-color);
+}
+.crm-container .election-btn.election-btn:hover,
+.crm-container .election-btn.election-btn:focus-visible,
+.crm-container .crm-election-form-block-container button.crm-button.crm-button:hover,
+.crm-container .crm-election-form-block-container button.crm-button.crm-button:focus-visible {
+    background: color-mix(in srgb, var(--election-btn-bg) 82%, #000);
+    border-color: color-mix(in srgb, var(--election-btn-bg) 82%, #000);
+    color: var(--election-btn-color);
+    text-decoration: none;
+}
+.crm-container .election-btn.election-btn:focus-visible,
+.crm-container .crm-election-form-block-container button.crm-button.crm-button:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 2px;
+}
+.crm-container .election-btn.election-btn:active {
+    transform: translateY(1px);
+}
+/* Cancel / back buttons on forms are the quiet variant */
+.crm-container .crm-election-form-block-container button.crm-button.crm-button-type-cancel.crm-button-type-cancel {
+    background: transparent;
+    color: var(--election-btn-bg);
+}
+.crm-container .crm-election-form-block-container .crm-submit-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.5rem 0 0;
 }

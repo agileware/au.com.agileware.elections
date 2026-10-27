@@ -2,6 +2,7 @@ import { chromium, type FullConfig } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 import users from './test-users.json';
+import { CMS } from './cms';
 
 /**
  * Logs each WordPress user in once, one after the other, and saves the session.
@@ -19,6 +20,10 @@ export const logins: Record<string, { username: string; password: string }> = {
 };
 
 export default async function globalSetup(config: FullConfig) {
+  // Back end logins below are for WordPress; the other CMS sites are covered by the front end specs.
+  if (CMS !== 'wordpress') {
+    return;
+  }
   const baseURL = config.projects[0].use.baseURL as string;
   fs.mkdirSync(AUTH_DIR, { recursive: true });
   const browser = await chromium.launch();

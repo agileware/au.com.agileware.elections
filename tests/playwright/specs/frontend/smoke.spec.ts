@@ -1,4 +1,5 @@
 import { test, expect } from '../../fixtures/base';
+import { frontUrl } from '../../fixtures/cms';
 
 /**
  * Front end smoke tests: a voter and an outsider using personal links, at the
@@ -25,7 +26,7 @@ test.describe('election front end (nominations stage)', () => {
   test('a link with a wrong checksum is refused', async ({ persona, allowedProblems }) => {
     allowedProblems.push(/403/);
     const page = await persona('V01');
-    const response = await page.goto('/?page=CiviCRM&q=civicrm/elections/view&eid=1&cid=1&cs=wrong');
+    const response = await page.goto(frontUrl('civicrm/elections/view', { eid: 1, cid: 1, cs: 'wrong' }));
     await expect(page.locator('body')).not.toContainText('Welcome,');
     expect([200, 403]).toContain(response?.status());
   });

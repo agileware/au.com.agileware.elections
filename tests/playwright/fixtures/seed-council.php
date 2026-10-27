@@ -31,7 +31,8 @@ $fixture = Council::create([
 
 // The logged in member (a WordPress user) takes part as well.
 $users = json_decode(file_get_contents(__DIR__ . '/test-users.json'), TRUE);
-$wpUser = get_user_by('login', $users['member']['username']);
+// WordPress only: other CMSs do not have a logged in member user in the seed.
+$wpUser = function_exists('get_user_by') ? get_user_by('login', $users['member']['username']) : NULL;
 if ($wpUser) {
   CRM_Core_BAO_UFMatch::synchronize($wpUser, TRUE, 'WordPress', 'Individual');
   $memberContactId = CRM_Core_BAO_UFMatch::getContactId($wpUser->ID);

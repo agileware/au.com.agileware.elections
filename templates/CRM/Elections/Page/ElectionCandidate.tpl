@@ -67,6 +67,6 @@
     </div><!-- ending of candidate-details-block -->
 {/foreach}
 {if $canEditStatement}
-<input type="button" value="{ts escape='htmlattribute'}Edit statement{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/candidate/statement" q="`$checksum_query['query']`&enid=`$nomination.id`"}'" class="election-action-button" />
+<a href="{crmURL p="civicrm/elections/candidate/statement" q="`$checksum_query['query']`&enid=`$nomination.id`"}" class="election-btn">{ts}Edit statement{/ts}</a>
 {/if}
-<input type="button" value="{ts escape='htmlattribute'}Back{/ts}" onclick="window.location.href='{crmURL p="civicrm/elections/view" q="`$checksum_query['query']`"}'" class="election-action-button" />
+<a href="{crmURL p="civicrm/elections/view" q="`$checksum_query['query']`"}" class="election-btn">{ts}Back{/ts}</a>

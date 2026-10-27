@@ -5,5 +5,5 @@
     {/if}
 </div>
 {if $return_button_text and $return_button_action}
-    <input type="button" value="{ts escape='htmlattribute'}{$return_button_text}{/ts}" onclick="window.location.href='{$return_button_action}'" class="crm-form-submit default validate" />
+    <a href="{$return_button_action}" class="election-btn">{ts}{$return_button_text}{/ts}</a>
 {/if}

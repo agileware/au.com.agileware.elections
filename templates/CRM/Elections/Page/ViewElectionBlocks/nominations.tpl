@@ -33,7 +33,7 @@
                                 {assign var="candidatesCount" value=$candidatesCount+1}
                                 <div class="crm-election-nominated-block inside">
                                     {assign var='profilePicUrl' value=$seconder.$scImgKey}
-                                    {if $election->showPhotos}<img src="{$profilePicUrl}" alt=""/><br><br>{/if}
+                                    {if $election->showPhotos}<img src="{$profilePicUrl}" alt=""/>{/if}
                                     {$seconder.$scKey}<br>
 
                                     {if !$election->isVotingStarted and ($seconder.is_eligible_candidate == 1)}
@@ -63,15 +63,11 @@
                             {if $isAllowedToNominate}
                             {if $election->isNominationsInProgress and $election->required_nominations >= 2 and $seconder.is_eligible_candidate != 1}
                                 <div class="clearfix"></div>
-                                <input type="button" value="{ts escape='htmlattribute'}Need Second{/ts}"
-                                       onclick="window.location.href='{crmURL p="civicrm/elections/nominations/create" q="`$checksum_query['query']`&enid=`$seconder.id`"}'"
-                                       class="election-action-button"/>
+                                <a href="{crmURL p="civicrm/elections/nominations/create" q="`$checksum_query['query']`&enid=`$seconder.id`"}" class="election-btn">{ts}Need Second{/ts}</a>
                             {/if}
                             {if $election->isNominationsInProgress and $seconder.has_rejected_nomination == 0 and $seconder.has_accepted_nomination == 0 and $seconder.is_eligible_candidate == 1}
                                 <div class="clearfix"></div>
-                                <input type="button" value="{ts escape='htmlattribute'}Nominate{/ts}"
-                                       onclick="window.location.href='{crmURL p="civicrm/elections/nominations/create" q="`$checksum_query['query']`&enid=`$seconder.id`"}'"
-                                       class="election-action-button"/>
+                                <a href="{crmURL p="civicrm/elections/nominations/create" q="`$checksum_query['query']`&enid=`$seconder.id`"}" class="election-btn">{ts}Nominate{/ts}</a>
                             {/if}
 
                             {/if}
