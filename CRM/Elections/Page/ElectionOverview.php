@@ -44,6 +44,11 @@ class CRM_Elections_Page_ElectionOverview extends CRM_Elections_Page_Base {
     $this->assign('election', $election);
     $this->assign('stage', $stage);
     $this->assign('counts', $counts);
+    $voters = CRM_Elections_Helper_Eligibility::countContactsInGroups($election->allowed_groups);
+    $this->assign('eligibleVoters', $voters);
+    $this->assign('turnoutPercent', $voters > 0 ? round(100 * $counts['ballots'] / $voters) : NULL);
+    $this->assign('turnout', CRM_Elections_BAO_Election::getTurnout($eId));
+    $this->assign('hasResults', !empty($election->has_results_generated));
     $this->assign('timeline', $timeline);
     $this->assign('nextStep', CRM_Elections_BAO_Election::getNextStep($stage, $counts));
     $this->assign('canEdit', $election->canEdit() === TRUE);

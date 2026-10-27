@@ -102,6 +102,29 @@ class CRM_Elections_Helper_Eligibility {
   }
 
   /**
+   * How many people are allowed to vote: the contacts in the election's groups.
+   *
+   * @param string|array|null $groupIds
+   *
+   * @return int
+   */
+  public static function countContactsInGroups($groupIds) {
+    if (!is_array($groupIds)) {
+      $groupIds = explode(',', strval($groupIds));
+    }
+    $groupIds = array_values(array_filter(array_map('trim', $groupIds), 'strlen'));
+    if (empty($groupIds)) {
+      return 0;
+    }
+    return \Civi\Api4\Contact::get(FALSE)
+      ->selectRowCount()
+      ->addWhere('is_deleted', '=', FALSE)
+      ->addWhere('groups', 'IN', $groupIds)
+      ->execute()
+      ->count();
+  }
+
+  /**
    * Is the contact allowed to vote in the election?
    *
    * @param int $electionId

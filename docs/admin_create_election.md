@@ -6,6 +6,8 @@ To create a new election, you should be a user who gains admin access for CiviCR
 ![Click Elections](images/admin_election/01.gif)
 2. Go to **Create Election**  
 ![Click Create Election](images/admin_election/02.gif)
+The form has four tabs: **Election** (name and description), **Dates**, **Participation** (settings) and **Display**. Move between them with the mouse or the left and right arrow keys. Required fields on a tab you have not opened are flagged when you click **Submit**, and a tab with a problem is marked with a !.
+
 3. Enter information about the new election  
 - **Name and Description**: enter the name and description of the new election. It helps users to know more about the election that they will participate.  
 ![Set Name and description](images/admin_election/03.gif)
@@ -17,14 +19,15 @@ To create a new election, you should be a user who gains admin access for CiviCR
 - **Voting Start Date**: This date is to allow user to vote. This date should be after **Advertise Start Date** and before **Visible End Date**  
 - **Voting End Date**: This date is to prevent user from voting. This date should be after **Voting Start Date** and before **Visible End Date**  
 - **Results Start Date**: This date is to let users know when the results will be available. This date should be after **Voting End Date** and before **Visible End Date**  
-![Set Election Dates](images/admin_election/04.gif)
-4. Configure the election's settings:
+![Set Election Dates](images/admin_election/04.gif)  
+The dates are checked as you change them: a date that is out of order is marked straight away with a message beside it, and the **Timeline** at the bottom of the **Dates** tab shows the stages in order with the one that is running now highlighted. Dates are also checked when you save.
+4. On the **Participation** tab, configure the election's settings:
 - **Anonymise Votes**: If set to Yes, votes are anonymised once the election results are published, so it is no longer possible to see how an individual voted.
 - **Allow Members to Change Vote**: If set to Yes, a member can vote again to change their earlier vote at any time before **Voting End Date**.
 - **Allow non-logged in access**: If enabled, people can nominate, accept nominations and vote using a personalised link, without needing to log in. See [Participating without logging in](setup.md#participating-without-logging-in).
 - **Number of Required Nominations**: The number of people who must nominate a person for a position before they become an eligible candidate. See [How to second a nomination](user_second_nomination.md).
 - **Allowed by Groups**: The CiviCRM Groups and Smart Groups whose members are permitted to nominate, accept nominations and vote in this election.
-5. Choose the **Display options** for what voters see about candidates:
+5. On the **Display** tab, choose the **Display options** for what voters see about candidates:
 - **Show candidate photos**: untick to hide candidate photos everywhere in this election - the nominations list, candidate pages, the ballot and the results. Use this when you want voters to decide without photos.
 - **Candidate statements**: candidates write a statement when they accept a nomination (see [How to accept a nomination](user_accept_nomination.md)). A statement is always shown on the candidate's own page. Choose whether it is also shown on the ballot, as an expandable *Read statement* or in full, and in the candidate list once voting has started.
 - **Show who nominated each candidate**: untick to hide the nominators and seconders on the candidate page, for example when nominations are handled outside the website.

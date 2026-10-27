@@ -19,6 +19,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     }
     $this->eId = CRM_Utils_Request::retrieve('eid', 'Positive', $this, FALSE, 0);
     $this->addFormElements();
+    $this->addPageResources();
     if ($this->eId) {
       $this->pageTitle = E::ts('Edit Election');
       CRM_Utils_System::setTitle($this->pageTitle);
@@ -85,6 +86,33 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     }
 
     return $defaults;
+  }
+
+  /**
+   * Script for the tabs, the date checks and the timeline preview, with the rules and wording it needs.
+   */
+  private function addPageResources() {
+    $stage = function ($label, $start, $end = NULL, $until = NULL) {
+      return array_filter(['label' => $label, 'start' => $start, 'end' => $end, 'until' => $until]);
+    };
+    $rules = CRM_Elections_BAO_Election::getDateRules();
+    Civi::resources()
+      ->addVars('elections', [
+        'dateRules' => $rules,
+        'dateFields' => [
+          'visibility_start_date', 'visibility_end_date', 'nomination_start_date', 'nomination_end_date',
+          'advertise_candidates_date', 'voting_start_date', 'voting_end_date', 'result_date',
+        ],
+        'stages' => [
+          $stage(E::ts('Visible to voters'), 'visibility_start_date', 'visibility_end_date'),
+          $stage(E::ts('Nominations open'), 'nomination_start_date', 'nomination_end_date'),
+          $stage(E::ts('Candidates advertised'), 'advertise_candidates_date', NULL, 'voting_start_date'),
+          $stage(E::ts('Voting open'), 'voting_start_date', 'voting_end_date'),
+          $stage(E::ts('Results published'), 'result_date', NULL, 'visibility_end_date'),
+        ],
+        'nowLabel' => E::ts('Now'),
+      ])
+      ->addScriptFile(E::LONG_NAME, 'js/election-form.js', 100, 'page-footer');
   }
 
   /**

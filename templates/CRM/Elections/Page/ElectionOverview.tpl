@@ -35,9 +35,34 @@
     </div>
   </div>
 
+  {if $stage.key == 'voting' or $stage.key == 'closed' or $stage.key == 'results' or $counts.ballots > 0}
+  <div class="election-overview-turnout">
+    <h3>{ts}Turnout{/ts}</h3>
+    <p class="election-turnout-summary">
+      {ts 1=$counts.ballots}%1 ballots cast{/ts}{if $eligibleVoters > 0}, {ts 1=$eligibleVoters 2=$turnoutPercent}out of %1 people allowed to vote (%2%){/ts}{/if}
+    </p>
+    <table class="election-turnout-table">
+      <thead>
+        <tr><th>{ts}Position{/ts}</th><th>{ts}Candidates standing{/ts}</th><th>{ts}Ballots with a preference{/ts}</th></tr>
+      </thead>
+      <tbody>
+        {foreach from=$turnout item=row}
+          <tr>
+            <td>{$row.name}</td>
+            <td>{$row.candidates}</td>
+            <td>{if $row.ballots === NULL}<span class="description">{ts}Not shown: votes are anonymised{/ts}</span>{else}{$row.ballots}{/if}</td>
+          </tr>
+        {/foreach}
+      </tbody>
+    </table>
+    <p class="description">{ts}Only counts are shown here, never who voted for whom.{/ts}</p>
+  </div>
+  {/if}
+
   <p class="election-overview-actions">
     <a class="button" href="{crmURL p='civicrm/elections/position-list' q='reset=1'}#/?eid={$election->id}"><span><i class="crm-i fa-list-ol" role="img" aria-hidden="true"></i> {ts}Positions{/ts}</span></a>
     <a class="button" href="{crmURL p='civicrm/elections/candidate-list' q='reset=1'}#/?eid={$election->id}"><span><i class="crm-i fa-users" role="img" aria-hidden="true"></i> {ts}Candidates{/ts}</span></a>
+    {if $hasResults}<a class="button" href="{crmURL p='civicrm/elections/result-list' q='reset=1'}#/?eid={$election->id}"><span><i class="crm-i fa-trophy" role="img" aria-hidden="true"></i> {ts}Results{/ts}</span></a>{/if}
     {if $canEdit}<a class="button" href="{crmURL p='civicrm/elections/create' q="eid=`$election->id`"}"><span><i class="crm-i fa-pencil" role="img" aria-hidden="true"></i> {ts}Edit settings{/ts}</span></a>{/if}
     <a class="button" href="{crmURL p='civicrm/elections/view' q="eid=`$election->id`"}"><span><i class="crm-i fa-eye" role="img" aria-hidden="true"></i> {ts}View as a voter{/ts}</span></a>
     <a class="button crm-popup" href="{crmURL p='civicrm/elections/duplicate' q="eid=`$election->id`"}"><span><i class="crm-i fa-copy" role="img" aria-hidden="true"></i> {ts}Duplicate{/ts}</span></a>

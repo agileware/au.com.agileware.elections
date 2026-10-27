@@ -207,4 +207,18 @@ test('results follow the ballots: clear winners, a tie and an uncontested role',
   await expect(adminPage.locator('.election-stage')).toHaveText('Results published');
   await expect(adminPage.locator('.election-count-ballots')).toHaveText(String(Object.keys(data.ballots).length));
   await expect(adminPage.locator('.election-count-candidates')).toHaveText('11');
+
+  // Turnout: counts only, one row for each of the six roles.
+  const turnout = adminPage.locator('.election-turnout-table tbody tr');
+  await expect(turnout).toHaveCount(6);
+  await expect(adminPage.locator('.election-turnout-summary')).toContainText(`${Object.keys(data.ballots).length} ballots cast`);
+  await expect(adminPage.locator('.election-turnout-table')).not.toContainText('Nominee');
+
+  // The results screen lists the ranking for each role.
+  await adminPage.getByRole('link', { name: 'Results' }).click();
+  await expect(adminPage.getByRole('columnheader', { name: 'Candidate' })).toBeVisible();
+  for (const position of POSITIONS) {
+    await expect(adminPage.locator('tbody tr', { hasText: position }).first()).toBeVisible();
+  }
+  await expectNoPhpOutput(adminPage);
 });

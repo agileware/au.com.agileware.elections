@@ -84,9 +84,67 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
       'nominations' => (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_nomination n INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1', $p),
       'eligible' => (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_nomination n INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1 AND n.is_eligible_candidate = 1', $p),
       'candidates' => (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_nomination n INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1 AND n.is_eligible_candidate = 1 AND n.has_accepted_nomination = 1', $p),
-      'ballots' => (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(DISTINCT v.member_id) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1 AND v.member_id IS NOT NULL', $p),
+      'ballots' => max(
+        (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(DISTINCT v.member_id) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1 AND v.member_id IS NOT NULL', $p),
+        // Anonymised votes no longer say who cast them, but each voter still has a Vote activity.
+        self::countVoters($electionId)
+      ),
       'votes' => (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1', $p),
     ];
+  }
+
+  /**
+   * How many different people voted in the election, from their Vote activities.
+   *
+   * Unlike the votes themselves, the activities are kept when the votes are anonymised.
+   *
+   * @param int $electionId
+   *
+   * @return int
+   */
+  public static function countVoters($electionId) {
+    $sourceType = (int) CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_ActivityContact', 'record_type_id', 'Activity Source');
+    $voteType = CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_Activity', 'activity_type_id', 'Vote');
+    if (!$voteType) {
+      return 0;
+    }
+    return (int) CRM_Core_DAO::singleValueQuery('
+      SELECT COUNT(DISTINCT ac.contact_id)
+      FROM civicrm_activity a
+      INNER JOIN civicrm_activity_contact ac ON ac.activity_id = a.id AND ac.record_type_id = %2
+      WHERE a.activity_type_id = %3 AND a.source_record_id = %1 AND a.is_deleted = 0 AND a.is_test = 0
+    ', [1 => [(int) $electionId, 'Positive'], 2 => [$sourceType, 'Integer'], 3 => [(int) $voteType, 'Integer']]);
+  }
+
+  /**
+   * Turnout for each position: candidates standing and ballots that ranked someone for it.
+   *
+   * Counts only, never who voted for whom. Once votes are anonymised the ballots for a position
+   * can no longer be told apart, so the count for each position is NULL.
+   *
+   * @param int $electionId
+   *
+   * @return array[] Each with the keys name, candidates and ballots (int or NULL).
+   */
+  public static function getTurnout($electionId) {
+    $dao = CRM_Core_DAO::executeQuery('
+      SELECT pos.id, pos.name,
+        (SELECT COUNT(*) FROM civicrm_election_nomination n WHERE n.election_position_id = pos.id AND n.is_eligible_candidate = 1 AND n.has_accepted_nomination = 1) AS candidates,
+        (SELECT COUNT(*) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id WHERE n.election_position_id = pos.id) AS vote_rows,
+        (SELECT COUNT(DISTINCT v.member_id) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id WHERE n.election_position_id = pos.id AND v.member_id IS NOT NULL) AS ballots
+      FROM civicrm_election_position pos
+      WHERE pos.election_id = %1
+      ORDER BY pos.sortorder ASC, pos.id ASC
+    ', [1 => [(int) $electionId, 'Positive']]);
+    $rows = [];
+    while ($dao->fetch()) {
+      $rows[] = [
+        'name' => $dao->name,
+        'candidates' => (int) $dao->candidates,
+        'ballots' => ((int) $dao->vote_rows > 0 && (int) $dao->ballots === 0) ? NULL : (int) $dao->ballots,
+      ];
+    }
+    return $rows;
   }
 
   /**
@@ -302,60 +360,53 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
   }
 
   /**
-   * Compare election dates and check if they are valid.
+   * The rules the election dates must follow, in the order they are checked.
    *
-   * @param $values
-   * @return array of errors
+   * Each rule says a date must come after ('after') or must not come after ('notAfter') another one.
+   * The first rule a date fails is the one reported. The election form uses the same table in the
+   * browser to show the problem as soon as a date is changed.
+   *
+   * @return array[] Each with the keys field, rule, other and message.
+   */
+  public static function getDateRules() {
+    $rule = function ($field, $rule, $other, $message) {
+      return ['field' => $field, 'rule' => $rule, 'other' => $other, 'message' => $message];
+    };
+    return [
+      $rule('visibility_end_date', 'after', 'visibility_start_date', E::ts('End date must be after start date.')),
+      $rule('nomination_start_date', 'after', 'visibility_start_date', E::ts('Start date must be after visibility start date.')),
+      $rule('nomination_end_date', 'after', 'nomination_start_date', E::ts('End date must be after start date.')),
+      $rule('nomination_end_date', 'notAfter', 'visibility_end_date', E::ts('End date must be before visibility end date.')),
+      $rule('advertise_candidates_date', 'after', 'nomination_end_date', E::ts('Start Date must be after nomination end date.')),
+      $rule('advertise_candidates_date', 'notAfter', 'visibility_end_date', E::ts('Start Date must be before visibility end date.')),
+      $rule('voting_start_date', 'after', 'advertise_candidates_date', E::ts('Start date must be after advertise candidate date.')),
+      $rule('voting_end_date', 'after', 'voting_start_date', E::ts('End date must be after start date.')),
+      $rule('voting_end_date', 'notAfter', 'visibility_end_date', E::ts('End date must be before visibility end date.')),
+      $rule('result_date', 'after', 'voting_end_date', E::ts('Start Date must be after voting end date.')),
+      $rule('result_date', 'notAfter', 'visibility_end_date', E::ts('Start Date must be before visibility end date.')),
+    ];
+  }
+
+  /**
+   * Check the order of the election dates.
+   *
+   * @param array $values The election dates, keyed by field.
+   * @param string $dateFormat Format of the dates in $values.
+   * @return array Error message for each date that is out of order, keyed by field.
    */
   public static function compareDates($values, $dateFormat = 'Y-m-d H:i:s') {
     $errors = [];
-
-    // Check election visibility
-    if (CRM_Elections_Helper_Dates::compare($values['visibility_start_date'], $values['visibility_end_date'], $dateFormat) != 1) {
-      $errors['visibility_end_date'] = E::ts('End date must be after start date.');
+    foreach (self::getDateRules() as $rule) {
+      if (isset($errors[$rule['field']])) {
+        continue;
+      }
+      $result = CRM_Elections_Helper_Dates::compare($values[$rule['other']], $values[$rule['field']], $dateFormat);
+      // compare() gives 1 when the second date is later, -1 when it is earlier.
+      $failed = ($rule['rule'] === 'after') ? ($result != 1) : ($result == 1);
+      if ($failed) {
+        $errors[$rule['field']] = $rule['message'];
+      }
     }
-
-    // Check nominations
-    if (CRM_Elections_Helper_Dates::compare($values['visibility_start_date'], $values['nomination_start_date'], $dateFormat) != 1) {
-      $errors['nomination_start_date'] = E::ts('Start date must be after visibility start date.');
-    }
-
-    if (CRM_Elections_Helper_Dates::compare($values['nomination_start_date'], $values['nomination_end_date'], $dateFormat) != 1) {
-      $errors['nomination_end_date'] = E::ts('End date must be after start date.');
-    }
-    elseif (CRM_Elections_Helper_Dates::compare($values['visibility_end_date'], $values['nomination_end_date'], $dateFormat) == 1) {
-      $errors['nomination_end_date'] = E::ts('End date must be before visibility end date.');
-    }
-
-    // Check advertise candidates
-    if (CRM_Elections_Helper_Dates::compare($values['nomination_end_date'], $values['advertise_candidates_date'], $dateFormat) != 1) {
-      $errors['advertise_candidates_date'] = E::ts('Start Date must be after nomination end date.');
-    }
-    elseif (CRM_Elections_Helper_Dates::compare($values['visibility_end_date'], $values['advertise_candidates_date'], $dateFormat) == 1) {
-      $errors['advertise_candidates_date'] = E::ts('Start Date must be before visibility end date.');
-    }
-
-    // Checking voting with advertise candidates
-    if (CRM_Elections_Helper_Dates::compare($values['advertise_candidates_date'], $values['voting_start_date'], $dateFormat) != 1) {
-      $errors['voting_start_date'] = E::ts('Start date must be after advertise candidate date.');
-    }
-
-    // Check voting end date
-    if (CRM_Elections_Helper_Dates::compare($values['voting_start_date'], $values['voting_end_date'], $dateFormat) != 1) {
-      $errors['voting_end_date'] = E::ts('End date must be after start date.');
-    }
-    elseif (CRM_Elections_Helper_Dates::compare($values['visibility_end_date'], $values['voting_end_date'], $dateFormat) == 1) {
-      $errors['voting_end_date'] = E::ts('End date must be before visibility end date.');
-    }
-
-    // Check results date
-    if (CRM_Elections_Helper_Dates::compare($values['voting_end_date'], $values['result_date'], $dateFormat) != 1) {
-      $errors['result_date'] = E::ts('Start Date must be after voting end date.');
-    }
-    elseif (CRM_Elections_Helper_Dates::compare($values['visibility_end_date'], $values['result_date'], $dateFormat) == 1) {
-      $errors['result_date'] = E::ts('Start Date must be before visibility end date.');
-    }
-
     return $errors;
   }
 
