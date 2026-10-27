@@ -89,6 +89,20 @@ function civicrm_api3_election_sendwriteinreminders($params) {
 }
 
 /**
+ * Election.sendwriteinclosednotices API
+ *
+ * Tells people written in who never answered that voting has closed and they can no longer accept.
+ *
+ * @param array $params
+ * @return array API result descriptor
+ */
+function civicrm_api3_election_sendwriteinclosednotices($params) {
+  $sent = CRM_Elections_Helper_Mailer::sendWriteInClosedNotices();
+  $dao = NULL;
+  return civicrm_api3_create_success([], $params, 'Election', 'sendwriteinclosednotices', $dao, ['message' => E::ts('%1 write-in closed notices sent.', [1 => $sent])]);
+}
+
+/**
  * Election.generateresults API
  *
  * @param array $params

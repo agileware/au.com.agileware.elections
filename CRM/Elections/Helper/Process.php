@@ -266,7 +266,7 @@ class CRM_Elections_Helper_Process {
     if ($writeIn) {
       // A person written in can answer until voting closes.
       if ($election->isVotingEnded) {
-        throw new CRM_Core_Exception(E::ts('Voting has closed, so this can no longer be answered.'));
+        throw new CRM_Core_Exception(CRM_Elections_Helper_WriteIn::closedMessage($election));
       }
       return;
     }

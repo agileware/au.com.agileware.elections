@@ -111,7 +111,7 @@ catch (\Throwable $e) {
 $upgrader = new CRM_Elections_Upgrader();
 $upgrader->init(['key' => 'au.com.agileware.elections']);
 $again = TRUE;
-foreach ([20000, 20010, 20020, 20030, 20040, 20050, 20060, 20070, 20080] as $step) {
+foreach ([20000, 20010, 20020, 20030, 20040, 20050, 20060, 20070, 20080, 20090] as $step) {
   $again = $again && $upgrader->{'upgrade_' . $step}();
 }
 check('every upgrade step can be run again', $again === TRUE);

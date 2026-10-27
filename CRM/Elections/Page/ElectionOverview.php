@@ -57,8 +57,9 @@ class CRM_Elections_Page_ElectionOverview extends CRM_Elections_Page_Base {
     $this->assign('eligibleRoles', $roles);
     // Write-ins: who has been written in and where they stand. Never who wrote them in, or how many votes they have.
     $writeIns = [];
+    $votingEnded = !empty($election->isVotingEnded);
     $dao = CRM_Core_DAO::executeQuery('
-      SELECT p.name AS position, c.display_name, n.has_accepted_nomination AS accepted, n.has_rejected_nomination AS declined, n.write_in_reminded_date
+      SELECT p.name AS position, c.display_name, n.has_accepted_nomination AS accepted, n.has_rejected_nomination AS declined, n.write_in_reminded_date, n.write_in_closed_notified_date
       FROM civicrm_election_nomination n
       INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
       INNER JOIN civicrm_contact c ON c.id = n.member_nominee
@@ -69,7 +70,7 @@ class CRM_Elections_Page_ElectionOverview extends CRM_Elections_Page_Base {
       $writeIns[] = [
         'position' => $dao->position,
         'name' => $dao->display_name,
-        'status' => $dao->accepted ? E::ts('Accepted: on the ballot') : ($dao->declined ? E::ts('Declined') : ($dao->write_in_reminded_date ? E::ts('Waiting for an answer (reminded)') : E::ts('Waiting for an answer'))),
+        'status' => $dao->accepted ? E::ts('Accepted: on the ballot') : ($dao->declined ? E::ts('Declined') : ($votingEnded ? ($dao->write_in_closed_notified_date ? E::ts('Did not answer before voting closed (told)') : E::ts('Did not answer before voting closed')) : ($dao->write_in_reminded_date ? E::ts('Waiting for an answer (reminded)') : E::ts('Waiting for an answer')))),
       ];
     }
     $this->assign('writeIns', $writeIns);

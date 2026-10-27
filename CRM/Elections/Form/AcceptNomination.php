@@ -67,7 +67,10 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
     if (!empty($this->electionNomination['is_write_in'])) {
       // Written in by a voter: can answer until voting closes.
       if ($election->isVotingEnded) {
-        throwAccessDeniedException($this, E::ts('Voting has closed, so this can no longer be answered.'));
+        throwAccessDeniedException($this, CRM_Elections_Helper_WriteIn::closedMessage($election, $this->electionNomination['election_position_id.name']), [
+          'return_button_text' => E::ts('View the election'),
+          'return_button_action' => CRM_Elections_Helper_Mailer::link($election, $nomineeId, 'civicrm/elections/view'),
+        ]);
         return;
       }
     }

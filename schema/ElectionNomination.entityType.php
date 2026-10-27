@@ -89,6 +89,15 @@ return [
       'default' => NULL,
       'usage' => ['export'],
     ],
+    'write_in_closed_notified_date' => [
+      'title' => E::ts('Write-in Closed Notice Sent'),
+      'sql_type' => 'datetime',
+      'input_type' => 'Date',
+      'description' => E::ts('When the person written in was told that voting closed before they answered.'),
+      'add' => '2.0',
+      'default' => NULL,
+      'usage' => ['export'],
+    ],
     'is_eligible_candidate' => [
       'title' => E::ts('Is Eligible Candidate'),
       'sql_type' => 'boolean',

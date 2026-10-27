@@ -96,6 +96,22 @@ class CRM_Elections_Helper_WriteIn {
   }
 
   /**
+   * The explanation shown to a person who tries to answer a write-in nomination after voting closed.
+   *
+   * @param CRM_Elections_BAO_Election $election
+   * @param string|null $positionName
+   *
+   * @return string
+   */
+  public static function closedMessage($election, $positionName = NULL) {
+    $closed = CRM_Utils_Date::customFormat($election->voting_end_date);
+    if ($positionName) {
+      return E::ts('Voting closed on %1, so the opportunity to answer this nomination has passed. You were written in for %2 in the election "%3", and write-in nominations can only be accepted or declined before voting closes. You are not on the ballot and no votes written in for you are counted. Nothing more is needed from you.', [1 => $closed, 2 => $positionName, 3 => $election->name]);
+    }
+    return E::ts('Voting closed on %1, so the opportunity to answer this nomination has passed. Write-in nominations can only be accepted or declined before voting closes.', [1 => $closed]);
+  }
+
+  /**
    * Write one entry in the audit log saying how many people were written in and how each ended. Counts
    * only: it never says who wrote whom in.
    *

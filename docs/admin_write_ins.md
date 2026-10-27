@@ -18,6 +18,8 @@ The voter is told that the vote counts only if the person accepts before voting 
 - A reminder (**Elections - Reminder to a person written in**) is sent once, in the day before voting closes, to anyone who has not answered. It comes from the scheduled job **Elections Write-in Reminders**, which runs hourly.
 - If they **accept** they become a candidate like any other and are shown on the ballot to everyone who votes from then on. Votes already written in for them count. They cannot withdraw afterwards.
 - If they **decline**, or do not answer before voting closes, the votes written in for them are dropped. A person who declined cannot be written in again for that position.
+- If voting closes and they have not answered, they are emailed once (**Elections - Voting closed before a person written in answered**) to say the opportunity to accept has passed and they can no longer accept. The email has no accept link. It comes from the scheduled job **Elections Write-in Closed Notices**. It is only sent for elections that closed in the last 14 days.
+- If they open an accept or decline link after voting has closed, they see a message explaining that the opportunity has passed, that they are not on the ballot and that nothing more is needed, with a button to the election.
 - A person who is already a candidate for the position is simply voted for. A person who was nominated but never accepted cannot be written in.
 
 People who voted before the person accepted only see the new candidate if they vote again, so write-ins work best with **Allow Members to Change Vote** turned on. The election overview warns you when write-ins are on and changing a vote is off.

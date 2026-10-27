@@ -220,6 +220,15 @@ class CRM_Elections_Upgrader extends CRM_Extension_Upgrader_Base {
   }
 
   /**
+   * Version 2.0.0: a person written in who never answered is told when voting closes.
+   */
+  public function upgrade_20090() {
+    Civi::log()->info('Applying update 20090');
+    $this->ensureColumn('civicrm_election_nomination', 'write_in_closed_notified_date', 'DATETIME NULL DEFAULT NULL');
+    return TRUE;
+  }
+
+  /**
    * Add a column unless it already exists, so upgrade steps can safely be re-run.
    *
    * @param string $table
