@@ -84,6 +84,20 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
 
     CRM_Utils_System::setTitle(E::ts('You are Voting for %1', [1 => $this->election->name]));
 
+    Civi::resources()
+      ->addVars('electionsBallot', [
+        'duplicate' => E::ts('Rank %1 is given to more than one candidate.'),
+        'needFirst' => E::ts('Give your first choice the rank 1.'),
+        'counted' => E::ts('%1 of %2 candidates ranked.'),
+        'reviewTitle' => E::ts('Check your vote'),
+        'reviewIntro' => E::ts('This is how your vote will be recorded. Nothing is saved until you confirm.'),
+        'noPreference' => E::ts('No preference given.'),
+        'rank' => E::ts('rank %1'),
+        'back' => E::ts('Go back and change'),
+        'confirm' => E::ts('Confirm my vote'),
+      ])
+      ->addScriptFile(E::LONG_NAME, 'js/election-ballot.js', 100, 'page-footer');
+
     parent::buildQuickForm();
   }
 

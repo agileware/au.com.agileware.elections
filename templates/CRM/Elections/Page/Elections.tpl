@@ -3,95 +3,33 @@
     <div class="clear"></div><br>
 {/if}
 <div class="crm-content-block crm-block crm-elections-list-block">
-
-    <div id="claim_level-wrapper" class="dataTables_wrapper">
-        {assign var="rowCount" value=0}
-        {if empty($elections)}
-            <h2 class="error-heading">{ts}No elections found.{/ts}</h2>
-        {/if}
-        {foreach from=$elections key=errorId item=election}
-            {assign var="rowCount" value=$rowCount+1}
-
-            <div class="crm-accordion-wrapper">
-                <div class="crm-accordion-header">
-                    <span>{$election.name|escape}</span>
-                    <span></span>
-                </div><!-- /.crm-accordion-header -->
-                <div class="crm-accordion-body">
-
-                    <p>{$election.description|escape|nl2br}</p>
-
-                    {assign var="viewBtnTxt" value=""}
-                    {assign var="electionProgressTxt" value=""}
-
-                    {if !$election.hasNominationsStarted}
-                        {assign var="viewBtnTxt" value=""}
-                        {assign var="electionProgressTxt" value="{ts}Nominations will open on{/ts}"}
-                        {assign var="electionProgressDate" value=$election.nomination_start_date|crmDate}
-                    {/if}
-                    {if $election.isNominationsInProgress}
-                        {assign var="viewBtnTxt" value="{ts escape='htmlattribute'}View and submit Nominations{/ts}"}
-                        {assign var="electionProgressTxt" value="{ts}Nominations will close on{/ts}"}
-                        {assign var="electionProgressDate" value=$election.nomination_end_date|crmDate}
-                    {/if}
-
-                    {if $election.hasNominationsStarted and (!$election.isNominationsInProgress) and !$election.advertiseCandidatesStarted}
-                        {assign var="viewBtnTxt" value="{ts escape='htmlattribute'}View the Nominations{/ts}"}
-                        {assign var="electionProgressTxt" value="{ts}Candidates will be advertised from{/ts}"}
-                        {assign var="electionProgressDate" value=$election.advertise_candidates_date|crmDate}
-                    {/if}
-
-                    {if $election.advertiseCandidatesStarted and !$election.isVotingStarted}
-                        {assign var="viewBtnTxt" value="{ts escape='htmlattribute'}View the Candidates{/ts}"}
-                        {assign var="electionProgressTxt" value="{ts}Voting will open on{/ts}"}
-                        {assign var="electionProgressDate" value=$election.voting_start_date|crmDate}
-                    {/if}
-
-                    {if $election.isVotingStarted and !$election.isVotingEnded}
-                        {assign var="viewBtnTxt" value="{ts escape='htmlattribute'}Vote in the Election{/ts}"}
-                        {assign var="electionProgressTxt" value="{ts}Voting will close on{/ts}"}
-                        {assign var="electionProgressDate" value=$election.voting_end_date|crmDate}
-                        {if !$election.isUserAllowedToVote}
-                            {assign var="viewBtnTxt" value=""}
-                            {assign var="electionProgressTxt" value=""}
-                        {/if}
-                    {/if}
-
-                    {if $election.isVotingEnded and !$election.isResultsOut}
-                        {assign var="viewBtnTxt" value="{ts escape='htmlattribute'}View the Candidates{/ts}"}
-                        {assign var="electionProgressTxt" value="{ts}Election results will be available on{/ts}"}
-                        {assign var="electionProgressDate" value=$election.result_date|crmDate}
-                    {/if}
-
-                    {if $election.isResultsOut}
-                        {assign var="viewBtnTxt" value="{ts escape='htmlattribute'}View Election results{/ts}"}
-                        {assign var="electionProgressTxt" value="{ts}Election results published on{/ts}"}
-                        {assign var="electionProgressDate" value=$election.result_date|crmDate}
-                    {/if}
-
-
-                    {if $viewBtnTxt != ''}
+    {if empty($elections)}
+        <h2 class="error-heading">{ts}No elections found.{/ts}</h2>
+    {/if}
+    <div class="election-card-list">
+        {foreach from=$elections item=election}
+            <article class="election-card election-card-{$election.card.stage|escape}">
+                <header class="election-card-header">
+                    <h2 class="election-card-title">{$election.name|escape}</h2>
+                    <span class="election-badge election-badge-{$election.card.stage|escape}">{$election.card.stageLabel|escape}</span>
+                </header>
+                {if $election.description}<p class="election-card-description">{$election.description|escape|nl2br}</p>{/if}
+                <p class="election-card-line">{$election.card.line|escape} <a class="election-card-timezone" target="_blank" rel="noopener noreferrer" href="{$siteTimeZoneConvertUrl|escape}">({$siteTimeZone|escape})</a></p>
+                {if $election.hasUserAlreadyVoted and !$election.isVotingEnded}
+                    <p class="election-card-line">
+                        {ts 1=$election.userVoteDate|crmDate}You voted in this election on %1.{/ts}
+                        {if $election.isUserAllowedToVote}{ts}You can vote again if you wish to change your vote.{/ts}{/if}
+                    </p>
+                {/if}
+                {if $election.card.button != ''}
+                    <p class="election-card-actions">
                         {if !$viewAction}
-                            <a href="{crmURL p="civicrm/elections/view" q="eid=`$election.id`"}" class="election-btn">{$viewBtnTxt}</a><br>
+                            <a href="{crmURL p="civicrm/elections/view" q="eid=`$election.id`"}" class="election-btn">{$election.card.button|escape}</a>
                         {else}
-                            <a href="{$viewAction|escape}?eid={$election.id|escape}" class="election-btn">{$viewBtnTxt}</a><br>
+                            <a href="{$viewAction|escape}?eid={$election.id|escape}" class="election-btn">{$election.card.button|escape}</a>
                         {/if}
-                    {/if}
-
-                    {if $electionProgressTxt != ''}
-                        <p>{$electionProgressTxt} <span class="crm-election-date">{$electionProgressDate} <a target="_blank" href="{$siteTimeZoneConvertUrl}">({$siteTimeZone})</a></span></p>
-                    {/if}
-
-                    {if $election.hasUserAlreadyVoted and !$election.isVotingEnded}
-                        <p>
-                            {capture assign=voteDate}<span class="crm-election-date">{$election.userVoteDate|crmDate} <a target="_blank" href="{$siteTimeZoneConvertUrl}">({$siteTimeZone})</a></span>{/capture}
-                            {ts 1=$voteDate}You voted in this election on %1.{/ts}
-                            {if $election.isUserAllowedToVote}
-                                {ts}You can vote again if you wish to change your vote.{/ts}
-                            {/if}
-                        </p>
-                    {/if}
-
+                    </p>
+                {/if}
 
                     {if !$isFromShortCode}
                         {if $isElectionAdmin}
@@ -126,8 +64,7 @@
                     {/if}
 
 
-                </div><!-- /.crm-accordion-body -->
-            </div><!-- ending of election wrapper -->
+            </article>
         {/foreach}
     </div>
 </div>

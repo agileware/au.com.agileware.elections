@@ -135,6 +135,8 @@ class CRM_Elections_Page_Elections extends CRM_Elections_Page_Base {
       $elections[$index]['isUserAllowedToVote'] = $variables['is_user_allowed_to_vote'];
       $elections[$index]['hasUserAlreadyVoted'] = $variables['has_user_already_voted'];
 
+      $elections[$index]['card'] = CRM_Elections_Helper_ElectionStatus::card($elections[$index]);
+
       $elections[$index]['positions'] = civicrm_api3('ElectionPosition', 'getcount', [
         'election_id' => $election['id'],
       ]);
