@@ -67,6 +67,8 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       $defaults['allowed_groups'] = $election->allowed_groups;
       $defaults['nomination_groups'] = $election->nomination_groups;
       $defaults['send_emails'] = (int) $election->send_emails;
+      $election->assignDisplayOptions();
+      $defaults['allow_online_nominations'] = (int) $election->onlineNominations;
       $defaults['candidate_groups'] = $election->candidate_groups;
 
       $defaults['allow_checksum_access'] = $election->allow_checksum_access;
@@ -86,6 +88,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       $defaults['allowed_groups'] = '';
       $defaults['nomination_groups'] = '';
       $defaults['send_emails'] = 1;
+      $defaults['allow_online_nominations'] = 1;
       $defaults['candidate_groups'] = '';
       $defaults['show_photos'] = 1;
       $defaults['show_statements'] = CRM_Elections_BAO_Election::STATEMENTS_LINK;
@@ -177,6 +180,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       ],
     ], TRUE);
 
+    $this->add('advcheckbox', 'allow_online_nominations', E::ts('Allow people to nominate online'));
     $this->add('advcheckbox', 'send_emails', E::ts('Email people about their nominations'));
 
     // Who may nominate, and who may stand, when that is not the same as who may vote.
@@ -242,6 +246,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       'required_nominations'        => $values['required_nominations'],
       'allowed_groups'              => $values['allowed_groups'],
       'send_emails'                 => !empty($values['send_emails']) ? 1 : 0,
+      'allow_online_nominations'    => !empty($values['allow_online_nominations']) ? 1 : 0,
       'nomination_groups'           => $values['nomination_groups'] ?? '',
       'candidate_groups'            => $values['candidate_groups'] ?? '',
       'show_photos'                 => !empty($values['show_photos']) ? 1 : 0,

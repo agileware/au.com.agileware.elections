@@ -115,6 +115,14 @@
         </tr>
 
         <tr class="crm-create-election-form-block-results">
+            <td class="label label-select-col">{$form.allow_online_nominations.label}</td>
+            <td>
+                {$form.allow_online_nominations.html}<br>
+                <span class="description">{ts}On: people in the nomination groups nominate and second on the website during the nomination period. Off: there is no nomination form and the organisers choose the candidates themselves (Candidates screen). Candidates added that way are asked to accept, and the rest of the election works as usual.{/ts}</span>
+            </td>
+        </tr>
+
+        <tr class="crm-create-election-form-block-results">
             <td class="label label-select-col">{$form.send_emails.label}</td>
             <td>
                 {$form.send_emails.html}<br>

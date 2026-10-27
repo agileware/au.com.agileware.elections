@@ -258,7 +258,7 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
     foreach ($dateFields as $field) {
       $values[$field] = date('Y-m-d H:i:s', strtotime($source[$field]) + $shiftSeconds);
     }
-    foreach (['anonymize_votes', 'required_nominations', 'allow_revote', 'allow_checksum_access', 'allowed_groups', 'nomination_groups', 'candidate_groups', 'send_emails', 'show_photos', 'show_statements', 'show_nominators', 'name_format', 'voting_method'] as $field) {
+    foreach (['anonymize_votes', 'required_nominations', 'allow_revote', 'allow_checksum_access', 'allowed_groups', 'nomination_groups', 'candidate_groups', 'send_emails', 'allow_online_nominations', 'show_photos', 'show_statements', 'show_nominators', 'name_format', 'voting_method'] as $field) {
       if (array_key_exists($field, $source)) {
         $values[$field] = $source[$field];
       }
@@ -360,6 +360,8 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
    */
   public function assignDisplayOptions() {
     $this->showPhotos = ($this->show_photos === NULL || $this->show_photos === '') ? TRUE : (bool) $this->show_photos;
+    // NULL (an election made before 2.0, or an API caller that left it out) means people can nominate online.
+    $this->onlineNominations = ($this->allow_online_nominations === NULL || $this->allow_online_nominations === '') ? TRUE : (bool) $this->allow_online_nominations;
     $this->showNominators = ($this->show_nominators === NULL || $this->show_nominators === '') ? TRUE : (bool) $this->show_nominators;
     $statements = $this->show_statements;
     $this->statementDisplay = array_key_exists($statements ?? '', self::getStatementDisplayOptions()) ? $statements : self::STATEMENTS_NONE;

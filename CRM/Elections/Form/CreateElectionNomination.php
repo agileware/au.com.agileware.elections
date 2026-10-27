@@ -34,6 +34,11 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
 
     $this->isElectionAdmin = isElectionAdmin();
 
+    $this->election->assignDisplayOptions();
+    if (!$this->election->onlineNominations) {
+      throwAccessDeniedException($this, E::ts('Candidates for this election are chosen by the organisers, so there are no online nominations.'));
+      return;
+    }
     if (!$this->election->isNominationsInProgress || (!$this->election->isVisible && !isElectionAdmin())) {
       throwAccessDeniedPage($this);
       return;

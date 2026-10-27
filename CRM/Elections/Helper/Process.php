@@ -32,6 +32,10 @@ class CRM_Elections_Helper_Process {
     if (!$election->isVisible || $election->is_deleted) {
       throw new CRM_Core_Exception(E::ts('You are not authorized to access this page.'));
     }
+    $election->assignDisplayOptions();
+    if (!$election->onlineNominations) {
+      throw new CRM_Core_Exception(E::ts('Candidates for this election are chosen by the organisers, so there are no online nominations.'));
+    }
     if (!$election->isNominationsInProgress) {
       throw new CRM_Core_Exception(E::ts('Nominations are not open for this election.'));
     }

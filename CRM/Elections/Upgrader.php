@@ -210,6 +210,16 @@ class CRM_Elections_Upgrader extends CRM_Extension_Upgrader_Base {
   }
 
   /**
+   * Version 2.0.0: an election can turn online nominating off, for organisers who choose the candidates themselves
+   * (on for every existing election).
+   */
+  public function upgrade_20080() {
+    Civi::log()->info('Applying update 20080');
+    $this->ensureColumn('civicrm_election', 'allow_online_nominations', 'TINYINT NULL DEFAULT 1');
+    return TRUE;
+  }
+
+  /**
    * Add a column unless it already exists, so upgrade steps can safely be re-run.
    *
    * @param string $table
