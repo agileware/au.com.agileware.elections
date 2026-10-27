@@ -207,8 +207,9 @@ test('a ballot changed before it is sent cannot reach another election or anothe
 test('election pages ask the browser not to pass the personal link on to other sites', async ({ browser }) => {
   reseedCouncil();
   for (const [civiPath, persona] of [['civicrm/elections/view', 'V01'], ['civicrm/elections/nominations/create', 'V01'], ['civicrm/elections/summary', 'V01']] as const) {
-    const { context, response } = await open(browser, persona, civiPath);
-    expect(response?.headers()['referrer-policy'], civiPath).toBe('same-origin');
+    const { context, page } = await open(browser, persona, civiPath);
+    // The page itself carries the policy (a site's own headers may replace the one the extension sends).
+    await expect(page.locator('meta[name="referrer"]'), civiPath).toHaveAttribute('content', 'same-origin');
     await context.close();
   }
 });
