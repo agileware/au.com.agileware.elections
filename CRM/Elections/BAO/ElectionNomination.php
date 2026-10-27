@@ -81,8 +81,8 @@ class CRM_Elections_BAO_ElectionNomination extends CRM_Elections_DAO_ElectionNom
     if ($election->isVotingStarted) {
       throw new CRM_Core_Exception(E::ts('Candidates cannot be added once voting has started.'));
     }
-    if (!CRM_Elections_Helper_Eligibility::canVote($electionId, $nomineeId)) {
-      throw new CRM_Core_Exception(E::ts('Only people who can take part in this election can be candidates. Add the person to one of the election groups first.'));
+    if (!CRM_Elections_Helper_Eligibility::canBeNominated($electionId, $nomineeId)) {
+      throw new CRM_Core_Exception(E::ts('Only people who can stand in this election can be candidates. Add the person to one of the election groups first.'));
     }
 
     $existing = civicrm_api3('ElectionNomination', 'get', ['member_nominee' => $nomineeId, 'election_position_id' => $positionId, 'sequential' => 1]);

@@ -308,6 +308,22 @@ return [
       'add' => '5.3',
       'usage' => ['export'],
     ],
+    'nomination_groups' => [
+      'title' => E::ts('Nomination Groups'),
+      'sql_type' => 'text',
+      'input_type' => 'Select2',
+      'description' => E::ts('Groups whose members may nominate and second. Empty means the same groups as voting.'),
+      'add' => '2.0',
+      'usage' => ['export'],
+    ],
+    'candidate_groups' => [
+      'title' => E::ts('Candidate Groups'),
+      'sql_type' => 'text',
+      'input_type' => 'Select2',
+      'description' => E::ts('Groups whose members may be nominated and stand as candidates. Empty means the same groups as voting.'),
+      'add' => '2.0',
+      'usage' => ['export'],
+    ],
     'created_at' => [
       'title' => E::ts('Created At'),
       'sql_type' => 'timestamp',

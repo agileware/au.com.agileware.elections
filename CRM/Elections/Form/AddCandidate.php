@@ -24,7 +24,7 @@ class CRM_Elections_Form_AddCandidate extends CRM_Elections_Form_Base {
     foreach (civicrm_api3('ElectionPosition', 'get', ['election_id' => $this->eId, 'options' => ['limit' => 0, 'sort' => 'sortorder ASC']])['values'] as $position) {
       $positions[$position['id']] = $position['name'];
     }
-    $groups = array_filter(explode(',', (string) $this->election->allowed_groups));
+    $groups = array_filter(explode(',', CRM_Elections_Helper_Eligibility::groupsFor($this->election, 'candidate')));
 
     $this->add('select', 'position', E::ts('Position'), ['' => E::ts('- select -')] + $positions, TRUE);
     $this->addEntityRef('contact', E::ts('Candidate'), [

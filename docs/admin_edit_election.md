@@ -23,4 +23,5 @@ To edit an election, you should be a user who gains admin access for CiviCRM and
 - **Allow Members to Change Vote**: to edit whether a member can revote to change their vote before **Voting End Date**.
 - **Allow non-logged in access**: to edit whether people can participate using a personalised link without logging in. See [Participating without logging in](setup.md#participating-without-logging-in).
 - **Number of Required Nominations**: to edit the number of nominations a person needs to become an eligible candidate. See [How to second a nomination](user_second_nomination.md).
-- **Allowed by Groups**: to edit the CiviCRM Groups and Smart Groups permitted to participate in this election.
+- **Allowed by Groups**: to edit the CiviCRM Groups and Smart Groups permitted to vote in this election.
+- **Nomination Groups** and **Candidate Groups**: to change who may nominate and second, and who may stand. Empty means the *Allowed by Groups* (see *Create an election*). None of the group settings can change once people have voted.

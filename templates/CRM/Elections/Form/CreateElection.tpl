@@ -115,6 +115,22 @@
         </tr>
 
         <tr class="crm-create-election-form-block-results">
+            <td class="label label-select-col">{$form.nomination_groups.label}</td>
+            <td>
+                {$form.nomination_groups.html}<br>
+                <span class="description">{ts}Optional. Members of these groups may nominate and second. Leave empty to use the voting groups. Group membership, including smart groups, is checked at the moment someone acts.{/ts}</span>
+            </td>
+        </tr>
+
+        <tr class="crm-create-election-form-block-results">
+            <td class="label label-select-col">{$form.candidate_groups.label}</td>
+            <td>
+                {$form.candidate_groups.html}<br>
+                <span class="description">{ts}Optional. Members of these groups may be nominated and stand as candidates. Leave empty to use the voting groups. People who already voted keep their vote whatever happens to their membership later.{/ts}</span>
+            </td>
+        </tr>
+
+        <tr class="crm-create-election-form-block-results">
             <td class="label label-select-col">{$form.voting_method.label}</td>
             <td>
                 {$form.voting_method.html}<br>

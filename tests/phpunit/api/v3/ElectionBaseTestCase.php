@@ -34,6 +34,7 @@ class api_v3_ElectionBaseTestCase extends \PHPUnit\Framework\TestCase implements
     $upgrader->upgrade_20010();
     $upgrader->upgrade_20020();
     $upgrader->upgrade_20030();
+    $upgrader->upgrade_20040();
     return $env;
   }
 

@@ -65,6 +65,8 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       $defaults['voting_method'] = CRM_Elections_VotingMethod::normalise($election->voting_method);
       $defaults['required_nominations'] = $election->required_nominations;
       $defaults['allowed_groups'] = $election->allowed_groups;
+      $defaults['nomination_groups'] = $election->nomination_groups;
+      $defaults['candidate_groups'] = $election->candidate_groups;
 
       $defaults['allow_checksum_access'] = $election->allow_checksum_access;
 
@@ -81,6 +83,8 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       $defaults['voting_method'] = CRM_Elections_VotingMethod::IRV;
       $defaults['required_nominations'] = 2;
       $defaults['allowed_groups'] = '';
+      $defaults['nomination_groups'] = '';
+      $defaults['candidate_groups'] = '';
       $defaults['show_photos'] = 1;
       $defaults['show_statements'] = CRM_Elections_BAO_Election::STATEMENTS_LINK;
       $defaults['show_nominators'] = 1;
@@ -171,6 +175,21 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       ],
     ], TRUE);
 
+    // Who may nominate, and who may stand, when that is not the same as who may vote.
+    foreach (['nomination_groups' => E::ts('Nomination Groups'), 'candidate_groups' => E::ts('Candidate Groups')] as $field => $label) {
+      $this->addEntityRef($field, $label, [
+        'entity' => 'Group',
+        'placeholder' => E::ts('- Same as voting groups -'),
+        'multiple' => TRUE,
+        'api' => [
+          'params' => [
+            'is_active' => 1,
+            'is_hidden' => 0,
+          ],
+        ],
+      ], FALSE);
+    }
+
     // Display options.
     $this->add('advcheckbox', 'show_photos', E::ts('Show candidate photos'));
     $this->add('select', 'show_statements', E::ts('Candidate statements'), CRM_Elections_BAO_Election::getStatementDisplayOptions(), TRUE);
@@ -218,6 +237,8 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       'is_visible'                  => 0,
       'required_nominations'        => $values['required_nominations'],
       'allowed_groups'              => $values['allowed_groups'],
+      'nomination_groups'           => $values['nomination_groups'] ?? '',
+      'candidate_groups'            => $values['candidate_groups'] ?? '',
       'show_photos'                 => !empty($values['show_photos']) ? 1 : 0,
       'show_statements'             => $values['show_statements'],
       'show_nominators'             => !empty($values['show_nominators']) ? 1 : 0,

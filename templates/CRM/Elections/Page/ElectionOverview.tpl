@@ -35,6 +35,16 @@
     </div>
   </div>
 
+  {if $eligibleRoles}
+  <div class="election-overview-roles">
+    <h3>{ts}Who can take part{/ts}</h3>
+    <ul>
+      <li>{ts 1=$eligibleVoters}%1 people may vote{/ts}</li>
+      {foreach from=$eligibleRoles item=role}<li>{$role.label|escape}: {$role.count|escape}</li>{/foreach}
+    </ul>
+  </div>
+  {/if}
+
   {if $stage.key == 'voting' or $stage.key == 'closed' or $stage.key == 'results' or $counts.ballots > 0}
   <div class="election-overview-turnout">
     <h3>{ts}Turnout{/ts}</h3>

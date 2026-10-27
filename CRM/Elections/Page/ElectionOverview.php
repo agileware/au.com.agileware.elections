@@ -46,6 +46,15 @@ class CRM_Elections_Page_ElectionOverview extends CRM_Elections_Page_Base {
     $this->assign('counts', $counts);
     $voters = CRM_Elections_Helper_Eligibility::countContactsInGroups($election->allowed_groups);
     $this->assign('eligibleVoters', $voters);
+    // Who is in each role, shown when the election has groups of its own for nominating or standing.
+    $roles = [];
+    foreach (['nominating' => E::ts('May nominate and second'), 'candidate' => E::ts('May stand as candidates')] as $role => $label) {
+      $own = $role === 'nominating' ? $election->nomination_groups : $election->candidate_groups;
+      if (trim((string) $own, ',') !== '') {
+        $roles[] = ['label' => $label, 'count' => CRM_Elections_Helper_Eligibility::countContactsInGroups(CRM_Elections_Helper_Eligibility::groupsFor($election, $role))];
+      }
+    }
+    $this->assign('eligibleRoles', $roles);
     $this->assign('turnoutPercent', $voters > 0 ? round(100 * $counts['ballots'] / $voters) : NULL);
     $this->assign('turnout', CRM_Elections_BAO_Election::getTurnout($eId));
     $this->assign('hasResults', !empty($election->has_results_generated));

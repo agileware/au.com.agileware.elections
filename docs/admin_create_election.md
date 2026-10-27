@@ -27,7 +27,11 @@ The dates are checked as you change them: a date that is out of order is marked 
 - **Allow Members to Change Vote**: If set to Yes, a member can vote again to change their earlier vote at any time before **Voting End Date**.
 - **Allow non-logged in access**: If enabled, people can nominate, accept nominations and vote using a personalised link, without needing to log in. See [Participating without logging in](setup.md#participating-without-logging-in).
 - **Number of Required Nominations**: The number of people who must nominate a person for a position before they become an eligible candidate. See [How to second a nomination](user_second_nomination.md).
-- **Allowed by Groups**: The CiviCRM Groups and Smart Groups whose members are permitted to nominate, accept nominations and vote in this election.
+- **Allowed by Groups**: The CiviCRM Groups and Smart Groups whose members are permitted to vote in this election. Unless you set the two groups below, the same people can also nominate, second and stand.
+- **Nomination Groups** (optional): The groups whose members may nominate and second. Leave empty to use the *Allowed by Groups*. Someone in the *Allowed by Groups* but not in these can vote but is refused the nomination form.
+- **Candidate Groups** (optional): The groups whose members may be nominated, accept a nomination, or be added as a candidate by an administrator. Leave empty to use the *Allowed by Groups*. A nominee must be a member of one of these groups at the moment they are nominated and again when they accept.
+
+Group membership, including smart groups, is checked when each person acts. People who have already voted keep their vote, whatever happens to their membership later. The groups cannot be changed once people have voted. The same person may be in more than one group, and nominating yourself is allowed.
 5. On the **Display** tab, choose the **Display options** for what voters see about candidates:
 - **Show candidate photos**: untick to hide candidate photos everywhere in this election - the nominations list, candidate pages, the ballot and the results. Use this when you want voters to decide without photos.
 - **Candidate statements**: candidates write a statement when they accept a nomination (see [How to accept a nomination](user_accept_nomination.md)). A statement is always shown on the candidate's own page. Choose whether it is also shown on the ballot, as an expandable *Read statement* or in full, and in the candidate list once voting has started.

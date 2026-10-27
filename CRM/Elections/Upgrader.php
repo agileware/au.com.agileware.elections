@@ -137,6 +137,17 @@ class CRM_Elections_Upgrader extends CRM_Extension_Upgrader_Base {
   }
 
   /**
+   * Version 2.0.0: separate groups for who may nominate and second, and who may stand. Empty means the
+   * voting groups, so every existing election behaves as before.
+   */
+  public function upgrade_20040() {
+    Civi::log()->info('Applying update 20040');
+    $this->ensureColumn('civicrm_election', 'nomination_groups', 'TEXT NULL DEFAULT NULL');
+    $this->ensureColumn('civicrm_election', 'candidate_groups', 'TEXT NULL DEFAULT NULL');
+    return TRUE;
+  }
+
+  /**
    * Add a column unless it already exists, so upgrade steps can safely be re-run.
    *
    * @param string $table

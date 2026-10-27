@@ -40,7 +40,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     }
 
     // Not allowed to take part (logged in, or using a personal link)
-    if ( !isLoggedInMemberAllowedToVote( $this->eId ) ) {
+    if ( !CRM_Elections_Helper_Eligibility::canNominate( $this->eId ) ) {
       throwNonMemberAccessDenied($this);
       return;
     }
