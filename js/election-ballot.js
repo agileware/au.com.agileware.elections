@@ -8,7 +8,7 @@
   var text = (CRM.vars && CRM.vars.electionsBallot) || {};
   var plurality = text.method === 'plurality';
 
-  /** The groups of rows on the ballot, one for each position. */
+  /** The groups of rows on the ballot, one for each position: the candidates, and the places for write-ins. */
   function positions($form) {
     return $form.find('.crm-vote-election-form-block').map(function () {
       var $block = $(this);
@@ -16,17 +16,39 @@
       var rows = $block.find('.vote-candidate-row').map(function () {
         var $row = $(this);
         return {
+          writeIn: false,
           $field: $row.find(plurality ? 'input[type="checkbox"][name^="candidate_"]' : 'input[name^="candidate_"]'),
           name: $.trim($row.find('label').first().text())
         };
       }).get();
+      $block.find('.election-writein-row').each(function () {
+        var $row = $(this);
+        var $person = $row.find('input[name^="writein_"]');
+        rows.push({
+          writeIn: true,
+          $person: $person,
+          $field: $row.find('input[name^="writeinrank_"]'),
+          get name() {
+            var chosen = $.trim($row.find('.select2-chosen').first().text()) || $person.val();
+            return (text.writtenIn || '%1').replace('%1', chosen);
+          }
+        });
+      });
       return {$block: $block, title: title, rows: rows, seats: parseInt($block.data('seats'), 10) || 1};
     }).get();
   }
 
+  /** Has the voter chosen this row (ticked, ranked, or named a person to write in)? */
+  function isChosen(row) {
+    if (row.writeIn) {
+      return $.trim(String(row.$person.val() || '')) !== '';
+    }
+    return rankOf(row) !== null;
+  }
+
   function rankOf(row) {
     if (plurality) {
-      return row.$field.prop('checked') ? 1 : null;
+      return isChosen(row) ? 1 : null;
     }
     var value = parseInt(row.$field.val(), 10);
     return isNaN(value) ? null : value;
@@ -35,7 +57,7 @@
   /** What is wrong with the ranks in one position, in plain words (empty when nothing is). */
   function problemsIn(position) {
     if (plurality) {
-      var ticked = $.grep(position.rows, function (row) { return rankOf(row) !== null; }).length;
+      var ticked = $.grep(position.rows, isChosen).length;
       return {problems: ticked > position.seats ? [text.tooMany.replace('%1', position.seats)] : [], ranked: ticked};
     }
     var problems = [];
@@ -43,6 +65,9 @@
     var ranked = 0;
     $.each(position.rows, function (i, row) {
       var rank = rankOf(row);
+      if (row.writeIn && isChosen(row) && rank === null) {
+        problems.push(text.writeInRank);
+      }
       if (rank === null) {
         return;
       }
@@ -67,7 +92,7 @@
         $status = $('<p class="election-rank-status" aria-live="polite"></p>').appendTo(position.$block.find('> p').first().parent()).insertAfter(position.$block.find('> p').first());
       }
       $status.toggleClass('election-rank-problem', result.problems.length > 0);
-      var counted = plurality ? text.chosen.replace('%1', result.ranked).replace('%2', position.seats) : text.counted.replace('%1', result.ranked).replace('%2', position.rows.length);
+      var counted = plurality ? text.chosen.replace('%1', result.ranked).replace('%2', position.seats) : text.counted.replace('%1', result.ranked).replace('%2', $.grep(position.rows, function (r) { return !r.writeIn; }).length);
       $status.text(result.problems.length ? result.problems.join(' ') : counted);
       anyProblem = anyProblem || result.problems.length > 0;
     });
@@ -79,7 +104,7 @@
     var $list = $('<div class="election-review-list"></div>');
     var skipped = [];
     $.each(positions($form), function (i, position) {
-      var ranked = $.grep(position.rows, function (row) { return rankOf(row) !== null; });
+      var ranked = $.grep(position.rows, function (row) { return rankOf(row) !== null && isChosen(row); });
       var title = position.title;
       if (!ranked.length) {
         skipped.push(title);
@@ -140,8 +165,30 @@
     if (!$form.length || !text.confirm) {
       return;
     }
-    $form.on('change', 'input[name^="candidate_"]', function () {
+    $form.on('change', 'input[name^="candidate_"], input[name^="writein"]', function () {
       check($form);
+    });
+    // Write-in places: one to start, a button adds the next (without JavaScript they are all shown).
+    $form.find('.election-writein').each(function () {
+      var $set = $(this);
+      var $rows = $set.find('.election-writein-row');
+      var $add = $set.find('.election-writein-add');
+      function sync() {
+        var hidden = $rows.filter(':hidden');
+        $add.prop('hidden', hidden.length === 0);
+      }
+      $rows.each(function (i) {
+        if (i > 0 && $.trim(String($(this).find('input[name^="writein_"]').val() || '')) === '') {
+          $(this).prop('hidden', true);
+        }
+      });
+      $add.on('click', function () {
+        var $next = $rows.filter(':hidden').first();
+        $next.prop('hidden', false);
+        $next.find('input, select, .select2-focusser').filter(':visible').first().trigger('focus');
+        sync();
+      });
+      sync();
     });
     check($form);
     $form.on('submit', function (e) {

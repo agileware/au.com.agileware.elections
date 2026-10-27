@@ -35,7 +35,7 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
         'id' => $this->enId,
         'member_nominee' => $nomineeId,
         'is_eligible_candidate' => 1,
-        'return' => ['has_accepted_nomination', 'election_position_id.name', 'has_rejected_nomination', 'election_position_id.election_id.name', 'election_position_id.election_id'],
+        'return' => ['has_accepted_nomination', 'is_write_in', 'election_position_id.name', 'has_rejected_nomination', 'election_position_id.election_id.name', 'election_position_id.election_id'],
       ]);
     } catch (CRM_Core_Exception $e) {
       throwAccessDeniedException($this, E::ts('You are not authorized to access this page.'));
@@ -64,7 +64,14 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
       return;
     }
 
-    if ($election->isVotingStarted) {
+    if (!empty($this->electionNomination['is_write_in'])) {
+      // Written in by a voter: can answer until voting closes.
+      if ($election->isVotingEnded) {
+        throwAccessDeniedException($this, E::ts('Voting has closed, so this can no longer be answered.'));
+        return;
+      }
+    }
+    elseif ($election->isVotingStarted) {
       throwAccessDeniedException($this, E::ts('You cannot accept the nomination once voting has started.'));
       return;
     }

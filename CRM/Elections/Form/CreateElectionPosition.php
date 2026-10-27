@@ -58,6 +58,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
         $default['name']          = $this->electionPosition['name'];
         $default['quantity']      = $this->electionPosition['quantity'];
         $default['sortorder']     = $this->electionPosition['sortorder'];
+        $default['write_ins_per_seat'] = $this->electionPosition['write_ins_per_seat'] ?? 0;
         $default['description']   = (!empty($this->electionPosition['description'])) ? $this->electionPosition['description'] : '';
 
         CRM_Utils_System::setTitle(E::ts('Edit Election Position for %1', [1 => $this->electionPosition['name']]));
@@ -77,6 +78,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
     $this->add('text', 'name', E::ts('Name'), ['size' => 35], TRUE);
     $this->add('text', 'quantity', E::ts('Seats'), ['size' => 15], TRUE);
     $this->add('text', 'sortorder', E::ts('Order'), ['size' => 15], TRUE);
+    $this->add('select', 'write_ins_per_seat', E::ts('Write-ins per seat'), array_combine(range(0, CRM_Elections_Helper_WriteIn::MAX_PER_SEAT), range(0, CRM_Elections_Helper_WriteIn::MAX_PER_SEAT)), TRUE);
     $this->add('textarea', 'description', E::ts('Description'), ['cols' => 55, 'rows' => 6], FALSE);
     $this->addElement('hidden', 'eid', $this->eId);
     $this->addElement('hidden', 'epid', $this->epId);
@@ -113,6 +115,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
       'name'         => $values['name'],
       'quantity'     => $values['quantity'],
       'sortorder'    => $values['sortorder'],
+      'write_ins_per_seat' => (int) $values['write_ins_per_seat'],
       'description'  => $values['description'],
       'election_id'  => $this->eId,
       'created_by'   => CRM_Core_Session::singleton()->getLoggedInContactID(),

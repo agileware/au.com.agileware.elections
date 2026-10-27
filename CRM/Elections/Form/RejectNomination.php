@@ -34,7 +34,7 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
       $this->electionNomination = civicrm_api3('ElectionNomination', 'getsingle', [
         'id' => $this->enId,
         'member_nominee' => $nomineeId,
-        'return' => ['has_accepted_nomination', 'is_eligible_candidate', 'election_position_id.name', 'election_position_id.election_id.name', 'has_rejected_nomination', 'election_position_id.election_id'],
+        'return' => ['has_accepted_nomination', 'is_write_in', 'is_eligible_candidate', 'election_position_id.name', 'election_position_id.election_id.name', 'has_rejected_nomination', 'election_position_id.election_id'],
       ]);
     }
     catch (CRM_Core_Exception $e) {
@@ -59,7 +59,14 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
       return;
     }
 
-    if ($election->isVotingStarted) {
+    if (!empty($this->electionNomination['is_write_in']) && !$this->electionNomination['has_accepted_nomination']) {
+      // Written in by a voter and not yet answered: can decline until voting closes.
+      if ($election->isVotingEnded) {
+        throwAccessDeniedException($this, E::ts('Voting has closed, so this can no longer be answered.'));
+        return;
+      }
+    }
+    elseif ($election->isVotingStarted) {
       throwAccessDeniedException($this, E::ts('You cannot withdraw the nomination once voting is started.'));
       return;
     }

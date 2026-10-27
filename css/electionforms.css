@@ -1137,3 +1137,46 @@ ul#errorList {
 .crm-container .election-next-message a {
     text-decoration: underline;
 }
+
+/* Write-ins on the ballot */
+.crm-container .election-writein {
+    margin: 1rem 0 0;
+    padding: 0.75rem 1rem 1rem;
+    border: 1px dashed currentColor;
+    border-radius: 0.5rem;
+}
+.crm-container .election-writein legend {
+    padding: 0 0.4rem;
+    font-weight: 600;
+    width: auto;
+    border: 0;
+}
+.crm-container .election-writein-note {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+}
+.crm-container .election-writein-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    align-items: end;
+    margin: 0 0 0.75rem;
+}
+.crm-container .election-writein-row[hidden],
+.crm-container .election-writein-add[hidden] {
+    display: none;
+}
+.crm-container .election-writein-person {
+    flex: 1 1 16rem;
+}
+.crm-container .election-writein-person label,
+.crm-container .election-writein-rank label {
+    display: block;
+    margin: 0 0 0.2rem;
+}
+.crm-container .election-writein-person .select2-container {
+    width: 100%;
+}
+.crm-container .election-writein-rank {
+    flex: 0 0 9rem;
+}

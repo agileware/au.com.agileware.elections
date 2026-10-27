@@ -20,6 +20,11 @@
       <td>{$form.sortorder.html}
 				<p class="description">{ts}Order that the position is shown in on the ballot.{/ts}</p></td>
 		</tr>
+    <tr class="crm-create-election-position-form-block-name">
+      <td class="label">{$form.write_ins_per_seat.label}</td>
+      <td>{$form.write_ins_per_seat.html}
+				<p class="description">{ts}How many people a voter can write in for each seat (0 to 10). 0 means write-ins are off. A person written in is told straight away and must accept before voting closes; votes for them count only if they do. Works best with &quot;Allow Members to Change Vote&quot; on, so people who voted earlier can vote again and see new candidates.{/ts}</p></td>
+		</tr>
 		<tr class="crm-create-election-position-form-block-description">
       <td class="label">{$form.description.label}</td>
       <td>{$form.description.html}

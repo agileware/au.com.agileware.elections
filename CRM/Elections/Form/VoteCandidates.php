@@ -89,6 +89,8 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     Civi::resources()
       ->addVars('electionsBallot', [
         'method' => $this->method,
+        'writeInRank' => E::ts('Give the person you wrote in a rank, or clear the name.'),
+        'writtenIn' => E::ts('%1 (written in)'),
         'tooMany' => E::ts('You can choose no more than %1.'),
         'chosen' => E::ts('%1 of %2 chosen.'),
         'chosenOne' => E::ts('Chosen: %1.'),
@@ -157,9 +159,13 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
   private function assignFormElements() {
     CRM_Elections_BAO_ElectionResult::updateCandidateProfilePictures($this->electionPositions);
     foreach ($this->electionPositions as $positionId => $position) {
+      $this->electionPositions[$positionId]['candidates'] = $position['candidates'] ?? [];
+      $position = $this->electionPositions[$positionId];
+      $this->electionPositions[$positionId]['writeInPlaces'] = CRM_Elections_Helper_WriteIn::places($position);
       $this->electionPositions[$positionId]['prompt'] = CRM_Elections_VotingMethod::positionPrompt($this->method, $position['name'], count($position['candidates'] ?? []), $position['quantity'] ?? 1);
       $this->electionPositions[$positionId]['seats'] = max(1, (int) ($position['quantity'] ?? 1));
     }
+    $this->addWriteInElements();
     $this->assign('positions', $this->electionPositions);
     $this->assign('votingMethod', $this->method);
     $this->assign('instructions', CRM_Elections_VotingMethod::instructions($this->method));
@@ -176,6 +182,56 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       }
       $this->add('select2', $element['key'], htmlspecialchars((string) $element['name'], ENT_QUOTES, 'UTF-8'), $this->getVoteSelectionByPosition($element['position_id']), FALSE, ['placeholder' => E::ts('- Rank -')]);
     }
+  }
+
+  /**
+   * The places on the ballot where a voter can write a person in, for each position that allows it: a person
+   * picker, and a rank when the election is counted by ranked choice.
+   */
+  private function addWriteInElements() {
+    foreach ($this->electionPositions as $positionId => $position) {
+      $places = (int) $position['writeInPlaces'];
+      $rows = [];
+      for ($n = 1; $n <= $places; $n++) {
+        $row = ['person' => "writein_{$positionId}_{$n}", 'rank' => "writeinrank_{$positionId}_{$n}", 'number' => $n];
+        $this->addEntityRef($row['person'], E::ts('Write-in %1', [1 => $n]), [
+          'entity' => 'ElectionNominee',
+          'placeholder' => E::ts('- Type at least 3 letters of a name -'),
+          'api' => ['election_id' => $this->election->id, 'write_in' => 1],
+        ], FALSE);
+        if ($this->method !== CRM_Elections_VotingMethod::PLURALITY) {
+          $options = [];
+          for ($i = 1; $i <= count($position['candidates']) + $places; $i++) {
+            $options[] = ['text' => $i, 'id' => $i];
+          }
+          $this->add('select2', $row['rank'], E::ts('Rank of write-in %1', [1 => $n]), $options, FALSE, ['placeholder' => E::ts('- Rank -')]);
+        }
+        $rows[] = $row;
+      }
+      $this->electionPositions[$positionId]['writeInRows'] = $rows;
+    }
+  }
+
+  /**
+   * The people the voter wrote in: position, person and rank (ticks have rank 1).
+   *
+   * @param array $values
+   *
+   * @return array[]
+   */
+  private function getWriteIns(array $values) {
+    $writeIns = [];
+    foreach ($this->electionPositions as $positionId => $position) {
+      foreach ($position['writeInRows'] ?? [] as $row) {
+        $contactId = $values[$row['person']] ?? '';
+        if ($contactId === '' || $contactId === NULL) {
+          continue;
+        }
+        $rank = ($this->method === CRM_Elections_VotingMethod::PLURALITY) ? 1 : ($values[$row['rank']] ?? '');
+        $writeIns[] = ['position_id' => (int) $positionId, 'contact_id' => $contactId, 'rank' => $rank, 'row' => $row];
+      }
+    }
+    return $writeIns;
   }
 
   private function findElectionPositions() {
@@ -234,12 +290,25 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     $values = $this->exportValues();
     $voteRanksByPosition = [];
 
+    $writeIns = $this->getWriteIns($values);
+    foreach ($writeIns as $writeIn) {
+      if (!CRM_Utils_Rule::positiveInteger($writeIn['contact_id'])) {
+        $this->_errors[$writeIn['row']['person']] = E::ts('Choose a person from the list.');
+      }
+      elseif ($this->method !== CRM_Elections_VotingMethod::PLURALITY && !CRM_Utils_Rule::positiveInteger($writeIn['rank'])) {
+        $this->_errors[$writeIn['row']['rank']] = E::ts('Give the person you wrote in a rank, or clear the name.');
+      }
+    }
+
     if ($this->method === CRM_Elections_VotingMethod::PLURALITY) {
       $ticks = [];
       foreach ($elements as $element) {
         if (!empty($values[$element['key']])) {
           $ticks[$element['position_id']] = ($ticks[$element['position_id']] ?? 0) + 1;
         }
+      }
+      foreach ($writeIns as $writeIn) {
+        $ticks[$writeIn['position_id']] = ($ticks[$writeIn['position_id']] ?? 0) + 1;
       }
       foreach ($ticks as $positionId => $count) {
         $seats = max(1, (int) ($this->electionPositions[$positionId]['quantity'] ?? 1));
@@ -270,6 +339,16 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
           $this->_errors[$key] = E::ts('Rank must be different for each candidate.');
         }
 
+      }
+    }
+
+    foreach ($writeIns as $writeIn) {
+      $rank = $writeIn['rank'];
+      if (CRM_Utils_Rule::positiveInteger($rank)) {
+        if (in_array($rank, $voteRanksByPosition[$writeIn['position_id']] ?? [])) {
+          $this->_errors[$writeIn['row']['rank']] = E::ts('Rank must be different for each candidate.');
+        }
+        $voteRanksByPosition[$writeIn['position_id']][] = $rank;
       }
     }
 
@@ -326,7 +405,20 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       }
     }
 
-    civicrm_api3('ElectionVote', 'addvotes', $addVotesParams);
+    $addVotesParams['write_ins'] = array_map(fn($w) => ['position_id' => $w['position_id'], 'contact_id' => (int) $w['contact_id'], 'rank' => (int) $w['rank']], $this->getWriteIns($values));
+
+    try {
+      civicrm_api3('ElectionVote', 'addvotes', $addVotesParams);
+    }
+    catch (CRM_Core_Exception $e) {
+      // Something the form could not know (for example a person who has declined since the page opened).
+      CRM_Core_Session::setStatus($e->getMessage(), E::ts('Your vote was not saved'), 'error');
+      $back = Civi::url('current://civicrm/elections/vote')->addQuery(['eid' => $this->eId]);
+      if ($this->cid && $this->cs) {
+        $back->addQuery(['cid' => $this->cid, 'cs' => $this->cs]);
+      }
+      CRM_Utils_System::redirect($back);
+    }
 
     $this->createVoteActivity([
       'member_cid' => $member_cid,

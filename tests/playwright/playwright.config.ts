@@ -84,10 +84,17 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
+      // Write-ins during voting, on the same election again.
+      name: 'writein',
+      testMatch: /council\/writein/,
+      dependencies: ['groups'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       // Pictures of every page (SCREENS=1 only).
       name: 'screens',
       testMatch: /frontend\/screens/,
-      dependencies: ['groups'],
+      dependencies: ['writein'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],
