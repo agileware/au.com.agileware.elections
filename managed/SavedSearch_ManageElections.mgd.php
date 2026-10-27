@@ -69,7 +69,7 @@ return [
               'dataType' => 'String',
               'label' => E::ts('Election'),
               'sortable' => TRUE,
-              'link' => ['path' => 'civicrm/elections/view?eid=[id]', 'entity' => '', 'action' => '', 'join' => '', 'target' => ''],
+              'link' => ['path' => 'civicrm/elections/overview?eid=[id]', 'entity' => '', 'action' => '', 'join' => '', 'target' => ''],
             ],
             [
               'type' => 'field',

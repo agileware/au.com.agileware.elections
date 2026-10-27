@@ -65,12 +65,6 @@
     <access_arguments>administer Elections</access_arguments>
   </item>
   <item>
-    <path>civicrm/ajax/elections/positions/reorder</path>
-    <page_callback>CRM_Elections_Page_ElectionPositions::reOrder</page_callback>
-    <access_arguments>administer Elections</access_arguments>
-    <is_ajax>true</is_ajax>
-  </item>
-  <item>
     <path>civicrm/elections/visibility</path>
     <page_callback>CRM_Elections_Form_ElectionVisibility</page_callback>
     <title>ElectionVisibility</title>
@@ -106,6 +100,12 @@
     <path>civicrm/elections/candidates/add</path>
     <page_callback>CRM_Elections_Form_AddCandidate</page_callback>
     <title>Add Candidate</title>
+    <access_arguments>administer Elections</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/elections/overview</path>
+    <page_callback>CRM_Elections_Page_ElectionOverview</page_callback>
+    <title>Election Overview</title>
     <access_arguments>administer Elections</access_arguments>
   </item>
   <item>

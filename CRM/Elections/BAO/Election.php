@@ -39,6 +39,95 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
   }
 
   /**
+   * The stage the election is in today.
+   *
+   * @return array
+   *   `key` (inactive, upcoming, nominations, advertise, voting, closed, results) and a translated `label`.
+   */
+  public function getStage() {
+    $this->assignStatues();
+    if ($this->is_deleted) {
+      return ['key' => 'deleted', 'label' => E::ts('Deleted')];
+    }
+    if (!$this->is_visible) {
+      return ['key' => 'inactive', 'label' => E::ts('Inactive')];
+    }
+    if ($this->isResultsOut) {
+      return ['key' => 'results', 'label' => E::ts('Results published')];
+    }
+    if ($this->isVotingEnded) {
+      return ['key' => 'closed', 'label' => E::ts('Voting closed')];
+    }
+    if ($this->isVotingStarted) {
+      return ['key' => 'voting', 'label' => E::ts('Voting open')];
+    }
+    if ($this->advertiseCandidatesStarted) {
+      return ['key' => 'advertise', 'label' => E::ts('Candidates advertised')];
+    }
+    if ($this->isNominationsStarted) {
+      return ['key' => $this->isNominationsInProgress ? 'nominations' : 'advertise', 'label' => $this->isNominationsInProgress ? E::ts('Nominations open') : E::ts('Nominations closed')];
+    }
+    return ['key' => 'upcoming', 'label' => E::ts('Not started')];
+  }
+
+  /**
+   * Counts shown on the overview: positions, nominations, candidates and ballots cast.
+   *
+   * @param int $electionId
+   *
+   * @return array
+   */
+  public static function getCounts($electionId) {
+    $p = [1 => [$electionId, 'Positive']];
+    return [
+      'positions' => (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_position WHERE election_id = %1', $p),
+      'nominations' => (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_nomination n INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1', $p),
+      'eligible' => (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_nomination n INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1 AND n.is_eligible_candidate = 1', $p),
+      'candidates' => (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_nomination n INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1 AND n.is_eligible_candidate = 1 AND n.has_accepted_nomination = 1', $p),
+      'ballots' => (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(DISTINCT v.member_id) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1 AND v.member_id IS NOT NULL', $p),
+      'votes' => (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position pos ON pos.id = n.election_position_id WHERE pos.election_id = %1', $p),
+    ];
+  }
+
+  /**
+   * What the administrator should do next, in plain words.
+   *
+   * @param array $stage
+   * @param array $counts
+   *
+   * @return string
+   */
+  public static function getNextStep(array $stage, array $counts) {
+    switch ($stage['key']) {
+      case 'deleted':
+        return E::ts('This election has been deleted.');
+
+      case 'inactive':
+        return $counts['positions'] < 1
+          ? E::ts('Add at least one position, then activate the election so people can see it.')
+          : E::ts('Activate the election when it is ready for people to see.');
+
+      case 'upcoming':
+        return E::ts('Nominations have not opened yet. You can still change the settings and positions.');
+
+      case 'nominations':
+        return E::ts('Nominations are open. People nominate and second each other on the website; you can also add candidates directly.');
+
+      case 'advertise':
+        return E::ts('Nominees are accepting or withdrawing. Check the candidates before voting opens.');
+
+      case 'voting':
+        return E::ts('Voting is open. Who is standing is now fixed; you can still correct statements.');
+
+      case 'closed':
+        return E::ts('Voting has closed. Results are calculated by the scheduled job and published on the results date.');
+
+      default:
+        return E::ts('The results are published.');
+    }
+  }
+
+  /**
    * Activating an election (making it visible) needs at least one position.
    *
    * Used by every write path - the activate form, the API and inline edits in

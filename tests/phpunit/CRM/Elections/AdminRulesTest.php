@@ -144,4 +144,42 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame(0, civicrm_api3('ElectionNomination', 'getcount', ['election_position_id' => ['IN' => array_keys($positions)]]));
   }
 
+  // ---------------------------------------------------------------- overview
+
+  public function testTheStageFollowsTheElectionThroughItsDates() {
+    $fixture = CRM_Elections_Test_CouncilFixture::create();
+    $expected = [
+      CRM_Elections_Test_CouncilFixture::STAGE_NOMINATIONS => 'nominations',
+      CRM_Elections_Test_CouncilFixture::STAGE_ADVERTISE => 'advertise',
+      CRM_Elections_Test_CouncilFixture::STAGE_VOTING => 'voting',
+      CRM_Elections_Test_CouncilFixture::STAGE_RESULTS => 'closed',
+    ];
+    foreach ($expected as $stage => $key) {
+      $fixture->moveToStage($stage);
+      $this->assertSame($key, findElectionById($fixture->electionId)->getStage()['key'], $stage);
+    }
+    // Results show once they have been generated after the result date.
+    $fixture->generateResults();
+    $this->assertSame('results', findElectionById($fixture->electionId)->getStage()['key']);
+  }
+
+  public function testAnInactiveElectionIsReportedAsInactive() {
+    $election = $this->inactiveElection();
+    $stage = findElectionById($election['id'])->getStage();
+    $this->assertSame('inactive', $stage['key']);
+    $counts = CRM_Elections_BAO_Election::getCounts($election['id']);
+    $this->assertSame(0, $counts['positions']);
+    $this->assertStringContainsString('Add at least one position', CRM_Elections_BAO_Election::getNextStep($stage, $counts));
+  }
+
+  public function testCountsFollowThePersonasThroughTheCouncilElection() {
+    $fixture = CRM_Elections_Test_CouncilFixture::create()->playUntil(CRM_Elections_Test_CouncilFixture::STAGE_VOTING);
+    $counts = CRM_Elections_BAO_Election::getCounts($fixture->electionId);
+    $this->assertSame(6, $counts['positions']);
+    $this->assertSame(17, $counts['nominations']);
+    $this->assertSame(16, $counts['eligible'], 'Only the unseconded nomination is not eligible');
+    $this->assertSame(11, $counts['candidates'], 'Eleven nominations were accepted and not withdrawn');
+    $this->assertSame(38, $counts['ballots']);
+  }
+
 }

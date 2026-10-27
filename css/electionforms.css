@@ -422,3 +422,59 @@ ul#errorList {
 .vote-candidate-row.no-photo .right-info-block {
     max-width: 100%;
 }
+
+
+/* Election overview (administrators) */
+.crm-election-overview .election-stage {
+    display: inline-block;
+    margin-left: 0.5em;
+    padding: 0.1em 0.6em;
+    border-radius: 1em;
+    font-size: 0.6em;
+    font-weight: normal;
+    vertical-align: middle;
+    background: #e9ecef;
+    color: #333;
+}
+.crm-election-overview .election-stage-nominations,
+.crm-election-overview .election-stage-voting {
+    background: #d1e7dd;
+}
+.crm-election-overview .election-stage-inactive,
+.crm-election-overview .election-stage-deleted {
+    background: #f8d7da;
+}
+.election-overview-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2em;
+}
+.election-overview-block {
+    flex: 1 1 18em;
+}
+.election-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.election-timeline li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1em;
+    padding: 0.35em 0;
+    border-bottom: 1px solid #ddd;
+}
+.election-timeline-passed {
+    opacity: 0.6;
+}
+.election-timeline-passed .election-timeline-label::before {
+    content: "¹3 a0";
+}
+.election-counts th {
+    text-align: left;
+    padding-right: 2em;
+    font-weight: normal;
+}
+.election-overview-actions {
+    margin-top: 1.5em;
+}
