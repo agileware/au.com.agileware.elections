@@ -36,7 +36,7 @@
                                         <a href="{crmURL p="civicrm/elections/candidate" q="`$checksum_query['query']`&enid=`$position.candidates.$member.id`"}">
                                             <div class="crm-election-nominated-block">
                                                 {assign var='profilePicUrl' value=$position.candidates.$member.$memberdisplayimage}
-                                                {if $election->showPhotos}<img src="{$profilePicUrl}" alt="" /><br><br>{/if}
+                                                {if $election->showPhotos}<img src="{$profilePicUrl}" alt="" />{/if}
                                                 {$position.candidates.$member.$memberdisplayname}<br>
                                             </div>
                                         </a>

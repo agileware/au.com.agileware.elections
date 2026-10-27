@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { frontUrl } from './cms';
 
 /**
  * The council election personas written by fixtures/seed-council.php:
@@ -50,13 +51,7 @@ export function personaUrl(persona: string, civiPath: string, params: Record<str
   if (!link) {
     throw new Error(`Unknown persona ${persona}`);
   }
-  const query = new URLSearchParams({ page: 'CiviCRM', q: civiPath, eid: String(data.election_id) });
-  for (const [k, v] of Object.entries(params)) {
-    query.set(k, String(v));
-  }
-  query.set('cid', String(link.cid));
-  query.set('cs', link.cs);
-  return `/?${query.toString()}`;
+  return frontUrl(civiPath, { eid: data.election_id, ...params, cid: link.cid, cs: link.cs });
 }
 
 export const voters = Array.from({ length: 30 }, (_, i) => `V${String(i + 1).padStart(2, '0')}`);

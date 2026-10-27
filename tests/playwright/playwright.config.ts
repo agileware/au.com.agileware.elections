@@ -17,6 +17,8 @@ export default defineConfig({
   reporter: process.env.CI ? [['html', { open: 'never' }], ['list']] : 'list',
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:8080',
+    // The DDEV sites use certificates from the local mkcert authority.
+    ignoreHTTPSErrors: true,
     // A step that cannot be done fails in seconds, not after the whole test timeout.
     actionTimeout: 20000,
     trace: 'retain-on-failure',

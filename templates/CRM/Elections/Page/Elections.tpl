@@ -72,9 +72,9 @@
 
                     {if $viewBtnTxt != ''}
                         {if !$viewAction}
-                            <input type="button" value="{$viewBtnTxt}" onclick="window.location.href='{crmURL p="civicrm/elections/view" q="eid=`$election.id`"}'" class="election-action-button" /><br>
+                            <a href="{crmURL p="civicrm/elections/view" q="eid=`$election.id`"}" class="election-btn">{$viewBtnTxt}</a><br>
                         {else}
-                            <input type="button" value="{$viewBtnTxt}" onclick="window.location.href='{$viewAction}?eid={$election.id}'" class="election-action-button" /><br>
+                            <a href="{$viewAction}?eid={$election.id}" class="election-btn">{$viewBtnTxt}</a><br>
                         {/if}
                     {/if}
 

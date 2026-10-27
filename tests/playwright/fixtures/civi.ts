@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { forgetCouncil } from './personas';
+import { CV } from './cms';
 
 /**
  * Shells out to `cv` to read and change CiviCRM data directly, bypassing the browser,
@@ -28,7 +29,7 @@ function run(args: string[], env: Record<string, string> = {}): string {
 }
 
 export function civiApi4<T = any>(entityDotAction: string, params: Record<string, unknown> = {}): T {
-  return JSON.parse(run(['cv', 'api4', entityDotAction, JSON.stringify(params)]));
+  return JSON.parse(run([CV, 'api4', entityDotAction, JSON.stringify(params)]));
 }
 
 /** Election stages in time order. */
@@ -40,7 +41,7 @@ export type Stage = 'nominations' | 'advertise' | 'voting' | 'results';
  * to-results, generate.
  */
 export function advanceCouncil(step: string): void {
-  run(['cv', 'scr', path.resolve(__dirname, 'advance-council.php')], { STEP: step });
+  run([CV, 'scr', path.resolve(__dirname, 'advance-council.php')], { STEP: step });
 }
 
 /** Move the election's dates to a stage, as time passing would. */
@@ -56,17 +57,17 @@ export function countRows(entity: string, where: unknown[][] = []): number {
 export function civiSql(sql: string, params: Record<string, string | number> = {}): void {
   const typed = Object.fromEntries(Object.entries(params).map(([k, v]) => [k, [v, typeof v === 'number' ? 'Integer' : 'String']]));
   const php = `CRM_Core_DAO::executeQuery(${JSON.stringify(sql)}, json_decode(${JSON.stringify(JSON.stringify(typed))}, TRUE));`;
-  run(['cv', 'ev', php]);
+  run([CV, 'ev', php]);
 }
 
 /** Evaluate PHP inside CiviCRM (`cv ev`) and return what it prints. */
 export function civiEval(php: string): string {
-  return run(['cv', 'ev', php]);
+  return run([CV, 'ev', php]);
 }
 
 /** Seed the council election again, at the nominations stage (see fixtures/seed-council.php). */
 export function reseedCouncil(): void {
-  run(['cv', 'scr', path.resolve(__dirname, 'seed-council.php')]);
+  run([CV, 'scr', path.resolve(__dirname, 'seed-council.php')]);
   forgetCouncil();
 }
 
