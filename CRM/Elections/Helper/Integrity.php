@@ -30,6 +30,11 @@ class CRM_Elections_Helper_Integrity {
       INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id
       INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
       WHERE p.election_id = %1
+      UNION ALL
+      SELECT CONCAT("o:", ov.election_position_id, ":", ov.election_option_id) AS line
+      FROM civicrm_election_option_vote ov
+      INNER JOIN civicrm_election_position p ON p.id = ov.election_position_id
+      WHERE p.election_id = %1
     ', [1 => [(int) $electionId, 'Integer']]);
     $lines = [];
     while ($dao->fetch()) {

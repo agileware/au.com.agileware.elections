@@ -187,7 +187,7 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
     $turnout = CRM_Elections_BAO_Election::getTurnout($fixture->electionId);
     $this->assertSame(['President', 'Secretary', 'Treasurer', 'Council Member 1', 'Council Member 2', 'Council Member 3'], array_column($turnout, 'name'));
     foreach ($turnout as $row) {
-      $this->assertSame(['name', 'candidates', 'ballots'], array_keys($row), 'No voter or candidate choice appears in the turnout');
+      $this->assertSame(['name', 'isQuestion', 'candidates', 'ballots'], array_keys($row), 'No voter or candidate choice appears in the turnout');
       $this->assertGreaterThan(0, $row['ballots'], $row['name']);
       $this->assertLessThanOrEqual(38, $row['ballots'], $row['name']);
     }

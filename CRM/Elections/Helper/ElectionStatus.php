@@ -153,6 +153,18 @@ class CRM_Elections_Helper_ElectionStatus {
       $ballot[$dao->position_id]['position'] = $dao->position;
       $ballot[$dao->position_id]['candidates'][] = CRM_Elections_Helper_Candidate::formatName($dao->display_name, $dao->first_name, $dao->last_name, $dao->nick_name, $election->name_format ?: NULL);
     }
+    // The answer to each referendum question.
+    $answers = CRM_Core_DAO::executeQuery('
+      SELECT p.id AS position_id, p.name AS position, o.label
+      FROM civicrm_election_option_vote ov
+      INNER JOIN civicrm_election_option o ON o.id = ov.election_option_id
+      INNER JOIN civicrm_election_position p ON p.id = ov.election_position_id
+      WHERE p.election_id = %1 AND ov.member_id = %2
+      ORDER BY p.sortorder, p.id
+    ', [1 => [(int) $election->id, 'Integer'], 2 => [(int) $contactId, 'Integer']]);
+    while ($answers->fetch()) {
+      $ballot['q' . $answers->position_id] = ['position' => $answers->position, 'candidates' => [$answers->label]];
+    }
     return array_values($ballot);
   }
 

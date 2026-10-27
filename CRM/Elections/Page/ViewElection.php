@@ -141,6 +141,15 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
     ]);
 
     $this->assign('positions', $electionPositions['values']);
+    // The yes or no questions, with their choices.
+    $questions = [];
+    foreach ($electionPositions['values'] as $position) {
+      if (($position['position_type'] ?? '') === CRM_Elections_BAO_ElectionPosition::TYPE_REFERENDUM) {
+        $position['options'] = CRM_Elections_BAO_ElectionPosition::getOptions($position['id']);
+        $questions[] = $position;
+      }
+    }
+    $this->assign('questions', $questions);
   }
 
 }

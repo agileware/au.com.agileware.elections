@@ -113,7 +113,8 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
   private function throwExceptionIfNoCandidates() {
     $hasCandidatesInOnePosition = FALSE;
     foreach ($this->electionPositions as $electionPosition) {
-      if (!empty($electionPosition['candidates'])) {
+      if (!empty($electionPosition['candidates']) || $this->isQuestion($electionPosition)) {
+        // A question can be voted on without any candidates in the election.
         $hasCandidatesInOnePosition = TRUE;
         break;
       }
@@ -124,6 +125,45 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       return TRUE;
     }
     return FALSE;
+  }
+
+  private function isQuestion(array $position) {
+    return ($position['position_type'] ?? '') === CRM_Elections_BAO_ElectionPosition::TYPE_REFERENDUM;
+  }
+
+  /**
+   * The choice on each referendum question: a set of radio buttons, which can be cleared to leave a question unanswered.
+   */
+  private function addQuestionElements() {
+    foreach ($this->electionPositions as $positionId => $position) {
+      if (!$this->isQuestion($position)) {
+        continue;
+      }
+      $options = [];
+      foreach (CRM_Elections_BAO_ElectionPosition::getOptions($positionId) as $option) {
+        $options[$option['id']] = htmlspecialchars((string) $option['label'], ENT_QUOTES, 'UTF-8');
+      }
+      $this->addRadio("option_{$positionId}", htmlspecialchars((string) $position['name'], ENT_QUOTES, 'UTF-8'), $options, ['allowClear' => TRUE], '', FALSE);
+      $this->electionPositions[$positionId]['isQuestion'] = TRUE;
+      $this->electionPositions[$positionId]['questionKey'] = "option_{$positionId}";
+    }
+  }
+
+  /**
+   * The choices the voter made on referendum questions.
+   *
+   * @param array $values
+   *
+   * @return array[]
+   */
+  private function getOptionVotes(array $values) {
+    $choices = [];
+    foreach ($this->electionPositions as $positionId => $position) {
+      if ($this->isQuestion($position) && !empty($values["option_{$positionId}"])) {
+        $choices[] = ['position_id' => (int) $positionId, 'option_id' => (int) $values["option_{$positionId}"]];
+      }
+    }
+    return $choices;
   }
 
   private function getFormElementsByCandidates() {
@@ -161,14 +201,22 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     foreach ($this->electionPositions as $positionId => $position) {
       $this->electionPositions[$positionId]['candidates'] = $position['candidates'] ?? [];
       $position = $this->electionPositions[$positionId];
-      $this->electionPositions[$positionId]['writeInPlaces'] = CRM_Elections_Helper_WriteIn::places($position);
-      $this->electionPositions[$positionId]['prompt'] = CRM_Elections_VotingMethod::positionPrompt($this->method, $position['name'], count($position['candidates'] ?? []), $position['quantity'] ?? 1);
+      $this->electionPositions[$positionId]['writeInPlaces'] = $this->isQuestion($position) ? 0 : CRM_Elections_Helper_WriteIn::places($position);
+      $this->electionPositions[$positionId]['prompt'] = $this->isQuestion($position) ? $position['name'] : CRM_Elections_VotingMethod::positionPrompt($this->method, $position['name'], count($position['candidates'] ?? []), $position['quantity'] ?? 1);
       $this->electionPositions[$positionId]['seats'] = max(1, (int) ($position['quantity'] ?? 1));
     }
     $this->addWriteInElements();
+    $this->addQuestionElements();
     $this->assign('positions', $this->electionPositions);
     $this->assign('votingMethod', $this->method);
-    $this->assign('instructions', CRM_Elections_VotingMethod::instructions($this->method));
+    $instructions = CRM_Elections_VotingMethod::instructions($this->method);
+    foreach ($this->electionPositions as $position) {
+      if ($this->isQuestion($position)) {
+        $instructions[] = E::ts('Questions: choose one answer for each question. You can leave a question unanswered.');
+        break;
+      }
+    }
+    $this->assign('instructions', $instructions);
     $this->addElement('hidden', 'eid', $this->eId);
     if ( $this->cid && $this->cs ) {
       $this->addElement('hidden', 'cid', $this->cid);
@@ -405,6 +453,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       }
     }
 
+    $addVotesParams['option_votes'] = $this->getOptionVotes($values);
     $addVotesParams['write_ins'] = array_map(fn($w) => ['position_id' => $w['position_id'], 'contact_id' => (int) $w['contact_id'], 'rank' => (int) $w['rank']], $this->getWriteIns($values));
 
     try {

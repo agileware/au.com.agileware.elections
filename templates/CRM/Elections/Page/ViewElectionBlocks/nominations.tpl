@@ -10,6 +10,7 @@
 {/if}
 
 {foreach from = $nominations key = k item = nomination}
+  {if $nomination.position_type|default:'election' != 'referendum'}
     <div class="crm-election-position-nominations-block">
 
         <h3>{if $election->advertiseCandidatesStarted}{ts 1=$nomination.name}Candidates for %1{/ts}{else}{ts 1=$nomination.name}Nominations for %1{/ts}{/if}</h3>
@@ -86,4 +87,5 @@
         {/if}
     </div>
     <div class="clearfix"></div>
+  {/if}
 {/foreach}

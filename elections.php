@@ -61,10 +61,10 @@ function elections_civicrm_pre($op, $objectName, $id, &$params) {
     $changesThePosition = TRUE;
     if ($op === 'edit' && $id) {
       // Writing a result (the status of the count) is not a change to the position itself.
-      $current = CRM_Core_DAO::executeQuery('SELECT name, quantity, sortorder, description, election_id, write_ins_per_seat FROM civicrm_election_position WHERE id = %1', [1 => [$id, 'Positive']]);
+      $current = CRM_Core_DAO::executeQuery('SELECT ' . implode(', ', CRM_Elections_BAO_ElectionPosition::DEFINING_FIELDS) . ' FROM civicrm_election_position WHERE id = %1', [1 => [$id, 'Positive']]);
       $current->fetch();
       $changesThePosition = FALSE;
-      foreach (['name', 'quantity', 'sortorder', 'description', 'election_id', 'write_ins_per_seat'] as $field) {
+      foreach (CRM_Elections_BAO_ElectionPosition::DEFINING_FIELDS as $field) {
         if (array_key_exists($field, (array) $params) && CRM_Elections_BAO_ElectionPosition::normalise($field, $params[$field]) !== CRM_Elections_BAO_ElectionPosition::normalise($field, $current->$field)) {
           $changesThePosition = TRUE;
         }
@@ -126,6 +126,7 @@ function elections_civicrm_merge($type, &$data, $mainId = NULL, $otherId = NULL,
   $data[] = "UPDATE civicrm_election_nomination_seconder SET member_nominator = $main WHERE member_nominator = $other";
   // A ballot the kept contact also cast stays where it is: one ballot for each person.
   $data[] = "UPDATE IGNORE civicrm_election_vote SET member_id = $main WHERE member_id = $other";
+  $data[] = "UPDATE IGNORE civicrm_election_option_vote SET member_id = $main WHERE member_id = $other";
 }
 
 /**

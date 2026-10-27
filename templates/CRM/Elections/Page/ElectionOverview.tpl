@@ -68,13 +68,13 @@
     </p>
     <table class="election-turnout-table">
       <thead>
-        <tr><th>{ts}Position{/ts}</th><th>{ts}Candidates standing{/ts}</th><th>{ts}Ballots with a preference{/ts}</th></tr>
+        <tr><th>{ts}Position{/ts}</th><th>{ts}Candidates standing{/ts}</th><th>{ts}Ballots with a choice{/ts}</th></tr>
       </thead>
       <tbody>
         {foreach from=$turnout item=row}
           <tr>
             <td>{$row.name|escape}</td>
-            <td>{$row.candidates}</td>
+            <td>{if $row.isQuestion}<span class="description">{ts}Question{/ts}</span>{else}{$row.candidates}{/if}</td>
             <td>{if $row.ballots === NULL}<span class="description">{ts}Not shown: votes are anonymised{/ts}</span>{else}{$row.ballots}{/if}</td>
           </tr>
         {/foreach}

@@ -1180,3 +1180,37 @@ ul#errorList {
 .crm-container .election-writein-rank {
     flex: 0 0 9rem;
 }
+
+/* Referendum questions on the ballot */
+.crm-container .election-question-fieldset {
+    margin: 1rem 0;
+    padding: 0.75rem 1rem 1rem;
+    border: 1px solid currentColor;
+    border-radius: 0.5rem;
+}
+.crm-container .election-question-fieldset legend {
+    padding: 0 0.4rem;
+    width: auto;
+    border: 0;
+    font-weight: 600;
+}
+.crm-container .election-question-resolution {
+    margin: 0 0 0.75rem;
+    padding-left: 0.75rem;
+    border-left: 3px solid currentColor;
+}
+.crm-container .election-question-choices .crm-form-radio,
+.crm-container .election-question-choices label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-right: 1.25rem;
+}
+.crm-container .election-winner-badge.election-winner-badge-fail {
+    background: transparent;
+    color: inherit;
+    border: 2px solid currentColor;
+}
+.crm-container .election-question-outcome {
+    margin: 0.5rem 0 1rem;
+}

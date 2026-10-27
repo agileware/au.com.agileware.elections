@@ -51,6 +51,11 @@ function _civicrm_api3_election_vote_addvotes_spec(&$spec) {
     'title'        => 'Votes',
     'api.required' => 0,
   ];
+  $spec['option_votes'] = [
+    'title'        => 'Choices on referendum questions',
+    'description'  => 'Each with position_id and option_id.',
+    'api.required' => 0,
+  ];
   $spec['write_ins'] = [
     'title'        => 'Write-ins',
     'description'  => 'People written in: each with position_id, contact_id and rank.',
@@ -102,6 +107,11 @@ function civicrm_api3_election_vote_deletevotes($params) {
       'id' => $voteId,
     ]);
   }
+  // Choices on referendum questions are part of the same ballot.
+  $choices = CRM_Core_DAO::executeQuery('SELECT ov.id FROM civicrm_election_option_vote ov INNER JOIN civicrm_election_position p ON p.id = ov.election_position_id WHERE p.election_id = %1 AND ov.member_id = %2', [1 => [(int) $electionId, 'Integer'], 2 => [(int) $params['member_id'], 'Integer']]);
+  while ($choices->fetch()) {
+    civicrm_api4('ElectionOptionVote', 'delete', ['where' => [['id', '=', (int) $choices->id]], 'checkPermissions' => FALSE]);
+  }
 }
 
 /**
@@ -150,14 +160,19 @@ function civicrm_api3_election_vote_addvotes($params) {
 
     $votes = $params['votes'] ?? [];
     $writeIns = $params['write_ins'] ?? [];
-    if (!is_array($writeIns)) {
-      return civicrm_api3_create_error('Write-ins must be a list.');
+    $optionVotes = $params['option_votes'] ?? [];
+    if (!is_array($writeIns) || !is_array($optionVotes)) {
+      return civicrm_api3_create_error('Write-ins and choices must be lists.');
+    }
+    $choices = CRM_Elections_Helper_Referendum::resolve($election, $optionVotes);
+    if ($choices['error']) {
+      return civicrm_api3_create_error($choices['error']);
     }
     $resolved = CRM_Elections_Helper_WriteIn::resolve($election, $writeIns);
     if ($resolved['error']) {
       return civicrm_api3_create_error($resolved['error']);
     }
-    $voteError = _civicrm_api3_election_vote_validate_ballot($election->id, $votes, $resolved['items']);
+    $voteError = _civicrm_api3_election_vote_validate_ballot($election->id, $votes, $resolved['items'], count($choices['items']));
     if ($voteError) {
       return civicrm_api3_create_error($voteError);
     }
@@ -188,6 +203,9 @@ function civicrm_api3_election_vote_addvotes($params) {
         $vote['member_id'] = $params['member_id'];
         civicrm_api3('ElectionVote', 'create', $vote);
       }
+      foreach ($choices['items'] as $choice) {
+        civicrm_api4('ElectionOptionVote', 'create', ['values' => ['election_position_id' => $choice['position_id'], 'election_option_id' => $choice['option_id'], 'member_id' => (int) $params['member_id']], 'checkPermissions' => FALSE]);
+      }
       CRM_Elections_Helper_Guard::$castingBallot = FALSE;
     }
     catch (Exception $e) {
@@ -207,7 +225,7 @@ function civicrm_api3_election_vote_addvotes($params) {
   }
 
   return civicrm_api3_create_success([
-    'message' => count($votes) . ' has been added successfully.',
+    'message' => (count($votes) + count($choices['items'])) . ' has been added successfully.',
   ], $params, 'ElectionVote', 'addvotes');
 }
 
@@ -237,9 +255,9 @@ function civicrm_api3_election_vote_get($params) {
  * @return string|null
  *   An error message, or NULL when the ballot is fine.
  */
-function _civicrm_api3_election_vote_validate_ballot($electionId, $votes, array $writeIns = []) {
+function _civicrm_api3_election_vote_validate_ballot($electionId, $votes, array $writeIns = [], $choices = 0) {
   $votes = is_array($votes) ? $votes : [];
-  if (empty($votes) && empty($writeIns)) {
+  if (empty($votes) && empty($writeIns) && !$choices) {
     return 'A ballot must rank at least one candidate.';
   }
 

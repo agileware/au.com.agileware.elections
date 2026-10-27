@@ -13,6 +13,10 @@
     return $form.find('.crm-vote-election-form-block').map(function () {
       var $block = $(this);
       var title = $block.attr('data-position') || $.trim($block.find('> p').first().text());
+      if ($block.attr('data-type') === 'question') {
+        // A referendum question: one choice, no ranks.
+        return {$block: $block, title: title, question: true, rows: [], seats: 1};
+      }
       var rows = $block.find('.vote-candidate-row').map(function () {
         var $row = $(this);
         return {
@@ -87,6 +91,9 @@
   function check($form) {
     var anyProblem = false;
     $.each(positions($form), function (i, position) {
+      if (position.question) {
+        return;
+      }
       var result = problemsIn(position);
       var $status = position.$block.find('.election-rank-status');
       if (!$status.length) {
@@ -105,6 +112,19 @@
     var $list = $('<div class="election-review-list"></div>');
     var skipped = [];
     $.each(positions($form), function (i, position) {
+      if (position.question) {
+        var $picked = position.$block.find('input[type="radio"]:checked');
+        if (!$picked.length) {
+          skipped.push(position.title);
+          return;
+        }
+        var $answer = $('<section class="election-review-position"></section>');
+        $('<h3></h3>').text(text.positionTitle.replace('%1', position.title)).appendTo($answer);
+        var picked = $.trim($('label[for="' + $picked.attr('id') + '"]').first().text()) || $picked.val();
+        $('<ul></ul>').append($('<li></li>').text(picked)).appendTo($answer);
+        $list.append($answer);
+        return;
+      }
       var ranked = $.grep(position.rows, function (row) { return rankOf(row) !== null && isChosen(row); });
       var title = position.title;
       if (!ranked.length) {

@@ -53,7 +53,7 @@ class CRM_Elections_Helper_WriteIn {
       if (!CRM_Utils_Rule::positiveInteger($positionId) || !CRM_Utils_Rule::positiveInteger($contactId) || !CRM_Utils_Rule::positiveInteger($rank)) {
         return ['error' => 'A write-in needs a position, a person and a rank.', 'items' => []];
       }
-      $position = CRM_Core_DAO::executeQuery('SELECT id, quantity, write_ins_per_seat FROM civicrm_election_position WHERE id = %1 AND election_id = %2', [1 => [(int) $positionId, 'Integer'], 2 => [(int) $election->id, 'Integer']]);
+      $position = CRM_Core_DAO::executeQuery('SELECT id, quantity, write_ins_per_seat FROM civicrm_election_position WHERE id = %1 AND election_id = %2 AND IFNULL(position_type, "election") <> "referendum"', [1 => [(int) $positionId, 'Integer'], 2 => [(int) $election->id, 'Integer']]);
       if (!$position->fetch()) {
         return ['error' => 'The selected position is not part of this election.', 'items' => []];
       }

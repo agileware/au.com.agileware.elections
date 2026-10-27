@@ -17,6 +17,18 @@
     </center>
 
     {foreach from = $positions key = k item = position}
+      {if $position.position_type|default:'election' == 'referendum'}
+        <div class="crm-election-position-result-block election-result-position election-result-question">
+            <h3>{$position.name|escape}</h3>
+            {if $position.resolution_text}<p class="election-question-resolution">{$position.resolution_text|escape|nl2br}</p>{/if}
+            <p class="election-question-outcome election-outcome-{$position.result_status|escape}">
+                {if $position.result_status == $resultStatuses.results_passed}<span class="election-winner-badge">{ts}Passed{/ts}</span>
+                {elseif $position.result_status == $resultStatuses.results_no_quorum}<span class="election-winner-badge election-winner-badge-tie">{ts}No quorum{/ts}</span>
+                {else}<span class="election-winner-badge election-winner-badge-fail">{ts}Not passed{/ts}</span>{/if}
+                {include file="CRM/Elections/Page/PositionResultTypeMessage.tpl"}
+            </p>
+        </div>
+      {else}
         <div class="crm-election-position-result-block election-result-position">
             <h3>{if $position.quantity > 1}{ts 1=$position.name}Winners for %1{/ts}{else}{ts 1=$position.name}Winner for %1{/ts}{/if}</h3>
             <span class="winner-type-label">
@@ -49,5 +61,6 @@
                 {/foreach}
                 </div>
         {/if}
+      {/if}
     {/foreach}
 </div>

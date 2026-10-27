@@ -90,6 +90,9 @@ class CRM_Elections_Helper_Guard {
             throw new CRM_Core_Exception(E::ts('Write-ins per seat must be a whole number from 0 to %1.', [1 => CRM_Elections_Helper_WriteIn::MAX_PER_SEAT]));
           }
         }
+        if ($objectName === 'ElectionPosition' && in_array($op, ['create', 'edit'], TRUE)) {
+          self::guardPositionSettings($id, (array) $params);
+        }
         if ($objectName === 'ElectionNomination' && $op === 'create') {
           self::guardNominationCreate((array) $params);
         }
@@ -97,6 +100,14 @@ class CRM_Elections_Helper_Guard {
           throw new CRM_Core_Exception(E::ts('Enter a web address starting with http:// or https://'));
         }
         self::remember($objectName === 'ElectionPosition' ? 'civicrm_election_position' : 'civicrm_election_nomination', $objectName, $op, $id);
+        break;
+
+      case 'ElectionOption':
+        self::guardOption($op, $id, (array) $params);
+        break;
+
+      case 'ElectionOptionVote':
+        self::guardOptionVote($op, $id, (array) $params);
         break;
 
       case 'Individual':
@@ -116,13 +127,19 @@ class CRM_Elections_Helper_Guard {
         break;
 
       case 'ElectionPosition':
-        self::auditChange($op, 'position', $id, self::electionOf('position', $id, $object), ['name', 'quantity', 'sortorder', 'description', 'result_status'], $object);
+        if (in_array($op, ['create', 'edit'], TRUE) && CRM_Core_DAO::singleValueQuery('SELECT position_type FROM civicrm_election_position WHERE id = %1', [1 => [(int) $id, 'Integer']]) === CRM_Elections_BAO_ElectionPosition::TYPE_REFERENDUM
+          && !CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_option WHERE election_position_id = %1', [1 => [(int) $id, 'Integer']])) {
+          // A question always has its Yes and No.
+          CRM_Elections_BAO_ElectionPosition::saveOptions((int) $id);
+        }
+        self::auditChange($op, 'position', $id, self::electionOf('position', $id, $object), ['name', 'quantity', 'sortorder', 'description', 'result_status', 'position_type', 'pass_threshold', 'quorum_percent', 'resolution_text', 'write_ins_per_seat'], $object);
         break;
 
       case 'ElectionNomination':
         self::auditChange($op, 'nomination', $id, self::electionOf('nomination', $id, $object), ['member_nominee', 'is_eligible_candidate', 'has_accepted_nomination', 'has_rejected_nomination', 'comments', 'statement_url', 'rejection_comments', 'is_write_in'], $object);
         break;
 
+      case 'ElectionOptionVote':
       case 'ElectionVote':
         // Only the removal of a ballot by someone other than the voter replacing it is worth a record;
         // adding ballots is not logged one by one, as that could be matched to the time a person voted.
@@ -133,6 +150,71 @@ class CRM_Elections_Helper_Guard {
           }
         }
         break;
+    }
+  }
+
+  // ----------------------------------------------------------------- referendum options and choices
+
+  /**
+   * The settings of a position that make it a referendum question: the type, the pass threshold and the quorum.
+   */
+  private static function guardPositionSettings($id, array $params) {
+    if (!empty($params['position_type']) && !array_key_exists($params['position_type'], CRM_Elections_BAO_ElectionPosition::getTypes())) {
+      throw new CRM_Core_Exception(E::ts('Unknown position type.'));
+    }
+    foreach (['pass_threshold' => [0, 100, E::ts('The pass threshold must be a percentage above 0 and up to 100.')], 'quorum_percent' => [-1, 100, E::ts('The quorum must be a percentage from 0 to 100.')]] as $field => [$min, $max, $message]) {
+      if (array_key_exists($field, $params) && $params[$field] !== NULL && $params[$field] !== '') {
+        if (!is_numeric($params[$field]) || (float) $params[$field] <= $min || (float) $params[$field] > $max) {
+          throw new CRM_Core_Exception($message);
+        }
+      }
+    }
+    if ($id && ($params['position_type'] ?? NULL) === CRM_Elections_BAO_ElectionPosition::TYPE_REFERENDUM
+      && CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_nomination WHERE election_position_id = %1', [1 => [(int) $id, 'Integer']])) {
+      throw new CRM_Core_Exception(E::ts('A position that has nominations cannot become a referendum question.'));
+    }
+  }
+
+  /**
+   * The wording of a question's choices is part of the question: it cannot change once the election has started.
+   */
+  private static function guardOption($op, $id, array $params) {
+    $positionId = $params['election_position_id'] ?? NULL;
+    if (!$positionId && $id) {
+      $positionId = CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_ElectionOption', $id, 'election_position_id');
+    }
+    $electionId = $positionId ? CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_ElectionPosition', $positionId, 'election_id') : NULL;
+    if ($electionId) {
+      CRM_Elections_BAO_ElectionPosition::assertCanChange($electionId);
+    }
+    if ($op === 'create' && !empty($params['kind']) && !in_array($params['kind'], ['yes', 'no', 'abstain'], TRUE)) {
+      throw new CRM_Core_Exception(E::ts('A referendum choice is yes, no or abstain.'));
+    }
+  }
+
+  /**
+   * A choice on a question is part of the ballot: it follows the rules of every other ballot row.
+   */
+  private static function guardOptionVote($op, $id, array $params) {
+    if ($op === 'edit') {
+      throw new CRM_Core_Exception(E::ts('A vote cannot be changed. A voter changes their vote by voting again.'));
+    }
+    $positionId = $params['election_position_id'] ?? NULL;
+    if ($op === 'delete' && $id) {
+      $positionId = CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_ElectionOptionVote', $id, 'election_position_id');
+      $electionId = $positionId ? (int) CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_ElectionPosition', $positionId, 'election_id') : 0;
+      self::$before['vote'][$id] = $electionId;
+    }
+    $electionId = $positionId ? (int) CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_ElectionPosition', $positionId, 'election_id') : 0;
+    if (!$electionId) {
+      return;
+    }
+    $election = findElectionById($electionId, FALSE);
+    if ($election->is_deleted || !$election->is_visible || !$election->isVotingStarted || $election->isVotingEnded || $election->has_results_generated) {
+      throw new CRM_Core_Exception(E::ts('Votes can only be added or removed while voting is open.'));
+    }
+    if ($op === 'create' && !self::$castingBallot) {
+      throw new CRM_Core_Exception(E::ts('A vote can only be cast through the ballot (ElectionVote.addvotes), which checks who may vote and what may be chosen.'));
     }
   }
 
@@ -188,7 +270,9 @@ class CRM_Elections_Helper_Guard {
       return;
     }
     $resultsGenerated = (bool) $current->has_results_generated;
-    $hasBallots = $resultsGenerated || (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position p ON p.id = n.election_position_id WHERE p.election_id = %1', [1 => [(int) $id, 'Integer']]) > 0;
+    $hasBallots = $resultsGenerated
+      || (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position p ON p.id = n.election_position_id WHERE p.election_id = %1', [1 => [(int) $id, 'Integer']]) > 0
+      || (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_option_vote ov INNER JOIN civicrm_election_position p ON p.id = ov.election_position_id WHERE p.election_id = %1', [1 => [(int) $id, 'Integer']]) > 0;
     if (!$hasBallots) {
       return;
     }
@@ -245,6 +329,7 @@ class CRM_Elections_Helper_Guard {
         EXISTS (SELECT 1 FROM civicrm_election_nomination n INNER JOIN civicrm_election_position p ON p.id = n.election_position_id WHERE p.election_id = e.id AND n.member_nominee = %1)
         OR EXISTS (SELECT 1 FROM civicrm_election_nomination_seconder s INNER JOIN civicrm_election_nomination n ON n.id = s.election_nomination_id INNER JOIN civicrm_election_position p ON p.id = n.election_position_id WHERE p.election_id = e.id AND s.member_nominator = %1)
         OR EXISTS (SELECT 1 FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position p ON p.id = n.election_position_id WHERE p.election_id = e.id AND v.member_id = %1)
+        OR EXISTS (SELECT 1 FROM civicrm_election_option_vote ov INNER JOIN civicrm_election_position p ON p.id = ov.election_position_id WHERE p.election_id = e.id AND ov.member_id = %1)
       )
       LIMIT 1
     ', [1 => [$contactId, 'Integer']]);

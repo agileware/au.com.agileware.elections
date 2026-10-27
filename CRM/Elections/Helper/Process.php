@@ -38,7 +38,7 @@ class CRM_Elections_Helper_Process {
     if (empty($nominatorId) || !CRM_Elections_Helper_Eligibility::canNominate($electionId, $nominatorId)) {
       throw new CRM_Core_Exception(E::ts('You are not allowed to nominate in this election.'));
     }
-    if (!CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_position WHERE id = %1 AND election_id = %2', [
+    if (!CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_position WHERE id = %1 AND election_id = %2 AND IFNULL(position_type, "election") <> "referendum"', [
       1 => [$positionId, 'Positive'],
       2 => [$electionId, 'Positive'],
     ])) {
