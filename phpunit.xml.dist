@@ -5,11 +5,11 @@
       <directory>./tests/phpunit</directory>
     </testsuite>
   </testsuites>
-  <filter>
-    <whitelist>
+  <coverage processUncoveredFiles="true">
+    <include>
       <directory suffix=".php">./</directory>
-    </whitelist>
-  </filter>
+    </include>
+  </coverage>
   <listeners>
     <listener class="Civi\Test\CiviTestListener">
       <arguments/>
