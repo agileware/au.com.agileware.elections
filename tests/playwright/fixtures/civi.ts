@@ -11,7 +11,20 @@ import { CV } from './cms';
  * CIVI_EXEC_PREFIX (set by the CI workflow to a `docker exec ...` command targeting the
  * WordPress container) is put in front of `cv`. When the tests run inside the container
  * itself (DDEV: `ddev exec`), leave it empty.
+ *
+ * With a prefix, the commands run where the extension is mounted at COMPONENT_DIR (also set by the
+ * workflow), which is not where the tests see it on the runner, so script paths are mapped across.
  */
+const EXTENSION_ROOT = path.resolve(__dirname, '..', '..', '..');
+
+function inContainer(file: string): string {
+  const dir = process.env.COMPONENT_DIR;
+  if (!process.env.CIVI_EXEC_PREFIX || !dir) {
+    return file;
+  }
+  return path.posix.join(dir, path.relative(EXTENSION_ROOT, file).split(path.sep).join('/'));
+}
+
 function execPrefixParts(): string[] {
   const prefix = process.env.CIVI_EXEC_PREFIX;
   return prefix ? prefix.split(' ').filter(Boolean) : [];
@@ -41,7 +54,7 @@ export type Stage = 'nominations' | 'advertise' | 'voting' | 'results';
  * to-results, generate.
  */
 export function advanceCouncil(step: string): void {
-  run([CV, 'scr', path.resolve(__dirname, 'advance-council.php')], { STEP: step });
+  run([CV, 'scr', inContainer(path.resolve(__dirname, 'advance-council.php'))], { STEP: step });
 }
 
 /** Move the election's dates to a stage, as time passing would. */
@@ -67,7 +80,7 @@ export function civiEval(php: string): string {
 
 /** Seed the council election again, at the nominations stage (see fixtures/seed-council.php). */
 export function reseedCouncil(): void {
-  run([CV, 'scr', path.resolve(__dirname, 'seed-council.php')]);
+  run([CV, 'scr', inContainer(path.resolve(__dirname, 'seed-council.php'))]);
   forgetCouncil();
 }
 
