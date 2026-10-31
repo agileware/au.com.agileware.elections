@@ -47,14 +47,14 @@ class CRM_Elections_BAO_ElectionNomination extends CRM_Elections_DAO_ElectionNom
 
     $election = findElectionById($current->election_id, FALSE);
     if ($election->isVotingEnded) {
-      throw new CRM_Core_Exception(E::ts('Nominations cannot be changed once voting has ended.'));
+      throw new CRM_Elections_Exception(E::ts('Nominations cannot be changed once voting has ended.'));
     }
     // A person written in answers during voting, through the write-in process only.
     if ($election->isVotingStarted && CRM_Elections_Helper_Guard::$writeIn) {
       return;
     }
     if ($election->isVotingStarted && array_intersect($changed, self::BALLOT_FIELDS)) {
-      throw new CRM_Core_Exception(E::ts('Who is standing cannot be changed once voting has started.'));
+      throw new CRM_Elections_Exception(E::ts('Who is standing cannot be changed once voting has started.'));
     }
   }
 
@@ -76,20 +76,20 @@ class CRM_Elections_BAO_ElectionNomination extends CRM_Elections_DAO_ElectionNom
   public static function addCandidate($positionId, $nomineeId, $accepted = TRUE, $statement = NULL) {
     $electionId = (int) CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_ElectionPosition', $positionId, 'election_id');
     if (!$electionId) {
-      throw new CRM_Core_Exception(E::ts('The selected position is not part of this election.'));
+      throw new CRM_Elections_Exception(E::ts('The selected position is not part of this election.'));
     }
     if (CRM_Elections_BAO_ElectionPosition::isReferendum($positionId)) {
-      throw new CRM_Core_Exception(E::ts('A referendum question has no candidates.'));
+      throw new CRM_Elections_Exception(E::ts('A referendum question has no candidates.'));
     }
     $election = findElectionById($electionId);
     if ($election->is_deleted) {
-      throw new CRM_Core_Exception(E::ts('Candidates cannot be added to a deleted election.'));
+      throw new CRM_Elections_Exception(E::ts('Candidates cannot be added to a deleted election.'));
     }
     if ($election->isVotingStarted) {
-      throw new CRM_Core_Exception(E::ts('Candidates cannot be added once voting has started.'));
+      throw new CRM_Elections_Exception(E::ts('Candidates cannot be added once voting has started.'));
     }
     if (!CRM_Elections_Helper_Eligibility::canBeNominated($electionId, $nomineeId)) {
-      throw new CRM_Core_Exception(E::ts('Only people who can stand in this election can be candidates. Add the person to one of the election groups first.'));
+      throw new CRM_Elections_Exception(E::ts('Only people who can stand in this election can be candidates. Add the person to one of the election groups first.'));
     }
 
     $existing = civicrm_api3('ElectionNomination', 'get', ['member_nominee' => $nomineeId, 'election_position_id' => $positionId, 'sequential' => 1]);

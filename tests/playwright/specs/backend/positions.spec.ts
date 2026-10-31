@@ -95,10 +95,10 @@ test.describe('Election positions (SearchKit list)', () => {
       }
       return '';
     };
-    expect(failure(() => civiApi4('ElectionPosition.update', { values: { name: 'Changed' }, where: [['id', '=', positionId]] }))).toContain('once election has been started');
-    expect(failure(() => civiApi4('ElectionPosition.update', { values: { sortorder: 2 }, where: [['id', '=', positionId]] }))).toContain('once election has been started');
-    expect(failure(() => addPosition(id, 'Late', 2))).toContain('once election has been started');
-    expect(failure(() => civiApi4('ElectionPosition.delete', { where: [['id', '=', positionId]] }))).toContain('once election has been started');
+    expect(failure(() => civiApi4('ElectionPosition.update', { values: { name: 'Changed' }, where: [['id', '=', positionId]] }))).toContain('This election is active');
+    expect(failure(() => civiApi4('ElectionPosition.update', { values: { sortorder: 2 }, where: [['id', '=', positionId]] }))).toContain('This election is active');
+    expect(failure(() => addPosition(id, 'Late', 2))).toContain('This election is active');
+    expect(failure(() => civiApi4('ElectionPosition.delete', { where: [['id', '=', positionId]] }))).toContain('This election is active');
     expect(positionNames(id)).toEqual(['Chair', 'Treasurer']);
   });
 });
@@ -135,5 +135,51 @@ test.describe('Referendum questions', () => {
     await adminPage.goto(listUrl(id));
     await expect(adminPage.locator('crm-search-display-table tbody tr').first()).toContainText('Referendum question');
     await expectNoPhpOutput(adminPage);
+  });
+
+  test('an active election opens a read-only list with nothing to change', async ({ adminPage }) => {
+    const id = createElection(nm('Positions active'));
+    addPosition(id, 'Alpha', 1);
+    addPosition(id, 'Beta', 2);
+    startElection(id);
+    await adminPage.goto(listUrl(id));
+    await expect(adminPage).toHaveURL(/position-list-active/);
+    await expect(adminPage.getByText('They cannot be changed while the election is active.')).toBeVisible();
+    const rows = adminPage.locator('crm-search-display-table tbody tr');
+    await expect(rows).toHaveCount(2);
+    await expect(rows.nth(0)).toContainText('Alpha');
+    await expect(adminPage.locator('crm-search-display-table .crm-draggable')).toHaveCount(0);
+    await expect(adminPage.getByRole('link', { name: 'Add Position' })).toHaveCount(0);
+    await expect(adminPage.getByRole('link', { name: 'Duplicate' })).toHaveCount(0);
+    await expect(adminPage.getByRole('link', { name: 'Delete' })).toHaveCount(0);
+    await expect(adminPage.getByText('Drag a row to change the order')).toHaveCount(0);
+    await expect(adminPage.getByRole('link', { name: 'Back to Manage Elections' })).toBeVisible();
+    await expectNoPhpOutput(adminPage);
+  });
+
+  test('a stale editable page explains why a drag is refused', async ({ adminPage, allowedProblems }) => {
+    allowedProblems.push(/./);
+    const id = createElection(nm('Positions stale'));
+    addPosition(id, 'Alpha', 1);
+    addPosition(id, 'Beta', 2);
+    addPosition(id, 'Gamma', 3);
+    await adminPage.goto(listUrl(id));
+    const rows = adminPage.locator('crm-search-display-table tbody tr');
+    await expect(rows).toHaveCount(3);
+    // The election starts while the page is open.
+    startElection(id);
+    await adminPage.waitForTimeout(500);
+    const from = (await rows.nth(2).locator('.crm-draggable').boundingBox())!;
+    const top = (await rows.nth(0).boundingBox())!;
+    await adminPage.mouse.move(from.x + 5, from.y + 5);
+    await adminPage.mouse.down();
+    for (let y = from.y; y > top.y - 30; y -= 10) {
+      await adminPage.mouse.move(from.x + 5, y, { steps: 2 });
+      await adminPage.waitForTimeout(40);
+    }
+    await adminPage.mouse.up();
+    await expect(adminPage.getByText('This election is active, so its positions cannot be changed.').first()).toBeVisible();
+    await expect(adminPage.getByText('Sorry an error occurred')).toHaveCount(0);
+    expect(positionNames(id)).toEqual(['Alpha', 'Beta', 'Gamma']);
   });
 });

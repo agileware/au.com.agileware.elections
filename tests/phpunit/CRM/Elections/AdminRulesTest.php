@@ -93,7 +93,7 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
         $this->fail('Changing ' . key($change) . ' of a started election must be refused.');
       }
       catch (CRM_Core_Exception $e) {
-        $this->assertStringContainsString('once election has been started', $e->getMessage());
+        $this->assertStringContainsString('This election is active', $e->getMessage());
       }
     }
     try {
@@ -101,7 +101,7 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
       $this->fail('Deleting a position of a started election must be refused.');
     }
     catch (CRM_Core_Exception $e) {
-      $this->assertStringContainsString('once election has been started', $e->getMessage());
+      $this->assertStringContainsString('This election is active', $e->getMessage());
     }
     $this->assertSame([$position['name']], $this->positionsInOrder($election['id']));
   }
@@ -271,7 +271,7 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
       $this->fail('Moving a position once the election has started must be refused');
     }
     catch (CRM_Core_Exception $e) {
-      $this->assertStringContainsString('once election has been started', $e->getMessage());
+      $this->assertStringContainsString('This election is active', $e->getMessage());
     }
     $this->assertSame($before, $this->positionsInOrder($election['id']), 'The others were not shuffled by the refused move');
     $orders = array_map('intval', array_column(civicrm_api3('ElectionPosition', 'get', ['election_id' => $election['id'], 'options' => ['limit' => 0]])['values'], 'sortorder'));

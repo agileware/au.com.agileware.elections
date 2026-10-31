@@ -78,13 +78,13 @@ class CRM_Elections_Helper_Guard {
 
       case 'ElectionResult':
         if (!CRM_Elections_Helper_Results::$writing) {
-          throw new CRM_Core_Exception(E::ts('Election results can only be written when they are generated.'));
+          throw new CRM_Elections_Exception(E::ts('Election results can only be written when they are generated.'));
         }
         break;
 
       case 'Election':
         if (in_array($op, ['create', 'edit'], TRUE) && !empty($params['voting_method']) && !array_key_exists($params['voting_method'], CRM_Elections_VotingMethod::getOptions())) {
-          throw new CRM_Core_Exception(E::ts('Unknown voting method.'));
+          throw new CRM_Elections_Exception(E::ts('Unknown voting method.'));
         }
         if ($op === 'edit' && $id) {
           self::guardElectionEdit($id, (array) $params);
@@ -96,7 +96,7 @@ class CRM_Elections_Helper_Guard {
       case 'ElectionNomination':
         if ($objectName === 'ElectionPosition' && in_array($op, ['create', 'edit'], TRUE) && array_key_exists('write_ins_per_seat', (array) $params) && $params['write_ins_per_seat'] !== NULL && $params['write_ins_per_seat'] !== '') {
           if (!CRM_Utils_Rule::positiveInteger($params['write_ins_per_seat']) && (string) $params['write_ins_per_seat'] !== '0' || (int) $params['write_ins_per_seat'] > CRM_Elections_Helper_WriteIn::MAX_PER_SEAT) {
-            throw new CRM_Core_Exception(E::ts('Write-ins per seat must be a whole number from 0 to %1.', [1 => CRM_Elections_Helper_WriteIn::MAX_PER_SEAT]));
+            throw new CRM_Elections_Exception(E::ts('Write-ins per seat must be a whole number from 0 to %1.', [1 => CRM_Elections_Helper_WriteIn::MAX_PER_SEAT]));
           }
         }
         if ($objectName === 'ElectionPosition' && in_array($op, ['create', 'edit'], TRUE)) {
@@ -106,7 +106,7 @@ class CRM_Elections_Helper_Guard {
           self::guardNominationCreate((array) $params);
         }
         if ($objectName === 'ElectionNomination' && in_array($op, ['create', 'edit'], TRUE) && !empty($params['statement_url']) && !CRM_Elections_Helper_Candidate::isValidStatementUrl($params['statement_url'])) {
-          throw new CRM_Core_Exception(E::ts('Enter a web address starting with http:// or https://'));
+          throw new CRM_Elections_Exception(E::ts('Enter a web address starting with http:// or https://'));
         }
         self::remember($objectName === 'ElectionPosition' ? 'civicrm_election_position' : 'civicrm_election_nomination', $objectName, $op, $id);
         break;
@@ -169,18 +169,18 @@ class CRM_Elections_Helper_Guard {
    */
   private static function guardPositionSettings($id, array $params) {
     if (!empty($params['position_type']) && !array_key_exists($params['position_type'], CRM_Elections_BAO_ElectionPosition::getTypes())) {
-      throw new CRM_Core_Exception(E::ts('Unknown position type.'));
+      throw new CRM_Elections_Exception(E::ts('Unknown position type.'));
     }
     foreach (['pass_threshold' => [0, 100, E::ts('The pass threshold must be a percentage above 0 and up to 100.')], 'quorum_percent' => [-1, 100, E::ts('The quorum must be a percentage from 0 to 100.')]] as $field => [$min, $max, $message]) {
       if (array_key_exists($field, $params) && $params[$field] !== NULL && $params[$field] !== '') {
         if (!is_numeric($params[$field]) || (float) $params[$field] <= $min || (float) $params[$field] > $max) {
-          throw new CRM_Core_Exception($message);
+          throw new CRM_Elections_Exception($message);
         }
       }
     }
     if ($id && ($params['position_type'] ?? NULL) === CRM_Elections_BAO_ElectionPosition::TYPE_REFERENDUM
       && CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_nomination WHERE election_position_id = %1', [1 => [(int) $id, 'Integer']])) {
-      throw new CRM_Core_Exception(E::ts('A position that has nominations cannot become a referendum question.'));
+      throw new CRM_Elections_Exception(E::ts('A position that has nominations cannot become a referendum question.'));
     }
   }
 
@@ -197,7 +197,7 @@ class CRM_Elections_Helper_Guard {
       CRM_Elections_BAO_ElectionPosition::assertCanChange($electionId);
     }
     if ($op === 'create' && !empty($params['kind']) && !in_array($params['kind'], ['yes', 'no', 'abstain'], TRUE)) {
-      throw new CRM_Core_Exception(E::ts('A referendum choice is yes, no or abstain.'));
+      throw new CRM_Elections_Exception(E::ts('A referendum choice is yes, no or abstain.'));
     }
   }
 
@@ -206,7 +206,7 @@ class CRM_Elections_Helper_Guard {
    */
   private static function guardOptionVote($op, $id, array $params) {
     if ($op === 'edit') {
-      throw new CRM_Core_Exception(E::ts('A vote cannot be changed. A voter changes their vote by voting again.'));
+      throw new CRM_Elections_Exception(E::ts('A vote cannot be changed. A voter changes their vote by voting again.'));
     }
     $positionId = $params['election_position_id'] ?? NULL;
     if ($op === 'delete' && $id) {
@@ -220,10 +220,10 @@ class CRM_Elections_Helper_Guard {
     }
     $election = findElectionById($electionId, FALSE);
     if ($election->is_deleted || !$election->is_visible || !$election->isVotingStarted || $election->isVotingEnded || $election->has_results_generated) {
-      throw new CRM_Core_Exception(E::ts('Votes can only be added or removed while voting is open.'));
+      throw new CRM_Elections_Exception(E::ts('Votes can only be added or removed while voting is open.'));
     }
     if ($op === 'create' && !self::$castingBallot) {
-      throw new CRM_Core_Exception(E::ts('A vote can only be cast through the ballot (ElectionVote.addvotes), which checks who may vote and what may be chosen.'));
+      throw new CRM_Elections_Exception(E::ts('A vote can only be cast through the ballot (ElectionVote.addvotes), which checks who may vote and what may be chosen.'));
     }
   }
 
@@ -231,7 +231,7 @@ class CRM_Elections_Helper_Guard {
 
   private static function guardVote($op, $id, array $params) {
     if ($op === 'edit') {
-      throw new CRM_Core_Exception(E::ts('A vote cannot be changed. A voter changes their vote by voting again.'));
+      throw new CRM_Elections_Exception(E::ts('A vote cannot be changed. A voter changes their vote by voting again.'));
     }
     $electionId = NULL;
     if ($op === 'create') {
@@ -247,10 +247,10 @@ class CRM_Elections_Helper_Guard {
     }
     $election = findElectionById($electionId, FALSE);
     if ($election->is_deleted || !$election->is_visible || !$election->isVotingStarted || $election->isVotingEnded || $election->has_results_generated) {
-      throw new CRM_Core_Exception(E::ts('Votes can only be added or removed while voting is open.'));
+      throw new CRM_Elections_Exception(E::ts('Votes can only be added or removed while voting is open.'));
     }
     if ($op === 'create' && !self::$castingBallot) {
-      throw new CRM_Core_Exception(E::ts('A vote can only be cast through the ballot (ElectionVote.addvotes), which checks who may vote and what may be chosen.'));
+      throw new CRM_Elections_Exception(E::ts('A vote can only be cast through the ballot (ElectionVote.addvotes), which checks who may vote and what may be chosen.'));
     }
   }
 
@@ -267,7 +267,7 @@ class CRM_Elections_Helper_Guard {
     }
     $election = findElectionById($electionId, FALSE);
     if ($election->isVotingStarted) {
-      throw new CRM_Core_Exception(E::ts('Who is standing cannot be changed once voting has started.'));
+      throw new CRM_Elections_Exception(E::ts('Who is standing cannot be changed once voting has started.'));
     }
   }
 
@@ -280,7 +280,7 @@ class CRM_Elections_Helper_Guard {
     }
     if (array_key_exists('is_visible', $params) && !(int) $params['is_visible'] && (int) $current->is_visible && !self::$withdrawing
       && !empty($current->nomination_start_date) && strtotime($current->nomination_start_date) <= time()) {
-      throw new CRM_Core_Exception(E::ts('This election is active and its nominations have started, so it cannot be switched off here. Use Withdraw on the Manage Elections page.'));
+      throw new CRM_Elections_Exception(E::ts('This election is active and its nominations have started, so it cannot be switched off here. Use Withdraw on the Manage Elections page.'));
     }
     $resultsGenerated = (bool) $current->has_results_generated;
     $hasBallots = $resultsGenerated
@@ -302,7 +302,7 @@ class CRM_Elections_Helper_Guard {
         continue;
       }
       if (self::normalise($field, $params[$field]) !== self::normalise($field, $current->$field)) {
-        throw new CRM_Core_Exception(E::ts('%1 cannot be changed once people have voted or the results are generated.', [1 => $field]));
+        throw new CRM_Elections_Exception(E::ts('%1 cannot be changed once people have voted or the results are generated.', [1 => $field]));
       }
     }
   }
@@ -347,7 +347,7 @@ class CRM_Elections_Helper_Guard {
       LIMIT 1
     ', [1 => [$contactId, 'Integer']]);
     if ($name) {
-      throw new CRM_Core_Exception(E::ts('This contact is a candidate, nominator or voter in the election "%1" and cannot be deleted. Deleting them would change the election.', [1 => $name]));
+      throw new CRM_Elections_Exception(E::ts('This contact is a candidate, nominator or voter in the election "%1" and cannot be deleted. Deleting them would change the election.', [1 => $name]));
     }
   }
 

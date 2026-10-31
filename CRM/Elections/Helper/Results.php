@@ -322,12 +322,12 @@ class CRM_Elections_Helper_Results {
       return;
     }
     if ($election->is_deleted || !$election->isVotingEnded) {
-      throw new CRM_Core_Exception(E::ts('Results can only be generated once voting has ended.'));
+      throw new CRM_Elections_Exception(E::ts('Results can only be generated once voting has ended.'));
     }
 
     $lock = Civi::lockManager()->acquire('data.elections.results.' . (int) $electionId, 30);
     if (!$lock->isAcquired()) {
-      throw new CRM_Core_Exception(E::ts('The results of this election are already being generated.'));
+      throw new CRM_Elections_Exception(E::ts('The results of this election are already being generated.'));
     }
     try {
       // Another request may have finished while this one waited for the lock.

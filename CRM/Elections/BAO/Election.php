@@ -217,7 +217,7 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
   public static function assertCanActivate($electionId) {
     $positions = (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_position WHERE election_id = %1', [1 => [$electionId, 'Positive']]);
     if ($positions < 1) {
-      throw new CRM_Core_Exception(E::ts('At least one Position must be defined before the Election can be active.'));
+      throw new CRM_Elections_Exception(E::ts('At least one Position must be defined before the Election can be active.'));
     }
   }
 

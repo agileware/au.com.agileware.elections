@@ -164,7 +164,7 @@ class CRM_Elections_Helper_WriteIn {
   public static function record($election, $positionId, $contactId) {
     $lock = Civi::lockManager()->acquire('data.elections.nominate.' . (int) $positionId . '.' . (int) $contactId, 10);
     if (!$lock->isAcquired()) {
-      throw new CRM_Core_Exception(E::ts('This person is being written in. Please wait a moment and try again.'));
+      throw new CRM_Elections_Exception(E::ts('This person is being written in. Please wait a moment and try again.'));
     }
     try {
       $existing = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_election_nomination WHERE election_position_id = %1 AND member_nominee = %2', [1 => [(int) $positionId, 'Integer'], 2 => [(int) $contactId, 'Integer']]);
