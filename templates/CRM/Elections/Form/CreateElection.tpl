@@ -132,7 +132,17 @@
             <td class="label label-select-col">{$form.send_emails.label}</td>
             <td>
                 {$form.send_emails.html}<br>
-                <span class="description">{ts}Email a nominee when they have enough nominations to stand, asking them to accept or withdraw. The emails come from the message templates called &quot;Elections&quot; (Administer, Communications, Message Templates), which you can edit.{/ts}</span>
+                <span class="description">{ts}Email a nominee when they have enough nominations to stand, asking them to accept or withdraw. Choose the message below.{/ts}</span>
+            </td>
+        </tr>
+
+        <tr class="crm-create-election-form-block-results election-nomination-email-row">
+            <td class="label label-select-col">{$form.nomination_message_template_id.label}</td>
+            <td>
+                {$form.nomination_message_template_id.html}<br>
+                <span class="description">{ts}The message template used for the email. The default is &quot;Election - Invite nominee&quot;.{/ts}
+                {if $canEditMessageTemplates}<a href="{$messageTemplatesUrl}" target="_blank" rel="noopener">{ts}Edit message templates{/ts}</a>{/if}</span><br>
+                <span class="description">{ts}A template can use these variables: {ldelim}$nomineeName{rdelim}, {ldelim}$positionName{rdelim}, {ldelim}$electionName{rdelim}, {ldelim}$votingOpens{rdelim}, {ldelim}$votingCloses{rdelim}, {ldelim}$acceptUrl{rdelim} and {ldelim}$viewUrl{rdelim}.{/ts}</span>
             </td>
         </tr>
 

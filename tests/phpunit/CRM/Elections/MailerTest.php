@@ -61,6 +61,61 @@ class CRM_Elections_MailerTest extends api_v3_ElectionBaseTestCase {
     $this->assertCount(1, $this->mails(), 'A further nominator does not send it again');
   }
 
+  private function chooseTemplate(Council $fixture, $templateId) {
+    CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET nomination_message_template_id = %2 WHERE id = %1', [1 => [$fixture->electionId, 'Integer'], 2 => [$templateId, $templateId ? 'Integer' : 'Timestamp']]);
+  }
+
+  private function ownTemplate($title = 'Our own nominee email') {
+    return (int) civicrm_api3('MessageTemplate', 'create', [
+      'msg_title' => $title,
+      'msg_subject' => 'Chosen subject for {$nomineeName}',
+      'msg_text' => 'Chosen text {$positionName}',
+      'msg_html' => '<p>Chosen body for {$positionName|escape} in {$electionName|escape}</p>',
+      'is_active' => 1,
+    ])['id'];
+  }
+
+  public function testTheOrganisersChoiceOfTemplateIsUsedAndItsVariablesFill() {
+    $fixture = Council::create();
+    $this->switchEmails($fixture, 1);
+    $this->chooseTemplate($fixture, $this->ownTemplate());
+    $this->email($fixture, 'N01', 'n01.mailer@example.org');
+    $this->nominate($fixture, 'N01', ['V01', 'V02']);
+    $mails = $this->mails();
+    $this->assertCount(1, $mails);
+    $text = $mails[0]['headers'] . $mails[0]['body'];
+    $this->assertStringContainsString('Chosen subject for', $text);
+    $this->assertStringContainsString('Chosen body for President', $text);
+    $this->assertStringNotContainsString('nominated for President', $text, 'Not the default wording');
+    $this->assertStringNotContainsString('{$', $text, 'The variables were filled in');
+  }
+
+  public function testTheDefaultTemplateIsUsedWhenNoneIsChosenOrTheChosenOneIsGone() {
+    $fixture = Council::create();
+    $this->switchEmails($fixture, 1);
+    $templateId = $this->ownTemplate('Soon gone');
+    $this->chooseTemplate($fixture, $templateId);
+    civicrm_api3('MessageTemplate', 'delete', ['id' => $templateId]);
+    $this->assertNull(CRM_Core_DAO::singleValueQuery('SELECT nomination_message_template_id FROM civicrm_election WHERE id = %1', [1 => [$fixture->electionId, 'Integer']]), 'Deleting the template empties the choice');
+    $this->email($fixture, 'N01', 'n01.mailer@example.org');
+    $this->nominate($fixture, 'N01', ['V01', 'V02']);
+    $this->assertStringContainsString('nominated for President', $this->mails()[0]['headers'] . $this->mails()[0]['body']);
+  }
+
+  public function testAnInactiveTemplateIsNotUsedAndTheChoiceListIsWhatTheOrganiserMayPick() {
+    $fixture = Council::create();
+    $this->switchEmails($fixture, 1);
+    $templateId = $this->ownTemplate('Switched off');
+    civicrm_api3('MessageTemplate', 'create', ['id' => $templateId, 'is_active' => 0]);
+    $this->chooseTemplate($fixture, $templateId);
+    $this->assertNull(CRM_Elections_Helper_Mailer::chosenTemplate(findElectionById($fixture->electionId)));
+    $choices = CRM_Elections_Helper_Mailer::getNominationTemplates();
+    $this->assertNotContains('Switched off', $choices);
+    $this->assertContains('Election - Invite nominee', $choices);
+    $this->assertNotContains('Election - Remind written-in person', $choices, 'Templates of other emails are not offered');
+    $this->assertContains($this->ownTemplate('Offered'), array_keys($choices) ? array_keys(CRM_Elections_Helper_Mailer::getNominationTemplates()) : []);
+  }
+
   public function testNothingIsSentWhenEmailsAreOff() {
     $fixture = Council::create();
     $this->email($fixture, 'N01', 'n01.mailer@example.org');
