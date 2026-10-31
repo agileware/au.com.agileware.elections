@@ -30,9 +30,9 @@ class CRM_Elections_Helper_Candidate {
    */
   public static function getNameFormats() {
     return [
-      self::NAME_DISPLAY => E::ts('Display name (Edward Smith)'),
-      self::NAME_FIRST_NICK_LAST => E::ts('First "Nickname" Last (Edward "Butch" Smith)'),
-      self::NAME_NICK_LAST => E::ts('Nickname Last (Butch Smith)'),
+      self::NAME_DISPLAY => E::ts('Display name (Robert Irwin)'),
+      self::NAME_FIRST_NICK_LAST => E::ts('First "Nickname" Last (Robert "Rob" Irwin)'),
+      self::NAME_NICK_LAST => E::ts('Nickname Last (Rob Irwin)'),
     ];
   }
 

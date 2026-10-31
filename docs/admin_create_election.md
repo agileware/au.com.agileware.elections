@@ -38,7 +38,7 @@ Group membership, including smart groups, is checked when each person acts. Peop
 - **Show candidate photos**: untick to hide candidate photos everywhere in this election - the nominations list, candidate pages, the ballot and the results. Use this when you want voters to decide without photos.
 - **Candidate statements**: candidates write a statement when they accept a nomination (see [How to accept a nomination](user_accept_nomination.md)). A statement is always shown on the candidate's own page. Choose whether it is also shown on the ballot, as an expandable *Read statement* or in full, and in the candidate list once voting has started.
 - **Show who nominated each candidate**: untick to hide the nominators and seconders on the candidate page, for example when nominations are handled outside the website.
-- **Candidate name format**: how candidate names are written. Use **First "Nickname" Last** to show, for example, Edward "Butch" Smith. Nicknames come from the contact's *Nickname* field. The default follows the site-wide setting, see [Elections Settings](admin_election_settings.md).
+- **Candidate name format**: how candidate names are written. Use **First "Nickname" Last** to show, for example, Robert "Rob" Irwin. Nicknames come from the contact's *Nickname* field. The default follows the site-wide setting, see [Elections Settings](admin_election_settings.md).
 6. Click **Create** to create a new election.
 
 The election is created inactive. At least one [Position](admin_add_position.md) must be added, and the election must be [activated](admin_activate_election.md), before it is visible to end users.
