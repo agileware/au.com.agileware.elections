@@ -220,7 +220,7 @@ test('results follow the ballots: clear winners, a tie and an uncontested role',
   await expect(adminPage.locator('.election-turnout-table')).not.toContainText('Nominee');
 
   // The results screen lists the ranking for each role.
-  await adminPage.getByRole('link', { name: 'Results' }).click();
+  await adminPage.getByRole('link', { name: 'Results', exact: true }).click();
   await expect(adminPage.getByRole('columnheader', { name: 'Candidate' })).toBeVisible();
   for (const position of POSITIONS) {
     await expect(adminPage.locator('crm-search-display-table tbody tr', { hasText: position }).first()).toBeVisible();
