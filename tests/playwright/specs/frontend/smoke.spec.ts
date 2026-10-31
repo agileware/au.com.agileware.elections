@@ -19,7 +19,7 @@ test.describe('election front end (nominations stage)', () => {
 
   test('an outsider with a valid link cannot nominate', async ({ personaGoto }) => {
     const page = await personaGoto('OUT', 'civicrm/elections/nominations/create');
-    await expect(page.getByText('You may only see this page if you are a member.')).toBeVisible();
+    await expect(page.getByText('You may only see this page if you can take part in this election.')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Nominate' })).toHaveCount(0);
   });
 

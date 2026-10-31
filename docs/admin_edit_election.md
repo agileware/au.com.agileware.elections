@@ -20,7 +20,7 @@ To edit an election, you should be a user who gains admin access for CiviCRM and
 - **Results Start Date**: to edit results start date. This date should be after **Voting End Date** and before **Visible End Date**
 - **Voting Method**: ranked choice or most votes win (it cannot be changed once people have voted).
 - **Anonymise Votes**: to edit whether votes are anonymised once results are published.
-- **Allow Members to Change Vote**: to edit whether a member can revote to change their vote before **Voting End Date**.
+- **Allow people to change their vote**: to edit whether people can revote to change their vote before **Voting End Date**.
 - **Allow non-logged in access**: to edit whether people can participate using a personalised link without logging in. See [Participating without logging in](setup.md#participating-without-logging-in).
 - **Number of Required Nominations**: to edit the number of nominations a person needs to become an eligible candidate. See [How to second a nomination](user_second_nomination.md).
 - **Allowed by Groups**: to edit the CiviCRM Groups and Smart Groups permitted to vote in this election.

@@ -75,7 +75,7 @@ class CRM_Elections_Helper_Process {
     ]);
     if ($existing['count'] > 0) {
       if ($existing['values'][0]['has_rejected_nomination'] == 1) {
-        throw new CRM_Elections_Exception(E::ts('Selected member has withdrawn the nomination, You cannot nominate the member again for selected position.'));
+        throw new CRM_Elections_Exception(E::ts('This person has withdrawn their nomination, so they cannot be nominated again for this position.'));
       }
       $nominationId = (int) $existing['values'][0]['id'];
     }

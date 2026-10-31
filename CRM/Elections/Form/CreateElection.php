@@ -161,7 +161,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
 
     $this->add('select', 'voting_method', E::ts('Voting Method'), CRM_Elections_VotingMethod::getOptions(), TRUE);
 
-    $this->add('select', 'allow_revote', E::ts('Allow Members to Change Vote'), CRM_Core_SelectValues::boolean(), TRUE, [
+    $this->add('select', 'allow_revote', E::ts('Allow people to change their vote'), CRM_Core_SelectValues::boolean(), TRUE, [
       'placeholder' => '- Select -',
     ]);
 

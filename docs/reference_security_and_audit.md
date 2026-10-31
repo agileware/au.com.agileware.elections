@@ -4,7 +4,7 @@ The extension is built so that the result of an election can be trusted: nobody 
 
 ## What the extension guarantees
 
-- **One ballot per member.** Enforced by the database as well as the code. A double click or two requests at once leave one ballot.
+- **One ballot per voter.** Enforced by the database as well as the code. A double click or two requests at once leave one ballot.
 - **Ballots go through one door.** Ballot rows can only be written by the voting process, while voting is open, after the checks on who may vote and who may be voted for. They cannot be edited, and cannot be added or removed through the API after voting closes.
 - **Who is standing is fixed once voting starts.** Settings, positions and candidates are frozen, apart from write-ins, which have their own protected process. Settings such as who may vote, anonymising and changing votes are locked once the first ballot exists.
 - **Results are written once.** They are generated after voting has ended, in one step, and cannot be edited or regenerated.

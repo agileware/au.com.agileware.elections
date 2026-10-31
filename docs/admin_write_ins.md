@@ -8,7 +8,7 @@ Edit the position and set **Write-ins per seat** to a number from 1 to 10 (0 tur
 
 ## What a voter sees
 
-On the ballot, under the candidates of that position, a **Write in a candidate** box with one place to start and an **Add another write-in** button up to the limit. The voter types at least three letters of a name and picks a person. Only people in the election's candidate groups (the voting groups unless you set candidate groups) are offered, only names are shown, and the number of searches a minute is limited, so nobody can browse the member list. In a ranked choice election the voter also gives the person a rank; in a most votes election the person counts as one of the voter's choices.
+On the ballot, under the candidates of that position, a **Write in a candidate** box with one place to start and an **Add another write-in** button up to the limit. The voter types at least three letters of a name and picks a person. Only people in the election's candidate groups (the voting groups unless you set candidate groups) are offered, only names are shown, and the number of searches a minute is limited, so nobody can browse the list of people. In a ranked choice election the voter also gives the person a rank; in a most votes election the person counts as one of the voter's choices.
 
 The voter is told that the vote counts only if the person accepts before voting closes, and that otherwise it is dropped (the ballot moves on to their next choice).
 
@@ -22,7 +22,7 @@ The voter is told that the vote counts only if the person accepts before voting 
 - If they open an accept or decline link after voting has closed, they see a message explaining that the opportunity has passed, that they are not on the ballot and that nothing more is needed, with a button to the election.
 - A person who is already a candidate for the position is simply voted for. A person who was nominated but never accepted cannot be written in.
 
-People who voted before the person accepted only see the new candidate if they vote again, so write-ins work best with **Allow Members to Change Vote** turned on. The election overview warns you when write-ins are on and changing a vote is off.
+People who voted before the person accepted only see the new candidate if they vote again, so write-ins work best with **Allow people to change their vote** turned on. The election overview warns you when write-ins are on and changing a vote is off.
 
 ## What the records show
 

@@ -114,7 +114,7 @@ test('voting: vote now, change your vote, or not allowed to vote', async ({ brow
   await voted.close();
 
   const outsider = await view(browser, 'OUT');
-  await expect(outsider.page.locator('.election-next-action')).toContainText('Only members can vote');
+  await expect(outsider.page.locator('.election-next-action')).toContainText("Only people in this election's groups can vote");
   await expect(outsider.page.locator('.election-next-action').getByRole('link')).toHaveCount(0);
   await outsider.close();
 });

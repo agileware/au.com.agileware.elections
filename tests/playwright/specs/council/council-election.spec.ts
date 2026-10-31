@@ -79,7 +79,7 @@ test('nominators nominate and second, and the outsider cannot take part', async 
 
   // The outsider has a valid link but is not in the election's group.
   const outsider = await personaGoto('OUT', 'civicrm/elections/nominations/create');
-  await expect(outsider.getByText('You may only see this page if you are a member.')).toBeVisible();
+  await expect(outsider.getByText('You may only see this page if you can take part in this election.')).toBeVisible();
 });
 
 test('nominees accept, withdraw or stay silent, and six people end up standing', async ({ persona, personaGoto }) => {
@@ -156,7 +156,7 @@ test('thirty voters and the nominees vote, one changes their vote, the outsider 
   await expect(ballot.locator(`input[name="candidate_${nominationIds['Treasurer|N07']}"]`)).toHaveCount(0);
   await expect(ballot.locator(`input[name="candidate_${nominationIds['Secretary|N03']}"]`)).toHaveCount(1);
   const outsider = await personaGoto('OUT', 'civicrm/elections/vote');
-  await expect(outsider.getByText('You may only see this page if you are a member.')).toBeVisible();
+  await expect(outsider.getByText('You may only see this page if you can take part in this election.')).toBeVisible();
 });
 
 test('results follow the ballots: clear winners, a tie and an uncontested role', async ({ personaGoto, browser }) => {
