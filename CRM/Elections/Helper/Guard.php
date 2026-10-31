@@ -61,6 +61,15 @@ class CRM_Elections_Helper_Guard {
    */
   public static $writeIn = FALSE;
 
+  /**
+   * TRUE only while an active election whose nominations have started is being withdrawn through the
+   * Withdraw form, which asks for the election's name. Switching such an election off lets it be edited
+   * again, so no other write path may do it.
+   *
+   * @var bool
+   */
+  public static $withdrawing = FALSE;
+
   public static function pre($op, $objectName, $id, &$params) {
     switch ($objectName) {
       case 'ElectionVote':
@@ -268,6 +277,10 @@ class CRM_Elections_Helper_Guard {
     $current = CRM_Core_DAO::executeQuery('SELECT * FROM civicrm_election WHERE id = %1', [1 => [(int) $id, 'Integer']]);
     if (!$current->fetch()) {
       return;
+    }
+    if (array_key_exists('is_visible', $params) && !(int) $params['is_visible'] && (int) $current->is_visible && !self::$withdrawing
+      && !empty($current->nomination_start_date) && strtotime($current->nomination_start_date) <= time()) {
+      throw new CRM_Core_Exception(E::ts('This election is active and its nominations have started, so it cannot be switched off here. Use Withdraw on the Manage Elections page.'));
     }
     $resultsGenerated = (bool) $current->has_results_generated;
     $hasBallots = $resultsGenerated

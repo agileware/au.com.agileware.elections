@@ -38,6 +38,47 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
     $this->assertEquals(0, CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], 'is_visible'));
   }
 
+  // ------------------------------------------------- active (locked) and stage
+
+  public function testStageAndLockedFollowTheElectionsState() {
+    $cases = [
+      [api_v3_ElectionBaseTestCase::$ELECTION_NOT_STARTED, 1, 'not_running', FALSE],
+      [api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, 1, 'nominations', TRUE],
+      [api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, 0, 'not_running', FALSE],
+      [api_v3_ElectionBaseTestCase::$ELECTION_ADVERTISE_CANDIDATES_STARTED, 1, 'candidates', TRUE],
+      [api_v3_ElectionBaseTestCase::$ELECTION_VOTING_IN_PROGRESS, 1, 'voting', TRUE],
+    ];
+    foreach ($cases as [$state, $visible, $stage, $locked]) {
+      $election = $this->editElectionByState($state, $this->inactiveElection());
+      CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET is_visible = %2 WHERE id = %1', [1 => [$election['id'], 'Integer'], 2 => [$visible, 'Integer']]);
+      $row = \Civi\Api4\Election::get(FALSE)->addSelect('is_locked', 'stage')->addWhere('id', '=', $election['id'])->execute()->single();
+      $this->assertSame($stage, $row['stage'], "$state, visible $visible");
+      $this->assertSame($locked, (bool) $row['is_locked'], "$state, visible $visible");
+    }
+  }
+
+  public function testAStartedElectionCannotBeSwitchedOffExceptByWithdrawing() {
+    $election = $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $this->inactiveElection());
+    CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET is_visible = 1 WHERE id = %1', [1 => [$election['id'], 'Integer']]);
+    try {
+      \Civi\Api4\Election::update(FALSE)->addWhere('id', '=', $election['id'])->addValue('is_visible', FALSE)->execute();
+      $this->fail('Switching off an active election must be refused.');
+    }
+    catch (CRM_Core_Exception $e) {
+      $this->assertStringContainsString('Use Withdraw', $e->getMessage());
+    }
+    $this->assertEquals(1, CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], 'is_visible'));
+
+    CRM_Elections_Helper_Guard::$withdrawing = TRUE;
+    try {
+      \Civi\Api4\Election::update(FALSE)->addWhere('id', '=', $election['id'])->addValue('is_visible', FALSE)->execute();
+    }
+    finally {
+      CRM_Elections_Helper_Guard::$withdrawing = FALSE;
+    }
+    $this->assertEquals(0, CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], 'is_visible'));
+  }
+
   // -------------------------------------------------------------- positions
 
   public function testPositionsAreLockedOnceTheElectionHasStarted() {
