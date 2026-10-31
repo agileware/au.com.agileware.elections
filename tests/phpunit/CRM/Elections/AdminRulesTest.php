@@ -57,6 +57,25 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
     }
   }
 
+  /**
+   * CiviCRM 6.19 and later hide an exception's message from an AJAX caller (SearchKit drag and drop, editing
+   * in place) behind "Sorry an error occurred ... (Error ID ...)" unless the exception says it is safe to show.
+   */
+  public function testRefusalsCarryTheirReasonToAjaxCallers() {
+    $election = $this->inactiveElection();
+    $position = $this->createElectionPosition($election);
+    $election = $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $election);
+    $this->callAPISuccess('Election', 'create', ['id' => $election['id'], 'is_visible' => 1] + $election);
+    try {
+      \Civi\Api4\ElectionPosition::update(FALSE)->addWhere('id', '=', $position['id'])->addValue('sortorder', 7)->execute();
+      $this->fail('A move must be refused.');
+    }
+    catch (CRM_Core_Exception $e) {
+      $this->assertTrue($e->getErrorData()['show_detailed_error'] ?? FALSE);
+      $this->assertStringContainsString('This election is active, so its positions cannot be changed', $e->getMessage());
+    }
+  }
+
   public function testAStartedElectionCannotBeSwitchedOffExceptByWithdrawing() {
     $election = $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $this->inactiveElection());
     CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET is_visible = 1 WHERE id = %1', [1 => [$election['id'], 'Integer']]);
