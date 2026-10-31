@@ -12,6 +12,7 @@ New to the extension? Read chapters 1 and 2, then follow chapter 3 to set up you
 
 ### 2. Set up your site
 - [Initial set up](setup.md): scheduled jobs, permissions, personal links for people who do not log in, and the pages to create on WordPress, Drupal and Joomla.
+- [Roles and permissions](roles_and_permissions.md): what an organiser, a person taking part and a site administrator each need.
 - [Elections settings](admin_election_settings.md): site-wide photo source and name format.
 
 ### 3. Running an election (administrators)

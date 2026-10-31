@@ -18,7 +18,7 @@ voters.
   (`cid` + `cs`) for each of the 41 personas to `fixtures/.generated/council.json`.
 - **Front end tests** act as personas through their personal links (the election has *Allow non-logged
   in access*), each in its own browser context. **Back end tests** log in as the WordPress
-  administrator, a manager (`administer Elections` only) and a member (`view Elections` only).
+  administrator, a manager (the permissions documented for an organiser in `docs/roles_and_permissions.md`), a limited organiser without View All Contacts (WordPress) and a member (`view Elections` only).
 - **Every test** also fails on: uncaught page errors, console errors, failed election AJAX requests
   and PHP output on the page (`Warning:`, `Notice:`, `Deprecated:`, `Undefined array key`, Smarty
   errors). A test that expects an error (for example a refused page) lists it with

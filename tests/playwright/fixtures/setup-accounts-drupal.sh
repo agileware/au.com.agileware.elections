@@ -27,7 +27,7 @@ account() {
 }
 
 role elections_manager "Elections Manager (test)"
-perms elections_manager "access CiviCRM" "administer Elections" "view Elections" "access AJAX API"
+perms elections_manager "access CiviCRM" "administer Elections" "view Elections" "access AJAX API" "view all contacts"
 role elections_member "Elections Member (test)"
 perms elections_member "view Elections" "access AJAX API" "access uploaded files" "profile view" "profile edit"
 

@@ -23,7 +23,7 @@ test.describe('election administration', () => {
     await expectNoPhpOutput(adminPage);
   });
 
-  test('a manager with only the administer Elections permission can open the list', async ({ managerPage }) => {
+  test('an organiser with the documented permissions can open the list', async ({ managerPage }) => {
     await managerPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
     await expect(managerPage.getByRole('link', { name: 'Create Election' })).toBeVisible();
     await expectNoPhpOutput(managerPage);

@@ -13,6 +13,7 @@ nav:
       - 'Workflows': workflows.md
   - '2. Set up your site':
       - 'Initial set up': setup.md
+      - 'Roles and permissions': roles_and_permissions.md
       - 'Elections settings': admin_election_settings.md
   - '3. Running an election':
       - 'Manage elections': admin_manage_elections.md

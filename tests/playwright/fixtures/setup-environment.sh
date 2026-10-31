@@ -26,15 +26,20 @@ echo "Creating WordPress roles..."
 # CiviCRM's WordPress permission check lowercases the permission and replaces runs of
 # non-alphanumerics with an underscore, so the capability names are the munged forms.
 #
-# manager: runs the Elections admin screens, nothing else.
+# manager: runs the elections with exactly the permissions documented in docs/roles_and_permissions.md
+# for an organiser.
 run wp role create elections_manager "Elections Manager (test)" --clone=subscriber >/dev/null 2>&1 || true
-run wp cap add elections_manager access_civicrm administer_elections view_elections access_ajax_api
+run wp cap add elections_manager access_civicrm administer_elections view_elections access_ajax_api view_all_contacts
+# limited: an organiser without View All Contacts, who cannot see any CiviCRM groups. The election form
+# tells them why.
+run wp role create elections_limited "Elections Organiser without contacts (test)" --clone=subscriber >/dev/null 2>&1 || true
+run wp cap add elections_limited access_civicrm administer_elections view_elections access_ajax_api
 # member: takes part in an election while logged in.
 run wp role create elections_member "Elections Member (test)" --clone=subscriber >/dev/null 2>&1 || true
 run wp cap add elections_member view_elections access_ajax_api access_uploaded_files profile_view profile_edit
 
 echo "Creating WordPress users..."
-for key in manager member; do
+for key in manager limited member; do
   USERNAME=$(json_get "$USERS_JSON" "$key" username)
   PASSWORD=$(json_get "$USERS_JSON" "$key" password)
   EMAIL=$(json_get "$USERS_JSON" "$key" email)

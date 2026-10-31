@@ -20,6 +20,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     $this->eId = CRM_Utils_Request::retrieve('eid', 'Positive', $this, FALSE, 0);
     $this->addFormElements();
     $this->addPageResources();
+    $this->assign('groupsHidden', CRM_Elections_Helper_Visibility::groupsHidden());
     if ($this->eId) {
       $this->pageTitle = E::ts('Edit Election');
       CRM_Utils_System::setTitle($this->pageTitle);

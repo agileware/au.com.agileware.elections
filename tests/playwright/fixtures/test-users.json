@@ -10,6 +10,12 @@
     "email": "elections-manager@example.test",
     "role": "elections_manager"
   },
+  "limited": {
+    "username": "elections_limited",
+    "password": "Elections-Test-Limited-1!",
+    "email": "elections-limited@example.test",
+    "role": "elections_limited"
+  },
   "member": {
     "username": "elections_member",
     "password": "Elections-Test-Member-1!",

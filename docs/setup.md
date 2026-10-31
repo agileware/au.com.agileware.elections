@@ -16,8 +16,10 @@ CiviCRM's cron must be running for them to execute. See [Emails and scheduled jo
 
 This extension adds two CiviCRM permissions:
 
-- **administer Elections**: Required by staff to create, edit, delete and activate elections and positions from the CiviCRM 'Elections' administration screens. Staff also need the core **administer CiviCRM** permission to see the 'Elections' and 'Elections Settings' items in the CiviCRM menu.
+- **administer Elections**: Required by staff to create, edit, delete and activate elections and positions from the CiviCRM 'Elections' administration screens. Together with the core **access CiviCRM** permission it shows the 'Elections' item in the CiviCRM menu. The 'Elections Settings' item needs the core **administer CiviCRM** permission.
 - **view Elections**: Required by end users to participate in elections, for example to view, nominate, accept nominations or vote. See below for the additional permissions required on WordPress/CiviCRM sites.
+
+Staff who run elections also need the core permissions **access AJAX API** and **view all contacts** (or an ACL) so that the group and people lists on the election forms are filled. See [Roles and permissions](roles_and_permissions.md) for every role, what it needs and how to set it up.
 
 ## Participating without logging in
 
