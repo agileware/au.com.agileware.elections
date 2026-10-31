@@ -2,7 +2,7 @@
 
 Each person who works with an election needs a different set of CiviCRM permissions. This page lists what each role needs, how to set it up on WordPress, Drupal and Joomla, and what goes wrong when a permission is missing.
 
-None of the roles needs a CiviCRM Membership. What matters is the permissions below and, for voting, being in one of the election's groups.
+No CiviCRM Membership is needed for any role. What matters is the permissions below and, for voting, being in one of the election's groups.
 
 ## The roles
 

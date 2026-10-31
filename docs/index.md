@@ -25,7 +25,7 @@ New to the extension? Read chapters 1 and 2, then follow chapter 3 to set up you
 5. Follow it through with the [election overview](admin_election_overview.md) (stage, timeline, turnout, results and integrity) and manage the [candidates](admin_candidates.md).
 6. [Edit](admin_edit_election.md), [duplicate](admin_duplicate_election.md) or [delete](admin_delete_election.md) an election.
 
-### 4. Taking part (members and candidates)
+### 4. Taking part (voters and candidates)
 Follow the stages in order:
 1. [Nominate someone](user_nominate.md) and [second a nomination](user_second_nomination.md).
 2. [Accept a nomination](user_accept_nomination.md) (including when you are written in) or [withdraw it](user_withdraw_nomination.md).

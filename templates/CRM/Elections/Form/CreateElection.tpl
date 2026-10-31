@@ -116,7 +116,7 @@
             <td class="label label-select-col">{$form.allowed_groups.label}</td>
             <td>
                 {$form.allowed_groups.html}<br>
-                <span class="description">{ts}Select the groups whose members are allowed to vote & nominate in this election.{/ts}</span>
+                <span class="description">{ts}Select the groups. People in these groups are allowed to vote and nominate in this election.{/ts}</span>
             </td>
         </tr>
 
@@ -140,7 +140,7 @@
             <td class="label label-select-col">{$form.nomination_groups.label}</td>
             <td>
                 {$form.nomination_groups.html}<br>
-                <span class="description">{ts}Optional. Members of these groups may nominate and second. Leave empty to use the voting groups. Group membership, including smart groups, is checked at the moment someone acts.{/ts}</span>
+                <span class="description">{ts}Optional. People in these groups may nominate and second. Leave empty to use the voting groups. Being in a group, including a smart group, is checked at the moment someone acts.{/ts}</span>
             </td>
         </tr>
 
@@ -148,7 +148,7 @@
             <td class="label label-select-col">{$form.candidate_groups.label}</td>
             <td>
                 {$form.candidate_groups.html}<br>
-                <span class="description">{ts}Optional. Members of these groups may be nominated and stand as candidates. Leave empty to use the voting groups. People who already voted keep their vote whatever happens to their membership later.{/ts}</span>
+                <span class="description">{ts}Optional. People in these groups may be nominated and stand as candidates. Leave empty to use the voting groups. People who already voted keep their vote even if they leave the groups later.{/ts}</span>
             </td>
         </tr>
 
@@ -164,7 +164,7 @@
             <td class="label label-select-col">{$form.allow_revote.label}</td>
             <td>
                 {$form.allow_revote.html}<br>
-                <span class="description">{ts}Select &quot;Yes&quot; to allow members to change their vote right up until the close of voting in this election.{/ts}</span>
+                <span class="description">{ts}Select &quot;Yes&quot; to allow people to change their vote right up until the close of voting in this election.{/ts}</span>
             </td>
         </tr>
 
@@ -180,7 +180,7 @@
             <td class="label label-select-col">{$form.allow_checksum_access.label}</td>
             <td>
                 {$form.allow_checksum_access.html}<br>
-                <span class="description">{ts}Allow Members to access Election pages and perform actions when not-logged in. Requires the user to have a valid checksum URL.{/ts}</span>
+                <span class="description">{ts}Allow people to access Election pages and perform actions when not-logged in. Requires the user to have a valid checksum URL.{/ts}</span>
             </td>
         </tr>
 

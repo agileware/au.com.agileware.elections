@@ -81,7 +81,7 @@ class CRM_Elections_ElectionStatusTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame([], $locked['actions']);
 
     $notAllowed = CRM_Elections_Helper_ElectionStatus::nextAction($election, $fixture->id('OUT'), $query, ['canVote' => FALSE] + $base);
-    $this->assertStringContainsString('Only members can vote', $notAllowed['message']);
+    $this->assertStringContainsString("Only people in this election's groups can vote", $notAllowed['message']);
 
     // Voting has closed but the results are not generated yet.
     $fixture->moveToStage(CRM_Elections_Test_CouncilFixture::STAGE_RESULTS);

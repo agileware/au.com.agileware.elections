@@ -36,7 +36,7 @@
   </div>
 
   {if $writeInsWithoutRevote}
-  <div class="messages status no-popup election-writein-warning">{ts}Write-ins are allowed but members cannot change their vote. People who voted before a person written in accepted will not see them on the ballot. Consider turning on &quot;Allow Members to Change Vote&quot;.{/ts}</div>
+  <div class="messages status no-popup election-writein-warning">{ts}Write-ins are allowed but people cannot change their vote. People who voted before a person written in accepted will not see them on the ballot. Consider turning on &quot;Allow people to change their vote&quot;.{/ts}</div>
   {/if}
   {if $writeIns}
   <div class="election-overview-writeins">

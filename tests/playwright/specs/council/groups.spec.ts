@@ -34,7 +34,7 @@ test('someone who can only vote is told they cannot nominate', async ({ personaG
   await expect(page.getByText('You are not able to nominate in this election.')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Submit Nomination' })).toHaveCount(0);
   const form = await personaGoto('V03', 'civicrm/elections/nominations/create');
-  await expect(form.getByText('You may only see this page if you are a member.')).toBeVisible();
+  await expect(form.getByText('You may only see this page if you can take part in this election.')).toBeVisible();
 });
 
 test('a member of the nomination group nominates a person who may stand', async ({ persona }) => {

@@ -299,7 +299,7 @@ function elections_civicrm_coreResourceList(&$list, $region) {
 }
 
 /**
- * Check if logged in user is member of any election admin group.
+ * Check if the logged in user may administer elections.
  *
  * @return bool
  * @throws CRM_Core_Exception
@@ -343,14 +343,14 @@ function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions
 }
 
 /**
- * Throw access denied exception if non-member is trying access a member related page.
+ * Throw access denied exception if someone who cannot take part in the election tries to open one of its pages.
  *
  * @param $exceptionMessage
  * @throws CRM_Extension_Exception
  */
 function throwNonMemberAccessDenied($formOrPage) {
   $formOrPage->assign('nonmember', TRUE);
-  throwAccessDeniedException($formOrPage, E::ts('You may only see this page if you are a member.'));
+  throwAccessDeniedException($formOrPage, E::ts('You may only see this page if you can take part in this election.'));
 }
 
 /**
@@ -467,7 +467,7 @@ function elections_civicrm_managed(&$entities) {
       'option_group_id' => 'activity_type',
       'label' => 'Nomination',
       'name' => 'Nomination',
-      'description' => 'Nominated a member',
+      'description' => 'Nominated a person',
       'is_reserved' => 1,
       'weight' => 1,
       'is_active' => 1,
@@ -492,7 +492,7 @@ function elections_civicrm_managed(&$entities) {
 }
 
 /**
- * Check if logged in member has current membership return if he/she is allowed to vote/nominate in election.
+ * Check if the logged in person is allowed to vote and nominate in the election.
  *
  * @return bool
  * @throws CRM_Core_Exception
@@ -502,7 +502,7 @@ function isLoggedInMemberAllowedToVote($electionId, $contactId = NULL) {
 }
 
 /**
- * Check if members are allowed to re-vote.
+ * Check if people are allowed to re-vote.
  *
  * @param $electionId
  *

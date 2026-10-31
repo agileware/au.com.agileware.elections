@@ -84,7 +84,7 @@ class CRM_Elections_Helper_ElectionStatus {
         ];
       }
       if (!$state['canVote']) {
-        return ['type' => 'closed', 'message' => E::ts('Voting is open until %1. Only members can vote in this election.', [1 => $date($election->voting_end_date)]), 'actions' => []];
+        return ['type' => 'closed', 'message' => E::ts('Voting is open until %1. Only people in this election\'s groups can vote in it.', [1 => $date($election->voting_end_date)]), 'actions' => []];
       }
       if ($state['hasVoted']) {
         $message = E::ts('You voted on %1.', [1 => $date($state['voteDate'])]);

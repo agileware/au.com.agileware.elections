@@ -10,9 +10,9 @@ An election moves through a fixed sequence of stages, each opened by a date set 
 flowchart TD
     A["Election created<br/>(inactive)"] --> B{"At least one position added?<br/>Admin activates the election"}
     B -->|Yes| C["Visible<br/>from Visible Start Date<br/>Election is listed on the website"]
-    C --> D["Nominations<br/>Nomination Start Date to Nomination End Date<br/>Members nominate and second candidates<br/>(skipped when the organisers choose the candidates)"]
+    C --> D["Nominations<br/>Nomination Start Date to Nomination End Date<br/>People nominate and second candidates<br/>(skipped when the organisers choose the candidates)"]
     D --> E["Advertise Candidates<br/>Advertise Candidates Date to Voting Start Date<br/>Eligible candidates accept or withdraw"]
-    E --> F["Voting<br/>Voting Start Date to Voting End Date<br/>Permitted members vote on positions and questions<br/>Write-ins are answered until voting closes"]
+    E --> F["Voting<br/>Voting Start Date to Voting End Date<br/>Permitted people vote on positions and questions<br/>Write-ins are answered until voting closes"]
     F --> G["Voting closed<br/>People written in who did not answer are told<br/>the opportunity has passed"]
     G --> H["Results<br/>from Results Start Date<br/>Results are calculated by the scheduled job and published"]
     H --> I["Hidden<br/>after Visible End Date<br/>Removed from the website, results remain as a record"]
@@ -20,7 +20,7 @@ flowchart TD
 
 An election which is not [activated](admin_activate_election.md), or which has no positions, is never shown to end users, regardless of the dates. The settings of an election can only be changed before its Nomination Start Date, and several of them are locked once the first vote has been cast.
 
-## 2. Nominations by members
+## 2. Nominations by people
 
 The default way to get on the ballot. Each nomination for a position follows this path.
 
@@ -103,7 +103,7 @@ Whatever the kind of election, every vote is saved the same way, which is what k
 flowchart TD
     S1["Confirm my vote"] --> S2{"Checks on the server<br/>voting open, voter allowed, candidates standing,<br/>ranks or ticks valid, answers valid"}
     S2 -->|Fails| S2x["Nothing is saved<br/>a message says why"]
-    S2 -->|Passes| S3["Voter's earlier ballot is replaced in one step<br/>one ballot per member, enforced by the database"]
+    S2 -->|Passes| S3["Voter's earlier ballot is replaced in one step<br/>one ballot per voter, enforced by the database"]
     S3 --> S4["A Vote activity records that the person voted<br/>never how"]
 ```
 
