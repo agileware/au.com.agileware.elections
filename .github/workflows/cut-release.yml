@@ -16,4 +16,4 @@ jobs:
     uses: agileware/ci-workflows/.github/workflows/civicrm-extension-cut-release.yml@main
     with:
       VERSION: ${{ inputs.VERSION }}
-      EXCLUDE_PATHS: ".github tests"
+      EXCLUDE_PATHS: ".github tests .gitignore CONTRIBUTING.md"
