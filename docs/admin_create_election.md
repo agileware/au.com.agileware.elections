@@ -11,9 +11,18 @@ The form has four tabs: **Election** (name and description), **Dates**, **Partic
 3. Enter information about the new election  
 - **Name and Description**: enter the name and description of the new election. It helps users to know more about the election that they will participate.  
 ![Set Name and description](images/admin_election/03.gif)
+- **Quick set-up** (top of the **Dates** tab): fills in all the dates for you. Choose an **Election cycle** (1 week of nominations and 1 week of voting; 2 and 2; 2 and 3; or 2 and 4), enter when **Nominations open**, set the times each phase starts (default 09:00) and ends (default 17:00), choose when results are published and for how many weeks the election stays visible, then select **Fill in the dates**. The dates are worked out like this:
+    - **Visible Start Date** is the same moment nominations open.
+    - Nominations run for whole weeks and close at the end time on the last day (Monday to Sunday when they open on a Monday).
+    - Candidates are advertised from 5 minutes after nominations close.
+    - Voting opens at the start time on the day after candidates are advertised, and runs for whole weeks, closing at the end time on the last day.
+    - Results are published 5 minutes after voting closes, or at the start time the next morning.
+    - **Visible End Date** is the chosen number of weeks (default 12) after the results are published.
+
+  Every date it fills in passes the same checks as the form, and you can still change any of them. If dates were already entered you are asked before they are replaced. The times are clock times in the site's time zone, so a Daylight Saving change does not move them.
 - **Visible Start Date**: set the date and time when user can start seeing it in the election section.  
 - **Visible End Date**: set the date and time when the admin wants to hide the election from the election page.  
-- **Nomination Start Date**: This date allows user to start nominating. This date should be after **Visible Start Date** and before **Visible End Date**  
+- **Nomination Start Date**: This date allows user to start nominating. This date should not be before **Visible Start Date** (it can be the same moment) and should be before **Visible End Date**  
 - **Nomination End Date**: This date is to prevent user from nominating. This date should be after **Nomination Start Date** and before **Visible End Date**  
 - **Advertise Start Date**: This date is to let user know that it waiting for nominees to accept their positions. This date should be after **Nomination End Date** and before **Visible End Date**  
 - **Voting Start Date**: This date is to allow user to vote. This date should be after **Advertise Start Date** and before **Visible End Date**  

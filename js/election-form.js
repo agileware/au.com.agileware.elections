@@ -6,6 +6,7 @@
   'use strict';
 
   var settings = (CRM.vars && CRM.vars.elections) || {};
+  var ts = CRM.ts('au.com.agileware.elections');
 
   function parse(value) {
     if (!value) {
@@ -36,7 +37,7 @@
       if (problems[rule.field] || !value || !other) {
         return;
       }
-      var failed = rule.rule === 'after' ? !(value > other) : value > other;
+      var failed = rule.rule === 'after' ? !(value > other) : (rule.rule === 'notBefore' ? value < other : value > other);
       if (failed) {
         problems[rule.field] = rule.message;
       }
@@ -170,6 +171,51 @@
       refresh($form);
     });
     refresh($form);
+
+    // Quick set-up: fill in all the dates from a cycle and when nominations open.
+    $form.on('click', '#election-quick-fill', function (e) {
+      e.preventDefault();
+      var $status = $form.find('.election-quick-status').removeClass('crm-error').text('');
+      var fail = function (message) {
+        $status.addClass('crm-error').text(message);
+      };
+      var cycle = $form.find('#quick_cycle').val();
+      var start = field($form, 'quick_start').val();
+      if (!cycle) {
+        return fail(ts('Choose an election cycle.'));
+      }
+      if (!start) {
+        return fail(ts('Enter the date and time nominations open.'));
+      }
+      var fill = function () {
+        CRM.api4('Election', 'suggestDates', {
+          cycle: cycle,
+          start: start.substring(0, 16),
+          startTime: $form.find('#quick_start_time').val(),
+          endTime: $form.find('#quick_end_time').val(),
+          results: $form.find('#quick_results').val(),
+          visibleWeeks: parseInt($form.find('#quick_visible_weeks').val(), 10) || 12
+        }).then(function (result) {
+          $.each(result[0], function (name, value) {
+            field($form, name).val(value).trigger('change');
+          });
+          refresh($form);
+          var started = parse(start);
+          $status.text(started && started < new Date() ? ts('The dates are filled in. Nominations open in the past.') : ts('The dates are filled in.'));
+        }, function (error) {
+          fail(error.error_message || ts('The dates could not be worked out.'));
+        });
+      };
+      var filled = $.grep(settings.dateFields || [], function (name) {
+        return !!field($form, name).val();
+      }).length;
+      if (filled) {
+        CRM.confirm({title: ts('Fill in the dates'), message: ts('This replaces the dates entered so far. Continue?')}).on('crmConfirm:yes', fill);
+      }
+      else {
+        fill();
+      }
+    });
 
     // The choice of nomination email only matters when the emails are on.
     var $emails = $form.find('input[type=checkbox][name=send_emails]');
