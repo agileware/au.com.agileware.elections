@@ -251,6 +251,24 @@ class CRM_Elections_Upgrader extends CRM_Extension_Upgrader_Base {
   }
 
   /**
+   * Version 2.0.0: header logo, header text and footer text for the results page, and the celebration effect.
+   */
+  public function upgrade_20110() {
+    Civi::log()->info('Applying update 20110');
+    $this->ensureColumn('civicrm_election', 'results_header_text', 'VARCHAR(255) NULL DEFAULT NULL');
+    $this->ensureColumn('civicrm_election', 'results_footer_text', 'TEXT NULL DEFAULT NULL');
+    $this->ensureColumn('civicrm_election', 'results_logo_file_id', 'INT UNSIGNED NULL DEFAULT NULL');
+    $this->ensureColumn('civicrm_election', 'results_logo_alt', 'VARCHAR(255) NULL DEFAULT NULL');
+    if (!CRM_Core_DAO::singleValueQuery("SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'civicrm_election' AND CONSTRAINT_NAME = 'FK_civicrm_election_results_logo_file_id'")) {
+      CRM_Core_DAO::executeQuery('ALTER TABLE `civicrm_election` ADD CONSTRAINT `FK_civicrm_election_results_logo_file_id` FOREIGN KEY (`results_logo_file_id`) REFERENCES `civicrm_file`(`id`) ON DELETE SET NULL');
+    }
+    $this->ensureColumn('civicrm_election', 'celebration_enabled', 'TINYINT NULL DEFAULT 0');
+    $this->ensureColumn('civicrm_election', 'celebration_effect', 'VARCHAR(16) NULL DEFAULT NULL');
+    $this->ensureColumn('civicrm_election', 'celebration_days', 'INT UNSIGNED NULL DEFAULT 5');
+    return TRUE;
+  }
+
+  /**
    * Add a column unless it already exists, so upgrade steps can safely be re-run.
    *
    * @param string $table

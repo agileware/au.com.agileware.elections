@@ -1,4 +1,5 @@
 <div class="crm-election-view-block">
+    {include file="CRM/Elections/Page/ResultsHeader.tpl"}
     {include file="CRM/Elections/Page/WelcomeMessage.tpl"}
 
     <p>{$election->description|escape|nl2br}</p>
@@ -63,4 +64,5 @@
         {/if}
       {/if}
     {/foreach}
+    {include file="CRM/Elections/Page/ResultsFooter.tpl"}
 </div>

@@ -258,13 +258,19 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
     foreach ($dateFields as $field) {
       $values[$field] = date('Y-m-d H:i:s', strtotime($source[$field]) + $shiftSeconds);
     }
-    foreach (['anonymize_votes', 'required_nominations', 'allow_revote', 'allow_checksum_access', 'allowed_groups', 'nomination_groups', 'candidate_groups', 'send_emails', 'allow_online_nominations', 'show_photos', 'show_statements', 'show_nominators', 'name_format', 'voting_method', 'nomination_message_template_id'] as $field) {
+    foreach (['anonymize_votes', 'required_nominations', 'allow_revote', 'allow_checksum_access', 'allowed_groups', 'nomination_groups', 'candidate_groups', 'send_emails', 'allow_online_nominations', 'show_photos', 'show_statements', 'show_nominators', 'name_format', 'voting_method', 'nomination_message_template_id', 'results_header_text', 'results_footer_text', 'results_logo_alt', 'celebration_enabled', 'celebration_effect', 'celebration_days'] as $field) {
       if (array_key_exists($field, $source)) {
         $values[$field] = $source[$field];
       }
     }
     $copy = civicrm_api3('Election', 'create', $values);
     $copyId = (int) $copy['id'];
+    if (!empty($source['results_logo_file_id'])) {
+      $logoId = CRM_Elections_Helper_ResultsDisplay::copyLogo($source['results_logo_file_id'], $copyId);
+      if ($logoId) {
+        \Civi\Api4\Election::update(FALSE)->addWhere('id', '=', $copyId)->addValue('results_logo_file_id', $logoId)->execute();
+      }
+    }
 
     $positions = civicrm_api3('ElectionPosition', 'get', ['election_id' => $electionId, 'options' => ['limit' => 0, 'sort' => 'sortorder ASC']]);
     foreach ($positions['values'] as $position) {

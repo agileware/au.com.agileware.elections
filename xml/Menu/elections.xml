@@ -110,6 +110,20 @@
     <access_arguments>administer Elections</access_arguments>
   </item>
   <item>
+    <path>civicrm/elections/results-display</path>
+    <page_callback>CRM_Elections_Form_ResultsDisplay</page_callback>
+    <title>Results Page</title>
+    <access_arguments>administer Elections</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/elections/results-logo</path>
+    <page_callback>CRM_Elections_Page_ResultsLogo</page_callback>
+    <title>Results Logo</title>
+    <access_arguments>view Elections</access_arguments>
+    <is_public>true</is_public>
+    <access_callback>CRM_Elections_Permission::check</access_callback>
+  </item>
+  <item>
     <path>civicrm/elections/overview</path>
     <page_callback>CRM_Elections_Page_ElectionOverview</page_callback>
     <title>Election Overview</title>

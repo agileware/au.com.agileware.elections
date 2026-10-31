@@ -22,7 +22,7 @@ function q($sql, $params = []) {
 $like = "WHERE e.name LIKE 'Upgrade %'";
 
 // --- the schema
-foreach (['civicrm_election' => ['voting_method', 'nomination_groups', 'candidate_groups', 'send_emails', 'allow_online_nominations', 'show_photos', 'show_statements', 'name_format', 'nomination_message_template_id'], 'civicrm_election_position' => ['write_ins_per_seat', 'position_type', 'pass_threshold', 'quorum_percent', 'resolution_text'], 'civicrm_election_nomination' => ['is_write_in', 'write_in_notified_date', 'write_in_reminded_date', 'write_in_closed_notified_date', 'statement_url']] as $table => $columns) {
+foreach (['civicrm_election' => ['voting_method', 'nomination_groups', 'candidate_groups', 'send_emails', 'allow_online_nominations', 'show_photos', 'show_statements', 'name_format', 'nomination_message_template_id', 'results_header_text', 'results_footer_text', 'results_logo_file_id', 'results_logo_alt', 'celebration_enabled', 'celebration_effect', 'celebration_days'], 'civicrm_election_position' => ['write_ins_per_seat', 'position_type', 'pass_threshold', 'quorum_percent', 'resolution_text'], 'civicrm_election_nomination' => ['is_write_in', 'write_in_notified_date', 'write_in_reminded_date', 'write_in_closed_notified_date', 'statement_url']] as $table => $columns) {
   foreach ($columns as $column) {
     check("column $table.$column exists", CRM_Core_BAO_SchemaHandler::checkIfFieldExists($table, $column));
   }
@@ -111,7 +111,7 @@ catch (\Throwable $e) {
 $upgrader = new CRM_Elections_Upgrader();
 $upgrader->init(['key' => 'au.com.agileware.elections']);
 $again = TRUE;
-foreach ([20000, 20010, 20020, 20030, 20040, 20050, 20060, 20070, 20080, 20090, 20100] as $step) {
+foreach ([20000, 20010, 20020, 20030, 20040, 20050, 20060, 20070, 20080, 20090, 20100, 20110] as $step) {
   $again = $again && $upgrader->{'upgrade_' . $step}();
 }
 check('every upgrade step can be run again', $again === TRUE);

@@ -74,6 +74,8 @@ class CRM_Elections_Page_ElectionSummary extends CRM_Elections_Page_Base {
       }
     }
 
+    CRM_Elections_Helper_ResultsDisplay::assignToPage($this, $this->election, $this->get_template_vars('checksum_query')['query'] ?? sprintf('eid=%s', $this->eId), FALSE);
+
     parent::run();
   }
 
