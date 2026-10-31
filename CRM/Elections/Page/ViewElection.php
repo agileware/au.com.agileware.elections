@@ -110,7 +110,7 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
       $this->assignStatus();
     }
     elseif ($this->election->isResultsOut || $this->isElectionAdmin) {
-      $query = $this->get_template_vars('checksum_query')['query'] ?? ('eid=' . $this->eId);
+      $query = $this->getTemplateVars('checksum_query')['query'] ?? ('eid=' . $this->eId);
       CRM_Elections_Helper_ResultsDisplay::assignToPage($this, $this->election, $query, $this->election->isResultsOut);
     }
 

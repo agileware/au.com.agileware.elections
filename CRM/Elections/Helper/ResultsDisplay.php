@@ -342,18 +342,21 @@ class CRM_Elections_Helper_ResultsDisplay {
    * @param CRM_Elections_BAO_Election $election
    * @param string $query
    *   The query string that identifies the election and a person using a personal link.
+   * @param bool $frontend
+   *   FALSE for the address of the logo in the back office, where an administrator is logged in (on Joomla the
+   *   front end and the back end have separate sessions).
    *
    * @return array
    *   header_text, footer_text, logo_url, logo_alt, has_logo (all empty when there is nothing to show).
    */
-  public static function getDisplay($election, $query) {
+  public static function getDisplay($election, $query, $frontend = TRUE) {
     $logoId = (int) ($election->results_logo_file_id ?? 0);
     $hasLogo = $logoId && self::logoPath($logoId);
     return [
       'header_text' => self::decode($election->results_header_text ?? ''),
       'footer_text' => self::decode($election->results_footer_text ?? ''),
       'has_logo' => (bool) $hasLogo,
-      'logo_url' => $hasLogo ? CRM_Utils_System::url('civicrm/elections/results-logo', $query . '&v=' . $logoId, FALSE, NULL, FALSE, TRUE) : '',
+      'logo_url' => $hasLogo ? CRM_Utils_System::url('civicrm/elections/results-logo', $query . '&v=' . $logoId, FALSE, NULL, FALSE, $frontend) : '',
       'logo_alt' => self::decode($election->results_logo_alt ?? ''),
     ];
   }

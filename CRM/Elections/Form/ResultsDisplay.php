@@ -31,7 +31,7 @@ class CRM_Elections_Form_ResultsDisplay extends CRM_Elections_Form_Base {
       ['type' => 'cancel', 'name' => E::ts('Cancel')],
     ]);
     $this->assign('election', $this->election);
-    $this->assign('resultsLogo', CRM_Elections_Helper_ResultsDisplay::getDisplay($this->election, 'eid=' . (int) $this->eId));
+    $this->assign('resultsLogo', CRM_Elections_Helper_ResultsDisplay::getDisplay($this->election, 'eid=' . (int) $this->eId, FALSE));
     CRM_Elections_Helper_ResultsDisplay::addPageResources();
     parent::buildQuickForm();
   }
