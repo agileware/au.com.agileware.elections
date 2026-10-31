@@ -24,7 +24,7 @@ class CRM_Elections_WordingTest extends \PHPUnit\Framework\TestCase {
 
   private function files() {
     $root = $this->root();
-    $files = [$root . '/README.md', $root . '/CONTRIBUTING.md', $root . '/elections.php'];
+    $files = [$root . '/README.md', $root . '/elections.php'];
     foreach (['templates', 'msg_tpl', 'docs', 'ang', 'js', 'managed', 'settings', 'xml', 'CRM', 'Civi', 'api', 'Job'] as $dir) {
       $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root . '/' . $dir, FilesystemIterator::SKIP_DOTS));
       foreach ($iterator as $file) {

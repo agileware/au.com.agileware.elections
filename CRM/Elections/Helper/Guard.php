@@ -29,7 +29,7 @@ class CRM_Elections_Helper_Guard {
     'nomination_start_date', 'nomination_end_date', 'advertise_candidates_date', 'voting_start_date',
     'voting_end_date', 'result_date', 'allowed_groups', 'nomination_groups', 'candidate_groups', 'anonymize_votes', 'allow_revote',
     'allow_checksum_access', 'required_nominations', 'has_results_generated', 'show_photos',
-    'show_statements', 'show_nominators', 'name_format', 'voting_method', 'send_emails', 'allow_online_nominations',
+    'show_statements', 'show_nominators', 'name_format', 'voting_method', 'send_emails', 'allow_online_nominations', 'nomination_message_template_id',
   ];
 
   const DATE_FIELDS = [

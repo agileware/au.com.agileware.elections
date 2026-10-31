@@ -14,11 +14,11 @@ The voter is told that the vote counts only if the person accepts before voting 
 
 ## What happens to the person written in
 
-- The first time anyone writes them in they are emailed straight away (the message template **Elections - Person written in by a voter**), with links to accept or decline. Other voters who write them in later do not send another email.
-- A reminder (**Elections - Reminder to a person written in**) is sent once, in the day before voting closes, to anyone who has not answered. It comes from the scheduled job **Elections Write-in Reminders**, which runs hourly.
+- The first time anyone writes them in they are emailed straight away (the message template **Election - Invite written-in person**), with links to accept or decline. Other voters who write them in later do not send another email.
+- A reminder (**Election - Remind written-in person**) is sent once, in the day before voting closes, to anyone who has not answered. It comes from the scheduled job **Elections Write-in Reminders**, which runs hourly.
 - If they **accept** they become a candidate like any other and are shown on the ballot to everyone who votes from then on. Votes already written in for them count. They cannot withdraw afterwards.
 - If they **decline**, or do not answer before voting closes, the votes written in for them are dropped. A person who declined cannot be written in again for that position.
-- If voting closes and they have not answered, they are emailed once (**Elections - Voting closed before a person written in answered**) to say the opportunity to accept has passed and they can no longer accept. The email has no accept link. It comes from the scheduled job **Elections Write-in Closed Notices**. It is only sent for elections that closed in the last 14 days.
+- If voting closes and they have not answered, they are emailed once (**Election - Close written-in invitation**) to say the opportunity to accept has passed and they can no longer accept. The email has no accept link. It comes from the scheduled job **Elections Write-in Closed Notices**. It is only sent for elections that closed in the last 14 days.
 - If they open an accept or decline link after voting has closed, they see a message explaining that the opportunity has passed, that they are not on the ballot and that nothing more is needed, with a button to the election.
 - A person who is already a candidate for the position is simply voted for. A person who was nominated but never accepted cannot be written in.
 

@@ -229,6 +229,28 @@ class CRM_Elections_Upgrader extends CRM_Extension_Upgrader_Base {
   }
 
   /**
+   * Version 2.0.0: the email sent to a nominee can be chosen for each election, and the message templates the
+   * extension provides are titled "Election - " and what they do.
+   */
+  public function upgrade_20100() {
+    Civi::log()->info('Applying update 20100');
+    $this->ensureColumn('civicrm_election', 'nomination_message_template_id', 'INT UNSIGNED NULL DEFAULT NULL');
+    if (!CRM_Core_DAO::singleValueQuery("SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'civicrm_election' AND CONSTRAINT_NAME = 'FK_civicrm_election_nomination_message_template_id'")) {
+      CRM_Core_DAO::executeQuery('ALTER TABLE `civicrm_election` ADD CONSTRAINT `FK_civicrm_election_nomination_message_template_id` FOREIGN KEY (`nomination_message_template_id`) REFERENCES `civicrm_msg_template`(`id`) ON DELETE SET NULL');
+    }
+    // Retitle only the templates that still have the title the extension gave them; a site that renamed its copy keeps its name.
+    foreach ([
+      'elections_nominee_invited' => ['Elections - Nominee invited to respond', 'Election - Invite nominee'],
+      'elections_write_in_invited' => ['Elections - Person written in by a voter', 'Election - Invite written-in person'],
+      'elections_write_in_reminder' => ['Elections - Reminder to a person written in', 'Election - Remind written-in person'],
+      'elections_write_in_closed' => ['Elections - Voting closed before a person written in answered', 'Election - Close written-in invitation'],
+    ] as $workflow => [$old, $new]) {
+      CRM_Core_DAO::executeQuery('UPDATE civicrm_msg_template SET msg_title = %1 WHERE workflow_name = %2 AND msg_title = %3', [1 => [$new, 'String'], 2 => [$workflow, 'String'], 3 => [$old, 'String']]);
+    }
+    return TRUE;
+  }
+
+  /**
    * Add a column unless it already exists, so upgrade steps can safely be re-run.
    *
    * @param string $table

@@ -170,5 +170,13 @@
       refresh($form);
     });
     refresh($form);
+
+    // The choice of nomination email only matters when the emails are on.
+    var $emails = $form.find('input[type=checkbox][name=send_emails]');
+    var toggleTemplate = function () {
+      $form.find('.election-nomination-email-row').toggle($emails.is(':checked'));
+    };
+    $emails.on('change', toggleTemplate);
+    toggleTemplate();
   });
 }(CRM.$, CRM));

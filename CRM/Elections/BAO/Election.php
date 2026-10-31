@@ -258,7 +258,7 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
     foreach ($dateFields as $field) {
       $values[$field] = date('Y-m-d H:i:s', strtotime($source[$field]) + $shiftSeconds);
     }
-    foreach (['anonymize_votes', 'required_nominations', 'allow_revote', 'allow_checksum_access', 'allowed_groups', 'nomination_groups', 'candidate_groups', 'send_emails', 'allow_online_nominations', 'show_photos', 'show_statements', 'show_nominators', 'name_format', 'voting_method'] as $field) {
+    foreach (['anonymize_votes', 'required_nominations', 'allow_revote', 'allow_checksum_access', 'allowed_groups', 'nomination_groups', 'candidate_groups', 'send_emails', 'allow_online_nominations', 'show_photos', 'show_statements', 'show_nominators', 'name_format', 'voting_method', 'nomination_message_template_id'] as $field) {
       if (array_key_exists($field, $source)) {
         $values[$field] = $source[$field];
       }

@@ -10,6 +10,14 @@ Every push to `master` and `version-2`, and every pull request, runs three GitHu
 
 See `tests/playwright/README.md` for running the browser tests on a local DDEV site.
 
+## Message templates
+
+Every message template the extension provides is titled **Election - ** followed by a verb that says what the email does (for example *Election - Invite nominee*). Add the template in `managed/MessageTemplates.mgd.php` with its files in `msg_tpl/`, and list it in `docs/reference_emails_and_jobs.md`.
+
+## Wording
+
+Everyone who takes part is called "people" (voters, nominees, candidates, organisers), never "members": a membership is not needed. `WordingTest` fails if "member" or "membership" appears in anything a person reads. Database columns and API parameters (`member_id`) keep their names.
+
 ## Versioning and releases
 
 - The extension version lives in the `<version>` element of `info.xml`. Bump it, and `<releaseDate>`, on `master` as part of any release.

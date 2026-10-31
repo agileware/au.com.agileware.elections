@@ -68,6 +68,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       $defaults['allowed_groups'] = $election->allowed_groups;
       $defaults['nomination_groups'] = $election->nomination_groups;
       $defaults['send_emails'] = (int) $election->send_emails;
+      $defaults['nomination_message_template_id'] = CRM_Elections_Helper_Mailer::chosenTemplate($election) ?: CRM_Elections_Helper_Mailer::getDefaultNominationTemplateId();
       $election->assignDisplayOptions();
       $defaults['allow_online_nominations'] = (int) $election->onlineNominations;
       $defaults['candidate_groups'] = $election->candidate_groups;
@@ -89,6 +90,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       $defaults['allowed_groups'] = '';
       $defaults['nomination_groups'] = '';
       $defaults['send_emails'] = 1;
+      $defaults['nomination_message_template_id'] = CRM_Elections_Helper_Mailer::getDefaultNominationTemplateId();
       $defaults['allow_online_nominations'] = 1;
       $defaults['candidate_groups'] = '';
       $defaults['show_photos'] = 1;
@@ -183,6 +185,9 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
 
     $this->add('advcheckbox', 'allow_online_nominations', E::ts('Allow people to nominate online'));
     $this->add('advcheckbox', 'send_emails', E::ts('Email people about their nominations'));
+    $this->add('select', 'nomination_message_template_id', E::ts('Nomination email'), CRM_Elections_Helper_Mailer::getNominationTemplates(), FALSE);
+    $this->assign('canEditMessageTemplates', CRM_Core_Permission::check('edit message templates'));
+    $this->assign('messageTemplatesUrl', CRM_Utils_System::url('civicrm/admin/messageTemplates', 'reset=1'));
 
     // Who may nominate, and who may stand, when that is not the same as who may vote.
     foreach (['nomination_groups' => E::ts('Nomination Groups'), 'candidate_groups' => E::ts('Candidate Groups')] as $field => $label) {
@@ -247,6 +252,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       'required_nominations'        => $values['required_nominations'],
       'allowed_groups'              => $values['allowed_groups'],
       'send_emails'                 => !empty($values['send_emails']) ? 1 : 0,
+      'nomination_message_template_id' => !empty($values['nomination_message_template_id']) && (int) $values['nomination_message_template_id'] !== (int) CRM_Elections_Helper_Mailer::getDefaultNominationTemplateId() ? (int) $values['nomination_message_template_id'] : NULL,
       'allow_online_nominations'    => !empty($values['allow_online_nominations']) ? 1 : 0,
       'nomination_groups'           => $values['nomination_groups'] ?? '',
       'candidate_groups'            => $values['candidate_groups'] ?? '',

@@ -6,10 +6,10 @@ use CRM_Elections_ExtensionUtil as E;
  * reserved original, which is how CiviCRM lets people edit a template and reset it later.
  */
 $templates = [
-  'elections_nominee_invited' => E::ts('Elections - Nominee invited to respond'),
-  'elections_write_in_invited' => E::ts('Elections - Person written in by a voter'),
-  'elections_write_in_reminder' => E::ts('Elections - Reminder to a person written in'),
-  'elections_write_in_closed' => E::ts('Elections - Voting closed before a person written in answered'),
+  'elections_nominee_invited' => E::ts('Election - Invite nominee'),
+  'elections_write_in_invited' => E::ts('Election - Invite written-in person'),
+  'elections_write_in_reminder' => E::ts('Election - Remind written-in person'),
+  'elections_write_in_closed' => E::ts('Election - Close written-in invitation'),
 ];
 
 $entities = [

@@ -31,6 +31,7 @@ class CRM_Elections_UpgraderTest extends \PHPUnit\Framework\TestCase implements 
     $this->upgrader()->upgrade_20070();
     $this->upgrader()->upgrade_20080();
     $this->upgrader()->upgrade_20090();
+    $this->upgrader()->upgrade_20100();
     parent::tearDown();
   }
 
@@ -227,6 +228,26 @@ class CRM_Elections_UpgraderTest extends \PHPUnit\Framework\TestCase implements 
   private function ensureIndex($table, $name, $column) {
     if (!CRM_Core_BAO_SchemaHandler::checkIfIndexExists($table, $name)) {
       CRM_Core_DAO::executeQuery("ALTER TABLE $table ADD INDEX `$name` (`$column`)");
+    }
+  }
+
+  public function testUpgrade20100AddsTheTemplateChoiceAndRetitlesOnlyUntouchedTemplates() {
+    CRM_Core_ManagedEntities::singleton(TRUE)->reconcile();
+    // As an older 2.0 development site left them: the old default title on one, the site's own title on another.
+    CRM_Core_DAO::executeQuery("UPDATE civicrm_msg_template SET msg_title = 'Elections - Nominee invited to respond' WHERE workflow_name = 'elections_nominee_invited'");
+    CRM_Core_DAO::executeQuery("UPDATE civicrm_msg_template SET msg_title = 'Our own reminder' WHERE workflow_name = 'elections_write_in_reminder'");
+    CRM_Core_DAO::executeQuery('ALTER TABLE civicrm_election DROP FOREIGN KEY FK_civicrm_election_nomination_message_template_id');
+    CRM_Core_DAO::executeQuery('ALTER TABLE civicrm_election DROP COLUMN nomination_message_template_id');
+    try {
+      $this->assertTrue($this->upgrader()->upgrade_20100());
+      $this->assertTrue(CRM_Core_BAO_SchemaHandler::checkIfFieldExists('civicrm_election', 'nomination_message_template_id'));
+      $this->assertSame('Election - Invite nominee', CRM_Core_DAO::singleValueQuery("SELECT msg_title FROM civicrm_msg_template WHERE workflow_name = 'elections_nominee_invited' AND is_reserved = 0"));
+      $this->assertSame('Our own reminder', CRM_Core_DAO::singleValueQuery("SELECT msg_title FROM civicrm_msg_template WHERE workflow_name = 'elections_write_in_reminder' AND is_reserved = 0"), 'A title the site changed is left alone');
+      $this->assertTrue($this->upgrader()->upgrade_20100(), 'It can run again');
+    }
+    finally {
+      CRM_Core_DAO::executeQuery("UPDATE civicrm_msg_template SET msg_title = 'Election - Remind written-in person' WHERE workflow_name = 'elections_write_in_reminder'");
+      $this->upgrader()->upgrade_20100();
     }
   }
 

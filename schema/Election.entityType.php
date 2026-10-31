@@ -360,6 +360,20 @@ return [
       'default' => 'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
       'usage' => ['export'],
     ],
+    'nomination_message_template_id' => [
+      'title' => E::ts('Nomination Email Template'),
+      'sql_type' => 'int unsigned',
+      'input_type' => 'EntityRef',
+      'description' => E::ts('FK to the message template used to email a nominee. Empty uses Election - Invite nominee.'),
+      'add' => '2.0',
+      'default' => NULL,
+      'entity_reference' => [
+        'entity' => 'MessageTemplate',
+        'key' => 'id',
+        'on_delete' => 'SET NULL',
+      ],
+      'usage' => ['export'],
+    ],
     'created_by' => [
       'title' => E::ts('Created By'),
       'sql_type' => 'int unsigned',

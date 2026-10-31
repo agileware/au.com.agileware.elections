@@ -31,7 +31,55 @@ class CRM_Elections_Helper_Mailer {
       'nomineeName' => $nomination['member_nominee.display_name'],
       'positionName' => $nomination['election_position_id.name'],
       'acceptUrl' => self::link($election, $contactId, 'civicrm/elections/nominations/accept', ['enid' => (int) $nominationId]),
-    ]);
+    ], self::chosenTemplate($election));
+  }
+
+  /**
+   * The message template the election's organisers chose for the email to a nominee, if it can be used.
+   *
+   * @param CRM_Elections_BAO_Election $election
+   *
+   * @return int|null
+   *   NULL means the default, Election - Invite nominee.
+   */
+  public static function chosenTemplate($election) {
+    $id = (int) ($election->nomination_message_template_id ?? 0);
+    if (!$id) {
+      return NULL;
+    }
+    $usable = CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_msg_template WHERE id = %1 AND is_active = 1 AND is_reserved = 0', [1 => [$id, 'Integer']]);
+    return $usable ? $id : NULL;
+  }
+
+  /**
+   * The message templates an organiser can choose for the nominee email: the extension's own default and the
+   * site's active templates that are not part of another workflow.
+   *
+   * @return array
+   *   Template id => title.
+   */
+  public static function getNominationTemplates() {
+    $templates = [];
+    $dao = CRM_Core_DAO::executeQuery("
+      SELECT id, msg_title FROM civicrm_msg_template
+      WHERE is_active = 1 AND is_reserved = 0
+        AND (workflow_name IS NULL OR workflow_name = 'elections_nominee_invited')
+      ORDER BY msg_title
+    ");
+    while ($dao->fetch()) {
+      $templates[(int) $dao->id] = $dao->msg_title;
+    }
+    return $templates;
+  }
+
+  /**
+   * The id of the default nominee email, Election - Invite nominee.
+   *
+   * @return int|null
+   */
+  public static function getDefaultNominationTemplateId() {
+    $id = CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_msg_template WHERE workflow_name = 'elections_nominee_invited' AND is_reserved = 0 AND is_active = 1 LIMIT 1");
+    return $id ? (int) $id : NULL;
   }
 
   /**
@@ -177,10 +225,12 @@ class CRM_Elections_Helper_Mailer {
    * @param int $contactId
    * @param array $vars
    *   Smarty variables for the template. The election's name and the contact's name are added.
+   * @param int|null $templateId
+   *   A message template to use in place of the workflow's own.
    *
    * @return bool
    */
-  public static function send($workflow, $election, $contactId, array $vars) {
+  public static function send($workflow, $election, $contactId, array $vars, $templateId = NULL) {
     try {
       $contact = \Civi\Api4\Contact::get(FALSE)
         ->addSelect('display_name', 'do_not_email', 'is_deceased', 'is_deleted', 'email_primary.email', 'email_primary.on_hold')
@@ -197,8 +247,7 @@ class CRM_Elections_Helper_Mailer {
         'votingCloses' => CRM_Utils_Date::customFormat($election->voting_end_date),
         'viewUrl' => self::link($election, $contactId, 'civicrm/elections/view'),
       ];
-      [$sent] = CRM_Core_BAO_MessageTemplate::sendTemplate([
-        'workflow' => $workflow,
+      [$sent] = CRM_Core_BAO_MessageTemplate::sendTemplate(($templateId ? ['messageTemplateID' => (int) $templateId] : ['workflow' => $workflow]) + [
         'tplParams' => $vars,
         'contactId' => (int) $contactId,
         'from' => CRM_Core_BAO_Domain::getFromEmail(),

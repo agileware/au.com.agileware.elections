@@ -80,4 +80,25 @@ test.describe('election form', () => {
     await expect(adminPage.getByRole('tab', { name: 'Election' })).toHaveAttribute('aria-selected', 'true');
     await expect(adminPage.locator('#name')).toBeVisible();
   });
+  test('the nomination email is chosen from the message templates, with a link for people who may edit them', async ({ adminPage, managerPage }) => {
+    await adminPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
+    await adminPage.getByRole('tab', { name: 'Participation' }).click();
+    const choice = adminPage.getByLabel('Nomination email');
+    await expect(choice).toBeVisible();
+    await expect(choice.locator('option:checked')).toHaveText('Election - Invite nominee');
+    await expect(adminPage.getByRole('link', { name: 'Edit message templates' })).toBeVisible();
+    await expect(adminPage.getByText('{$nomineeName}', { exact: false })).toBeVisible();
+
+    // Only when emails are on.
+    await adminPage.getByLabel('Email people about their nominations').uncheck();
+    await expect(choice).toBeHidden();
+    await adminPage.getByLabel('Email people about their nominations').check();
+    await expect(choice).toBeVisible();
+
+    // An organiser who cannot edit message templates still chooses one, without the link.
+    await managerPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
+    await managerPage.getByRole('tab', { name: 'Participation' }).click();
+    await expect(managerPage.getByLabel('Nomination email')).toBeVisible();
+    await expect(managerPage.getByRole('link', { name: 'Edit message templates' })).toHaveCount(0);
+  });
 });
