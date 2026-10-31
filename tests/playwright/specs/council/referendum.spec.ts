@@ -60,6 +60,9 @@ test('the question is on the ballot with its wording and no rank boxes', async (
   await expect(question.getByRole('radio', { name: 'Against' })).toBeVisible();
   await expect(question.getByRole('radio', { name: 'Abstain' })).toBeVisible();
   await expect(question.locator('input[name^="candidate_"]')).toHaveCount(0);
+  // The ballot also has positions, so the introduction still explains ranking as well as the questions.
+  await expect(page.getByText('Votes are numbered from 1 onwards')).toBeVisible();
+  await expect(page.getByText('Questions: choose one answer for each question')).toBeVisible();
   const result = await new AxeBuilder({ page }).include('.crm-container').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   expect(result.violations.filter((v) => ['serious', 'critical'].includes(v.impact || ''))).toEqual([]);
 });

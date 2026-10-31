@@ -97,6 +97,27 @@ class CRM_Elections_VotingMethod {
   }
 
   /**
+   * The instructions at the top of a ballot, for what the ballot holds: positions with candidates, referendum
+   * questions or both. A ballot of questions only says nothing about candidates or ranks.
+   *
+   * @param string $method
+   * @param bool $hasPositions
+   * @param bool $hasQuestions
+   *
+   * @return string[]
+   */
+  public static function ballotInstructions($method, $hasPositions, $hasQuestions) {
+    if (!$hasPositions) {
+      return [E::ts('Use this form to answer the questions below. Choose one answer for each question. You can leave a question unanswered.')];
+    }
+    $instructions = self::instructions($method);
+    if ($hasQuestions) {
+      $instructions[] = E::ts('Questions: choose one answer for each question. You can leave a question unanswered.');
+    }
+    return $instructions;
+  }
+
+  /**
    * The heading of a position on the ballot.
    *
    * @param string $method
