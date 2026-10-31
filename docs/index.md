@@ -4,6 +4,12 @@ Elections (au.com.agileware.elections) is a CiviCRM extension which provides on-
 
 New to the extension? Read chapters 1 and 2, then follow chapter 3 to set up your first election.
 
+## Words used in this guide
+
+- **People**: everyone who takes part in an election. No CiviCRM Membership is needed; what matters is being in one of the election's groups.
+- **Voters**, **nominees** and **candidates**: people at different stages of an election. A nominee becomes a candidate when they have enough nominations and accept.
+- **Organisers**: the staff who set up and run elections.
+
 ## Contents
 
 ### 1. Introduction
