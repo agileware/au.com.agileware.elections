@@ -14,9 +14,9 @@
     <url desc="Support">https://support.agileware.com.au</url>
     <url desc="Licensing">https://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
-  <releaseDate>2026-09-12</releaseDate>
-  <version>2.0.0-dev</version>
-  <develStage>alpha</develStage>
+  <releaseDate>2026-10-31</releaseDate>
+  <version>2.0.0</version>
+  <develStage>stable</develStage>
   <compatibility>
     <ver>6.16</ver>
   </compatibility>
