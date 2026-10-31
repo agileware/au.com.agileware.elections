@@ -42,7 +42,7 @@ export async function expectNoPhpOutput(page: Page) {
 }
 
 /** A page for a WordPress user, using the session saved by global-setup.ts. */
-async function loggedInPage(browser: Browser, name: 'admin' | 'manager' | 'member') {
+async function loggedInPage(browser: Browser, name: 'admin' | 'manager' | 'limited' | 'member') {
   const state = path.join(AUTH_DIR, `${name}.json`);
   if (!fs.existsSync(state)) {
     base.skip(true, `No saved ${name} session on this CMS (see fixtures/global-setup.ts)`);
@@ -54,8 +54,10 @@ async function loggedInPage(browser: Browser, name: 'admin' | 'manager' | 'membe
 type Fixtures = {
   /** A page for the WordPress administrator. */
   adminPage: Page;
-  /** A page for a user with the "administer Elections" permission only. */
+  /** A page for an organiser with the permissions documented in docs/roles_and_permissions.md. */
   managerPage: Page;
+  /** A page for an organiser who lacks "view all contacts" (WordPress only). */
+  limitedPage: Page;
   /** A page for a logged in member with "view Elections". */
   memberPage: Page;
   /** Open a persona (by personal link) in its own browser context. */
@@ -94,6 +96,13 @@ export const test = base.extend<Fixtures>({
   managerPage: async ({ browser, guards }, use) => {
     const { context, page } = await loggedInPage(browser, 'manager');
     watch(page, 'manager', guards);
+    await use(page);
+    await context.close();
+  },
+
+  limitedPage: async ({ browser, guards }, use) => {
+    const { context, page } = await loggedInPage(browser, 'limited');
+    watch(page, 'limited', guards);
     await use(page);
     await context.close();
   },

@@ -43,6 +43,7 @@ class CRM_Elections_Form_AddCandidate extends CRM_Elections_Form_Base {
       ['type' => 'cancel', 'name' => E::ts('Cancel')],
     ]);
     $this->assign('election', $this->election);
+    $this->assign('contactsHidden', CRM_Elections_Helper_Visibility::contactsHidden(array_map('intval', $groups)));
     parent::buildQuickForm();
   }
 

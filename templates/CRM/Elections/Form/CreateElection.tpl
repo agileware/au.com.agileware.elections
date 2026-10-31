@@ -96,6 +96,12 @@
     </table>
     </div>
     <div class="election-form-panel" id="election-panel-participation" data-title="{ts escape='htmlattribute'}Participation{/ts}">
+    {if $groupsHidden}
+    <div class="messages warning no-popup election-groups-hidden" role="alert">
+        <strong>{ts}You cannot see any groups.{/ts}</strong>
+        {ts}CiviCRM only shows groups to people whose role has the permission View All Contacts (or an ACL that allows the groups to be viewed), so the group fields below stay empty. Ask a site administrator to add that permission to your role, then reload this page. See Roles and permissions in the Elections guide.{/ts}
+    </div>
+    {/if}
     <table class="form-layout">
 
         <tr class="crm-create-election-form-block-results">

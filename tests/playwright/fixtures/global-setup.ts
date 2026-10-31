@@ -17,6 +17,7 @@ export const AUTH_DIR = path.resolve(__dirname, '.generated', 'auth');
 export const logins: Record<string, { username: string; password: string }> = {
   admin: { username: process.env.WP_ADMIN_USER || 'admin', password: process.env.WP_ADMIN_PASS || 'admin' },
   manager: { username: users.manager.username, password: users.manager.password },
+  limited: { username: users.limited.username, password: users.limited.password },
   member: { username: users.member.username, password: users.member.password },
 };
 
