@@ -1,8 +1,11 @@
 <div af-fieldset="">
   <details class="af-container" af-title="Filters" open="">
     <div class="af-container af-layout-inline">
-      <af-field name="name" defn="{input_type: 'Text', label: 'Election'}" />
-      <af-field name="is_visible" defn="{label: 'Active'}" />
+      <af-field name="name" defn="{input_type: 'Text', label: 'Election', help_post: 'Part of the election\'s name.'}" />
+      <af-field name="is_visible" defn="{label: 'Active', help_post: 'Yes shows elections that are switched on for voters. No shows elections that are still being set up or have been switched off.'}" />
+      <af-field name="stage" defn="{label: 'Stage', help_post: 'Where the election is now. Not running means it is switched off or its nominations have not started.'}" />
+      <af-field name="voting_end_date" defn="{input_type: 'Date', search_range: true, label: 'Voting closes', help_post: 'Elections whose voting closes in this period. Pick a ready-made period such as This month or Next 7 days, or enter your own dates.'}" />
+      <af-field name="result_date" defn="{input_type: 'Date', search_range: true, label: 'Results', help_post: 'Elections whose results are published in this period.'}" />
     </div>
     <button class="af-button btn btn-warning" type="reset" crm-icon="fa-undo">Reset</button>
   </details>
