@@ -56,7 +56,7 @@ export default async function globalSetup(config: FullConfig) {
   // set through Joomla's access levels there, so those specs are skipped on Joomla.
   const sessions: Array<[string, { username: string; password: string }]> =
     CMS === 'wordpress' ? Object.entries(logins)
-      : CMS === 'drupal' ? [['admin', testAdmin], ['manager', logins.manager], ['member', logins.member]]
+      : CMS === 'drupal' ? [['admin', testAdmin], ['manager', logins.manager], ['limited', logins.limited], ['member', logins.member]]
         : [['admin', testAdmin]];
 
   for (const [name, { username, password }] of sessions) {

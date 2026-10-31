@@ -166,6 +166,9 @@ test.describe('Referendum questions', () => {
     await adminPage.goto(listUrl(id));
     const rows = adminPage.locator('crm-search-display-table tbody tr');
     await expect(rows).toHaveCount(3);
+    // Themes with a tall header (Drupal Olivero) put the table below the fold: bring the rows into view.
+    await adminPage.waitForLoadState('networkidle');
+    await rows.nth(1).evaluate((el) => el.scrollIntoView({ block: 'center' }));
     // The election starts while the page is open.
     startElection(id);
     await adminPage.waitForTimeout(500);
