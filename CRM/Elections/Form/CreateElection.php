@@ -80,6 +80,8 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       $defaults['show_statements'] = $election->statementDisplay;
       $defaults['show_nominators'] = (int) $election->showNominators;
       $defaults['name_format'] = $election->name_format ?? '';
+      $defaults += CRM_Elections_Helper_ResultsDisplay::getDefaults($election);
+      $this->assign('resultsLogo', CRM_Elections_Helper_ResultsDisplay::getDisplay($election, 'eid=' . (int) $election->id));
     }
     else {
       $this->eId = 0;
@@ -97,6 +99,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       $defaults['show_statements'] = CRM_Elections_BAO_Election::STATEMENTS_LINK;
       $defaults['show_nominators'] = 1;
       $defaults['name_format'] = '';
+      $defaults += CRM_Elections_Helper_ResultsDisplay::getDefaults();
     }
 
     return $defaults;
@@ -127,6 +130,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
         'nowLabel' => E::ts('Now'),
       ])
       ->addScriptFile(E::LONG_NAME, 'js/election-form.js', 100, 'page-footer');
+    CRM_Elections_Helper_ResultsDisplay::addPageResources();
   }
 
   /**
@@ -209,6 +213,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     }
 
     // Display options.
+    CRM_Elections_Helper_ResultsDisplay::addFormElements($this);
     $this->add('advcheckbox', 'show_photos', E::ts('Show candidate photos'));
     $this->add('select', 'show_statements', E::ts('Candidate statements'), CRM_Elections_BAO_Election::getStatementDisplayOptions(), TRUE);
     $this->add('advcheckbox', 'show_nominators', E::ts('Show who nominated each candidate'));
@@ -265,7 +270,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       'show_nominators'             => !empty($values['show_nominators']) ? 1 : 0,
       'name_format'                 => $values['name_format'] !== '' ? $values['name_format'] : NULL,
       'created_by'                  => CRM_Core_Session::singleton()->getLoggedInContactID(),
-    ];
+    ] + CRM_Elections_Helper_ResultsDisplay::getValuesToSave($values);
 
     $successMessage = E::ts('Election has been created successfully.');
     if ($this->eId) {
@@ -279,6 +284,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
         CRM_Core_Session::setStatus($election['error_message'], '', 'error');
         return;
       }
+      CRM_Elections_Helper_ResultsDisplay::saveLogo((int) $election['id'], $values, CRM_Elections_Helper_ResultsDisplay::upload());
     }
     catch (CRM_Core_Exception $e) {
       CRM_Core_Session::setStatus($e->getMessage(), '', 'error');

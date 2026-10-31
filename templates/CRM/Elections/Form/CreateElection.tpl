@@ -251,6 +251,7 @@
                 <span class="description">{ts}How candidate names are shown. Nicknames are only used for contacts that have one.{/ts}</span>
             </td>
         </tr>
+        {include file="CRM/Elections/Form/ResultsDisplayFields.tpl"}
 
     </table>
     </div>

@@ -1240,3 +1240,50 @@ ul#errorList {
 .crm-container .election-quick-status {
     margin-left: 0.75rem;
 }
+
+/* Results page: logo, header text, footer text and the celebration */
+.crm-container .election-results-header {
+    margin: 0 0 1.25rem;
+    text-align: center;
+}
+.crm-container .election-results-logo {
+    display: block;
+    margin: 0 auto 0.5rem;
+    max-height: 120px;
+    max-width: 100%;
+    height: auto;
+    width: auto;
+}
+.crm-container .election-results-header-text {
+    margin: 0;
+    font-size: 1.4em;
+    font-weight: 600;
+}
+.crm-container .election-results-footer {
+    margin: 1.5rem 0 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid currentColor;
+    text-align: center;
+}
+.crm-container .election-results-logo-current {
+    max-height: 120px;
+    max-width: 100%;
+    margin-bottom: 0.5rem;
+}
+.election-celebration-banner {
+    margin: 0 0 1rem;
+    padding: 0.75rem 1rem;
+    border: 2px solid currentColor;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-align: center;
+}
+.election-celebration-skip {
+    padding: 0.5rem 0.9rem;
+    border: 2px solid currentColor;
+    border-radius: 0.5rem;
+    background: Canvas;
+    color: CanvasText;
+    font: inherit;
+    cursor: pointer;
+}

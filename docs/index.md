@@ -28,8 +28,9 @@ New to the extension? Read chapters 1 and 2, then follow chapter 3 to set up you
    - [Write-ins](admin_write_ins.md): let voters add a person to the ballot.
    - [Referendum questions](admin_referendum.md): yes or no questions with a threshold and quorum.
 4. [Activate the election](admin_activate_election.md) so people can see it.
-5. Follow it through with the [election overview](admin_election_overview.md) (stage, timeline, turnout, results and integrity) and manage the [candidates](admin_candidates.md).
-6. [Edit](admin_edit_election.md), [duplicate](admin_duplicate_election.md) or [delete](admin_delete_election.md) an election.
+5. Make the [results page](admin_results_page.md) your own: a logo, header and footer text and a celebration.
+6. Follow it through with the [election overview](admin_election_overview.md) (stage, timeline, turnout, results and integrity) and manage the [candidates](admin_candidates.md).
+7. [Edit](admin_edit_election.md), [duplicate](admin_duplicate_election.md) or [delete](admin_delete_election.md) an election.
 
 ### 4. Taking part (voters and candidates)
 Follow the stages in order:

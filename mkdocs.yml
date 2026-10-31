@@ -26,6 +26,7 @@ nav:
       - 'Referendum questions': admin_referendum.md
       - 'Activate an election': admin_activate_election.md
       - 'Election overview': admin_election_overview.md
+      - 'Results page': admin_results_page.md
       - 'Candidates': admin_candidates.md
       - 'Edit an election': admin_edit_election.md
       - 'Duplicate an election': admin_duplicate_election.md

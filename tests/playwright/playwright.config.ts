@@ -105,10 +105,17 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
+      // The look of the results page: logo, header, footer and the celebration, on the same election again.
+      name: 'results-display',
+      testMatch: /council\/results-display/,
+      dependencies: ['admin-managed'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       // Pictures of every page (SCREENS=1 only).
       name: 'screens',
       testMatch: /frontend\/screens/,
-      dependencies: ['admin-managed'],
+      dependencies: ['results-display'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],

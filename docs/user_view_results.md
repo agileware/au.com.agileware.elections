@@ -21,3 +21,5 @@ Each position's results show a status describing how the result was reached:
 ## Questions
 
 A yes or no question shows **Passed**, **Not passed** (including a tie) or **No quorum**, with the resolution. Counts are not shown.
+
+The results page can have a logo, a header and a footer chosen by the organisers, and for a few days after the results are published it may show a short celebration (confetti, fireworks and so on). Press **Skip the celebration** or Escape to end it. Nothing is shown if your device asks for reduced motion.

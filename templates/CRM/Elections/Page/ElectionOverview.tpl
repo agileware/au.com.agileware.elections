@@ -107,6 +107,7 @@
     <a class="button" href="{crmURL p='civicrm/elections/candidate-list' q='reset=1'}#/?eid={$election->id}"><span><i class="crm-i fa-users" role="img" aria-hidden="true"></i> {ts}Candidates{/ts}</span></a>
     <a class="button" href="{crmURL p='civicrm/elections/audit-log' q='reset=1'}#/?eid={$election->id}"><span><i class="crm-i fa-shield" role="img" aria-hidden="true"></i> {ts}Audit log{/ts}</span></a>
     {if $hasResults}<a class="button" href="{crmURL p='civicrm/elections/result-list' q='reset=1'}#/?eid={$election->id}"><span><i class="crm-i fa-trophy" role="img" aria-hidden="true"></i> {ts}Results{/ts}</span></a>{/if}
+    <a class="button" href="{crmURL p='civicrm/elections/results-display' q="reset=1&eid=`$election->id`"}"><span><i class="crm-i fa-image" role="img" aria-hidden="true"></i> {ts}Results page{/ts}</span></a>
     {if $canEdit}<a class="button" href="{crmURL p='civicrm/elections/create' q="eid=`$election->id`"}"><span><i class="crm-i fa-pencil" role="img" aria-hidden="true"></i> {ts}Edit settings{/ts}</span></a>{/if}
     <a class="button" href="{crmURL p='civicrm/elections/view' q="eid=`$election->id`"}"><span><i class="crm-i fa-eye" role="img" aria-hidden="true"></i> {ts}View as a voter{/ts}</span></a>
     <a class="button crm-popup" href="{crmURL p='civicrm/elections/duplicate' q="eid=`$election->id`"}"><span><i class="crm-i fa-copy" role="img" aria-hidden="true"></i> {ts}Duplicate{/ts}</span></a>

@@ -48,6 +48,7 @@ Being in a group, including a smart group, is checked when each person acts. Peo
 - **Candidate statements**: candidates write a statement when they accept a nomination (see [How to accept a nomination](user_accept_nomination.md)). A statement is always shown on the candidate's own page. Choose whether it is also shown on the ballot, as an expandable *Read statement* or in full, and in the candidate list once voting has started.
 - **Show who nominated each candidate**: untick to hide the nominators and seconders on the candidate page, for example when nominations are handled outside the website.
 - **Candidate name format**: how candidate names are written. Use **First "Nickname" Last** to show, for example, Robert "Rob" Irwin. Nicknames come from the contact's *Nickname* field. The default follows the site-wide setting, see [Elections Settings](admin_election_settings.md).
+   Also on the **Display** tab, make the results page your own: a **Header logo** with its description, **Header text**, **Footer text**, and **Display celebration effects on the Election results page** with the effect and for how many days it is shown (5 by default). These can also be changed after the election has started. See [How to change the look of the results page](admin_results_page.md).
 6. Click **Create** to create a new election.
 
 The election is created inactive. At least one [Position](admin_add_position.md) must be added, and the election must be [activated](admin_activate_election.md), before it is visible to end users.
