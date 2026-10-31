@@ -209,14 +209,17 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     $this->addQuestionElements();
     $this->assign('positions', $this->electionPositions);
     $this->assign('votingMethod', $this->method);
-    $instructions = CRM_Elections_VotingMethod::instructions($this->method);
+    $hasQuestions = FALSE;
+    $hasPositions = FALSE;
     foreach ($this->electionPositions as $position) {
       if ($this->isQuestion($position)) {
-        $instructions[] = E::ts('Questions: choose one answer for each question. You can leave a question unanswered.');
-        break;
+        $hasQuestions = TRUE;
+      }
+      else {
+        $hasPositions = TRUE;
       }
     }
-    $this->assign('instructions', $instructions);
+    $this->assign('instructions', CRM_Elections_VotingMethod::ballotInstructions($this->method, $hasPositions, $hasQuestions));
     $this->addElement('hidden', 'eid', $this->eId);
     if ( $this->cid && $this->cs ) {
       $this->addElement('hidden', 'cid', $this->cid);

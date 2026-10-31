@@ -61,6 +61,26 @@ class CRM_Elections_VotingMethodTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame('plurality', CRM_Elections_VotingMethod::normalise('plurality'));
   }
 
+  public function testTheBallotIntroductionSaysOnlyWhatApplies() {
+    $text = fn(array $lines) => implode(' ', $lines);
+    // A ballot of questions only never mentions candidates, ranks or ticking.
+    foreach (['irv', 'plurality'] as $method) {
+      $questionsOnly = $text(CRM_Elections_VotingMethod::ballotInstructions($method, FALSE, TRUE));
+      $this->assertStringContainsString('answer the questions', $questionsOnly);
+      $this->assertStringNotContainsString('candidate', $questionsOnly);
+      $this->assertStringNotContainsString('numbered', $questionsOnly);
+      $this->assertStringNotContainsString('Tick', $questionsOnly);
+    }
+    // Positions only: the method's own wording, nothing about questions.
+    $this->assertStringContainsString('numbered from 1', $text(CRM_Elections_VotingMethod::ballotInstructions('irv', TRUE, FALSE)));
+    $this->assertStringNotContainsString('Questions:', $text(CRM_Elections_VotingMethod::ballotInstructions('irv', TRUE, FALSE)));
+    $this->assertStringContainsString('Tick the candidates', $text(CRM_Elections_VotingMethod::ballotInstructions('plurality', TRUE, FALSE)));
+    // Both: the method's wording and the line about questions.
+    $both = $text(CRM_Elections_VotingMethod::ballotInstructions('irv', TRUE, TRUE));
+    $this->assertStringContainsString('numbered from 1', $both);
+    $this->assertStringContainsString('Questions: choose one answer', $both);
+  }
+
   public function testAnUnknownMethodIsRefused() {
     $this->expectRefusal(function () {
       civicrm_api3('Election', 'create', ['name' => 'Odd', 'voting_method' => 'coin-toss'] + $this->plainDates());
