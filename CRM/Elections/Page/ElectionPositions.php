@@ -20,9 +20,11 @@ class CRM_Elections_Page_ElectionPositions extends CRM_Elections_Page_Base {
       parent::run();
       return;
     }
-    // The positions list is a SearchKit page (drag to reorder, edit in place). This route is kept so
-    // existing links and redirects keep working.
-    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/position-list', 'reset=1', FALSE, '/?eid=' . (int) $this->eId));
+    // The positions list is a SearchKit page. While the election is active (switched on, nominations
+    // started) the positions cannot change, so the read-only page is opened instead of the one with drag
+    // and drop and editing in place. This route is also kept so existing links keep working.
+    $locked = findElectionById($this->eId)->canEdit() !== TRUE;
+    CRM_Utils_System::redirect(CRM_Utils_System::url($locked ? 'civicrm/elections/position-list-active' : 'civicrm/elections/position-list', 'reset=1', FALSE, '/?eid=' . (int) $this->eId));
   }
 
 }

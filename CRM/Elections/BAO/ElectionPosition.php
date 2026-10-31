@@ -97,10 +97,10 @@ class CRM_Elections_BAO_ElectionPosition extends CRM_Elections_DAO_ElectionPosit
   public static function assertCanChange($electionId) {
     $election = findElectionById($electionId, FALSE);
     if ($election->is_deleted) {
-      throw new CRM_Core_Exception(E::ts('Election position cannot be added/modified for deleted election.'));
+      throw new CRM_Elections_Exception(E::ts('Election position cannot be added/modified for deleted election.'));
     }
     if ($election->isNominationsStarted && $election->is_visible == 1) {
-      throw new CRM_Core_Exception(E::ts('Election position cannot be added/modified once election has been started.'));
+      throw new CRM_Elections_Exception(E::ts('This election is active, so its positions cannot be changed. Positions can be changed only before nominations start, or while the election is switched off.'));
     }
   }
 

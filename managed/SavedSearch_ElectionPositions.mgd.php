@@ -69,4 +69,36 @@ return [
       'match' => ['saved_search_id', 'name'],
     ],
   ],
+  [
+    'name' => 'SavedSearch_ElectionPositions_SearchDisplay_ElectionPositions_Locked',
+    'entity' => 'SearchDisplay',
+    'cleanup' => 'unused',
+    'update' => 'unmodified',
+    'params' => [
+      'version' => 4,
+      'values' => [
+        'name' => 'ElectionPositions_Locked',
+        'label' => E::ts('Election Positions (election active)'),
+        'saved_search_id.name' => 'ElectionPositions',
+        'type' => 'table',
+        'settings' => [
+          'description' => E::ts('The positions of an active election. They cannot be changed, so there is nothing to drag, edit or delete.'),
+          'sort' => [['sortorder', 'ASC']],
+          'limit' => 100,
+          'pager' => FALSE,
+          'placeholder' => 5,
+          'columns' => [
+            ['type' => 'field', 'key' => 'name', 'dataType' => 'String', 'label' => E::ts('Position'), 'sortable' => FALSE],
+            ['type' => 'field', 'key' => 'position_type:label', 'dataType' => 'String', 'label' => E::ts('Type'), 'sortable' => FALSE],
+            ['type' => 'field', 'key' => 'quantity', 'dataType' => 'Integer', 'label' => E::ts('Seats'), 'sortable' => FALSE],
+            ['type' => 'field', 'key' => 'write_ins_per_seat', 'dataType' => 'Integer', 'label' => E::ts('Write-ins per seat'), 'sortable' => FALSE],
+            ['type' => 'field', 'key' => 'description', 'dataType' => 'Text', 'label' => E::ts('Description'), 'sortable' => FALSE],
+          ],
+          'actions' => FALSE,
+          'classes' => ['table', 'table-striped'],
+        ],
+      ],
+      'match' => ['saved_search_id', 'name'],
+    ],
+  ],
 ];

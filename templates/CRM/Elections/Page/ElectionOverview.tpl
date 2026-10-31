@@ -103,7 +103,7 @@
   </div>
 
   <p class="election-overview-actions">
-    <a class="button" href="{crmURL p='civicrm/elections/position-list' q='reset=1'}#/?eid={$election->id}"><span><i class="crm-i fa-list-ol" role="img" aria-hidden="true"></i> {ts}Positions{/ts}</span></a>
+    <a class="button" href="{crmURL p='civicrm/elections/positions' q="reset=1&eid=`$election->id`"}"><span><i class="crm-i fa-list-ol" role="img" aria-hidden="true"></i> {ts}Positions{/ts}</span></a>
     <a class="button" href="{crmURL p='civicrm/elections/candidate-list' q='reset=1'}#/?eid={$election->id}"><span><i class="crm-i fa-users" role="img" aria-hidden="true"></i> {ts}Candidates{/ts}</span></a>
     <a class="button" href="{crmURL p='civicrm/elections/audit-log' q='reset=1'}#/?eid={$election->id}"><span><i class="crm-i fa-shield" role="img" aria-hidden="true"></i> {ts}Audit log{/ts}</span></a>
     {if $hasResults}<a class="button" href="{crmURL p='civicrm/elections/result-list' q='reset=1'}#/?eid={$election->id}"><span><i class="crm-i fa-trophy" role="img" aria-hidden="true"></i> {ts}Results{/ts}</span></a>{/if}

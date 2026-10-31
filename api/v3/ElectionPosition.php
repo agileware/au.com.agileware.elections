@@ -27,7 +27,7 @@ function civicrm_api3_election_position_create($params) {
   $election = findElectionById($electionId, FALSE);
   if (!isset($params['result_status']) || $params['result_status'] == '') {
     if ($election->isNominationsStarted && $election->is_visible == 1) {
-      return civicrm_api3_create_error('Election position cannot be added/modified once election has been started.');
+      return civicrm_api3_create_error(E::ts('This election is active, so its positions cannot be changed. Positions can be changed only before nominations start, or while the election is switched off.'));
     }
     if ($election->is_deleted) {
       return civicrm_api3_create_error('Election position cannot be added/modified for deleted election.');
@@ -49,7 +49,7 @@ function civicrm_api3_election_position_delete($params) {
 
   $election = findElectionById($electionId, FALSE);
   if ($election->isNominationsStarted && $election->is_visible == 1) {
-    return civicrm_api3_create_error('Election position cannot be deleted once election has been started.');
+    return civicrm_api3_create_error(E::ts('This election is active, so its positions cannot be changed. Positions can be changed only before nominations start, or while the election is switched off.'));
   }
 
   return _civicrm_api3_basic_delete(_civicrm_api3_get_BAO(__FUNCTION__), $params);

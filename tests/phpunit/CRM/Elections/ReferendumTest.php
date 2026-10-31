@@ -108,9 +108,9 @@ class CRM_Elections_ReferendumTest extends api_v3_ElectionBaseTestCase {
 
   public function testTheQuestionIsFrozenOnceTheElectionHasStarted() {
     [$fixture, $position] = $this->council();
-    $this->refused(fn() => civicrm_api3('ElectionPosition', 'create', ['id' => $position, 'election_id' => $fixture->electionId, 'pass_threshold' => 75]), 'once election has been started');
-    $this->refused(fn() => civicrm_api3('ElectionPosition', 'create', ['id' => $position, 'election_id' => $fixture->electionId, 'position_type' => 'election']), 'once election has been started');
-    $this->refused(fn() => CRM_Elections_BAO_ElectionPosition::saveOptions($position, ['yes' => 'Rewritten']), 'once election has been started');
+    $this->refused(fn() => civicrm_api3('ElectionPosition', 'create', ['id' => $position, 'election_id' => $fixture->electionId, 'pass_threshold' => 75]), 'This election is active');
+    $this->refused(fn() => civicrm_api3('ElectionPosition', 'create', ['id' => $position, 'election_id' => $fixture->electionId, 'position_type' => 'election']), 'This election is active');
+    $this->refused(fn() => CRM_Elections_BAO_ElectionPosition::saveOptions($position, ['yes' => 'Rewritten']), 'This election is active');
   }
 
   public function testSettingsAreKeptInRange() {

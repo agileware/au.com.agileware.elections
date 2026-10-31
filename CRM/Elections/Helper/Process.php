@@ -30,33 +30,33 @@ class CRM_Elections_Helper_Process {
   public static function nominate($electionId, $positionId, $nomineeId, $nominatorId, $reason = NULL) {
     $election = findElectionById($electionId);
     if (!$election->isVisible || $election->is_deleted) {
-      throw new CRM_Core_Exception(E::ts('You are not authorized to access this page.'));
+      throw new CRM_Elections_Exception(E::ts('You are not authorized to access this page.'));
     }
     $election->assignDisplayOptions();
     if (!$election->onlineNominations) {
-      throw new CRM_Core_Exception(E::ts('Candidates for this election are chosen by the organisers, so there are no online nominations.'));
+      throw new CRM_Elections_Exception(E::ts('Candidates for this election are chosen by the organisers, so there are no online nominations.'));
     }
     if (!$election->isNominationsInProgress) {
-      throw new CRM_Core_Exception(E::ts('Nominations are not open for this election.'));
+      throw new CRM_Elections_Exception(E::ts('Nominations are not open for this election.'));
     }
     if (empty($nominatorId) || !CRM_Elections_Helper_Eligibility::canNominate($electionId, $nominatorId)) {
-      throw new CRM_Core_Exception(E::ts('You are not allowed to nominate in this election.'));
+      throw new CRM_Elections_Exception(E::ts('You are not allowed to nominate in this election.'));
     }
     if (!CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_position WHERE id = %1 AND election_id = %2 AND IFNULL(position_type, "election") <> "referendum"', [
       1 => [$positionId, 'Positive'],
       2 => [$electionId, 'Positive'],
     ])) {
-      throw new CRM_Core_Exception(E::ts('The selected position is not part of this election.'));
+      throw new CRM_Elections_Exception(E::ts('The selected position is not part of this election.'));
     }
     if (!CRM_Elections_Helper_Eligibility::canBeNominated($electionId, $nomineeId)) {
-      throw new CRM_Core_Exception(E::ts('Only people who can stand in this election can be nominated.'));
+      throw new CRM_Elections_Exception(E::ts('Only people who can stand in this election can be nominated.'));
     }
 
     // One request at a time for each person and position: a repeated or simultaneous request must not
     // find "nothing there yet" twice and write two rows (the database refuses them too).
     $lock = Civi::lockManager()->acquire('data.elections.nominate.' . (int) $positionId . '.' . (int) $nomineeId, 10);
     if (!$lock->isAcquired()) {
-      throw new CRM_Core_Exception(E::ts('This nomination is being saved. Please wait a moment and try again.'));
+      throw new CRM_Elections_Exception(E::ts('This nomination is being saved. Please wait a moment and try again.'));
     }
     try {
       return self::nominateLocked($election, $electionId, $positionId, $nomineeId, $nominatorId, $reason);
@@ -75,7 +75,7 @@ class CRM_Elections_Helper_Process {
     ]);
     if ($existing['count'] > 0) {
       if ($existing['values'][0]['has_rejected_nomination'] == 1) {
-        throw new CRM_Core_Exception(E::ts('Selected member has withdrawn the nomination, You cannot nominate the member again for selected position.'));
+        throw new CRM_Elections_Exception(E::ts('Selected member has withdrawn the nomination, You cannot nominate the member again for selected position.'));
       }
       $nominationId = (int) $existing['values'][0]['id'];
     }
@@ -140,19 +140,19 @@ class CRM_Elections_Helper_Process {
     self::assertElectionOpenToNominees($election, NULL, $writeIn);
 
     if (!CRM_Elections_Helper_Eligibility::canBeNominated($election->id, $contactId)) {
-      throw new CRM_Core_Exception(E::ts('Only people who can stand in this election can accept a nomination.'));
+      throw new CRM_Elections_Exception(E::ts('Only people who can stand in this election can accept a nomination.'));
     }
     if (empty($nomination['is_eligible_candidate'])) {
-      throw new CRM_Core_Exception(E::ts('This nomination has not received enough nominations to be accepted.'));
+      throw new CRM_Elections_Exception(E::ts('This nomination has not received enough nominations to be accepted.'));
     }
     if ($nomination['has_accepted_nomination'] == 1) {
-      throw new CRM_Core_Exception(E::ts('You already have accepted this nomination.'));
+      throw new CRM_Elections_Exception(E::ts('You already have accepted this nomination.'));
     }
     if ($nomination['has_rejected_nomination'] == 1) {
-      throw new CRM_Core_Exception(E::ts('You cannot accept a rejected nomination.'));
+      throw new CRM_Elections_Exception(E::ts('You cannot accept a rejected nomination.'));
     }
     if (!CRM_Elections_Helper_Candidate::isValidStatementUrl($statementUrl)) {
-      throw new CRM_Core_Exception(E::ts('Enter a web address starting with http:// or https://'));
+      throw new CRM_Elections_Exception(E::ts('Enter a web address starting with http:// or https://'));
     }
 
     $statementUrl = trim((string) $statementUrl);
@@ -187,11 +187,11 @@ class CRM_Elections_Helper_Process {
     self::assertElectionOpenToNominees($election, E::ts('You cannot withdraw the nomination once voting is started.'), $writeIn);
 
     if ($nomination['has_rejected_nomination'] == 1) {
-      throw new CRM_Core_Exception(E::ts('You have withdrawn this nomination.'));
+      throw new CRM_Elections_Exception(E::ts('You have withdrawn this nomination.'));
     }
     if ($writeIn && $election->isVotingStarted && $nomination['has_accepted_nomination'] == 1) {
       // Voters have seen them on the ballot since they accepted, as with any other candidate.
-      throw new CRM_Core_Exception(E::ts('You cannot withdraw the nomination once voting is started.'));
+      throw new CRM_Elections_Exception(E::ts('You cannot withdraw the nomination once voting is started.'));
     }
 
     CRM_Elections_Helper_Guard::$writeIn = $writeIn && $election->isVotingStarted;
@@ -240,7 +240,7 @@ class CRM_Elections_Helper_Process {
    */
   private static function loadOwnNomination($nominationId, $contactId) {
     if (empty($contactId)) {
-      throw new CRM_Core_Exception(E::ts('You are not authorized to access this page.'));
+      throw new CRM_Elections_Exception(E::ts('You are not authorized to access this page.'));
     }
     $nominations = civicrm_api3('ElectionNomination', 'get', [
       'id' => $nominationId,
@@ -248,7 +248,7 @@ class CRM_Elections_Helper_Process {
       'return' => ['is_eligible_candidate', 'has_accepted_nomination', 'has_rejected_nomination', 'is_write_in', 'election_position_id.election_id'],
     ]);
     if ($nominations['count'] != 1) {
-      throw new CRM_Core_Exception(E::ts('You are not authorized to access this page.'));
+      throw new CRM_Elections_Exception(E::ts('You are not authorized to access this page.'));
     }
     return reset($nominations['values']);
   }
@@ -261,17 +261,17 @@ class CRM_Elections_Helper_Process {
    */
   private static function assertElectionOpenToNominees($election, $votingStartedMessage = NULL, $writeIn = FALSE) {
     if (!$election->isVisible || $election->is_deleted) {
-      throw new CRM_Core_Exception(E::ts('You are not authorized to access this page.'));
+      throw new CRM_Elections_Exception(E::ts('You are not authorized to access this page.'));
     }
     if ($writeIn) {
       // A person written in can answer until voting closes.
       if ($election->isVotingEnded) {
-        throw new CRM_Core_Exception(CRM_Elections_Helper_WriteIn::closedMessage($election));
+        throw new CRM_Elections_Exception(CRM_Elections_Helper_WriteIn::closedMessage($election));
       }
       return;
     }
     if ($election->isVotingStarted) {
-      throw new CRM_Core_Exception($votingStartedMessage ?: E::ts('You cannot accept the nomination once voting has started.'));
+      throw new CRM_Elections_Exception($votingStartedMessage ?: E::ts('You cannot accept the nomination once voting has started.'));
     }
   }
 
