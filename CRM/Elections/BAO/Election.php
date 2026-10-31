@@ -407,7 +407,7 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
     };
     return [
       $rule('visibility_end_date', 'after', 'visibility_start_date', E::ts('End date must be after start date.')),
-      $rule('nomination_start_date', 'after', 'visibility_start_date', E::ts('Start date must be after visibility start date.')),
+      $rule('nomination_start_date', 'notBefore', 'visibility_start_date', E::ts('Start date must not be before the visibility start date.')),
       $rule('nomination_end_date', 'after', 'nomination_start_date', E::ts('End date must be after start date.')),
       $rule('nomination_end_date', 'notAfter', 'visibility_end_date', E::ts('End date must be before visibility end date.')),
       $rule('advertise_candidates_date', 'after', 'nomination_end_date', E::ts('Start Date must be after nomination end date.')),
@@ -435,7 +435,15 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
       }
       $result = CRM_Elections_Helper_Dates::compare($values[$rule['other']], $values[$rule['field']], $dateFormat);
       // compare() gives 1 when the second date is later, -1 when it is earlier.
-      $failed = ($rule['rule'] === 'after') ? ($result != 1) : ($result == 1);
+      if ($rule['rule'] === 'after') {
+        $failed = ($result != 1);
+      }
+      elseif ($rule['rule'] === 'notBefore') {
+        $failed = ($result == -1);
+      }
+      else {
+        $failed = ($result == 1);
+      }
       if ($failed) {
         $errors[$rule['field']] = $rule['message'];
       }

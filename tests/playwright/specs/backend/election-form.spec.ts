@@ -101,4 +101,64 @@ test.describe('election form', () => {
     await expect(managerPage.getByLabel('Nomination email')).toBeVisible();
     await expect(managerPage.getByRole('link', { name: 'Edit message templates' })).toHaveCount(0);
   });
+  test('the quick set-up fills in valid dates for each cycle', async ({ adminPage }) => {
+    await adminPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
+    await adminPage.getByRole('tab', { name: 'Dates' }).click();
+    const value = (name: string) => adminPage.locator(`input[name="${name}"]`).inputValue();
+
+    // Nothing chosen yet.
+    await adminPage.locator('#election-quick-fill').click();
+    await expect(adminPage.locator('.election-quick-status')).toContainText('Choose an election cycle');
+
+    await adminPage.locator('#quick_cycle').selectOption('2-3');
+    await adminPage.evaluate(() => {
+      // @ts-ignore CRM is CiviCRM's global
+      CRM.$('input[name="quick_start"]').val('2031-03-03 09:00:00').trigger('change');
+    });
+    await adminPage.locator('#election-quick-fill').click();
+    await expect(adminPage.locator('.election-quick-status')).toContainText('The dates are filled in');
+    expect(await value('visibility_start_date')).toBe('2031-03-03 09:00:00');
+    expect(await value('nomination_start_date')).toBe('2031-03-03 09:00:00');
+    expect(await value('nomination_end_date')).toBe('2031-03-16 17:00:00');
+    expect(await value('advertise_candidates_date')).toBe('2031-03-16 17:05:00');
+    expect(await value('voting_start_date')).toBe('2031-03-17 09:00:00');
+    expect(await value('voting_end_date')).toBe('2031-04-06 17:00:00');
+    expect(await value('result_date')).toBe('2031-04-06 17:05:00');
+    expect(await value('visibility_end_date')).toBe('2031-06-29 17:05:00');
+    // The same rules the form applies show no problem.
+    await expect(adminPage.locator('.election-date-problem')).toHaveCount(0);
+
+    // A second fill asks first, and keeping the dates keeps them.
+    await adminPage.locator('#quick_cycle').selectOption('1-1');
+    await adminPage.locator('#election-quick-fill').click();
+    const dialog = adminPage.locator('.ui-dialog', { hasText: 'This replaces the dates entered so far' });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('button', { name: 'Cancel' }).click();
+    expect(await value('voting_end_date')).toBe('2031-04-06 17:00:00');
+    await adminPage.locator('#election-quick-fill').click();
+    await adminPage.locator('.ui-dialog', { hasText: 'This replaces the dates entered so far' }).getByRole('button', { name: 'Continue' }).click();
+    await expect.poll(() => value('voting_end_date')).toBe('2031-03-16 17:00:00');
+  });
+
+  test('the times the phases start and end are used, and bad times are explained', async ({ adminPage, allowedProblems }) => {
+    // A refused request is answered with HTTP 500 and the reason.
+    allowedProblems.push(/suggestDates|500/);
+    await adminPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
+    await adminPage.getByRole('tab', { name: 'Dates' }).click();
+    await adminPage.locator('#quick_cycle').selectOption('1-1');
+    await adminPage.evaluate(() => {
+      // @ts-ignore CRM is CiviCRM's global
+      CRM.$('input[name="quick_start"]').val('2031-03-03 10:30:00').trigger('change');
+    });
+    await adminPage.locator('#quick_start_time').fill('08:15');
+    await adminPage.locator('#quick_end_time').fill('08:15');
+    await adminPage.locator('#election-quick-fill').click();
+    await expect(adminPage.locator('.election-quick-status')).toContainText('The end time must be later than the start time');
+    await adminPage.locator('#quick_end_time').fill('20:45');
+    await adminPage.locator('#quick_results').selectOption('morning');
+    await adminPage.locator('#election-quick-fill').click();
+    await expect.poll(() => adminPage.locator('input[name="voting_start_date"]').inputValue()).toBe('2031-03-10 08:15:00');
+    expect(await adminPage.locator('input[name="nomination_end_date"]').inputValue()).toBe('2031-03-09 20:45:00');
+    expect(await adminPage.locator('input[name="result_date"]').inputValue()).toBe('2031-03-17 08:15:00');
+  });
 });

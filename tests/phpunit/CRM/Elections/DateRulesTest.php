@@ -43,6 +43,12 @@ class CRM_Elections_DateRulesTest extends api_v3_ElectionBaseTestCase {
     }
   }
 
+  public function testNominationsMayOpenAtTheSameMomentTheElectionBecomesVisible() {
+    $this->assertSame([], CRM_Elections_BAO_Election::compareDates($this->dates(['nomination_start_date' => '2031-01-01 09:00:00'])));
+    $errors = CRM_Elections_BAO_Election::compareDates($this->dates(['nomination_start_date' => '2031-01-01 08:59:00']));
+    $this->assertSame(E::ts('Start date must not be before the visibility start date.'), $errors['nomination_start_date']);
+  }
+
   public function testNothingMayEndAfterTheElectionStopsBeingVisible() {
     foreach (['nomination_end_date', 'advertise_candidates_date', 'voting_end_date', 'result_date'] as $field) {
       $errors = CRM_Elections_BAO_Election::compareDates($this->dates([$field => '2031-04-30 09:00:00']));
@@ -58,7 +64,7 @@ class CRM_Elections_DateRulesTest extends api_v3_ElectionBaseTestCase {
 
   public function testRuleTableIsUsableByTheBrowser() {
     foreach (CRM_Elections_BAO_Election::getDateRules() as $rule) {
-      $this->assertContains($rule['rule'], ['after', 'notAfter']);
+      $this->assertContains($rule['rule'], ['after', 'notAfter', 'notBefore']);
       $this->assertNotEmpty($rule['message']);
       $this->assertNotEmpty($rule['field']);
       $this->assertNotEmpty($rule['other']);

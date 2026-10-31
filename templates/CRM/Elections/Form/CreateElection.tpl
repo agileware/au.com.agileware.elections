@@ -17,6 +17,25 @@
     </table>
     </div>
     <div class="election-form-panel" id="election-panel-dates" data-title="{ts escape='htmlattribute'}Dates{/ts}">
+    <fieldset class="election-quick-setup">
+        <legend>{ts}Quick set-up{/ts}</legend>
+        <p class="description">{ts 1=$siteTimeZone}Choose a cycle and when nominations open, and the dates below are filled in for you (times are in %1). You can still change any of them.{/ts}</p>
+        <div class="election-quick-fields">
+            <div class="election-quick-field">{$form.quick_cycle.label}<br>{$form.quick_cycle.html}</div>
+            <div class="election-quick-field">{$form.quick_start.label}<br>{$form.quick_start.html}</div>
+            <div class="election-quick-field"><label for="quick_start_time">{ts}Each phase starts at{/ts}</label><br><input type="time" id="quick_start_time" class="crm-form-text" value="09:00" step="300"></div>
+            <div class="election-quick-field"><label for="quick_end_time">{ts}Each phase ends at{/ts}</label><br><input type="time" id="quick_end_time" class="crm-form-text" value="17:00" step="300"></div>
+            <div class="election-quick-field"><label for="quick_results">{ts}Results are published{/ts}</label><br>
+                <select id="quick_results" class="crm-form-select">
+                    <option value="close">{ts}5 minutes after voting closes{/ts}</option>
+                    <option value="morning">{ts}The morning after voting closes{/ts}</option>
+                </select></div>
+            <div class="election-quick-field"><label for="quick_visible_weeks">{ts}Visible for (weeks after the results){/ts}</label><br><input type="number" id="quick_visible_weeks" class="crm-form-text" value="12" min="1" max="520" style="width: 5em"></div>
+        </div>
+        <p><button type="button" class="crm-button election-quick-fill" id="election-quick-fill"><i class="crm-i fa-calendar-check-o" aria-hidden="true"></i> {ts}Fill in the dates{/ts}</button>
+        <span class="election-quick-status" role="status" aria-live="polite"></span></p>
+        <p class="description">{ts}Nominations and voting each run for whole weeks, ending at the end time on the last day. Candidates are advertised from 5 minutes after nominations close, and voting opens at the start time the next day. The election is visible from when nominations open.{/ts}</p>
+    </fieldset>
     <table class="form-layout">
         <tr>
             <td colspan="2">

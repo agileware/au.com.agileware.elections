@@ -137,6 +137,10 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     $this->add('text', 'name', E::ts('Name'), ['size' => 35], TRUE);
     $this->add('textarea', 'description', E::ts('Description'), ['cols' => 55, 'rows' => 6], FALSE);
 
+    // Quick set-up of the dates: not saved, only used to fill in the dates below.
+    $this->add('select', 'quick_cycle', E::ts('Election cycle'), ['' => E::ts('- Choose a cycle -')] + array_map(fn($cycle) => $cycle[0], CRM_Elections_Helper_Dates::getCycles()), FALSE);
+    $this->add('datepicker', 'quick_start', E::ts('Nominations open'), [], FALSE);
+
     // Visibility fields.
     $this->add('datepicker', 'visibility_start_date', E::ts('Start Date'), [], TRUE);
     $this->add('datepicker', 'visibility_end_date', E::ts('End Date'), [], TRUE);

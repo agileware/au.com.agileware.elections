@@ -28,6 +28,18 @@ class Election extends Generic\DAOEntity {
   }
 
   /**
+   * Work out all the election dates from when nominations open and an election cycle.
+   *
+   * @param bool $checkPermissions
+   *
+   * @return \Civi\Api4\Action\Election\SuggestDates
+   */
+  public static function suggestDates($checkPermissions = TRUE) {
+    return (new Action\Election\SuggestDates(static::class, __FUNCTION__))
+      ->setCheckPermissions($checkPermissions);
+  }
+
+  /**
    * @return array
    */
   public static function permissions(): array {

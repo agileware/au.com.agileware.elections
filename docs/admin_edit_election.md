@@ -12,7 +12,7 @@ To edit an election, you should be a user who gains admin access for CiviCRM and
 - **Name and Description**: to edit the name and description of the election.  
 - **Visible Start Date**: to edit the date and time when user can start seeing it in the election section.  
 - **Visible End Date**: to edit the date and time when the admin wants to hide the election from the election page.  
-- **Nomination Start Date**: to edit the nomination start date. This date should be after **Visible Start Date** and before **Visible End Date**  
+- **Nomination Start Date**: to edit the nomination start date. This date should not be before **Visible Start Date** (it can be the same moment) and should be before **Visible End Date**  
 - **Nomination End Date**: to edit the nomination end date. This date should be after **Nomination Start Date** and before **Visible End Date**  
 - **Advertise Start Date**: to edit advertise start date. This date should be after **Nomination End Date** and before **Visible End Date**  
 - **Voting Start Date**: to edit voting start date. This date should be after **Advertise Start Date** and before **Visible End Date**  
