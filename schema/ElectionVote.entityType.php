@@ -12,6 +12,15 @@ return [
     'log' => TRUE,
     'add' => '5.3',
   ],
+  'getIndices' => fn() => [
+    // One row for each member and candidate: a ballot can never count a candidate twice, however the
+    // request arrives. Anonymised votes have no member, and any number of NULLs are allowed.
+    'UI_election_vote_member_nomination' => [
+      'fields' => ['member_id' => TRUE, 'election_nomination_id' => TRUE],
+      'unique' => TRUE,
+      'add' => '2.0',
+    ],
+  ],
   'getFields' => fn() => [
     'id' => [
       'title' => E::ts('ID'),
@@ -56,7 +65,8 @@ return [
       'entity_reference' => [
         'entity' => 'Contact',
         'key' => 'id',
-        'on_delete' => 'CASCADE',
+        // Deleting a contact must not quietly delete the ballots they cast.
+        'on_delete' => 'SET NULL',
       ],
     ],
     'created_at' => [

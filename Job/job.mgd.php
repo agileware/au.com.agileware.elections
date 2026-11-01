@@ -17,4 +17,30 @@ return [
             'run_frequency' => 'Always',
         ],
     ],
+    1 => [
+        'name' => 'Elections Write-in Reminders',
+        'entity' => 'Job',
+        'update' => 'never',
+        'params' => [
+            'version' => 3,
+            'name' => 'Elections Write-in Reminders',
+            'description' => 'Remind people written in by a voter, who have not answered, shortly before voting closes.',
+            'api_entity' => 'Election',
+            'api_action' => 'sendwriteinreminders',
+            'run_frequency' => 'Hourly',
+        ],
+    ],
+    2 => [
+        'name' => 'Elections Write-in Closed Notices',
+        'entity' => 'Job',
+        'update' => 'never',
+        'params' => [
+            'version' => 3,
+            'name' => 'Elections Write-in Closed Notices',
+            'description' => 'Tell people written in by a voter, who never answered, that voting has closed and they can no longer accept.',
+            'api_entity' => 'Election',
+            'api_action' => 'sendwriteinclosednotices',
+            'run_frequency' => 'Always',
+        ],
+    ],
 ];

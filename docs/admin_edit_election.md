@@ -12,14 +12,16 @@ To edit an election, you should be a user who gains admin access for CiviCRM and
 - **Name and Description**: to edit the name and description of the election.  
 - **Visible Start Date**: to edit the date and time when user can start seeing it in the election section.  
 - **Visible End Date**: to edit the date and time when the admin wants to hide the election from the election page.  
-- **Nomination Start Date**: to edit the nomination start date. This date should be after **Visible Start Date** and before **Visible End Date**  
+- **Nomination Start Date**: to edit the nomination start date. This date should not be before **Visible Start Date** (it can be the same moment) and should be before **Visible End Date**  
 - **Nomination End Date**: to edit the nomination end date. This date should be after **Nomination Start Date** and before **Visible End Date**  
 - **Advertise Start Date**: to edit advertise start date. This date should be after **Nomination End Date** and before **Visible End Date**  
 - **Voting Start Date**: to edit voting start date. This date should be after **Advertise Start Date** and before **Visible End Date**  
 - **Voting End Date**: to edit voting end date. This date should be after **Voting Start Date** and before **Visible End Date**  
 - **Results Start Date**: to edit results start date. This date should be after **Voting End Date** and before **Visible End Date**
+- **Voting Method**: ranked choice or most votes win (it cannot be changed once people have voted).
 - **Anonymise Votes**: to edit whether votes are anonymised once results are published.
-- **Allow Members to Change Vote**: to edit whether a member can revote to change their vote before **Voting End Date**.
+- **Allow people to change their vote**: to edit whether people can revote to change their vote before **Voting End Date**.
 - **Allow non-logged in access**: to edit whether people can participate using a personalised link without logging in. See [Participating without logging in](setup.md#participating-without-logging-in).
 - **Number of Required Nominations**: to edit the number of nominations a person needs to become an eligible candidate. See [How to second a nomination](user_second_nomination.md).
-- **Allowed by Groups**: to edit the CiviCRM Groups and Smart Groups permitted to participate in this election.
+- **Allowed by Groups**: to edit the CiviCRM Groups and Smart Groups permitted to vote in this election.
+- **Nomination Groups** and **Candidate Groups**: to change who may nominate and second, and who may stand. Empty means the *Allowed by Groups* (see *Create an election*). None of the group settings can change once people have voted.

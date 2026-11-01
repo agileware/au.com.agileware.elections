@@ -50,6 +50,117 @@ function elections_civicrm_enable() {
 // --- Functions below this ship commented out. Uncomment as required. ---
 
 /**
+ * Implements hook_civicrm_pre().
+ *
+ * Business rules that must hold however an election is changed - the forms, the
+ * API, or an inline edit in a SearchKit list.
+ */
+function elections_civicrm_pre($op, $objectName, $id, &$params) {
+  CRM_Elections_Helper_Guard::pre($op, $objectName, $id, $params);
+  if ($objectName === 'ElectionPosition' && in_array($op, ['create', 'edit', 'delete'], TRUE)) {
+    $changesThePosition = TRUE;
+    if ($op === 'edit' && $id) {
+      // Writing a result (the status of the count) is not a change to the position itself.
+      $current = CRM_Core_DAO::executeQuery('SELECT ' . implode(', ', CRM_Elections_BAO_ElectionPosition::DEFINING_FIELDS) . ' FROM civicrm_election_position WHERE id = %1', [1 => [$id, 'Positive']]);
+      $current->fetch();
+      $changesThePosition = FALSE;
+      foreach (CRM_Elections_BAO_ElectionPosition::DEFINING_FIELDS as $field) {
+        if (array_key_exists($field, (array) $params) && CRM_Elections_BAO_ElectionPosition::normalise($field, $params[$field]) !== CRM_Elections_BAO_ElectionPosition::normalise($field, $current->$field)) {
+          $changesThePosition = TRUE;
+        }
+      }
+    }
+    if ($changesThePosition) {
+      $electionId = $params['election_id'] ?? ($id ? CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_ElectionPosition', $id, 'election_id') : NULL);
+      if ($electionId) {
+        CRM_Elections_BAO_ElectionPosition::assertCanChange($electionId);
+      }
+      // Moving a position (drag and drop sets its order to where it was dropped): make room by
+      // shifting the others, so every position keeps its own place.
+      if ($op === 'edit' && $id && isset($params['sortorder']) && $params['sortorder'] !== '') {
+        $oldOrder = (int) $current->sortorder;
+        $newOrder = (int) $params['sortorder'];
+        // APIv4 (SortableEntity) has already made room by the time this runs; other routes have not,
+        // and then another position of the election still holds the place being moved into.
+        $placeTaken = (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_position WHERE election_id = %1 AND sortorder = %2 AND id <> %3', [
+          1 => [(int) $current->election_id, 'Integer'],
+          2 => [$newOrder, 'Integer'],
+          3 => [(int) $id, 'Integer'],
+        ]);
+        if ($oldOrder !== $newOrder && $placeTaken > 0) {
+          CRM_Utils_Weight::updateOtherWeights('CRM_Elections_DAO_ElectionPosition', $oldOrder, $newOrder, ['election_id' => (int) $current->election_id], 'sortorder');
+        }
+      }
+    }
+  }
+  if ($objectName === 'ElectionNomination' && $op === 'edit' && $id) {
+    CRM_Elections_BAO_ElectionNomination::assertCanChange($id, (array) $params);
+  }
+
+  if ($objectName === 'Election' && $op === 'edit' && $id && !empty($params['is_visible'])) {
+    $isVisibleNow = CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $id, 'is_visible');
+    if (!$isVisibleNow) {
+      CRM_Elections_BAO_Election::assertCanActivate($id);
+    }
+  }
+}
+
+/**
+ * Implements hook_civicrm_post(): the audit log.
+ */
+function elections_civicrm_post($op, $objectName, $objectId, &$objectRef) {
+  CRM_Elections_Helper_Guard::post($op, $objectName, $objectId, $objectRef);
+}
+
+/**
+ * Implements hook_civicrm_merge(): when two contacts are merged, move what they did in elections to the
+ * contact that is kept, so deleting the other contact does not remove or change anything.
+ */
+function elections_civicrm_merge($type, &$data, $mainId = NULL, $otherId = NULL, $tables = NULL) {
+  if ($type !== 'sqls' || !$mainId || !$otherId) {
+    return;
+  }
+  $main = (int) $mainId;
+  $other = (int) $otherId;
+  $data[] = "UPDATE civicrm_election_nomination SET member_nominee = $main WHERE member_nominee = $other";
+  $data[] = "UPDATE civicrm_election_nomination_seconder SET member_nominator = $main WHERE member_nominator = $other";
+  // A ballot the kept contact also cast stays where it is: one ballot for each person.
+  $data[] = "UPDATE IGNORE civicrm_election_vote SET member_id = $main WHERE member_id = $other";
+  $data[] = "UPDATE IGNORE civicrm_election_option_vote SET member_id = $main WHERE member_id = $other";
+}
+
+/**
+ * Election pages and forms can carry a personal link (the contact id and checksum are in the address).
+ * Ask the browser not to pass that address on to any other site (through the Referer header, for
+ * example when a candidate's statement link is followed). Requests inside this site still carry it,
+ * which the nominee search relies on.
+ */
+function elections_send_referrer_policy() {
+  CRM_Utils_System::setHttpHeader('Referrer-Policy', 'same-origin');
+  // Some sites (Joomla's HTTP headers plugin, for one) send their own header after ours, so the policy is
+  // also given in the page itself, which the browser applies whatever the headers say.
+  Civi::resources()->addMarkup('<meta name="referrer" content="same-origin">', ['region' => 'html-header', 'weight' => -100]);
+}
+
+/**
+ * Implements hook_civicrm_pageRun().
+ */
+function elections_civicrm_pageRun(&$page) {
+  if ($page instanceof CRM_Elections_Page_Base) {
+    elections_send_referrer_policy();
+  }
+}
+
+/**
+ * Implements hook_civicrm_buildForm().
+ */
+function elections_civicrm_buildForm($formName, &$form) {
+  if ($form instanceof CRM_Elections_Form_Base) {
+    elections_send_referrer_policy();
+  }
+}
+
+/**
  * Implements hook_civicrm_preProcess().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess
@@ -163,8 +274,9 @@ function elections_civicrm_navigationMenu(&$menu) {
     'label' => E::ts('Elections'),
     'name' => 'Elections',
     'icon'     => 'crm-i fa-check-square-o',
-    'url' => 'civicrm/elections',
-    'permission' => 'administer CiviCRM',
+    'url' => 'civicrm/elections/manage',
+    'permission' => 'access CiviCRM,administer Elections',
+    'operator' => 'AND',
     'weight' => 62,
 
   ]);
@@ -187,7 +299,7 @@ function elections_civicrm_coreResourceList(&$list, $region) {
 }
 
 /**
- * Check if logged in user is member of any election admin group.
+ * Check if the logged in user may administer elections.
  *
  * @return bool
  * @throws CRM_Core_Exception
@@ -204,7 +316,7 @@ function isElectionAdmin() {
  */
 function throwUnauthorizedMessageIfRequired($formOrPage) {
   if (!isElectionAdmin()) {
-    throwAccessDeniedException($formOrPage, 'You are not authorized to perform this action.');
+    throwAccessDeniedException($formOrPage, E::ts('You are not authorized to perform this action.'));
     return TRUE;
   }
   return FALSE;
@@ -221,7 +333,7 @@ function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions
   $formOrPage->assign('errormessage', $exceptionMessage);
 
   if (empty($pageOptions)) {
-    $pageOptions['return_button_text'] = 'Return to Elections';
+    $pageOptions['return_button_text'] = E::ts('Return to Elections');
     $pageOptions['return_button_action'] = Civi::url('current://civicrm/elections');
   }
 
@@ -231,14 +343,14 @@ function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions
 }
 
 /**
- * Throw access denied exception if non-member is trying access a member related page.
+ * Throw access denied exception if someone who cannot take part in the election tries to open one of its pages.
  *
  * @param $exceptionMessage
  * @throws CRM_Extension_Exception
  */
 function throwNonMemberAccessDenied($formOrPage) {
   $formOrPage->assign('nonmember', TRUE);
-  throwAccessDeniedException($formOrPage, 'You may only see this page if you are a member.');
+  throwAccessDeniedException($formOrPage, E::ts('You may only see this page if you can take part in this election.'));
 }
 
 /**
@@ -248,7 +360,7 @@ function throwNonMemberAccessDenied($formOrPage) {
  */
 function throwAccessDeniedPage($formOrPage) {
   $formOrPage->throwError = TRUE;
-  $formOrPage->assign('errormessage', 'You are not authorized to access this page.');
+  $formOrPage->assign('errormessage', E::ts('You are not authorized to access this page.'));
 }
 
 /**
@@ -262,7 +374,7 @@ function retrieveElectionIdFromUrl($form)
 {
     $eId = CRM_Utils_Request::retrieve('eid', 'Positive', $form, FALSE, 0);
     if (!$eId) {
-        throwAccessDeniedException($form, 'Unable to view this Election, Election ID parameter missing.', ['']);
+        throwAccessDeniedException($form, E::ts('Unable to view this Election, Election ID parameter missing.'), ['']);
         return -1;
     }
     return $eId;
@@ -290,7 +402,7 @@ function retrieveContactChecksumFromUrl( $form )
 
     if ( !$results['valid'] ) {
       // Invalid checksum
-      throwAccessDeniedException( $form, 'Unauthorised. Invalid contact credentials.', [''] );
+      throwAccessDeniedException( $form, E::ts('Unauthorised. Invalid contact credentials.'), [''] );
       return false;
     }
 
@@ -298,7 +410,7 @@ function retrieveContactChecksumFromUrl( $form )
   }
 
   // Otherwise, something is missing
-  throwAccessDeniedException( $form, 'Unauthorised. Missing valid contact credentials.', [''] );
+  throwAccessDeniedException( $form, E::ts('Unauthorised. Missing valid contact credentials.'), [''] );
   return false;
 }
 
@@ -324,14 +436,14 @@ function isRequestUsingShortCode() {
  */
 function findElectionById($electionId, $throwErrorIfNotFound = TRUE) {
   if (!$electionId) {
-    throw new CRM_Extension_Exception('You are not authorised to access this page.');
+    throw new CRM_Extension_Exception(E::ts('You are not authorised to access this page.'));
   }
 
   $election = new CRM_Elections_BAO_Election();
   $election->id = $electionId;
 
   if (!$election->find(TRUE) && $throwErrorIfNotFound) {
-    throw new CRM_Extension_Exception('You are not authorised to access this page.');
+    throw new CRM_Extension_Exception(E::ts('You are not authorised to access this page.'));
   }
 
   $election->assignStatues();
@@ -355,7 +467,7 @@ function elections_civicrm_managed(&$entities) {
       'option_group_id' => 'activity_type',
       'label' => 'Nomination',
       'name' => 'Nomination',
-      'description' => 'Nominated a member',
+      'description' => 'Nominated a person',
       'is_reserved' => 1,
       'weight' => 1,
       'is_active' => 1,
@@ -380,46 +492,17 @@ function elections_civicrm_managed(&$entities) {
 }
 
 /**
- * Check if logged in member has current membership return if he/she is allowed to vote/nominate in election.
+ * Check if the logged in person is allowed to vote and nominate in the election.
  *
  * @return bool
  * @throws CRM_Core_Exception
  */
 function isLoggedInMemberAllowedToVote($electionId, $contactId = NULL) {
-  if ($contactId == NULL) {
-    $contactId = CRM_Core_Session::singleton()->getLoggedInContactID();
-  }
-  $election = findElectionById($electionId);
-  $groupIds = $election->allowed_groups;
-  if (!empty($groupIds)) {
-    $groupIds = explode(',', strval($groupIds));
-  } else {
-    return FALSE;
-  }
-
-  $groups = civicrm_api3('GroupContact', 'get', [
-    'sequential' => TRUE,
-    'contact_id' => $contactId,
-    'options' => ['limit' => 0],
-  ]);
-
-  $contactGroups = array_column($groups['values'], 'group_id');
-  $groupsCount = count(array_intersect($contactGroups, $groupIds));
-
-  // Check if contact belongs to any of the selected smart groups.
-  if ($groupsCount == 0) {
-    $smartGroups = CRM_Contact_BAO_GroupContactCache::contactGroup(CRM_Core_Session::singleton()->getLoggedInContactID());
-    if (isset($smartGroups['group'])) {
-      $smartGroups = array_column($smartGroups['group'], 'id');
-      $groupsCount = count(array_intersect($smartGroups, $groupIds));
-    }
-  }
-
-  return ($groupsCount > 0) ? TRUE : FALSE;
+  return CRM_Elections_Helper_Eligibility::canVote($electionId, $contactId);
 }
 
 /**
- * Check if members are allowed to re-vote.
+ * Check if people are allowed to re-vote.
  *
  * @param $electionId
  *
@@ -438,16 +521,7 @@ function isMemberAllowedToReVote($electionId) {
  * @throws CRM_Core_Exception
  */
 function hasLoggedInUserAlreadyVoted($electionId, $memberId = NULL) {
-  if (!$memberId) {
-    $memberId = CRM_Core_Session::singleton()->getLoggedInContactID();
-  }
-  $votesCount = civicrm_api3('ElectionVote', 'getcount', [
-    'sequential' => TRUE,
-    'member_id'  => $memberId,
-    'election_nomination_id.election_position_id.election_id.id' => $electionId,
-    'options' => ['limit' => 0],
-  ]);
-  return ($votesCount > 0);
+  return CRM_Elections_Helper_Eligibility::hasVoted($electionId, $memberId);
 }
 
 /**
@@ -458,15 +532,7 @@ function hasLoggedInUserAlreadyVoted($electionId, $memberId = NULL) {
  * @throws CRM_Core_Exception
  */
 function getLoggedInUserVoteDate($electionId) {
-  $voteDate = civicrm_api3('ElectionVote', 'get', [
-    'sequential' => TRUE,
-    'return'     => ['created_at'],
-    'options'    => ['limit' => 0],
-    'member_id'  => CRM_Core_Session::singleton()->getLoggedInContactID(),
-    'election_nomination_id.election_position_id.election_id.id' => $electionId,
-  ]);
-  $voteDate = $voteDate['values'][0]['created_at'];
-  return $voteDate;
+  return CRM_Elections_Helper_Eligibility::getVoteDate($electionId);
 }
 
 /**
@@ -512,38 +578,39 @@ function elections_shuffle_assoc($list) {
  * Implements hook_civicrm_alterAPIPermissions().
  */
 function elections_civicrm_alterAPIPermissions($entity, $action, &$params, &$permissions) {
+  // Logged in users need 'view Elections'. People using a personal checksum link are granted
+  // it for the nominee search only, see elections_civicrm_permission_check().
   $permissions['election_nominee']['getlist'] = ['view Elections'];
+}
 
-  if ( $entity !== 'election_nominee' && $action !== 'getlist' ) {
+/**
+ * Implements hook_civicrm_permission_check().
+ *
+ * Someone using a personal link (checksum) is not logged in, so the nominee search on the
+ * nomination form would be refused. The search page carries the link's `cid` and `cs` in its
+ * address, repeated in the Referer of the search request. With a valid checksum the person is
+ * granted just the permissions that one search needs, for that request only, rather than
+ * granting them to everybody who is not logged in.
+ */
+function elections_civicrm_permission_check($permission, &$granted, $contactId) {
+  static $checking = FALSE;
+  if ($granted || $checking || !in_array($permission, ['access AJAX API', 'view Elections'], TRUE)) {
     return;
   }
-
-  // Default to logged in permissions
-  if ( !empty( CRM_Core_Session::getLoggedInContactID() ) ) {
+  if (!empty(CRM_Core_Session::getLoggedInContactID())) {
     return;
   }
-
-  // Get cs and cid parameters via referer in AJAX calls
-  $referer = CRM_Utils_System::getRequestHeaders()['Referer'] ?? NULL;
-  if ( !filter_var( $referer, FILTER_VALIDATE_URL) ) {
-    // Do nothing if not a URL
+  if (strtolower($_REQUEST['entity'] ?? '') !== 'electionnominee' || strtolower($_REQUEST['action'] ?? '') !== 'getlist') {
     return;
   }
-  $referer_parsed = parse_url($referer);
-  parse_str($referer_parsed['query'], $query_params);
-
-  // Bypass 'view Elections' permissions if we have a validated checksum.
-  // Defer to AJAX API permissions.
-  if ( $query_params['cid'] && $query_params['cs'] ) {
-    $results = \Civi\Api4\Contact::validateChecksum(FALSE)
-                                  ->setContactId($query_params['cid'])
-                                  ->setChecksum($query_params['cs'])
-                                  ->execute()
-                                  ->first();
-
-    if ( $results['valid'] ) {
-      $permissions['election_nominee']['getlist'] = ['access AJAX API'];
+  $checking = TRUE;
+  try {
+    if (CRM_Elections_Helper_Eligibility::getActingContactId(TRUE)) {
+      $granted = TRUE;
     }
+  }
+  finally {
+    $checking = FALSE;
   }
 }
 

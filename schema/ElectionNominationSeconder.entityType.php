@@ -12,6 +12,14 @@ return [
     'log' => TRUE,
     'add' => '5.3',
   ],
+  'getIndices' => fn() => [
+    // A person can nominate someone for a position once: a second row would count as a second nominator.
+    'UI_election_nomination_seconder_nominator_nomination' => [
+      'fields' => ['member_nominator' => TRUE, 'election_nomination_id' => TRUE],
+      'unique' => TRUE,
+      'add' => '2.0',
+    ],
+  ],
   'getFields' => fn() => [
     'id' => [
       'title' => E::ts('ID'),

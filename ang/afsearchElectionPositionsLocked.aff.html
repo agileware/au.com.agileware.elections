@@ -1,0 +1,7 @@
+<div af-fieldset="">
+  <p>
+    <a class="af-button btn btn-default" crm-icon="fa-arrow-left" ng-href="{{ crmUrl('civicrm/elections/manage') }}">{{:: ts('Back to Manage Elections') }}</a>
+  </p>
+  <p class="election-locked-note" role="status">{{:: ts('The positions of this election are listed below. They cannot be changed while the election is active.') }}</p>
+  <crm-search-display-table search-name="ElectionPositions" display-name="ElectionPositions_Locked" filters="{election_id: routeParams.eid}"></crm-search-display-table>
+</div>

@@ -4,18 +4,22 @@ This page documents the initial steps that need to be performed to configure you
 
 ## Scheduled Jobs
 
-CiviElections creates a new CiviCRM Scheduled Job, **Elections Results Job** on installation.
-This Scheduled Job calculates the [election results](user_view_results.md) which are then displayed on the election results page.
-This Scheduled Job is configured to execute **Always** and is **Enabled** by default.
+The extension creates three CiviCRM Scheduled Jobs on installation, all **Enabled** by default:
 
-If this Scheduled Job is not enabled or executed, then no election results will be calculated.  
+- **Elections Results Job** (Always): calculates the [election results](user_view_results.md) shown on the results page. If it is not enabled or executed, no election results will be calculated.
+- **Elections Write-in Reminders** (Hourly): reminds people written in who have not answered, in the last day before voting closes.
+- **Elections Write-in Closed Notices** (Always): tells people written in who never answered that voting has closed and the opportunity to accept has passed.
+
+CiviCRM's cron must be running for them to execute. See [Emails and scheduled jobs](reference_emails_and_jobs.md).
 
 ## CiviCRM Permissions
 
 This extension adds two CiviCRM permissions:
 
-- **administer Elections**: Required by staff to create, edit, delete and activate elections and positions from the CiviCRM 'Elections' administration screens. Staff also need the core **administer CiviCRM** permission to see the 'Elections' and 'Elections Settings' items in the CiviCRM menu.
+- **administer Elections**: Required by staff to create, edit, delete and activate elections and positions from the CiviCRM 'Elections' administration screens. Together with the core **access CiviCRM** permission it shows the 'Elections' item in the CiviCRM menu. The 'Elections Settings' item needs the core **administer CiviCRM** permission.
 - **view Elections**: Required by end users to participate in elections, for example to view, nominate, accept nominations or vote. See below for the additional permissions required on WordPress/CiviCRM sites.
+
+Staff who run elections also need the core permissions **access AJAX API** and **view all contacts** (or an ACL) so that the group and people lists on the election forms are filled. See [Roles and permissions](roles_and_permissions.md) for every role, what it needs and how to set it up.
 
 ## Participating without logging in
 
@@ -26,6 +30,15 @@ A personalised link can be generated for a contact using CiviCRM's standard chec
 This extension also provides `election_name`, `election_position`, `nominator_name` and `nominee_name` tokens for the **Nomination** activity, and an `election_name` token for the **Vote** activity, for use when emailing people about their nominations or votes.
 
 ## For WordPress/CiviCRM Sites
+
+### Before you start: permalinks and the CiviCRM base page (required)
+
+Election pages only display correctly on WordPress when both of these are in place:
+
+1. **Pretty permalinks.** In WordPress go to _Settings > Permalinks_ and choose anything other than _Plain_ (for example _Post name_). Without them CiviCRM pages are reached with the `/?page=CiviCRM&q=civicrm/elections/view` form of address, which WordPress shows inside your blog or home page template (with a "Blog" heading, or an author and comment area) instead of as a normal page.
+2. **The CiviCRM base page.** CiviCRM creates a page (usually called _CiviCRM_, slug `civicrm`) and uses it to show all CiviCRM screens at addresses such as `https://example.org/civicrm/elections/view/?eid=1`. Check that it exists and is published, and that CiviCRM's _WordPress Base Page_ setting (`wpBasePage`) names it. The links the extension builds, including the personal links for people who do not log in, rely on it.
+
+With both in place the election screens use your theme's normal page layout and button styles; no theme customisation is needed (tested with Twenty Twenty-Five).
 
 ### Create Pages for the Election Listing and Individual Election
 1. Create a Page to display the election information. This page can be called anything, but typically _Election_.
@@ -53,9 +66,13 @@ Other default permissions which should already be enabled for the **User Role** 
 
 Screenshot below is an example permissions matrix.
   
-![Screenshot of example permissions matrix](images/setup/example-permissions.png)  
+![Screenshot of example permissions matrix](images/setup/example-permissions.png)
 
+## For Drupal Sites
 
+Election screens are available at `/civicrm/elections/view?eid=1` and the other `civicrm/elections/...` paths. In _People > Permissions_ give the roles that take part in elections the CiviCRM permissions **view Elections** and **access AJAX API** (plus the profile and uploaded files permissions listed above). The pages use the active theme (tested with Olivero) and need no extra setup.
 
+## For Joomla Sites
 
+Election screens are available at `/index.php?option=com_civicrm&task=civicrm/elections/view&eid=1` and the other `civicrm/elections/...` tasks; create a menu item of type _CiviCRM_ if you want them in a menu. In _Users > Access Levels / Permissions_ give the groups that take part in elections the CiviCRM permissions **view Elections** and **access AJAX API**. The pages use the active template (tested with Cassiopeia) and need no extra setup.
 

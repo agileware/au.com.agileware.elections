@@ -26,6 +26,7 @@ class api_v3_ElectionVoteTest extends api_v3_ElectionBaseTestCase {
     $nominationParams = $this->createNomination();
     $memberId = $this->individualCreate();
     $nomination = $nominationParams['nomination'];
+    $this->makeCandidate($nomination['id']);
 
     $params['rank'] = 1;
     $this->callAPIFailure('ElectionVote', 'create', $params);
@@ -45,6 +46,7 @@ class api_v3_ElectionVoteTest extends api_v3_ElectionBaseTestCase {
     $nominationParams = $this->createNomination();
     $memberId = $this->individualCreate();
     $nomination = $nominationParams['nomination'];
+    $this->makeCandidate($nomination['id']);
     $election = $nominationParams['election'];
     $this->addMembersInElectionGroup($memberId, $election);
 
@@ -69,6 +71,7 @@ class api_v3_ElectionVoteTest extends api_v3_ElectionBaseTestCase {
     $nominationParams = $this->createNomination();
     $memberId = $this->individualCreate();
     $nomination = $nominationParams['nomination'];
+    $this->makeCandidate($nomination['id']);
     $election = $nominationParams['election'];
     $this->addMembersInElectionGroup($memberId, $election);
 
@@ -101,6 +104,7 @@ class api_v3_ElectionVoteTest extends api_v3_ElectionBaseTestCase {
     $nominationParams = $this->createNomination();
     $memberId = $this->individualCreate();
     $nomination = $nominationParams['nomination'];
+    $this->makeCandidate($nomination['id']);
     $election = $nominationParams['election'];
     $this->addMembersInElectionGroup($memberId, $election);
 
@@ -140,6 +144,7 @@ class api_v3_ElectionVoteTest extends api_v3_ElectionBaseTestCase {
     $nominationParams = $this->createNomination();
     $memberId = $this->individualCreate();
     $nomination = $nominationParams['nomination'];
+    $this->makeCandidate($nomination['id']);
     $election = $nominationParams['election'];
     $this->addMembersInElectionGroup($memberId, $election);
 
@@ -168,6 +173,7 @@ class api_v3_ElectionVoteTest extends api_v3_ElectionBaseTestCase {
     $nominationParams = $this->createNomination();
     $memberId = $this->individualCreate();
     $nomination = $nominationParams['nomination'];
+    $this->makeCandidate($nomination['id']);
     $election = $nominationParams['election'];
     $this->addMembersInElectionGroup($memberId, $election);
 
@@ -206,6 +212,7 @@ class api_v3_ElectionVoteTest extends api_v3_ElectionBaseTestCase {
 
     $memberId = $this->individualCreate();
     $nomination = $nominationParams['nomination'];
+    $this->makeCandidate($nomination['id']);
     $election = $nominationParams['election'];
     $this->addMembersInElectionGroup($memberId, $election);
 
@@ -243,6 +250,7 @@ class api_v3_ElectionVoteTest extends api_v3_ElectionBaseTestCase {
 
     $memberId = $this->individualCreate();
     $nomination = $nominationParams['nomination'];
+    $this->makeCandidate($nomination['id']);
     $election = $nominationParams['election'];
     $this->addMembersInElectionGroup($memberId, $election);
 
@@ -280,6 +288,7 @@ class api_v3_ElectionVoteTest extends api_v3_ElectionBaseTestCase {
 
     $memberId = $this->individualCreate();
     $nomination = $nominationParams['nomination'];
+    $this->makeCandidate($nomination['id']);
     $election = $nominationParams['election'];
 
     $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_VOTING_IN_PROGRESS, $election);

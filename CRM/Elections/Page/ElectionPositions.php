@@ -15,53 +15,16 @@ class CRM_Elections_Page_ElectionPositions extends CRM_Elections_Page_Base {
       parent::run();
       return;
     }
-    $this->election = findElectionById($this->eId);
-
-    $this->isElectionAdmin = isElectionAdmin();
-    $canEdit = $this->election->canEdit();
-    $this->isElectionRunning = ($canEdit !== TRUE) ? TRUE : FALSE;
-
-    if (!$this->isElectionAdmin && !$this->election->isVisible) {
+    if (!isElectionAdmin()) {
       throwAccessDeniedPage($this);
       parent::run();
       return;
     }
-
-    $this->assign('isElectionAdmin', $this->isElectionAdmin);
-    $this->assign('isElectionRunning', $this->isElectionRunning);
-    $this->assign('election', $this->election);
-
-    CRM_Utils_System::setTitle('Election Positions for ' . $this->election->name);
-
-    $electionPositions = civicrm_api3('ElectionPosition', 'get', [
-      'election_id' => $this->eId,
-      'options'     => ['limit' => 0, 'sort' => 'sortorder ASC'],
-      'sequential'  => TRUE,
-    ]);
-
-    $this->assign('positions', $electionPositions['values']);
-
-    parent::run();
-  }
-
-  public static function reOrder() {
-    $positionsString = CRM_Utils_Request::retrieve('neworder', 'String');
-    if ($positionsString) {
-      $positionsWithOrder = json_decode($positionsString, TRUE);
-      foreach ($positionsWithOrder as $positionWithOrder) {
-        $electionPostion = new CRM_Elections_BAO_ElectionPosition();
-        $electionPostion->id = $positionWithOrder['id'];
-
-        if ($electionPostion->find(TRUE)) {
-          $electionPostion->sortorder = $positionWithOrder['order'];
-          $electionPostion->save();
-        }
-      }
-    }
-
-    CRM_Utils_JSON::output([
-      'status' => 1,
-    ]);
+    // The positions list is a SearchKit page. While the election is active (switched on, nominations
+    // started) the positions cannot change, so the read-only page is opened instead of the one with drag
+    // and drop and editing in place. This route is also kept so existing links keep working.
+    $locked = findElectionById($this->eId)->canEdit() !== TRUE;
+    CRM_Utils_System::redirect(CRM_Utils_System::url($locked ? 'civicrm/elections/position-list-active' : 'civicrm/elections/position-list', 'reset=1', FALSE, '/?eid=' . (int) $this->eId));
   }
 
 }

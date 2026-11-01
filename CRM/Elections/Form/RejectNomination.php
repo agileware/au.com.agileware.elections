@@ -23,15 +23,22 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
       return;
     }
 
+    // The nominee is the logged in contact, or the contact identified by a valid checksum link.
+    $nomineeId = CRM_Elections_Helper_Eligibility::getActingContactId();
+    if (empty($nomineeId)) {
+      throwAccessDeniedPage($this);
+      return;
+    }
+
     try {
       $this->electionNomination = civicrm_api3('ElectionNomination', 'getsingle', [
         'id' => $this->enId,
-        'member_nominee' => CRM_Core_Session::singleton()->getLoggedInContactID(),
-        'return' => ['has_accepted_nomination', 'is_eligible_candidate', 'election_position_id.name', 'election_position_id.election_id.name', 'has_rejected_nomination', 'election_position_id.election_id'],
+        'member_nominee' => $nomineeId,
+        'return' => ['has_accepted_nomination', 'is_write_in', 'is_eligible_candidate', 'election_position_id.name', 'election_position_id.election_id.name', 'has_rejected_nomination', 'election_position_id.election_id'],
       ]);
     }
     catch (CRM_Core_Exception $e) {
-      throwAccessDeniedException($this, $e->getMessage());
+      throwAccessDeniedException($this, E::ts('You are not authorized to access this page.'));
       return;
     }
 
@@ -48,18 +55,28 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
     }
 
     if ($this->electionNomination['has_rejected_nomination'] == 1) {
-      throwAccessDeniedException($this, 'You have withdrawn this nomination.');
+      throwAccessDeniedException($this, E::ts('You have withdrawn this nomination.'));
       return;
     }
 
-    if ($election->isVotingStarted) {
-      throwAccessDeniedException($this, 'You cannot withdraw the nomination once voting is started.');
+    if (!empty($this->electionNomination['is_write_in']) && !$this->electionNomination['has_accepted_nomination']) {
+      // Written in by a voter and not yet answered: can decline until voting closes.
+      if ($election->isVotingEnded) {
+        throwAccessDeniedException($this, CRM_Elections_Helper_WriteIn::closedMessage($election, $this->electionNomination['election_position_id.name']), [
+          'return_button_text' => E::ts('View the election'),
+          'return_button_action' => CRM_Elections_Helper_Mailer::link($election, $nomineeId, 'civicrm/elections/view'),
+        ]);
+        return;
+      }
+    }
+    elseif ($election->isVotingStarted) {
+      throwAccessDeniedException($this, E::ts('You cannot withdraw the nomination once voting is started.'));
       return;
     }
 
     $this->assign('electionNomination', $this->electionNomination);
 
-    $this->add('textarea', 'nominationcomments', 'Comments', ['cols' => 55, 'rows' => 6], FALSE);
+    $this->add('textarea', 'nominationcomments', E::ts('Comments'), ['cols' => 55, 'rows' => 6], FALSE);
     $this->addElement('hidden', 'enid', $this->enId);
 
     if ( $this->cid && $this->cs ) {
@@ -106,14 +123,13 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
   public function postProcess() {
     $values = $this->exportValues();
 
-    civicrm_api3('ElectionNomination', 'create', [
-      'id' => $this->enId,
-      'rejection_comments' => $values['nominationcomments'],
-      'has_rejected_nomination' => 1,
-      'has_accepted_nomination' => 0,
-    ]);
-
-    CRM_Core_Session::setStatus('You have withdrawn the nomination.', '', 'success');
+    try {
+      CRM_Elections_Helper_Process::withdraw($this->enId, CRM_Elections_Helper_Eligibility::getActingContactId(), $values['nominationcomments']);
+      CRM_Core_Session::setStatus(E::ts('You have withdrawn the nomination.'), '', 'success');
+    }
+    catch (CRM_Core_Exception $e) {
+      CRM_Core_Session::setStatus($e->getMessage(), '', 'error');
+    }
 
     // Redirect back to the main election info view
     $redirectUrl = Civi::url('current://civicrm/elections/view');

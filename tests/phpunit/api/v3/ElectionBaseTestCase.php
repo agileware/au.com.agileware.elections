@@ -1,11 +1,15 @@
 <?php
 
+use Civi\Test\Api3TestTrait;
 use Civi\Test\HeadlessInterface;
+use Civi\Test\TransactionalInterface;
 
 /**
  * @group headless
  */
-class api_v3_ElectionBaseTestCase extends CiviCaseTestCase implements HeadlessInterface {
+class api_v3_ElectionBaseTestCase extends \PHPUnit\Framework\TestCase implements HeadlessInterface, TransactionalInterface {
+
+  use Api3TestTrait;
 
   public static $ELECTION_NOT_STARTED = 'not-started';
   public static $ELECTION_NOMINATION_IN_PROGRESS = 'nomination-in-progress';
@@ -13,15 +17,59 @@ class api_v3_ElectionBaseTestCase extends CiviCaseTestCase implements HeadlessIn
   public static $ELECTION_VOTING_IN_PROGRESS = 'voting-in-progress';
   public static $ELECTION_RESULTS_STARTED = 'results-started';
 
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
   }
-  public function tearDown() {
+
+  public function tearDown(): void {
     parent::tearDown();
   }
 
   public function setUpHeadless() {
+    $env = \Civi\Test::headless()->installMe(__DIR__)->apply();
+    // The shared test database may have been copied from an older site: make sure it has every 2.0 change.
+    $upgrader = new CRM_Elections_Upgrader();
+    $upgrader->init(['key' => 'au.com.agileware.elections']);
+    $upgrader->upgrade_20000();
+    $upgrader->upgrade_20010();
+    $upgrader->upgrade_20020();
+    $upgrader->upgrade_20030();
+    $upgrader->upgrade_20040();
+    $upgrader->upgrade_20050();
+    $upgrader->upgrade_20060();
+    $upgrader->upgrade_20070();
+    $upgrader->upgrade_20080();
+    $upgrader->upgrade_20090();
+    return $env;
+  }
 
+  /**
+   * Create an Individual contact and return its id.
+   *
+   * @param array $params
+   * @return int
+   */
+  public function individualCreate($params = []) {
+    $params += [
+      'contact_type' => 'Individual',
+      'first_name' => 'Test' . rand(0, 999999),
+      'last_name' => 'Voter' . rand(0, 999999),
+    ];
+    return (int) $this->callAPISuccess('Contact', 'create', $params)['id'];
+  }
+
+  /**
+   * Create a Group and return its id.
+   *
+   * @param array $params
+   * @return int
+   */
+  public function groupCreate($params = []) {
+    $params += [
+      'name' => 'Test Group ' . rand(0, 999999),
+      'title' => 'Test Group ' . rand(0, 999999),
+    ];
+    return (int) $this->callAPISuccess('Group', 'create', $params)['id'];
   }
 
   public function getElectionById($electionId) {
@@ -221,6 +269,19 @@ class api_v3_ElectionBaseTestCase extends CiviCaseTestCase implements HeadlessIn
     $params = array_merge($params, $defaultParams);
     $electionPosition = $this->callAPISuccess('ElectionPosition', 'create', $params);
     return $electionPosition['values'][$electionPosition['id']];
+  }
+
+  /**
+   * Make a nomination an eligible candidate who has accepted, so it can be voted for.
+   *
+   * @param int $nominationId
+   */
+  public function makeCandidate($nominationId) {
+    $this->callAPISuccess('ElectionNomination', 'create', [
+      'id' => $nominationId,
+      'is_eligible_candidate' => 1,
+      'has_accepted_nomination' => 1,
+    ]);
   }
 
   /**

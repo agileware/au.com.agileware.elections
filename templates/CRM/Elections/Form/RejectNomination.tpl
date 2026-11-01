@@ -7,25 +7,25 @@
   {assign var='spKey' value='election_position_id.name'}
 
   {if $electionNomination.is_eligible_candidate}
-    <p>You're eligible as a candidate for {$electionNomination.$spKey}</p>
+    <p>{ts 1=$electionNomination.$spKey}You're eligible as a candidate for %1{/ts}</p>
   {/if}
 
   <div class="crm-election-form-row">
     <div class="crm-election-form-col-left">
-      <label>Election</label>
+      <label>{ts}Election{/ts}</label>
     </div>
     <div class="crm-election-form-col-right">
       {assign var='sKey' value='election_position_id.election_id.name'}
-      {$electionNomination.$sKey}
+      {$electionNomination.$sKey|escape}
     </div>
   </div><!-- ending of crm-election-form-row -->
 
   <div class="crm-election-form-row">
     <div class="crm-election-form-col-left">
-      <label>Position</label>
+      <label>{ts}Position{/ts}</label>
     </div>
     <div class="crm-election-form-col-right">
-      {$electionNomination.$spKey}
+      {$electionNomination.$spKey|escape}
     </div>
   </div><!-- ending of crm-election-form-row -->
 

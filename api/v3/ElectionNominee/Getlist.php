@@ -21,6 +21,10 @@ function _civicrm_api3_election_nominee_Getlist_spec(&$spec) {
     'title' => 'Search Term',
     'api.required' => 1,
   ];
+  $spec['write_in'] = [
+    'title' => 'Search for a person to write in (a voter, during voting)',
+    'api.required' => 0,
+  ];
   $spec['page_num'] = [
     'title' => 'Page Number',
     'api.required' => 1,
@@ -39,7 +43,35 @@ function _civicrm_api3_election_nominee_Getlist_spec(&$spec) {
 function civicrm_api3_election_nominee_Getlist($params) {
   $electionId = $params['election_id'];
   $election = findElectionById($electionId);
-  $allowedGroupIds = $election->allowed_groups;
+
+  $actingContactId = CRM_Elections_Helper_Eligibility::getActingContactId(TRUE);
+  if (!empty($params['write_in'])) {
+    // A voter looking for someone to write in: only while voting is open, only for people in this election's
+    // candidate groups, names only, a few letters first and a limited number of searches, so the list of
+    // members cannot be browsed.
+    $positionsWithWriteIns = (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_position WHERE election_id = %1 AND write_ins_per_seat > 0', [1 => [(int) $electionId, 'Integer']]);
+    if (!$actingContactId || !$positionsWithWriteIns || !$election->isVotingStarted || $election->isVotingEnded || !CRM_Elections_Helper_Eligibility::canVote($electionId, $actingContactId)) {
+      return civicrm_api3_create_success([], $params, 'ElectionNominee', 'getlist');
+    }
+    if (!isset($params['id'])) {
+      if (mb_strlen(trim((string) ($params['input'] ?? ''))) < 3) {
+        return civicrm_api3_create_success([], $params, 'ElectionNominee', 'getlist');
+      }
+      $cache = Civi::cache('short');
+      $key = 'elections_writein_search_' . (int) $actingContactId . '_' . floor(time() / 60);
+      $searches = (int) $cache->get($key, 0);
+      if ($searches >= 30) {
+        return civicrm_api3_create_success([], $params, 'ElectionNominee', 'getlist');
+      }
+      $cache->set($key, $searches + 1, 120);
+    }
+  }
+  // Only people who can nominate in the election may search for nominees.
+  elseif (!$actingContactId || !CRM_Elections_Helper_Eligibility::canNominate($electionId, $actingContactId)) {
+    return civicrm_api3_create_success([], $params, 'ElectionNominee', 'getlist');
+  }
+
+  $allowedGroupIds = CRM_Elections_Helper_Eligibility::groupsFor($election, 'candidate');
   if (!empty($allowedGroupIds)) {
     $allowedGroupIds = explode(',', $allowedGroupIds);
   }

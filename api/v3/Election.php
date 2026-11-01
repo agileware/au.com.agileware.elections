@@ -75,6 +75,34 @@ function civicrm_api3_election_get($params) {
 }
 
 /**
+ * Election.sendwriteinreminders API
+ *
+ * Reminds people written in who have not answered, in the day before voting closes.
+ *
+ * @param array $params
+ * @return array API result descriptor
+ */
+function civicrm_api3_election_sendwriteinreminders($params) {
+  $sent = CRM_Elections_Helper_Mailer::sendWriteInReminders();
+  $dao = NULL;
+  return civicrm_api3_create_success([], $params, 'Election', 'sendwriteinreminders', $dao, ['message' => E::ts('%1 write-in reminders sent.', [1 => $sent])]);
+}
+
+/**
+ * Election.sendwriteinclosednotices API
+ *
+ * Tells people written in who never answered that voting has closed and they can no longer accept.
+ *
+ * @param array $params
+ * @return array API result descriptor
+ */
+function civicrm_api3_election_sendwriteinclosednotices($params) {
+  $sent = CRM_Elections_Helper_Mailer::sendWriteInClosedNotices();
+  $dao = NULL;
+  return civicrm_api3_create_success([], $params, 'Election', 'sendwriteinclosednotices', $dao, ['message' => E::ts('%1 write-in closed notices sent.', [1 => $sent])]);
+}
+
+/**
  * Election.generateresults API
  *
  * @param array $params
@@ -93,18 +121,26 @@ function civicrm_api3_election_generateresults($params) {
   $dao = NULL;
   if (!$elections['count']) {
     return civicrm_api3_create_success(1, [], NULL, NULL, $dao, [
-      'message' => 'No election results are scheduled today.',
+      'message' => E::ts('No election results are scheduled today.'),
     ]);
   }
 
   $elections = $elections['values'];
   $electionResults = new CRM_Elections_Helper_Results();
+  $generated = 0;
   foreach ($elections as $election) {
-    $electionResults->generateResult($election['id'], $election['anonymize_votes']);
+    try {
+      $electionResults->generateResult($election['id'], $election['anonymize_votes']);
+      $generated++;
+    }
+    catch (CRM_Core_Exception $e) {
+      // One election that is not ready (or has a problem) must not stop the others.
+      CRM_Core_Error::debug_log_message('Elections: results for election ' . $election['id'] . ' not generated: ' . $e->getMessage());
+    }
   }
 
   return civicrm_api3_create_success(1, [], NULL, NULL, $dao, [
-     'message' => 'Successfully generated results for ' . count($elections) . ' elections.',
+     'message' => E::ts('Successfully generated results for %1 elections.', [1 => $generated]),
   ]);
 
 }

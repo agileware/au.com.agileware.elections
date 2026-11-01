@@ -15,6 +15,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
   private $election = NULL;
   private $electionPositions = [];
   private $electionCandidates = [];
+  private $method = CRM_Elections_VotingMethod::IRV;
 
   public function buildQuickForm() {
     hideNonRequiredItemsOnPage($this);
@@ -23,6 +24,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       return;
     }
     $this->election = findElectionById($this->eId);
+    $this->method = CRM_Elections_VotingMethod::normalise($this->election->voting_method);
 
     // Election is not visible
     if ( !$this->election->isVisible ) {
@@ -36,15 +38,15 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       return;
     }
 
-    // Logged in but not allowed to vote
-    if ( !empty( \CRM_Core_Session::getLoggedInContactID() ) && !isLoggedInMemberAllowedToVote( $this->eId ) ) {
+    // Not allowed to take part (logged in, or using a personal link)
+    if ( !isLoggedInMemberAllowedToVote( $this->eId ) ) {
       throwNonMemberAccessDenied($this);
       return;
     }
 
     // Already voted
     if ( !isMemberAllowedToReVote( $this->eId ) && hasLoggedInUserAlreadyVoted( $this->eId ) ) {
-      throwAccessDeniedException( $this, 'You have already voted in this election.' );
+      throwAccessDeniedException( $this, E::ts('You have already voted in this election.') );
     }
 
     // Check if there are positions or candidates
@@ -54,7 +56,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     }
 
     if ( $this->election->isVotingEnded ) {
-      throwAccessDeniedException($this, 'Voting is closed on ' . CRM_Utils_Date::customFormat($this->election->voting_end_date));
+      throwAccessDeniedException($this, E::ts('Voting is closed on %1', [1 => CRM_Utils_Date::customFormat($this->election->voting_end_date)]));
       return;
     }
 
@@ -82,7 +84,28 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       ],
     ]);
 
-    CRM_Utils_System::setTitle('You are Voting for ' . $this->election->name);
+    CRM_Utils_System::setTitle(E::ts('You are Voting for %1', [1 => $this->election->name]));
+
+    Civi::resources()
+      ->addVars('electionsBallot', [
+        'method' => $this->method,
+        'writeInRank' => E::ts('Give the person you wrote in a rank, or clear the name.'),
+        'writtenIn' => E::ts('%1 (written in)'),
+        'tooMany' => E::ts('You can choose no more than %1.'),
+        'chosen' => E::ts('%1 of %2 chosen.'),
+        'chosenOne' => E::ts('Chosen: %1.'),
+        'duplicate' => E::ts('Rank %1 is given to more than one candidate.'),
+        'needFirst' => E::ts('Give your first choice the rank 1.'),
+        'counted' => E::ts('%1 of %2 candidates ranked.'),
+        'reviewTitle' => E::ts('Check your vote'),
+        'reviewIntro' => E::ts('This is how your vote will be recorded. Nothing is saved until you confirm.'),
+        'positionTitle' => E::ts('Vote for %1'),
+        'noPreference' => E::ts('No preference given for: %1.'),
+        'rank' => E::ts('rank %1'),
+        'back' => E::ts('Go back and change'),
+        'confirm' => E::ts('Confirm my vote'),
+      ])
+      ->addScriptFile(E::LONG_NAME, 'js/election-ballot.js', 100, 'page-footer');
 
     parent::buildQuickForm();
   }
@@ -90,17 +113,57 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
   private function throwExceptionIfNoCandidates() {
     $hasCandidatesInOnePosition = FALSE;
     foreach ($this->electionPositions as $electionPosition) {
-      if (!empty($electionPosition['candidates'])) {
+      if (!empty($electionPosition['candidates']) || $this->isQuestion($electionPosition)) {
+        // A question can be voted on without any candidates in the election.
         $hasCandidatesInOnePosition = TRUE;
         break;
       }
     }
 
     if (!$hasCandidatesInOnePosition) {
-      throwAccessDeniedException($this, 'Candidates are not available in election for voting.');
+      throwAccessDeniedException($this, E::ts('Candidates are not available in election for voting.'));
       return TRUE;
     }
     return FALSE;
+  }
+
+  private function isQuestion(array $position) {
+    return ($position['position_type'] ?? '') === CRM_Elections_BAO_ElectionPosition::TYPE_REFERENDUM;
+  }
+
+  /**
+   * The choice on each referendum question: a set of radio buttons, which can be cleared to leave a question unanswered.
+   */
+  private function addQuestionElements() {
+    foreach ($this->electionPositions as $positionId => $position) {
+      if (!$this->isQuestion($position)) {
+        continue;
+      }
+      $options = [];
+      foreach (CRM_Elections_BAO_ElectionPosition::getOptions($positionId) as $option) {
+        $options[$option['id']] = htmlspecialchars((string) $option['label'], ENT_QUOTES, 'UTF-8');
+      }
+      $this->addRadio("option_{$positionId}", htmlspecialchars((string) $position['name'], ENT_QUOTES, 'UTF-8'), $options, ['allowClear' => TRUE], '', FALSE);
+      $this->electionPositions[$positionId]['isQuestion'] = TRUE;
+      $this->electionPositions[$positionId]['questionKey'] = "option_{$positionId}";
+    }
+  }
+
+  /**
+   * The choices the voter made on referendum questions.
+   *
+   * @param array $values
+   *
+   * @return array[]
+   */
+  private function getOptionVotes(array $values) {
+    $choices = [];
+    foreach ($this->electionPositions as $positionId => $position) {
+      if ($this->isQuestion($position) && !empty($values["option_{$positionId}"])) {
+        $choices[] = ['position_id' => (int) $positionId, 'option_id' => (int) $values["option_{$positionId}"]];
+      }
+    }
+    return $choices;
   }
 
   private function getFormElementsByCandidates() {
@@ -135,7 +198,28 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
 
   private function assignFormElements() {
     CRM_Elections_BAO_ElectionResult::updateCandidateProfilePictures($this->electionPositions);
+    foreach ($this->electionPositions as $positionId => $position) {
+      $this->electionPositions[$positionId]['candidates'] = $position['candidates'] ?? [];
+      $position = $this->electionPositions[$positionId];
+      $this->electionPositions[$positionId]['writeInPlaces'] = $this->isQuestion($position) ? 0 : CRM_Elections_Helper_WriteIn::places($position);
+      $this->electionPositions[$positionId]['prompt'] = $this->isQuestion($position) ? $position['name'] : CRM_Elections_VotingMethod::positionPrompt($this->method, $position['name'], count($position['candidates'] ?? []), $position['quantity'] ?? 1);
+      $this->electionPositions[$positionId]['seats'] = max(1, (int) ($position['quantity'] ?? 1));
+    }
+    $this->addWriteInElements();
+    $this->addQuestionElements();
     $this->assign('positions', $this->electionPositions);
+    $this->assign('votingMethod', $this->method);
+    $hasQuestions = FALSE;
+    $hasPositions = FALSE;
+    foreach ($this->electionPositions as $position) {
+      if ($this->isQuestion($position)) {
+        $hasQuestions = TRUE;
+      }
+      else {
+        $hasPositions = TRUE;
+      }
+    }
+    $this->assign('instructions', CRM_Elections_VotingMethod::ballotInstructions($this->method, $hasPositions, $hasQuestions));
     $this->addElement('hidden', 'eid', $this->eId);
     if ( $this->cid && $this->cs ) {
       $this->addElement('hidden', 'cid', $this->cid);
@@ -143,8 +227,62 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     }
     $elements = $this->getFormElementsByCandidates();
     foreach ($elements as $element) {
-      $this->add('select2', $element['key'], $element['name'], $this->getVoteSelectionByPosition($element['position_id']), FALSE);
+      if ($this->method === CRM_Elections_VotingMethod::PLURALITY) {
+        $this->addElement('checkbox', $element['key'], htmlspecialchars((string) $element['name'], ENT_QUOTES, 'UTF-8'));
+        continue;
+      }
+      $this->add('select2', $element['key'], htmlspecialchars((string) $element['name'], ENT_QUOTES, 'UTF-8'), $this->getVoteSelectionByPosition($element['position_id']), FALSE, ['placeholder' => E::ts('- Rank -')]);
     }
+  }
+
+  /**
+   * The places on the ballot where a voter can write a person in, for each position that allows it: a person
+   * picker, and a rank when the election is counted by ranked choice.
+   */
+  private function addWriteInElements() {
+    foreach ($this->electionPositions as $positionId => $position) {
+      $places = (int) $position['writeInPlaces'];
+      $rows = [];
+      for ($n = 1; $n <= $places; $n++) {
+        $row = ['person' => "writein_{$positionId}_{$n}", 'rank' => "writeinrank_{$positionId}_{$n}", 'number' => $n];
+        $this->addEntityRef($row['person'], E::ts('Write-in %1', [1 => $n]), [
+          'entity' => 'ElectionNominee',
+          'placeholder' => E::ts('- Type at least 3 letters of a name -'),
+          'api' => ['election_id' => $this->election->id, 'write_in' => 1],
+        ], FALSE);
+        if ($this->method !== CRM_Elections_VotingMethod::PLURALITY) {
+          $options = [];
+          for ($i = 1; $i <= count($position['candidates']) + $places; $i++) {
+            $options[] = ['text' => $i, 'id' => $i];
+          }
+          $this->add('select2', $row['rank'], E::ts('Rank of write-in %1', [1 => $n]), $options, FALSE, ['placeholder' => E::ts('- Rank -')]);
+        }
+        $rows[] = $row;
+      }
+      $this->electionPositions[$positionId]['writeInRows'] = $rows;
+    }
+  }
+
+  /**
+   * The people the voter wrote in: position, person and rank (ticks have rank 1).
+   *
+   * @param array $values
+   *
+   * @return array[]
+   */
+  private function getWriteIns(array $values) {
+    $writeIns = [];
+    foreach ($this->electionPositions as $positionId => $position) {
+      foreach ($position['writeInRows'] ?? [] as $row) {
+        $contactId = $values[$row['person']] ?? '';
+        if ($contactId === '' || $contactId === NULL) {
+          continue;
+        }
+        $rank = ($this->method === CRM_Elections_VotingMethod::PLURALITY) ? 1 : ($values[$row['rank']] ?? '');
+        $writeIns[] = ['position_id' => (int) $positionId, 'contact_id' => $contactId, 'rank' => $rank, 'row' => $row];
+      }
+    }
+    return $writeIns;
   }
 
   private function findElectionPositions() {
@@ -154,7 +292,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     ]);
 
     if ($this->electionPositions['count'] == 0) {
-      throwAccessDeniedException($this, 'Positions are not added in election for voting.');
+      throwAccessDeniedException($this, E::ts('Positions are not added in election for voting.'));
       return FALSE;
     }
 
@@ -166,17 +304,18 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     $this->electionCandidates = civicrm_api3('ElectionNomination', 'get', [
       'is_eligible_candidate' => 1,
       'has_accepted_nomination' => 1,
-      'return' => ['id', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL', 'election_position_id'],
+      'return' => array_merge(['id', 'member_nominee', 'member_nominee.image_URL', 'election_position_id', 'comments', 'statement_url'], CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS),
       'election_position_id' => ['IN' => array_column($this->electionPositions, 'id')],
       'options' => ['limit' => 0],
     ]);
 
     if ($this->electionCandidates == 0) {
-      throwAccessDeniedException($this, 'Nominations are not added in election for voting.');
+      throwAccessDeniedException($this, E::ts('Nominations are not added in election for voting.'));
       return FALSE;
     }
 
     $this->electionCandidates = $this->electionCandidates['values'];
+    CRM_Elections_Helper_Candidate::applyNameFormatToAll($this->electionCandidates, CRM_Elections_Helper_Candidate::getNameFormatForElection($this->election->id));
     $this->mapCandidatesWithPosition();
     return TRUE;
   }
@@ -202,6 +341,35 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     $values = $this->exportValues();
     $voteRanksByPosition = [];
 
+    $writeIns = $this->getWriteIns($values);
+    foreach ($writeIns as $writeIn) {
+      if (!CRM_Utils_Rule::positiveInteger($writeIn['contact_id'])) {
+        $this->_errors[$writeIn['row']['person']] = E::ts('Choose a person from the list.');
+      }
+      elseif ($this->method !== CRM_Elections_VotingMethod::PLURALITY && !CRM_Utils_Rule::positiveInteger($writeIn['rank'])) {
+        $this->_errors[$writeIn['row']['rank']] = E::ts('Give the person you wrote in a rank, or clear the name.');
+      }
+    }
+
+    if ($this->method === CRM_Elections_VotingMethod::PLURALITY) {
+      $ticks = [];
+      foreach ($elements as $element) {
+        if (!empty($values[$element['key']])) {
+          $ticks[$element['position_id']] = ($ticks[$element['position_id']] ?? 0) + 1;
+        }
+      }
+      foreach ($writeIns as $writeIn) {
+        $ticks[$writeIn['position_id']] = ($ticks[$writeIn['position_id']] ?? 0) + 1;
+      }
+      foreach ($ticks as $positionId => $count) {
+        $seats = max(1, (int) ($this->electionPositions[$positionId]['quantity'] ?? 1));
+        if ($count > $seats) {
+          $this->_errors['_qf_default'] = E::ts('For %1 you can choose no more than %2.', [1 => $this->electionPositions[$positionId]['name'], 2 => $seats]);
+        }
+      }
+      return parent::validate();
+    }
+
     foreach ($elements as $element) {
       $key = $element['key'];
       if (array_key_exists($key, $values)) {
@@ -211,7 +379,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
         }
         $value = $values[$key];
         if ($value != '' && !CRM_Utils_Rule::positiveInteger($value)) {
-          $this->_errors[$key] = 'Rank must be a valid positive integer.';
+          $this->_errors[$key] = E::ts('Rank must be a valid positive integer.');
         }
 
         // Similar ranks to different candidates are not allowed.
@@ -219,9 +387,19 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
           $voteRanksByPosition[$element['position_id']][] = $value;
         }
         elseif ($value != '') {
-          $this->_errors[$key] = 'Rank must be different for each candidate.';
+          $this->_errors[$key] = E::ts('Rank must be different for each candidate.');
         }
 
+      }
+    }
+
+    foreach ($writeIns as $writeIn) {
+      $rank = $writeIn['rank'];
+      if (CRM_Utils_Rule::positiveInteger($rank)) {
+        if (in_array($rank, $voteRanksByPosition[$writeIn['position_id']] ?? [])) {
+          $this->_errors[$writeIn['row']['rank']] = E::ts('Rank must be different for each candidate.');
+        }
+        $voteRanksByPosition[$writeIn['position_id']][] = $rank;
       }
     }
 
@@ -229,7 +407,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       if (array_filter($ranksByPosition)) {
         $ranks = array_values($ranksByPosition);
         if (!in_array(1, $ranks)) {
-          $this->_errors['_qf_default'] = 'For each position, You may or may not assign a number to candidates. But if you are assigning numbers for a position, you must assign number 1 to at least one candidate';
+          $this->_errors['_qf_default'] = E::ts('For each position, you may or may not assign a number to candidates. But if you are assigning numbers for a position, you must assign number 1 to at least one candidate.');
         }
       }
     }
@@ -268,7 +446,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       $key = $element['key'];
       if (array_key_exists($key, $values)) {
         $nominationId = $element['nominationId'];
-        $rank = $values[$key];
+        $rank = ($this->method === CRM_Elections_VotingMethod::PLURALITY) ? (empty($values[$key]) ? '' : 1) : $values[$key];
         if ($rank != '') {
           $addVotesParams['votes'][] = [
             'election_nomination_id' => $nominationId,
@@ -278,7 +456,21 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       }
     }
 
-    civicrm_api3('ElectionVote', 'addvotes', $addVotesParams);
+    $addVotesParams['option_votes'] = $this->getOptionVotes($values);
+    $addVotesParams['write_ins'] = array_map(fn($w) => ['position_id' => $w['position_id'], 'contact_id' => (int) $w['contact_id'], 'rank' => (int) $w['rank']], $this->getWriteIns($values));
+
+    try {
+      civicrm_api3('ElectionVote', 'addvotes', $addVotesParams);
+    }
+    catch (CRM_Core_Exception $e) {
+      // Something the form could not know (for example a person who has declined since the page opened).
+      CRM_Core_Session::setStatus($e->getMessage(), E::ts('Your vote was not saved'), 'error');
+      $back = Civi::url('current://civicrm/elections/vote')->addQuery(['eid' => $this->eId]);
+      if ($this->cid && $this->cs) {
+        $back->addQuery(['cid' => $this->cid, 'cs' => $this->cs]);
+      }
+      CRM_Utils_System::redirect($back);
+    }
 
     $this->createVoteActivity([
       'member_cid' => $member_cid,
@@ -293,9 +485,9 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
                                     ->execute()
                                     ->first();
 
-      CRM_Core_Session::setStatus('You have successfully voted as ' . $contact['display_name'] . ' in the election.', '', 'success');
+      CRM_Core_Session::setStatus(E::ts('You have successfully voted as %1 in the election.', [1 => $contact['display_name']]), '', 'success');
     } else {
-      CRM_Core_Session::setStatus('You have successfully voted in the election.', '', 'success');
+      CRM_Core_Session::setStatus(E::ts('You have successfully voted in the election.'), '', 'success');
     }
 
     parent::postProcess();
@@ -322,7 +514,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       'assignee_id' => $params['member_cid'],
       'target_id' => $params['member_cid'],
       'source_record_id' => $this->eId,
-      'subject'  => 'Voted in an election : ' . $this->election->name,
+      'subject'  => E::ts('Voted in an election : %1', [1 => $this->election->name]),
     ]);
   }
 

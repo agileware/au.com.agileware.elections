@@ -53,29 +53,30 @@ class CRM_Elections_BAO_ElectionResult extends CRM_Elections_DAO_ElectionResult 
     }
   }
 
+  /**
+   * Group the results by rank, best first, and mark who won.
+   *
+   * Candidates on the same rank share it. A rank that fits in the seats still open wins; one that runs
+   * across the last seat is a tie, and every candidate in it is marked `is_tied` (nobody is chosen over
+   * the others).
+   */
   private static function getRanksForPosition($results, &$candidates, $positionQty) {
     $ranks = [];
     foreach ($results as $result) {
-      if (!array_key_exists($result['rank'], $ranks)) {
-        $ranks[$result['rank']] = [];
-      }
-
-      if ($result['rank'] <= $positionQty) {
-        $candidates[$result['election_nomination_id']]['is_winner'] = TRUE;
-      }
       $ranks[$result['rank']][] = $result['election_nomination_id'];
     }
-    uksort($ranks, function ($rankA, $rankB) {
-      if ($rankA == $rankB) {
-        return 0;
+    ksort($ranks);
+    $filled = 0;
+    foreach ($ranks as $members) {
+      if ($filled >= $positionQty) {
+        break;
       }
-      if ($rankA < $rankB) {
-        return -1;
+      $tied = ($filled + count($members) > $positionQty);
+      foreach ($members as $nominationId) {
+        $candidates[$nominationId][$tied ? 'is_tied' : 'is_winner'] = TRUE;
       }
-      else {
-        return 1;
-      }
-    });
+      $filled += count($members);
+    }
     return $ranks;
   }
 
@@ -91,10 +92,11 @@ class CRM_Elections_BAO_ElectionResult extends CRM_Elections_DAO_ElectionResult 
     $nominations = civicrm_api3('ElectionNomination', 'get', [
       'election_position_id' => $positionId,
       'options' => ['limit' => 0],
-      'return' => ['comments', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL', 'election_position_id'],
+      'return' => array_merge(['comments', 'statement_url', 'member_nominee', 'member_nominee.image_URL', 'election_position_id'], CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS),
     ]);
 
     $nominations = $nominations['values'];
+    CRM_Elections_Helper_Candidate::applyNameFormatToAll($nominations, CRM_Elections_Helper_Candidate::getNameFormatForPosition($positionId));
     return $nominations;
   }
 
@@ -104,10 +106,11 @@ class CRM_Elections_BAO_ElectionResult extends CRM_Elections_DAO_ElectionResult 
       'has_accepted_nomination' => 1,
       'election_position_id' => $positionId,
       'options' => ['limit' => 0],
-      'return' => ['comments', 'member_nominee', 'member_nominee.display_name', 'member_nominee.image_URL', 'election_position_id'],
+      'return' => array_merge(['comments', 'statement_url', 'member_nominee', 'member_nominee.image_URL', 'election_position_id'], CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS),
     ]);
 
     $nominations = $nominations['values'];
+    CRM_Elections_Helper_Candidate::applyNameFormatToAll($nominations, CRM_Elections_Helper_Candidate::getNameFormatForPosition($positionId));
     return $nominations;
   }
 

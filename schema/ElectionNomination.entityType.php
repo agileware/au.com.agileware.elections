@@ -12,6 +12,14 @@ return [
     'log' => TRUE,
     'add' => '5.3',
   ],
+  'getIndices' => fn() => [
+    // One nomination for each person and position, however many people nominate them.
+    'UI_election_nomination_position_nominee' => [
+      'fields' => ['election_position_id' => TRUE, 'member_nominee' => TRUE],
+      'unique' => TRUE,
+      'add' => '2.0',
+    ],
+  ],
   'getFields' => fn() => [
     'id' => [
       'title' => E::ts('ID'),
@@ -44,6 +52,51 @@ return [
         'export',
         'duplicate_matching',
       ],
+    ],
+    'statement_url' => [
+      'title' => E::ts('Statement Link'),
+      'sql_type' => 'varchar(2048)',
+      'input_type' => 'Text',
+      'description' => E::ts('Link to a longer candidate statement or CV.'),
+      'add' => '2.0',
+      'default' => NULL,
+      'usage' => ['export'],
+    ],
+    'is_write_in' => [
+      'title' => E::ts('Is Write-in'),
+      'sql_type' => 'boolean',
+      'input_type' => 'CheckBox',
+      'description' => E::ts('Written in by a voter during voting rather than nominated. Becomes a candidate when the person accepts.'),
+      'add' => '2.0',
+      'default' => FALSE,
+      'usage' => ['export'],
+    ],
+    'write_in_notified_date' => [
+      'title' => E::ts('Write-in Invitation Sent'),
+      'sql_type' => 'datetime',
+      'input_type' => 'Date',
+      'description' => E::ts('When the person written in was told.'),
+      'add' => '2.0',
+      'default' => NULL,
+      'usage' => ['export'],
+    ],
+    'write_in_reminded_date' => [
+      'title' => E::ts('Write-in Reminder Sent'),
+      'sql_type' => 'datetime',
+      'input_type' => 'Date',
+      'description' => E::ts('When the person written in was reminded to answer before voting closes.'),
+      'add' => '2.0',
+      'default' => NULL,
+      'usage' => ['export'],
+    ],
+    'write_in_closed_notified_date' => [
+      'title' => E::ts('Write-in Closed Notice Sent'),
+      'sql_type' => 'datetime',
+      'input_type' => 'Date',
+      'description' => E::ts('When the person written in was told that voting closed before they answered.'),
+      'add' => '2.0',
+      'default' => NULL,
+      'usage' => ['export'],
     ],
     'is_eligible_candidate' => [
       'title' => E::ts('Is Eligible Candidate'),

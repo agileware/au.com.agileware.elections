@@ -14,7 +14,9 @@ class CRM_Elections_Page_Elections extends CRM_Elections_Page_Base {
     $this->assign('isElectionAdmin', $this->isElectionAdmin);
     $this->isFromShortCode = isRequestUsingShortCode();
     $this->electionsAction = CRM_Utils_Request::retrieve('eaction', 'String');
-    $this->viewAction = CRM_Utils_Request::retrieve('evaction', 'String');
+    // The page that shows one election: only an address on this site is accepted, so the parameter
+    // cannot be used to send people elsewhere or to run script (it is a link target, not text).
+    $this->viewAction = CRM_Elections_Helper_Utils::localUrlOrNull(CRM_Utils_Request::retrieve('evaction', 'String'));
     $this->assign('viewAction', $this->viewAction);
 
     if ($this->electionsAction === NULL) {
@@ -132,6 +134,8 @@ class CRM_Elections_Page_Elections extends CRM_Elections_Page_Base {
       $elections[$index]['userVoteDate'] = $variables['user_vote_date'];
       $elections[$index]['isUserAllowedToVote'] = $variables['is_user_allowed_to_vote'];
       $elections[$index]['hasUserAlreadyVoted'] = $variables['has_user_already_voted'];
+
+      $elections[$index]['card'] = CRM_Elections_Helper_ElectionStatus::card($elections[$index]);
 
       $elections[$index]['positions'] = civicrm_api3('ElectionPosition', 'getcount', [
         'election_id' => $election['id'],

@@ -13,7 +13,7 @@ class CRM_BAO_ElectionResultTest extends api_v3_ElectionBaseTestCase {
   private $election;
   private $electionPosition;
 
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
     $this->election = $this->createElection([
       'is_visible' => 1,
@@ -526,8 +526,50 @@ class CRM_BAO_ElectionResultTest extends api_v3_ElectionBaseTestCase {
     $votesCount = $this->callAPISuccess('ElectionVote', 'getcount', [
       'election_nomination_id.election_position_id.election_id.id' => $this->election['id'],
     ]);
+    $this->assertEquals(10, $votesCount, 'Anonymising keeps the votes for recounts.');
 
-    $this->assertEquals(0, $votesCount, 'Votes count should be zero.');
+    $namedVotes = CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote WHERE member_id IS NOT NULL');
+    $this->assertEquals(0, $namedVotes, 'No vote should be attributable to a voter.');
+  }
+
+  /**
+   * Anonymising must not stop results being calculated for later positions.
+   */
+  public function testAnonymizeVotesWithMultiplePositions() {
+    $this->election['anonymize_votes'] = 1;
+    $this->callAPISuccess('Election', 'create', $this->election);
+
+    $positions = [
+      $this->createElectionPosition($this->election, ['name' => 'President']),
+      $this->createElectionPosition($this->election, ['name' => 'Treasurer']),
+    ];
+    $this->election = $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $this->election);
+    $candidates = [];
+    foreach ($positions as $position) {
+      $members = $this->createNominationForResults($position['id'], 2, 2);
+      $candidates[$position['id']] = $members['candidates'];
+    }
+    $voters = $this->getVoters(5);
+    $memberVotes = $voters['memberVotes'];
+    $voters = $voters['voters'];
+    $this->addMembersInElectionGroup($voters, $this->election);
+
+    $this->election = $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_VOTING_IN_PROGRESS, $this->election);
+    foreach ($voters as $voter) {
+      foreach ($candidates as $positionCandidates) {
+        $memberVotes[$voter][] = $this->recordVote(1, $positionCandidates[0]['id']);
+        $memberVotes[$voter][] = $this->recordVote(2, $positionCandidates[1]['id']);
+      }
+    }
+    $this->addMemberVotes($memberVotes);
+    $this->election = $this->generateElectionResults($this->election);
+
+    foreach ($positions as $position) {
+      $status = $this->getElectionPositionById($position['id'])['result_status'];
+      $this->assertEquals(CRM_Elections_BAO_Election::$RESULTS_MAJORITY, $status, 'Every position gets a result.');
+      $this->assertRank($candidates[$position['id']][0]['id'], $position['id'], 1);
+    }
+    $this->assertEquals(0, CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote WHERE member_id IS NOT NULL'));
   }
 
   /**

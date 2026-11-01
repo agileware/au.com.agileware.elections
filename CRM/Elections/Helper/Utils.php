@@ -4,6 +4,75 @@ use CRM_Elections_ExtensionUtil as E;
 
 class CRM_Elections_Helper_Utils {
 
+  /**
+   * An address on this website, or NULL.
+   *
+   * Used for addresses that arrive in a request (for example the page that shows one election),
+   * so they cannot send a person to another site or carry a `javascript:` address.
+   *
+   * @param string|null $url
+   *   A path starting with one slash, or a full http(s) address on this site.
+   *
+   * @return string|null
+   */
+  public static function localUrlOrNull($url) {
+    $url = trim((string) $url);
+    if ($url === '' || preg_match('/[\x00-\x20\\\\]/', $url) || strpos($url, '//') === 0) {
+      return NULL;
+    }
+    if ($url[0] === '/') {
+      return $url;
+    }
+    $parts = parse_url($url);
+    if (!$parts || empty($parts['host']) || !in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], TRUE)) {
+      return NULL;
+    }
+    $site = parse_url((string) CRM_Utils_System::baseCMSURL());
+    if (empty($site['host']) || strtolower($site['host']) !== strtolower($parts['host'])) {
+      return NULL;
+    }
+    return $url;
+  }
+
+  /**
+   * A web address that is safe to use as a link: http or https only, otherwise an empty string.
+   *
+   * @param string|null $url
+   *
+   * @return string
+   */
+  public static function safeHttpUrl($url) {
+    $url = trim((string) $url);
+    if ($url === '' || preg_match('/[\\x00-\\x20]/', $url)) {
+      return '';
+    }
+    $parts = parse_url($url);
+    if (!$parts || empty($parts['host']) || !in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], TRUE)) {
+      return '';
+    }
+    return $url;
+  }
+
+  /**
+   * A picture address that is safe to put in an image tag: http(s) or a path, never another scheme.
+   *
+   * @param string|null $url
+   * @param string $fallback
+   *
+   * @return string
+   */
+  public static function safeImageUrl($url, $fallback) {
+    $url = trim((string) $url);
+    if ($url === '' || preg_match('/[\x00-\x20]/', $url)) {
+      return $fallback;
+    }
+    if ($url[0] === '/' && strpos($url, '//') !== 0) {
+      return $url;
+    }
+    $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+    return in_array($scheme, ['http', 'https'], TRUE) ? $url : $fallback;
+  }
+
   public static function replaceSingleProfilePic(&$contact, $imageKey, $contactIdKey) {
     $profilePics = self::getCandidatePictures([$contact[$contactIdKey]]);
     $contact[$imageKey] = $profilePics[$contact[$contactIdKey]];
@@ -36,7 +105,7 @@ class CRM_Elections_Helper_Utils {
     $defaultImage = Civi::resources()->getUrl('au.com.agileware.elections', 'images/default_profile.jpg');
 
     foreach ($cmsMatches as $cmsMatch) {
-      $profilePictures[$cmsMatch['contact_id']] = $cmsMatch['image_URL'] !== '' ? $cmsMatch['image_URL'] : $defaultImage;
+      $profilePictures[$cmsMatch['contact_id']] = self::safeImageUrl($cmsMatch['image_URL'] ?? '', $defaultImage);
     }
 
     return $profilePictures;

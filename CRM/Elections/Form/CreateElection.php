@@ -10,7 +10,7 @@ use CRM_Elections_ExtensionUtil as E;
 class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
 
   private $eId = 0;
-  private $pageTitle = 'Create Election';
+  private $pageTitle = NULL;
 
   public function buildQuickForm() {
     hideNonRequiredItemsOnPage($this);
@@ -19,8 +19,10 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     }
     $this->eId = CRM_Utils_Request::retrieve('eid', 'Positive', $this, FALSE, 0);
     $this->addFormElements();
+    $this->addPageResources();
+    $this->assign('groupsHidden', CRM_Elections_Helper_Visibility::groupsHidden());
     if ($this->eId) {
-      $this->pageTitle = 'Edit Election';
+      $this->pageTitle = E::ts('Edit Election');
       CRM_Utils_System::setTitle($this->pageTitle);
     }
     else {
@@ -61,20 +63,74 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
 
       $defaults['anonymize_votes'] = $election->anonymize_votes;
       $defaults['allow_revote'] = $election->allow_revote;
+      $defaults['voting_method'] = CRM_Elections_VotingMethod::normalise($election->voting_method);
       $defaults['required_nominations'] = $election->required_nominations;
       $defaults['allowed_groups'] = $election->allowed_groups;
+      $defaults['nomination_groups'] = $election->nomination_groups;
+      $defaults['send_emails'] = (int) $election->send_emails;
+      $defaults['nomination_message_template_id'] = CRM_Elections_Helper_Mailer::chosenTemplate($election) ?: CRM_Elections_Helper_Mailer::getDefaultNominationTemplateId();
+      $election->assignDisplayOptions();
+      $defaults['allow_online_nominations'] = (int) $election->onlineNominations;
+      $defaults['candidate_groups'] = $election->candidate_groups;
 
       $defaults['allow_checksum_access'] = $election->allow_checksum_access;
+
+      $election->assignDisplayOptions();
+      $defaults['show_photos'] = (int) $election->showPhotos;
+      $defaults['show_statements'] = $election->statementDisplay;
+      $defaults['show_nominators'] = (int) $election->showNominators;
+      $defaults['name_format'] = $election->name_format ?? '';
+      $defaults += CRM_Elections_Helper_ResultsDisplay::getDefaults($election);
+      $this->assign('resultsLogo', CRM_Elections_Helper_ResultsDisplay::getDisplay($election, 'eid=' . (int) $election->id));
     }
     else {
       $this->eId = 0;
       $defaults['anonymize_votes'] = 1;
       $defaults['allow_revote'] = 0;
+      $defaults['voting_method'] = CRM_Elections_VotingMethod::IRV;
       $defaults['required_nominations'] = 2;
       $defaults['allowed_groups'] = '';
+      $defaults['nomination_groups'] = '';
+      $defaults['send_emails'] = 1;
+      $defaults['nomination_message_template_id'] = CRM_Elections_Helper_Mailer::getDefaultNominationTemplateId();
+      $defaults['allow_online_nominations'] = 1;
+      $defaults['candidate_groups'] = '';
+      $defaults['show_photos'] = 1;
+      $defaults['show_statements'] = CRM_Elections_BAO_Election::STATEMENTS_LINK;
+      $defaults['show_nominators'] = 1;
+      $defaults['name_format'] = '';
+      $defaults += CRM_Elections_Helper_ResultsDisplay::getDefaults();
     }
 
     return $defaults;
+  }
+
+  /**
+   * Script for the tabs, the date checks and the timeline preview, with the rules and wording it needs.
+   */
+  private function addPageResources() {
+    $stage = function ($label, $start, $end = NULL, $until = NULL) {
+      return array_filter(['label' => $label, 'start' => $start, 'end' => $end, 'until' => $until]);
+    };
+    $rules = CRM_Elections_BAO_Election::getDateRules();
+    Civi::resources()
+      ->addVars('elections', [
+        'dateRules' => $rules,
+        'dateFields' => [
+          'visibility_start_date', 'visibility_end_date', 'nomination_start_date', 'nomination_end_date',
+          'advertise_candidates_date', 'voting_start_date', 'voting_end_date', 'result_date',
+        ],
+        'stages' => [
+          $stage(E::ts('Visible to voters'), 'visibility_start_date', 'visibility_end_date'),
+          $stage(E::ts('Nominations open'), 'nomination_start_date', 'nomination_end_date'),
+          $stage(E::ts('Candidates advertised'), 'advertise_candidates_date', NULL, 'voting_start_date'),
+          $stage(E::ts('Voting open'), 'voting_start_date', 'voting_end_date'),
+          $stage(E::ts('Results published'), 'result_date', NULL, 'visibility_end_date'),
+        ],
+        'nowLabel' => E::ts('Now'),
+      ])
+      ->addScriptFile(E::LONG_NAME, 'js/election-form.js', 100, 'page-footer');
+    CRM_Elections_Helper_ResultsDisplay::addPageResources();
   }
 
   /**
@@ -82,40 +138,46 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
    */
   private function addFormElements() {
     // election information fields
-    $this->add('text', 'name', 'Name', ['size' => 35], TRUE);
-    $this->add('textarea', 'description', 'Description', ['cols' => 55, 'rows' => 6], FALSE);
+    $this->add('text', 'name', E::ts('Name'), ['size' => 35], TRUE);
+    $this->add('textarea', 'description', E::ts('Description'), ['cols' => 55, 'rows' => 6], FALSE);
+
+    // Quick set-up of the dates: not saved, only used to fill in the dates below.
+    $this->add('select', 'quick_cycle', E::ts('Election cycle'), ['' => E::ts('- Choose a cycle -')] + array_map(fn($cycle) => $cycle[0], CRM_Elections_Helper_Dates::getCycles()), FALSE);
+    $this->add('datepicker', 'quick_start', E::ts('Nominations open'), [], FALSE);
 
     // Visibility fields.
-    $this->add('datepicker', 'visibility_start_date', 'Start Date', [], TRUE);
-    $this->add('datepicker', 'visibility_end_date', 'End Date', [], TRUE);
+    $this->add('datepicker', 'visibility_start_date', E::ts('Start Date'), [], TRUE);
+    $this->add('datepicker', 'visibility_end_date', E::ts('End Date'), [], TRUE);
 
     // Nominations fields.
-    $this->add('datepicker', 'nomination_start_date', 'Start Date', [], TRUE);
-    $this->add('datepicker', 'nomination_end_date', 'End Date', [], TRUE);
+    $this->add('datepicker', 'nomination_start_date', E::ts('Start Date'), [], TRUE);
+    $this->add('datepicker', 'nomination_end_date', E::ts('End Date'), [], TRUE);
 
     // Advetise Candidates
-    $this->add('datepicker', 'advertise_candidates_date', 'Start Date', [], TRUE);
+    $this->add('datepicker', 'advertise_candidates_date', E::ts('Start Date'), [], TRUE);
 
     // Voting fields.
-    $this->add('datepicker', 'voting_start_date', 'Start Date', [], TRUE);
-    $this->add('datepicker', 'voting_end_date', 'End Date', [], TRUE);
+    $this->add('datepicker', 'voting_start_date', E::ts('Start Date'), [], TRUE);
+    $this->add('datepicker', 'voting_end_date', E::ts('End Date'), [], TRUE);
 
     // Publish result
-    $this->add('datepicker', 'result_date', 'Start Date', [], TRUE);
+    $this->add('datepicker', 'result_date', E::ts('Start Date'), [], TRUE);
 
     // Setting fields.
 
-    $this->add('select', 'anonymize_votes', 'Anonymise Votes', CRM_Core_SelectValues::boolean(), TRUE, [
+    $this->add('select', 'anonymize_votes', E::ts('Anonymise Votes'), CRM_Core_SelectValues::boolean(), TRUE, [
       'placeholder' => '- Select -',
     ]);
 
-    $this->add('select', 'allow_revote', 'Allow Members to Change Vote', CRM_Core_SelectValues::boolean(), TRUE, [
+    $this->add('select', 'voting_method', E::ts('Voting Method'), CRM_Elections_VotingMethod::getOptions(), TRUE);
+
+    $this->add('select', 'allow_revote', E::ts('Allow people to change their vote'), CRM_Core_SelectValues::boolean(), TRUE, [
       'placeholder' => '- Select -',
     ]);
 
-    $this->add('advcheckbox', 'allow_checksum_access', 'Allow non-logged in access');
+    $this->add('advcheckbox', 'allow_checksum_access', E::ts('Allow non-logged in access'));
 
-    $this->add('text', 'required_nominations', 'Number of Required Nominations', ['size' => 15], TRUE);
+    $this->add('text', 'required_nominations', E::ts('Number of Required Nominations'), ['size' => 15], TRUE);
 
     $this->addEntityRef('allowed_groups', 'Allowed by Groups', [
       'entity' => 'Group',
@@ -128,6 +190,34 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
         ],
       ],
     ], TRUE);
+
+    $this->add('advcheckbox', 'allow_online_nominations', E::ts('Allow people to nominate online'));
+    $this->add('advcheckbox', 'send_emails', E::ts('Email people about their nominations'));
+    $this->add('select', 'nomination_message_template_id', E::ts('Nomination email'), CRM_Elections_Helper_Mailer::getNominationTemplates(), FALSE);
+    $this->assign('canEditMessageTemplates', CRM_Core_Permission::check('edit message templates'));
+    $this->assign('messageTemplatesUrl', CRM_Utils_System::url('civicrm/admin/messageTemplates', 'reset=1'));
+
+    // Who may nominate, and who may stand, when that is not the same as who may vote.
+    foreach (['nomination_groups' => E::ts('Nomination Groups'), 'candidate_groups' => E::ts('Candidate Groups')] as $field => $label) {
+      $this->addEntityRef($field, $label, [
+        'entity' => 'Group',
+        'placeholder' => E::ts('- Same as voting groups -'),
+        'multiple' => TRUE,
+        'api' => [
+          'params' => [
+            'is_active' => 1,
+            'is_hidden' => 0,
+          ],
+        ],
+      ], FALSE);
+    }
+
+    // Display options.
+    CRM_Elections_Helper_ResultsDisplay::addFormElements($this);
+    $this->add('advcheckbox', 'show_photos', E::ts('Show candidate photos'));
+    $this->add('select', 'show_statements', E::ts('Candidate statements'), CRM_Elections_BAO_Election::getStatementDisplayOptions(), TRUE);
+    $this->add('advcheckbox', 'show_nominators', E::ts('Show who nominated each candidate'));
+    $this->add('select', 'name_format', E::ts('Candidate name format'), ['' => E::ts('Use the site setting')] + CRM_Elections_Helper_Candidate::getNameFormats());
 
     // Submit button
     $this->addButtons([
@@ -145,7 +235,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     $this->_errors = array_merge($this->_errors, $errors);
 
     if (!CRM_Utils_Rule::positiveInteger($values['required_nominations'])) {
-      $this->_errors['required_nominations'] = 'Value should be a positive integer.';
+      $this->_errors['required_nominations'] = E::ts('Value should be a positive integer.');
     }
     return parent::validate();
   }
@@ -165,16 +255,26 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       'result_date'                 => $values['result_date'],
       'anonymize_votes'             => $values['anonymize_votes'],
       'allow_revote'                => $values['allow_revote'],
+      'voting_method'               => $values['voting_method'],
       'allow_checksum_access'       => $values['allow_checksum_access'],
       'is_visible'                  => 0,
       'required_nominations'        => $values['required_nominations'],
       'allowed_groups'              => $values['allowed_groups'],
+      'send_emails'                 => !empty($values['send_emails']) ? 1 : 0,
+      'nomination_message_template_id' => !empty($values['nomination_message_template_id']) && (int) $values['nomination_message_template_id'] !== (int) CRM_Elections_Helper_Mailer::getDefaultNominationTemplateId() ? (int) $values['nomination_message_template_id'] : NULL,
+      'allow_online_nominations'    => !empty($values['allow_online_nominations']) ? 1 : 0,
+      'nomination_groups'           => $values['nomination_groups'] ?? '',
+      'candidate_groups'            => $values['candidate_groups'] ?? '',
+      'show_photos'                 => !empty($values['show_photos']) ? 1 : 0,
+      'show_statements'             => $values['show_statements'],
+      'show_nominators'             => !empty($values['show_nominators']) ? 1 : 0,
+      'name_format'                 => $values['name_format'] !== '' ? $values['name_format'] : NULL,
       'created_by'                  => CRM_Core_Session::singleton()->getLoggedInContactID(),
-    ];
+    ] + CRM_Elections_Helper_ResultsDisplay::getValuesToSave($values);
 
-    $messageKey = 'created';
+    $successMessage = E::ts('Election has been created successfully.');
     if ($this->eId) {
-      $messageKey = 'updated';
+      $successMessage = E::ts('Election has been updated successfully.');
       $election['id'] = $this->eId;
     }
 
@@ -184,15 +284,16 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
         CRM_Core_Session::setStatus($election['error_message'], '', 'error');
         return;
       }
+      CRM_Elections_Helper_ResultsDisplay::saveLogo((int) $election['id'], $values, CRM_Elections_Helper_ResultsDisplay::upload());
     }
     catch (CRM_Core_Exception $e) {
       CRM_Core_Session::setStatus($e->getMessage(), '', 'error');
       return;
     }
 
-    CRM_Core_Session::setStatus('Election has been ' . $messageKey . ' successfully.', '', 'success');
+    CRM_Core_Session::setStatus($successMessage, '', 'success');
     parent::postProcess();
-    CRM_Utils_System::redirect(Civi::url('current://civicrm/elections'));
+    $this->finish(CRM_Utils_System::url('civicrm/elections/manage', 'reset=1'));
   }
 
 }

@@ -1,137 +1,55 @@
-Elections (au.com.agileware.elections) is a CiviCRM extension which provides on-line election functionality (nominations and voting) to CiviCRM. 
+# Elections documentation
 
-The following sections describe the concepts and processes.
+Elections (au.com.agileware.elections) is a CiviCRM extension which provides on-line elections to CiviCRM: nominations, ranked choice or most-votes ballots, write-ins, yes or no questions, and published results, on WordPress, Drupal and Joomla.
 
-# Election Workflow Overview
+New to the extension? Read chapters 1 and 2, then follow chapter 3 to set up your first election.
 
-An election moves through a fixed sequence of stages, each one gated by a date set when the election was created - see [Creating an Election](#creating-an-election). The diagram below shows the stages in order, the date that opens each one, and what happens at a high level during each stage.
+## Words used in this guide
 
-```mermaid
-flowchart TD
-    A["Election created<br/>(inactive)"] --> B{"At least one Position added?<br/>Admin activates the election"}
-    B -->|Yes| C["Visible<br/>from Visible Start Date<br/>Election is listed on the website"]
-    C --> D["Nominations<br/>Nomination Start Date to Nomination End Date<br/>People nominate, and second, candidates for each position"]
-    D --> E["Advertise Candidates<br/>Advertise Candidates Date to Voting Start Date<br/>Eligible candidates accept or withdraw their nomination"]
-    E --> F["Voting<br/>Voting Start Date to Voting End Date<br/>Permitted members rank the candidates for each position"]
-    F --> G["Results<br/>from Results Start Date<br/>Results are calculated using Instant-Runoff Voting and published"]
-    G --> H["Hidden<br/>after Visible End Date<br/>Election is removed from the website, results remain as a historical record"]
-```
+- **People**: everyone who takes part in an election. No CiviCRM Membership is needed; what matters is being in one of the election's groups.
+- **Voters**, **nominees** and **candidates**: people at different stages of an election. A nominee becomes a candidate when they have enough nominations and accept.
+- **Organisers**: the staff who set up and run elections.
 
-An election which is not [activated](admin_activate_election.md), or which has no Positions, is never shown to end users, regardless of these dates. See [Nomination Workflow](#nomination-workflow) below for what happens to an individual nomination between the Nominations and Advertise Candidates stages.
+## Contents
 
-# Initial Set Up
-Before creating an election, follow these [initial set up steps](setup.md) to configure your website and CiviCRM to host elections. 
+### 1. Introduction
+- [Types of elections and options](election_types.md): positions and referendum questions, ranked choice and most votes, how people get on the ballot, who can take part, and how to choose.
+- [Workflows](workflows.md): diagrams of the election lifecycle, nominations, write-ins, voting, results and referendum questions.
 
-# Elections Settings
+### 2. Set up your site
+- [Initial set up](setup.md): scheduled jobs, permissions, personal links for people who do not log in, and the pages to create on WordPress, Drupal and Joomla.
+- [Roles and permissions](roles_and_permissions.md): what an organiser, a person taking part and a site administrator each need.
+- [Elections settings](admin_election_settings.md): site-wide photo source and name format.
 
-A single, site-wide settings page controls where candidate and nominee photos are sourced from. For more information, see [Elections Settings](admin_election_settings.md).
+### 3. Running an election (administrators)
+1. [Manage elections](admin_manage_elections.md): the list of elections and what you can do with each.
+2. [Create an election](admin_create_election.md): dates and settings, including the voting method, groups, emails and display options.
+3. Add the positions and questions: [add a position](admin_add_position.md), [edit a position](admin_edit_position.md), [reorder positions](admin_reorder_positions.md), [delete a position](admin_delete_position.md).
+   - [Write-ins](admin_write_ins.md): let voters add a person to the ballot.
+   - [Referendum questions](admin_referendum.md): yes or no questions with a threshold and quorum.
+4. [Activate the election](admin_activate_election.md) so people can see it.
+5. Make the [results page](admin_results_page.md) your own: a logo, header and footer text and a celebration.
+6. Follow it through with the [election overview](admin_election_overview.md) (stage, timeline, turnout, results and integrity) and manage the [candidates](admin_candidates.md).
+7. [Edit](admin_edit_election.md), [duplicate](admin_duplicate_election.md) or [delete](admin_delete_election.md) an election.
 
-# Creating an Election
-To create a new election, you should identify the date of each stage in the election's process as well as name and description of the election.   
-- **Name and Description**: Title the election and provide a brief description of the reason for the election. For example, Name: 2020 Legislative Assembly election; Description: Election of the Legislative Assembly for the 5 electorates of the ACT: Brindabella, Ginninderra, Kurrajong, Murrumbidgee and Yerrabi.  
-- **Visible Start Date**: The date that user can start seeing the election and the public will know about the election as well.  
-- **Visible End Date**: The election will be invisible to the public after this date.  
-- **Nomination Start Date**: Users allow to nominate from this date and it should be after **Visible Start Date** and before **Visible End Date**.    
-- **Nomination End Date**: Users do not allow to nominate after this date and it should be after **Nomination Start Date** and before **Visible End Date**.     
-- **Advertise Start Date**: Waiting for nominee to accept their position. This date should be after **Nomination End Date** and before **Visible End Date**.  
-- **Voting Start Date**: Users can start voting from this date and it should be after **Advertise Start Date** and before **Visible End Date**.     
-- **Voting End Date**: Users cannot vote from this date and it should be after **Voting Start Date** and before **Visible End Date**  
-- **Results Start Date**: Users can check the election results from this date and it should be after **Voting End Date** and before **Visible End Date**.  
+### 4. Taking part (voters and candidates)
+Follow the stages in order:
+1. [Nominate someone](user_nominate.md) and [second a nomination](user_second_nomination.md).
+2. [Accept a nomination](user_accept_nomination.md) (including when you are written in) or [withdraw it](user_withdraw_nomination.md).
+3. [Vote](user_vote.md): ranked choice, most votes, write-ins and questions.
+4. [View the results](user_view_results.md).
 
-Each election also has its own settings, independent of the dates above:
-- **Anonymise Votes**: whether votes are anonymised once results are published, so it's no longer possible to see how an individual voted.
-- **Allow Members to Change Vote**: whether a member can vote again to change their vote before **Voting End Date**.
-- **Allow non-logged in access**: whether people can nominate, accept nominations and vote using a personalised link, without logging in - see [Participating without logging in](setup.md#participating-without-logging-in).
-- **Number of Required Nominations**: how many people must nominate a person for a position before they become an eligible candidate - see [Seconding a Nomination](#seconding-a-nomination) below.
-- **Allowed by Groups**: the CiviCRM Groups and Smart Groups whose members are permitted to participate in the election.
+### 5. Reference
+- [Emails and scheduled jobs](reference_emails_and_jobs.md): the message templates and the three jobs.
+- [Security and audit](reference_security_and_audit.md): the guarantees, the audit log and the integrity check.
 
-For more information, see [How to create a new election](admin_create_election.md)  
+## An election at a glance
 
-# Activating an Election
-
-A new election is created inactive, and is never visible to end users until it is activated. At least one Position must be added to the election before it can be activated.
-
-For more information, see [How to activate or deactivate an election](admin_activate_election.md)
-
-# Editing an Election  
-To edit an election, you should follow the rules of date and time for each stage in **Create an election**. An election can only be edited before its **Nomination Start Date** has passed while it is active.
-
-For more information, see [How to edit an election](admin_edit_election.md)
-
-# Deleting an Election  
-
-An election can only be deleted before its **Nomination Start Date** has passed while it is active.
-
-To delete an election, see [How to delete an election](admin_delete_election.md)  
-
-# Positions  
-
-A person is nominated for one or more positions in an election.
-Each election must have at least one position defined.
-There are no limits to the seats which can be defined.
-The CiviCRM administrator must define the positions available prior to the nomination stage for the election.
-Positions are shown to end users in a defined order, which can be set when a position is added or edited, or changed afterwards - see [How to reorder positions](admin_reorder_positions.md).
-
-## Adding a Position
-
-A position only can be added before the **Nomination Start Date** or if the election is inactive.  
-For more information, see [How to add a position](admin_add_position.md)  
-
-## Editing a Position
-
-A position only can be added before the **Nomination Start Date** or if the election is inactive.
-For more information, see [How to edit a position](admin_edit_position.md)
-
-## Deleting a Position
-
-A position only can be deleted before the **Nomination Start Date** or if the election is inactive.
-For more information, see [How to delete a position](admin_delete_position.md)  
-
-# Nominations 
-
-To nominate a user, see [How to nominate a user](user_nominate.md)
-User cannot nominate after the **Nomination End Date**
-A user can nominate any user including self, as set in the Settings for the Election
-There is no limit for how many nominations a user can receive.
-The minimum number of  nominations for a user to become a candidate is set in the Settings for the Election
-
-## Nomination Workflow
-
-Each nomination for a position moves through its own smaller workflow, shown below, before it can appear on the ballot.
+An election moves through fixed stages, each opened by a date: Nominations, Advertise Candidates, Voting, Results. Each stage is described, with diagrams for every kind of election, in [Workflows](workflows.md).
 
 ```mermaid
-flowchart TD
-    N1["Nomination submitted<br/>(select position and nominee)<br/>only between Nomination Start Date and Nomination End Date"] --> N2{"Has the nomination received<br/>Number of Required Nominations?"}
-    N2 -->|"No"| N3["Needs a Second<br/>'Need Second' button is shown"]
-    N3 -->|"Someone else seconds it"| N2
-    N2 -->|"Yes"| N4["Nominee becomes an<br/>Eligible Candidate"]
-    N4 --> N5{"What does the nominee do,<br/>before Voting Start Date?"}
-    N5 -->|"Accepts"| N6["Candidate<br/>appears on the ballot for voting"]
-    N5 -->|"Withdraws, or no response"| N7["Not a candidate<br/>does not appear on the ballot"]
+flowchart LR
+    A["Created<br/>inactive"] --> B["Activated<br/>visible"] --> C["Nominations"] --> D["Advertise<br/>Candidates"] --> E["Voting"] --> F["Results"] --> G["Hidden"]
 ```
 
-A withdrawn nomination cannot be nominated again for the same position. For more information, see [How to nominate a user](user_nominate.md), [How to second a nomination](user_second_nomination.md), [How to accept a nomination](user_accept_nomination.md) and [How to withdraw a nomination](user_withdraw_nomination.md).
-
-## Seconding a Nomination
-
-If an election's **Number of Required Nominations** is more than 1, a nomination needs to be seconded by that many additional people before the nominee becomes an eligible candidate. For more information, see [How to second a nomination](user_second_nomination.md)
-
-## Withdrawing a Nomination
-
-A nominee can withdraw their own nomination at any time before **Voting Start Date**, whether or not it has been accepted. For more information, see [How to withdraw a nomination](user_withdraw_nomination.md)
-
-# Accepting a Nomination  
-
-A user must accept a nomination to become a candidate for any position. Only a nomination which has become an eligible candidate, by receiving the required number of nominations, can be accepted.
-For more information, see [How to accept a nomination](user_accept_nomination.md)
-
-# Voting  
-
-User can only vote after **Voting Start Date** and before **Voting End Date**. If the election allows it, a user may vote again before **Voting End Date** to change their vote.
-For more information, see [How to vote](user_vote.md)
-
-# Results  
-
-Results are published after the **Results Start Date**. Elections results are then available on the website, see example [election results](user_view_results.md)  
-Election results are calculated using the Instant-runoff voting (IRV) method, see https://en.wikipedia.org/wiki/Instant-runoff_voting
-  
+An election which is not activated, or which has no positions, is never shown to end users, whatever its dates. The election's dates and settings are explained in [Create an election](admin_create_election.md).

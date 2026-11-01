@@ -34,13 +34,15 @@ class VoteAction extends AbstractAction {
       $rank = $parameters->getParameter('rank');
     }
 
-    $vote['version'] = 3;
-    $vote['member_id'] = $voter_contact_id;
-    $vote['election_nomination_id'] = $election_nomination_id;
-    $vote['rank'] = $rank;
-    $result = civicrm_api('ElectionVote', 'create', $vote);
+    // The vote goes through the same ballot rules as the website: who may vote, the candidate, the rank.
+    $election_id = $this->configuration->getParameter('election_id');
+    civicrm_api3('ElectionVote', 'addvotes', [
+      'election_id' => $election_id,
+      'member_id' => $voter_contact_id,
+      'votes' => [['election_nomination_id' => $election_nomination_id, 'rank' => $rank]],
+    ]);
     if ($this->configuration->getParameter('anonymize_vote')) {
-      \CRM_Core_DAO::executeQuery('UPDATE `civicrm_election_vote` SET `member_id` = NULL WHERE `id` = %1', [1=>[$result['id'], 'Integer']]);
+      \CRM_Core_DAO::executeQuery('UPDATE `civicrm_election_vote` SET `member_id` = NULL WHERE `member_id` = %1 AND `election_nomination_id` = %2', [1 => [$voter_contact_id, 'Integer'], 2 => [$election_nomination_id, 'Integer']]);
     }
   }
 
@@ -54,16 +56,16 @@ class VoteAction extends AbstractAction {
     $voter_contact_id = $parameters->getParameter('voter_contact_id');
     $election = findElectionById($election_id);
     if (!$election->isVisible) {
-      throw new InvalidParameterException('Voting is closed.');
+      throw new InvalidParameterException(E::ts('Voting is closed.'));
     }
     if (!$election->isVotingStarted) {
-      throw new InvalidParameterException('Voting is closed.');
+      throw new InvalidParameterException(E::ts('Voting is closed.'));
     }
     if ($election->isVotingEnded) {
-      throw new InvalidParameterException('Voting is closed.');
+      throw new InvalidParameterException(E::ts('Voting is closed.'));
     }
     if (hasLoggedInUserAlreadyVoted($election_id, $voter_contact_id)) {
-      throw new InvalidParameterException('User has already voted.');
+      throw new InvalidParameterException(E::ts('User has already voted.'));
     }
     return $return;
   }
