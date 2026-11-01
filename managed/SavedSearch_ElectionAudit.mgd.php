@@ -15,7 +15,7 @@ return [
         'api_entity' => 'ElectionAudit',
         'api_params' => [
           'version' => 4,
-          'select' => ['id', 'election_id', 'created_date', 'contact_id.display_name', 'action_label', 'details_text'],
+          'select' => ['id', 'election_id', 'created_date', 'changed_by_name', 'action_label', 'details_text'],
           'orderBy' => [],
           'where' => [],
           'groupBy' => [],
@@ -48,7 +48,7 @@ return [
           'placeholder' => 5,
           'columns' => [
             ['type' => 'field', 'key' => 'created_date', 'dataType' => 'Timestamp', 'label' => E::ts('When'), 'sortable' => TRUE],
-            ['type' => 'field', 'key' => 'contact_id.display_name', 'dataType' => 'String', 'label' => E::ts('Who'), 'sortable' => TRUE, 'empty_value' => E::ts('System')],
+            ['type' => 'field', 'key' => 'changed_by_name', 'dataType' => 'String', 'label' => E::ts('Who'), 'sortable' => TRUE, 'empty_value' => E::ts('System')],
             ['type' => 'field', 'key' => 'action_label', 'dataType' => 'String', 'label' => E::ts('What'), 'sortable' => TRUE],
             ['type' => 'field', 'key' => 'details_text', 'dataType' => 'String', 'label' => E::ts('Details'), 'sortable' => FALSE],
           ],

@@ -1552,3 +1552,48 @@ ul#errorList {
 .crm-container .election-static-label {
     font-weight: 600;
 }
+
+/* The copy button next to the fingerprint keeps its icon and its word on one line. */
+.crm-container button.election-copy {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+.crm-container button.election-copy > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+}
+/* Long statements and links wrap inside the Candidates list instead of pushing the row buttons off the page. */
+.election-list-table td {
+    overflow-wrap: break-word;
+}
+.election-list-table td[data-field-name="statement_url"] {
+    overflow-wrap: anywhere;
+    max-width: 14em;
+}
+
+/*
+ * The four kinds of message of the standards (error, warning, success, information) look the same in every
+ * CiviCRM theme. CiviCRM itself only styles some of the class names, so the extension's messages state their own
+ * colours (all pass 4.5:1) and the kind is never the colour alone: the words say it.
+ */
+.crm-container .messages.error {
+    background: #fbe3e4;
+    color: #8a1f11;
+    border-left: 4px solid #8a1f11;
+    padding: 0.6em 1em;
+}
+.crm-container .messages.warning {
+    background: #fff3cd;
+    color: #5c4400;
+    border-left: 4px solid #8a6500;
+    padding: 0.6em 1em;
+}
+.crm-container .messages.success {
+    background: #f1f8eb;
+    color: #2d4a12;
+    border-left: 4px solid #4b7f1d;
+    padding: 0.6em 1em;
+}

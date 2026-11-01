@@ -48,6 +48,28 @@ class ElectionAuditSpecProvider implements Generic\SpecProviderInterface {
       ->setInputType('Text')
       ->setSqlRenderer([__CLASS__, 'renderDetailsText']);
     $spec->addFieldSpec($details);
+
+    // The contact is not a foreign key on purpose (a deleted contact must not change an entry, which is part of the
+    // hash chain), so the name is looked up here.
+    $who = new FieldSpec('changed_by_name', 'ElectionAudit', 'String');
+    $who->setLabel(E::ts('Who'))
+      ->setTitle(E::ts('Who'))
+      ->setDescription(E::ts('The person who made the change. Empty for changes made by the system.'))
+      ->setColumnName('contact_id')
+      ->setReadonly(TRUE)
+      ->setType('Extra')
+      ->setInputType('Text')
+      ->setSqlRenderer([__CLASS__, 'renderChangedByName']);
+    $spec->addFieldSpec($who);
+  }
+
+  /**
+   * @param array $field
+   * @return string
+   */
+  public static function renderChangedByName(array $field): string {
+    $contactId = self::column($field, 'contact_id');
+    return "(SELECT c.display_name FROM civicrm_contact c WHERE c.id = $contactId)";
   }
 
   public function applies($entity, $action): bool {
