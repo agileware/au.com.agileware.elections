@@ -249,7 +249,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     $errors = CRM_Elections_BAO_Election::compareDates($values);
     $this->_errors = array_merge($this->_errors, $errors);
 
-    if (!CRM_Utils_Rule::positiveInteger($values['required_nominations'])) {
+    if (!CRM_Utils_Rule::positiveInteger($values['required_nominations']) || ((int) $values['required_nominations'] < 1)) {
       $this->_errors['required_nominations'] = E::ts('Required nominations must be a whole number of 1 or more.');
     }
     return parent::validate();

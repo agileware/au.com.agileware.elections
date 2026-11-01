@@ -51,7 +51,9 @@ test('the election has been set up with six roles and is open for nominations', 
   await admin.close();
 });
 
-test('nominators nominate and second, and the outsider cannot take part', async ({ persona, personaGoto }) => {
+test('nominators nominate and second, and the outsider cannot take part', async ({ persona, personaGoto, allowedProblems }) => {
+  // A refused page says why and is sent as HTTP 403.
+  allowedProblems.push(/403/);
   test.setTimeout(10 * 60 * 1000);
   const data = council();
 
@@ -120,7 +122,9 @@ test('nominees accept, withdraw or stay silent, and six people end up standing',
   expect(new Set(Object.values(byRole).flat()).size).toBe(6);
 });
 
-test('thirty voters and the nominees vote, one changes their vote, the outsider cannot', async ({ persona, personaGoto }) => {
+test('thirty voters and the nominees vote, one changes their vote, the outsider cannot', async ({ persona, personaGoto, allowedProblems }) => {
+  // A refused page says why and is sent as HTTP 403.
+  allowedProblems.push(/403/);
   test.setTimeout(15 * 60 * 1000);
   const data = council();
   moveToStage('voting');

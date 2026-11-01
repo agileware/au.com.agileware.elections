@@ -1,6 +1,9 @@
 import { test, expect, civiAdminUrl, expectNoPhpOutput } from '../../fixtures/base';
 import { createElection, nm, positionNames, removeRunData } from '../../fixtures/data';
 
+// A required field's name ends with its separate * marker, so an exact name is matched as a pattern.
+const exactLabel = (label: string) => new RegExp(`^\\s*${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\*?\\s*$`);
+
 test.afterAll(() => {
   removeRunData();
 });
@@ -45,7 +48,7 @@ test.describe('election administration', () => {
     await adminPage.goto(civiAdminUrl('civicrm/elections/positions/create', { reset: 1, eid: id }));
     await expect(adminPage.getByText('Fields marked * are required.')).toBeVisible();
     for (const label of ['Name', 'Position type', 'Seats', 'Order on the ballot', 'Write-ins per seat', 'Description']) {
-      await expect(adminPage.getByLabel(label, { exact: true }), label).toBeVisible();
+      await expect(adminPage.getByLabel(exactLabel(label)), label).toBeVisible();
     }
     await expect(adminPage.getByLabel('Position type').locator('option')).toHaveText(['Position', 'Question']);
     await adminPage.getByLabel('Position type').selectOption('referendum');
@@ -60,10 +63,11 @@ test.describe('election administration', () => {
     await expect(footer.getByRole('link', { name: 'Back to Manage Elections' })).toBeVisible();
 
     await adminPage.getByLabel('Seats').fill('0');
-    await adminPage.getByLabel('Name', { exact: true }).fill('Smoke Chair');
+    await adminPage.getByLabel(exactLabel('Name')).fill('Smoke Chair');
     await adminPage.getByLabel('Order on the ballot').fill('1');
     await adminPage.getByRole('button', { name: 'Submit' }).click();
-    await expect(adminPage.getByText('Seats must be a whole number of 1 or more.')).toBeVisible();
+    // The problem is listed at the top of the form and shown beside the field.
+    await expect(adminPage.getByText('Seats must be a whole number of 1 or more.').first()).toBeVisible();
     await adminPage.getByLabel('Seats').fill('1');
     await adminPage.getByRole('button', { name: 'Submit' }).click();
     await expect(adminPage.getByText('Position added.')).toBeVisible();
@@ -76,9 +80,12 @@ test.describe('election administration', () => {
     await adminPage.goto(civiAdminUrl('civicrm/elections/candidates/add', { reset: 1, eid: id }));
     await expect(adminPage.getByText('There are no positions to add a candidate to.')).toBeVisible();
     await expect(adminPage.getByRole('link', { name: 'Add a position first.' })).toBeVisible();
-    for (const label of ['Position', 'Candidate', 'Mark as accepted', 'Statement']) {
-      await expect(adminPage.getByLabel(label, { exact: true }), label).toBeVisible();
+    for (const label of ['Position', 'Mark as accepted', 'Statement']) {
+      await expect(adminPage.getByLabel(exactLabel(label)), label).toBeVisible();
     }
+    // The person is chosen in a searchable box: its label is the field's label and it says what to do.
+    await expect(adminPage.locator('label[for="contact"]')).toHaveText(/^\s*Candidate\s*\*?\s*$/);
+    await expect(adminPage.locator('#s2id_contact')).toContainText('Select a person');
     await expect(adminPage.getByLabel('Position').locator('option').first()).toHaveText('Select a position');
     await expect(adminPage.locator('.crm-submit-buttons').getByRole('button', { name: 'Submit' })).toBeVisible();
     await expectNoPhpOutput(adminPage);

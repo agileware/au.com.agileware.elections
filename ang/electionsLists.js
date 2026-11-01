@@ -109,8 +109,22 @@
           if (!cell) {
             return '';
           }
-          var value = cell.querySelector('.crm-search-field-value');
-          return words(value || cell);
+          var value = cell.querySelector('.crm-search-field-value') || cell;
+          // While the name is being edited in place the cell also holds the editor and its Save and Cancel buttons:
+          // the row is still named by what it was called before, not by the buttons.
+          if (value.querySelector('input, select, textarea, button')) {
+            var copy = value.cloneNode(true);
+            Array.prototype.forEach.call(copy.querySelectorAll('input, select, textarea, button, form'), function (extra) {
+              extra.parentNode.removeChild(extra);
+            });
+            var edited = words(copy);
+            return edited || row.getAttribute('data-election-row-name') || '';
+          }
+          var name = words(value);
+          if (name) {
+            row.setAttribute('data-election-row-name', name);
+          }
+          return name;
         }
 
         function move(row, direction) {
@@ -160,7 +174,6 @@
           button.setAttribute('data-label', label);
           var glyph = document.createElement('i');
           glyph.className = 'crm-i ' + icon;
-          glyph.setAttribute('role', 'img');
           glyph.setAttribute('aria-hidden', 'true');
           button.appendChild(glyph);
           return button;

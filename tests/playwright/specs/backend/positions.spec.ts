@@ -101,7 +101,9 @@ test.describe('Election positions (SearchKit list)', () => {
     const row = adminPage.locator('crm-search-display-table tbody tr').first();
     await row.locator('[data-field-name="name"] .crm-editable-enabled').click();
     await row.locator('input[type="text"]').fill('New name');
-    await row.getByRole('button', { name: 'Save' }).click();
+    // While the name is edited the move buttons still name the row by its name, not by the editor's buttons.
+    await expect(row.getByRole('button', { name: 'Move up Old name' })).toBeVisible();
+    await row.getByRole('button', { name: 'Save', exact: true }).click();
     await expect.poll(() => positionNames(id)).toEqual(['New name']);
   });
 

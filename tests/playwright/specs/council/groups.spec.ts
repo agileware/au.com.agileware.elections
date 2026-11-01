@@ -29,7 +29,9 @@ test.afterAll(() => {
   civiEval(`foreach (civicrm_api3('Group', 'get', ['name' => ['LIKE' => 'pw_%'], 'options' => ['limit' => 0]])['values'] as $g) { civicrm_api3('Group', 'delete', ['id' => $g['id']]); }`);
 });
 
-test('someone who can only vote is told they cannot nominate', async ({ personaGoto }) => {
+test('someone who can only vote is told they cannot nominate', async ({ personaGoto, allowedProblems }) => {
+  // A refused page says why and is sent as HTTP 403.
+  allowedProblems.push(/403/);
   const page = await personaGoto('V03', 'civicrm/elections/view');
   await expect(page.getByText('You are not able to nominate in this election.')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Nominate', exact: true })).toHaveCount(0);
@@ -70,7 +72,7 @@ test('the overview shows who is in each role', async ({ browser }) => {
     return;
   }
   await admin.page.goto(civiAdminUrl('civicrm/elections/overview', { reset: 1, eid: council().election_id }));
-  await expect(admin.page.locator('.election-overview-roles')).toContainText('May nominate and second: 2');
-  await expect(admin.page.locator('.election-overview-roles')).toContainText('May stand as candidates: 2');
+  await expect(admin.page.locator('.election-overview-roles')).toContainText('2 people may nominate and second');
+  await expect(admin.page.locator('.election-overview-roles')).toContainText('2 people may stand as candidates');
   await admin.close();
 });

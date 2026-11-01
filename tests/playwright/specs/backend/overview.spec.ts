@@ -115,7 +115,7 @@ test.describe('Election overview', () => {
   test('the manage list links to the overview and a member cannot open it', async ({ adminPage, memberPage, allowedProblems }) => {
     const id = createElection(nm('Overview link'));
     await adminPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
-    await adminPage.locator('tr', { hasText: nm('Overview link') }).getByRole('link', { name: nm('Overview link') }).click();
+    await adminPage.locator('tr', { hasText: nm('Overview link') }).getByRole('link', { name: nm('Overview link'), exact: true }).click();
     await expect(adminPage.locator('.election-stage')).toBeVisible();
 
     allowedProblems.push(/403/);

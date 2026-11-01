@@ -53,7 +53,7 @@ test.describe('election form', () => {
     await adminPage.getByRole('tab', { name: 'Dates' }).click();
     const labels = ['Visible from', 'Visible until', 'Nominations open', 'Nominations close', 'Candidates advertised from', 'Voting opens', 'Voting closes', 'Results published on'];
     for (const label of labels) {
-      await expect(adminPage.locator('label').filter({ hasText: new RegExp(`^${label}\\s*\\*?$`) }), label).toHaveCount(1);
+      await expect(adminPage.locator('label').filter({ hasText: new RegExp(`^\\s*${label}\\s*\\*?\\s*$`) }), label).toHaveCount(1);
     }
     await expect(adminPage.locator('label', { hasText: /^(Start|End) Date/ })).toHaveCount(0);
     // One line, with the name of the zone, above the dates.
@@ -70,11 +70,16 @@ test.describe('election form', () => {
   test('the labels, placeholders and choices follow the standard', async ({ adminPage }) => {
     await adminPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
     await adminPage.getByRole('tab', { name: 'Participation' }).click();
-    for (const label of ['Voting groups', 'Nominating groups', 'Candidate groups', 'Voting method', 'Required nominations', 'Allow people to nominate online', 'Allow people to change their vote', 'Allow people to take part without logging in']) {
+    // The group choices are searchable widgets: the visible search box carries the label too (the hidden input behind it is not a control).
+    for (const label of ['Voting groups', 'Nominating groups', 'Candidate groups']) {
+      await expect(adminPage.getByRole('textbox', { name: new RegExp(`^${label}\\s*\\*?$`) }), label).toBeVisible();
+    }
+    for (const label of ['Voting method', 'Required nominations', 'Allow people to nominate online', 'Allow people to change their vote', 'Allow people to take part without logging in']) {
       await expect(adminPage.getByLabel(label), label).toBeVisible();
     }
-    await expect(adminPage.locator('#s2id_allowed_groups')).toContainText('Select groups');
-    await expect(adminPage.locator('#s2id_nomination_groups')).toContainText('Same as voting groups');
+    // An empty searchable choice shows its placeholder as the value of its search box.
+    await expect(adminPage.locator('#s2id_allowed_groups .select2-input')).toHaveValue('Select groups');
+    await expect(adminPage.locator('#s2id_nomination_groups .select2-input')).toHaveValue('Same as voting groups');
     await expect(adminPage.locator('body')).not.toContainText('- Select');
     await adminPage.getByRole('tab', { name: 'Dates' }).click();
     await expect(adminPage.locator('#quick_cycle option').first()).toHaveText('Select a cycle');

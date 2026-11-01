@@ -29,9 +29,19 @@ async function checkPage(page: Page, label: string) {
     document.querySelectorAll<HTMLElement>('.election-btn, .crm-election-form-block-container button.crm-button').forEach((b) => {
       const text = (b.textContent || '').trim();
       const r = b.getBoundingClientRect();
-      const range = document.createRange();
-      range.selectNodeContents(b);
-      const t = range.getBoundingClientRect();
+      // The text a person sees: not the words only a screen reader gets (they are clipped to 1px but their text overflows).
+      const visible: Range[] = [];
+      const walker = document.createTreeWalker(b, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        if (!(node.textContent || '').trim() || (node.parentElement && node.parentElement.closest('.election-visually-hidden'))) continue;
+        const piece = document.createRange();
+        piece.selectNodeContents(node);
+        visible.push(piece);
+      }
+      const rects = visible.map((v) => v.getBoundingClientRect());
+      const t = rects.length
+        ? { left: Math.min(...rects.map((x) => x.left)), right: Math.max(...rects.map((x) => x.right)), top: Math.min(...rects.map((x) => x.top)), bottom: Math.max(...rects.map((x) => x.bottom)) }
+        : { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
       const cs = getComputedStyle(b);
       const dx = Math.abs((t.left + t.right) / 2 - (r.left + r.right) / 2);
       const dy = Math.abs((t.top + t.bottom) / 2 - (r.top + r.bottom) / 2);

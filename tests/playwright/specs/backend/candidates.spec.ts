@@ -92,7 +92,7 @@ test.describe('Election candidates (SearchKit list)', () => {
     await adminPage.locator('#s2id_contact, .crm-form-entityref').first().click();
     await adminPage.locator('.select2-input:visible').fill('Di');
     await adminPage.locator('.select2-result-label', { hasText: 'Di' }).first().click();
-    await adminPage.getByLabel('Candidate statement').fill('Added by the board');
+    await adminPage.getByLabel(/^\s*Statement\s*\*?\s*$/).fill('Added by the board');
     await adminPage.getByRole('button', { name: 'Submit' }).click();
     await expect(adminPage.locator('crm-search-display-table tbody tr', { hasText: 'Di' })).toBeVisible();
     expect(nomineeNames(election).some((n) => n.includes('Di'))).toBe(true);

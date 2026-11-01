@@ -114,7 +114,9 @@ test('someone who declines cannot be written in again', async ({ persona }) => {
   expect(rows[0].has_rejected_nomination).toBeTruthy();
 });
 
-test('once voting has closed the person who never answered is told, and cannot accept', async ({ persona }) => {
+test('once voting has closed the person who never answered is told, and cannot accept', async ({ persona, allowedProblems }) => {
+  // A refused page says why and is sent as HTTP 403.
+  allowedProblems.push(/403/);
   const data = council();
   // V20 is written in and never answers.
   civiEval(`

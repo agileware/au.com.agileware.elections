@@ -39,7 +39,7 @@ test.describe('Manage Elections (SearchKit list)', () => {
       await expect(row.getByRole('link', { name: `${action} ${nm('Row actions')}` })).toBeVisible();
     }
     // The election's name opens its overview; there are no Positions or Candidates buttons in the row.
-    await expect(row.getByRole('link', { name: nm('Row actions') })).toHaveAttribute('href', /overview/);
+    await expect(row.getByRole('link', { name: nm('Row actions'), exact: true })).toHaveAttribute('href', /overview/);
     for (const name of ['Positions', 'Candidates']) {
       await expect(links.filter({ hasText: name })).toHaveCount(0);
     }
@@ -66,7 +66,7 @@ test.describe('Manage Elections (SearchKit list)', () => {
     await row.getByRole('link', { name: 'Activate' }).click();
     const dialog = adminPage.locator('.ui-dialog');
     await dialog.getByRole('button', { name: 'Activate' }).click();
-    await expect(adminPage.getByText('At least one Position must be defined before the Election can be active.')).toBeVisible();
+    await expect(adminPage.getByText('Add at least one position before activating the election.')).toBeVisible();
     await expect(adminPage.locator('tr', { hasText: nm('Needs positions') }).getByText('No', { exact: true })).toBeVisible();
     expect(isActive(id)).toBe(false);
   });
@@ -98,7 +98,7 @@ test.describe('Manage Elections (SearchKit list)', () => {
     catch (e: any) {
       message = String(e.stderr || e.message);
     }
-    expect(message).toContain('At least one Position');
+    expect(message).toContain('Add at least one position');
     expect(isActive(id)).toBe(false);
   });
 

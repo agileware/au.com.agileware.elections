@@ -141,6 +141,8 @@ class CRM_Elections_Page_Elections extends CRM_Elections_Page_Base {
   private function modifyElectionValues(&$elections) {
     $contactId = CRM_Elections_Helper_Eligibility::getActingContactId();
     foreach ($elections as $index => $election) {
+      // The API leaves out a description that was never filled in: the card still asks for it.
+      $elections[$index]['description'] = $election['description'] ?? '';
       $elections[$index]['hasNominationsStarted']   = CRM_Elections_BAO_Election::isTodayBetweenDates($election['nomination_start_date'], NULL);
       $elections[$index]['isVotingStarted'] = CRM_Elections_BAO_Election::isTodayBetweenDates($election['voting_start_date'], NULL);
       $elections[$index]['isResultsOut'] = (CRM_Elections_BAO_Election::isTodayBetweenDates($election['result_date'], NULL) && $election['has_results_generated']);

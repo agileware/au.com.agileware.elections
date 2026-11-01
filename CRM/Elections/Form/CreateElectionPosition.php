@@ -132,7 +132,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
   public function validate() {
     $values = $this->exportValues();
 
-    if (!CRM_Utils_Rule::positiveInteger($values['quantity'])) {
+    if (!CRM_Utils_Rule::positiveInteger($values['quantity']) || ((int) $values['quantity'] < 1)) {
       $this->_errors['quantity'] = E::ts('Seats must be a whole number of 1 or more.');
     }
 

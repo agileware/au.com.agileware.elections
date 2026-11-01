@@ -243,7 +243,8 @@ test('closed: voting has closed and says when the results come', async ({ browse
   await after.page.waitForLoadState('networkidle');
   await expect(after.page.getByRole('link', { name: 'Back to the election' })).toHaveClass(/election-btn-quiet/);
   await expect(after.page.locator('.crm-container')).toContainText(/Times are shown in \S+\./);
-  await expect(after.page.locator('.crm-container a[target=_blank]')).toHaveCount(0);
+  // No link in the election's own content opens another window (CiviCRM's "empowered by" footer link is not the election's).
+  await expect(after.page.locator('.crm-container a[target=_blank]:not(.crm-public-footer a)')).toHaveCount(0);
   await after.close();
   reseedCouncil();
 });

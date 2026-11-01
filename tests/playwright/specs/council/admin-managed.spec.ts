@@ -18,7 +18,9 @@ test.afterAll(() => {
   reseedCouncil();
 });
 
-test('there is no nomination form and the page says the organisers choose', async ({ personaGoto }) => {
+test('there is no nomination form and the page says the organisers choose', async ({ personaGoto, allowedProblems }) => {
+  // A refused page says why and is sent as HTTP 403.
+  allowedProblems.push(/403/);
   const page = await personaGoto('V01', 'civicrm/elections/view');
   await expect(page.getByText('chosen by the organisers').first()).toBeVisible();
   await expect(page.getByRole('link', { name: 'Nominate', exact: true })).toHaveCount(0);
