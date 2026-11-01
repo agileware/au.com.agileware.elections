@@ -4,7 +4,7 @@
 
 The list shows every election that has not been deleted: its name, whether it is **Active**, its **Stage**, the dates **Nominations open**, **Voting opens**, **Voting closes** and **Results published**, and how many positions it has. The page says "Times are shown in" followed by the site's time zone, and dates follow the date format set in CiviCRM. The list shows 50 elections a page.
 
-An election is **locked** once it is active and its nominations have started. A locked election cannot be edited or deleted and its positions cannot be changed, so **Edit** and **Delete** are not shown on its row. The **Edit and delete** column says "Locked: the election is active and nominations have started." instead.
+An election is **locked** once it is active and its nominations have started. A locked election cannot be edited or deleted and its positions cannot be changed, so **Edit** and **Delete** are not shown on its row. The **Edit and delete** column says "Locked: nominations have started." instead.
 
 For each election you can:
 

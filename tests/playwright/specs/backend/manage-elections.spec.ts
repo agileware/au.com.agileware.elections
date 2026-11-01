@@ -134,7 +134,7 @@ test.describe('Manage Elections (SearchKit list)', () => {
     await expect(row.getByRole('link', { name: /^Deactivate\b/ })).toBeVisible();
     await expect(row.getByRole('link', { name: /^Duplicate\b/ })).toBeVisible();
     // The reason is shown as text in place of the Edit and Delete buttons.
-    await expect(row.getByText('Locked: the election is active and nominations have started.')).toBeVisible();
+    await expect(row.getByText('Locked: nominations have started.')).toBeVisible();
     await expect(row.getByText('Nominations open', { exact: true })).toBeVisible();
   });
 

@@ -117,7 +117,7 @@ class ElectionSpecProvider implements Generic\SpecProviderInterface {
     $now = date('Y-m-d H:i:s');
     $visible = self::column($field, 'is_visible');
     $start = self::column($field, 'nomination_start_date');
-    $text = \CRM_Core_DAO::escapeString(E::ts('Locked: the election is active and nominations have started.'));
+    $text = \CRM_Core_DAO::escapeString(E::ts('Locked: nominations have started.'));
     return "IF($visible = 1 AND $start IS NOT NULL AND $start <= '$now', '$text', '')";
   }
 

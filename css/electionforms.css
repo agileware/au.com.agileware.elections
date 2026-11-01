@@ -651,6 +651,8 @@ ul#errorList {
     gap: 0.25rem 1rem;
     padding: 0.4rem 0.5rem;
     border-bottom: 1px solid var(--election-border, #ddd);
+    /* Every row keeps the same space on the left, so the rows that are marked (now, problem) line up with the rest. */
+    border-left: 4px solid transparent;
 }
 .election-timeline-preview .election-timeline-label {
     flex: 0 0 11rem;
@@ -1596,4 +1598,11 @@ ul#errorList {
     color: #2d4a12;
     border-left: 4px solid #4b7f1d;
     padding: 0.6em 1em;
+}
+
+/* The lists fit the page: tighter cells, text at the top of the cell, and the row buttons share one width. */
+.election-list-table td {
+    vertical-align: top;
+    padding-left: 0.4em;
+    padding-right: 0.4em;
 }
