@@ -149,6 +149,10 @@ function elections_civicrm_pageRun(&$page) {
   if ($page instanceof CRM_Elections_Page_Base) {
     elections_send_referrer_policy();
   }
+  // The SearchKit screens are drawn by Afform: give them the breadcrumb of the election, not CiviCRM's menu trail.
+  if (class_exists('CRM_Afform_Page_AfformBase') && $page instanceof CRM_Afform_Page_AfformBase) {
+    CRM_Elections_Helper_Frame::applyToListPage();
+  }
 }
 
 /**

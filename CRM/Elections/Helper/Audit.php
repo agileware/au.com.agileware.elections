@@ -1,5 +1,7 @@
 <?php
 
+use CRM_Elections_ExtensionUtil as E;
+
 /**
  * A tamper-evident log of what was changed in an election, by whom and when.
  *
@@ -89,6 +91,39 @@ class CRM_Elections_Helper_Audit {
    *
    * @return string
    */
+  /**
+   * What an audit log entry's action is called for a person: never the stored name.
+   *
+   * @param string $action
+   *   For example election_changed.
+   *
+   * @return string
+   *   For example "Election changed". An action that is not listed has its name turned into words, so a new kind of
+   *   entry never shows a code.
+   */
+  public static function actionLabel($action): string {
+    $labels = [
+      'election_created' => E::ts('Election created'),
+      'election_changed' => E::ts('Election changed'),
+      'election_deleted' => E::ts('Election deleted'),
+      'position_created' => E::ts('Position created'),
+      'position_changed' => E::ts('Position changed'),
+      'position_deleted' => E::ts('Position deleted'),
+      'nomination_created' => E::ts('Nomination created'),
+      'nomination_changed' => E::ts('Nomination changed'),
+      'nomination_deleted' => E::ts('Nomination deleted'),
+      'results_generated' => E::ts('Results generated'),
+      'vote_removed' => E::ts('Vote removed'),
+      'votes_anonymised' => E::ts('Votes anonymised'),
+      'write_ins_summary' => E::ts('Write-ins summary'),
+    ];
+    $action = (string) $action;
+    if (isset($labels[$action])) {
+      return $labels[$action];
+    }
+    return ucfirst(trim(str_replace('_', ' ', $action)));
+  }
+
   public static function getHeadHash() {
     return CRM_Core_DAO::singleValueQuery('SELECT entry_hash FROM civicrm_election_audit ORDER BY id DESC LIMIT 1') ?: self::NO_PREVIOUS;
   }
@@ -110,6 +145,7 @@ class CRM_Elections_Helper_Audit {
         'date' => $dao->created_date,
         'who' => $dao->display_name ?: '',
         'action' => $dao->action,
+        'label' => self::actionLabel($dao->action),
         'details' => json_decode((string) $dao->details, TRUE) ?: [],
       ];
     }

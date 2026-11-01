@@ -23,19 +23,23 @@ class CRM_Elections_Page_ElectionOverview extends CRM_Elections_Page_Base {
     $election = findElectionById($eId);
     $stage = $election->getStage();
     $counts = CRM_Elections_BAO_Election::getCounts($eId);
-    CRM_Utils_System::setTitle(E::ts('Election: %1', [1 => $election->name]));
+    CRM_Utils_System::setTitle($election->name, '<span class="election-overview-kicker">' . E::ts('Election Overview') . '</span> ' . htmlspecialchars(CRM_Elections_Helper_ResultsDisplay::decode($election->name), ENT_QUOTES, 'UTF-8'));
+    CRM_Elections_Helper_Frame::assign($this, CRM_Elections_Helper_Frame::overviewTrail((int) $eId), CRM_Elections_Helper_Frame::managerUrl());
+    Civi::resources()
+      ->addScriptFile(E::LONG_NAME, 'js/election-copy.js', 110, 'page-footer')
+      ->addVars('electionsCopy', ['copy' => E::ts('Copy'), 'copied' => E::ts('Copied'), 'failed' => E::ts('Select the fingerprint and copy it')]);
 
     $now = new DateTime();
     $timeline = [];
     foreach ([
-      'visibility_start_date' => E::ts('Visible to people'),
+      'visibility_start_date' => E::ts('Visible from'),
       'nomination_start_date' => E::ts('Nominations open'),
       'nomination_end_date' => E::ts('Nominations close'),
       'advertise_candidates_date' => E::ts('Candidates advertised'),
       'voting_start_date' => E::ts('Voting opens'),
       'voting_end_date' => E::ts('Voting closes'),
       'result_date' => E::ts('Results published'),
-      'visibility_end_date' => E::ts('Hidden from people'),
+      'visibility_end_date' => E::ts('Visible until'),
     ] as $field => $label) {
       $when = DateTime::createFromFormat('Y-m-d H:i:s', $election->$field);
       $timeline[] = ['label' => $label, 'date' => $election->$field, 'passed' => $when && $when <= $now];
@@ -84,7 +88,10 @@ class CRM_Elections_Page_ElectionOverview extends CRM_Elections_Page_Base {
     $this->assign('auditRecent', CRM_Elections_Helper_Audit::entries($eId, 8));
     $this->assign('timeline', $timeline);
     $this->assign('nextStep', CRM_Elections_BAO_Election::getNextStep($stage, $counts));
-    $this->assign('canEdit', $election->canEdit() === TRUE);
+    $canEdit = $election->canEdit();
+    $this->assign('canEdit', $canEdit === TRUE);
+    $this->assign('editReason', $canEdit === TRUE ? '' : (string) $canEdit);
+    $this->assign('isActive', !empty($election->is_visible));
     parent::run();
   }
 

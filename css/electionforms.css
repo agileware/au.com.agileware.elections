@@ -1287,3 +1287,56 @@ ul#errorList {
     font: inherit;
     cursor: pointer;
 }
+
+/* The frame of a back end page: the heading's small label, the row of action buttons and the quiet back buttons. */
+.election-overview-kicker {
+    display: block;
+    font-size: 0.5em;
+    font-weight: normal;
+    text-transform: none;
+    opacity: 0.75;
+}
+.election-action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5em;
+    margin: 1em 0;
+}
+.election-action-bar .button {
+    font-size: 0.9em;
+    padding-left: 0.7em;
+    padding-right: 0.7em;
+}
+.election-action-bar .button,
+.crm-submit-buttons .election-back,
+.crm-submit-buttons .election-back-manage {
+    margin: 0;
+}
+.crm-container a.button.election-action-quiet,
+.crm-container a.button.election-action-quiet:visited {
+    background: transparent;
+    color: inherit;
+    border: 1px solid currentColor;
+}
+.crm-container .button.election-action-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+.election-fingerprint {
+    display: inline-block;
+    max-width: 100%;
+    padding: 0.25em 0.5em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+    border: 1px solid rgba(128, 128, 128, 0.5);
+    border-radius: 4px;
+    user-select: all;
+}
+.election-fingerprint-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5em;
+}
