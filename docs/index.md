@@ -42,6 +42,7 @@ Follow the stages in order:
 ### 5. Reference
 - [Emails and scheduled jobs](reference_emails_and_jobs.md): the message templates and the three jobs.
 - [Security and audit](reference_security_and_audit.md): the guarantees, the audit log and the integrity check.
+- [Reporting a security problem](https://github.com/agileware/au.com.agileware.elections/blob/master/SECURITY.md): the security policy and supported versions.
 
 ## An election at a glance
 

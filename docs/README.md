@@ -79,6 +79,11 @@ Development of this CiviCRM extension and development of the PHP Unit Tests was 
 
 ![Linux Australia](https://github.com/agileware/au.com.agileware.elections/raw/master/docs/images/linux-australia-logo.png) 
 
+Security
+------
+
+Please report security problems privately, not as public GitHub issues. See the [security policy](https://github.com/agileware/au.com.agileware.elections/blob/master/SECURITY.md) for how to report them and which versions are supported (2.x; 1.x is no longer supported).
+
 About the Authors
 ------
 
