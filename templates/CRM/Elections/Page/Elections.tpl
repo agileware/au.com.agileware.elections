@@ -24,9 +24,9 @@
                 {if $election.card.button != ''}
                     <p class="election-card-actions">
                         {if !$viewAction}
-                            <a href="{crmURL p="civicrm/elections/view" q="eid=`$election.id`"}" class="election-btn">{$election.card.button|escape}</a>
+                            <a href="{crmURL p="civicrm/elections/view" q="eid=`$election.id``$personalLinkQuery`"}" class="election-btn">{$election.card.button|escape}</a>
                         {else}
-                            <a href="{$viewAction|escape}?eid={$election.id|escape}" class="election-btn">{$election.card.button|escape}</a>
+                            <a href="{$viewAction|escape}?eid={$election.id|escape}{$personalLinkQuery|escape}" class="election-btn">{$election.card.button|escape}</a>
                         {/if}
                     </p>
                 {/if}

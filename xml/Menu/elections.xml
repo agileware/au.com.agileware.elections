@@ -6,6 +6,7 @@
     <title>Elections</title>
     <access_arguments>view Elections</access_arguments>
     <is_public>true</is_public>
+    <access_callback>CRM_Elections_Permission::check</access_callback>
   </item>
   <item>
     <path>civicrm/elections/create</path>

@@ -23,6 +23,10 @@ class CRM_Elections_Page_Elections extends CRM_Elections_Page_Base {
       $this->electionsAction = 'all';
     }
 
+    // A person who has no login and arrived on their personal link keeps it on every link in the list, so the
+    // next page does not refuse them.
+    $this->assign('personalLinkQuery', self::personalLinkQuery());
+
     $this->elections = $this->getElections();
     $this->assign('elections', $this->elections);
     hideNonRequiredItemsOnPage($this);
@@ -34,6 +38,24 @@ class CRM_Elections_Page_Elections extends CRM_Elections_Page_Base {
     $this->assign('isFromShortCode', $this->isFromShortCode);
 
     parent::run();
+  }
+
+  /**
+   * The query string that keeps a personal link working, or an empty string for a person who is logged in or
+   * has no valid link.
+   *
+   * @return string
+   *   For example "&cid=5&cs=abc_123", ready to add to an address that already has a query.
+   */
+  public static function personalLinkQuery(): string {
+    if (!empty(CRM_Core_Session::singleton()->getLoggedInContactID())) {
+      return '';
+    }
+    $contactId = CRM_Elections_Helper_Eligibility::getActingContactId();
+    if (empty($contactId)) {
+      return '';
+    }
+    return '&cid=' . (int) $contactId . '&cs=' . rawurlencode((string) CRM_Utils_Request::retrieve('cs', 'String'));
   }
 
   private function getCurrentDateTime() {

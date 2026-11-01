@@ -63,6 +63,28 @@ test('the list of elections shows a card with the stage and the button for it', 
   await context.close();
 });
 
+test('the list of elections opens on a personal link and keeps the link on its buttons', async ({ browser }) => {
+  // A person with no login who follows their personal link to the list must not be refused, and the button on
+  // a card must lead to the election without asking them to log in.
+  const voter = await view(browser, 'V01');
+  await voter.close();
+  const context = await browser.newContext();
+  const list = await context.newPage();
+  await list.goto(personaUrl('V01', 'civicrm/elections'));
+  await list.waitForLoadState('networkidle');
+  await expect(list.locator('body')).not.toContainText('do not have permission');
+  const card = list.locator('.election-card', { hasText: 'Playwright Council Election' });
+  await expect(card.locator('.election-badge')).toHaveText('Nominations open');
+  const button = card.locator('a.election-btn').first();
+  await expect(button).toHaveAttribute('href', /cid=\d+/);
+  await expect(button).toHaveAttribute('href', /cs=/);
+  await button.click();
+  await list.waitForLoadState('networkidle');
+  await expect(list.locator('.election-stepper')).toBeVisible();
+  await expect(list.locator('body')).not.toContainText('not authorised');
+  await context.close();
+});
+
 test('candidates: a nominee is asked to respond, everyone else sees the candidates', async ({ browser }) => {
   advanceCouncil('fill-nominations');
   moveToStage('advertise');
