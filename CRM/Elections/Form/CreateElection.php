@@ -240,6 +240,23 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     return parent::validate();
   }
 
+  /**
+   * What only a new election is given. A new election starts inactive and records who made it; editing an
+   * election keeps whether it is active and who created it.
+   *
+   * @param int|string|null $electionId The election being edited, if any
+   * @return array
+   */
+  public static function valuesForNewElection($electionId): array {
+    if ($electionId) {
+      return [];
+    }
+    return [
+      'is_visible' => 0,
+      'created_by' => CRM_Core_Session::singleton()->getLoggedInContactID(),
+    ];
+  }
+
   public function postProcess() {
     $values = $this->exportValues();
     $election = [
@@ -257,7 +274,6 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       'allow_revote'                => $values['allow_revote'],
       'voting_method'               => $values['voting_method'],
       'allow_checksum_access'       => $values['allow_checksum_access'],
-      'is_visible'                  => 0,
       'required_nominations'        => $values['required_nominations'],
       'allowed_groups'              => $values['allowed_groups'],
       'send_emails'                 => !empty($values['send_emails']) ? 1 : 0,
@@ -269,8 +285,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
       'show_statements'             => $values['show_statements'],
       'show_nominators'             => !empty($values['show_nominators']) ? 1 : 0,
       'name_format'                 => $values['name_format'] !== '' ? $values['name_format'] : NULL,
-      'created_by'                  => CRM_Core_Session::singleton()->getLoggedInContactID(),
-    ] + CRM_Elections_Helper_ResultsDisplay::getValuesToSave($values);
+    ] + self::valuesForNewElection($this->eId) + CRM_Elections_Helper_ResultsDisplay::getValuesToSave($values);
 
     $successMessage = E::ts('Election has been created successfully.');
     if ($this->eId) {

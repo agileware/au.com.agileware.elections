@@ -48,7 +48,9 @@ function civicrm_api3_election_create($params) {
       }
     }
   }
-  $params['created_by'] = CRM_Core_Session::singleton()->getLoggedInContactID();
+  if (empty($params['id'])) {
+    $params['created_by'] = CRM_Core_Session::singleton()->getLoggedInContactID();
+  }
   return _civicrm_api3_basic_create(_civicrm_api3_get_BAO(__FUNCTION__), $params);
 }
 

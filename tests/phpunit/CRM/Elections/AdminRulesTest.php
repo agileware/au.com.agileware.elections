@@ -38,6 +38,38 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
     $this->assertEquals(0, CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], 'is_visible'));
   }
 
+  public function testEditingAnActiveElectionKeepsItActiveAndKeepsItsCreator() {
+    $election = $this->inactiveElection();
+    $this->createElectionPosition($election);
+    \Civi\Api4\Election::update(FALSE)->addWhere('id', '=', $election['id'])->addValue('is_visible', TRUE)->execute();
+    $creator = $this->individualCreate();
+    CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET created_by = %1 WHERE id = %2', [1 => [$creator, 'Integer'], 2 => [$election['id'], 'Integer']]);
+
+    // What the Edit Election form adds to a save: nothing for an election that exists, so it is not switched off.
+    $this->assertSame([], CRM_Elections_Form_CreateElection::valuesForNewElection($election['id']));
+    $new = CRM_Elections_Form_CreateElection::valuesForNewElection(0);
+    $this->assertSame(0, $new['is_visible']);
+    $this->assertArrayHasKey('created_by', $new);
+
+    $params = ['id' => $election['id'], 'name' => 'Renamed ' . uniqid()];
+    foreach (['visibility_start_date', 'visibility_end_date', 'nomination_start_date', 'nomination_end_date', 'advertise_candidates_date', 'voting_start_date', 'voting_end_date', 'result_date'] as $field) {
+      $params[$field] = CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], $field);
+    }
+    // Someone else edits it.
+    $editor = $this->individualCreate();
+    CRM_Core_Session::singleton()->set('userID', $editor);
+    try {
+      $this->callAPISuccess('Election', 'create', $params);
+    }
+    finally {
+      CRM_Core_Session::singleton()->set('userID', NULL);
+    }
+
+    $this->assertEquals(1, CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], 'is_visible'));
+    $this->assertEquals($creator, CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], 'created_by'));
+    $this->assertEquals($params['name'], CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], 'name'));
+  }
+
   // ------------------------------------------------- active (locked) and stage
 
   public function testStageAndLockedFollowTheElectionsState() {
