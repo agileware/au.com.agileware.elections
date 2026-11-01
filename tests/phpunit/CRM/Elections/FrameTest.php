@@ -33,6 +33,16 @@ class CRM_Elections_FrameTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame('<span aria-current="page">Positions</span>', $markup[2]);
   }
 
+  public function testTheBreadcrumbCanBeGivenAsLinksForTemplatesThatDrawEveryStepAsOne() {
+    $election = $this->createElection(['name' => 'Beekeepers <b>2027</b>']);
+    $trail = CRM_Elections_Helper_Frame::trail((int) $election['id'], [], 'Positions');
+    $links = CRM_Elections_Helper_Frame::breadcrumbLinks($trail);
+    $this->assertCount(3, $links);
+    $this->assertSame(['url', 'title'], array_keys($links[0]));
+    $this->assertSame('Beekeepers &lt;b&gt;2027&lt;/b&gt;', $links[1]['title']);
+    $this->assertSame('<span aria-current="page">Positions</span>', $links[2]['title']);
+  }
+
   public function testTheOverviewTrailHasTheElectionAsItsPage() {
     $election = $this->createElection();
     $trail = CRM_Elections_Helper_Frame::overviewTrail((int) $election['id']);

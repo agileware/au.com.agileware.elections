@@ -48,18 +48,35 @@ test.describe('Election overview', () => {
     const id = createElection(name);
     await adminPage.goto(overviewUrl(id));
     // Above the heading: Manage Elections is a link, the election is the current page.
-    const crumbs = adminPage.locator('.breadcrumb');
+    const crumbs = adminPage.locator('.crm-container .breadcrumb');
     await expect(crumbs.getByRole('link', { name: 'Manage Elections' })).toBeVisible();
     await expect(crumbs.locator('[aria-current="page"]')).toHaveText(name);
-    await expect(adminPage.locator('.crm-title .title, h2.title').first()).toContainText(name);
+    // The heading is CiviCRM's on WordPress and Joomla, and the theme's page title (an h1 in the main area) on Drupal.
+    await expect(adminPage.locator('.crm-title .title, h2.title, main h1').first()).toContainText(name);
     // The row: Back, Back to Manage Elections, Edit Election first of the actions, then the rest in order.
     const labels = (await adminPage.locator('.election-action-bar > .button').allInnerTexts()).map((t) => t.replace(/\s+/g, ' ').trim());
     expect(labels).toEqual(['Back', 'Back to Manage Elections', 'Edit Election', 'Positions', 'Candidates', 'Results Page', 'Audit Log', 'View as a Voter', 'Activate']);
     await expect(adminPage.getByRole('link', { name: 'Duplicate' })).toHaveCount(0);
     // One row on a wide screen (it wraps on a narrow one): every button sits at the same height.
     await adminPage.setViewportSize({ width: 1600, height: 900 });
-    const tops = await adminPage.locator('.election-action-bar > .button').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));
-    expect(new Set(tops).size).toBe(1);
+    // A Drupal or Joomla theme sets the width of the content column (Olivero is about 800 px wide), so the row
+    // is only expected to stay in one line where all the buttons fit in the width the theme gives it.
+    const row = await adminPage.locator('.election-action-bar').evaluate((bar) => {
+      const buttons = Array.from(bar.querySelectorAll(':scope > .button'));
+      const gap = parseFloat(getComputedStyle(bar).columnGap) || 0;
+      const needed = buttons.reduce((sum, b) => sum + b.getBoundingClientRect().width, 0) + gap * (buttons.length - 1);
+      return {
+        fits: needed <= bar.clientWidth,
+        tops: buttons.map((b) => Math.round(b.getBoundingClientRect().top)),
+      };
+    });
+    if (row.fits) {
+      expect(new Set(row.tops).size).toBe(1);
+    }
+    else {
+      // Wrapped: still in order, each row below the one before.
+      expect([...row.tops].sort((a, b) => a - b)).toEqual(row.tops);
+    }
     // The action bar is above the first block, not at the bottom.
     const bar = await adminPage.locator('.election-action-bar').boundingBox();
     const grid = await adminPage.locator('.election-overview-grid').boundingBox();

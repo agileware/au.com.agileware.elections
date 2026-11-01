@@ -1,5 +1,6 @@
 import { test, expect, civiAdminUrl } from '../../fixtures/base';
 import { advanceCouncil, civiApi4, civiSql, reseedCouncil } from '../../fixtures/civi';
+import { CMS } from '../../fixtures/cms';
 import { council, personaUrl } from '../../fixtures/personas';
 
 /**
@@ -30,7 +31,8 @@ test.afterAll(() => {
 
 test('the Results page form works on a running election and saves the logo, header and footer', async ({ adminPage }) => {
   await adminPage.goto(civiAdminUrl('civicrm/elections/results-display', { reset: 1, eid: electionId }));
-  await expect(adminPage.getByRole('heading', { name: 'Results Page', level: 2 })).toBeVisible();
+  // The page title is CiviCRM's h2 on WordPress and the theme's h1 on Drupal and Joomla.
+  await expect(adminPage.getByRole('heading', { name: 'Results Page', level: CMS === 'wordpress' ? 2 : 1 })).toBeVisible();
   await adminPage.getByLabel('Header text').fill('<b>Congratulations</b> to our new council');
   await adminPage.getByLabel('Footer text').fill('Thank you for voting.\nSee you at the AGM.');
   await adminPage.locator('input[name="results_logo"]').setInputFiles({ name: 'logo.png', mimeType: 'image/png', buffer: PNG });

@@ -152,10 +152,28 @@ class CRM_Elections_Helper_Frame {
   }
 
   /**
+   * The breadcrumb as Joomla's page template (and CiviCRM's standalone one) draws it: each step a link made from
+   * a "url" and a "title", both already escaped. Those templates link every step, so the page itself is a link
+   * to the top of the page with its name marked as the current one.
+   */
+  public static function breadcrumbLinks(array $trail): array {
+    $links = [];
+    foreach ($trail as [$label, $url]) {
+      $label = htmlspecialchars((string) $label, ENT_QUOTES, 'UTF-8');
+      $links[] = $url === NULL
+        ? ['url' => '#', 'title' => '<span aria-current="page">' . $label . '</span>']
+        : ['url' => htmlspecialchars((string) $url, ENT_QUOTES, 'UTF-8'), 'title' => $label];
+    }
+    return $links;
+  }
+
+  /**
    * Replace CiviCRM's own breadcrumb with the trail of this page.
    */
   public static function setBreadcrumb(array $trail): void {
-    CRM_Core_Smarty::singleton()->assign('breadcrumb', self::breadcrumbMarkup($trail));
+    $framework = CRM_Core_Config::singleton()->userFramework;
+    $crumbs = in_array($framework, ['Joomla', 'Standalone'], TRUE) ? self::breadcrumbLinks($trail) : self::breadcrumbMarkup($trail);
+    CRM_Core_Smarty::singleton()->assign('breadcrumb', $crumbs);
   }
 
   /**
@@ -181,7 +199,7 @@ class CRM_Elections_Helper_Frame {
    */
   public static function assignToForm($form, array $trail, string $fallbackBack): void {
     self::assign($form, $trail, $fallbackBack);
-    $form->addElement('hidden', 'back', $form->get_template_vars('backUrl'));
+    $form->addElement('hidden', 'back', $form->getTemplateVars('backUrl'));
   }
 
   /**

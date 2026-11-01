@@ -1,5 +1,6 @@
 import { test, expect, civiAdminUrl, expectNoPhpOutput } from '../../fixtures/base';
 import { civiEval } from '../../fixtures/civi';
+import { CMS } from '../../fixtures/cms';
 import { addPosition, createElection, nm, removeRunData, removeRunMembers } from '../../fixtures/data';
 
 test.afterAll(() => {
@@ -24,7 +25,7 @@ test.describe('Back end page frame', () => {
     ];
     for (const [route, label] of pages) {
       await adminPage.goto(civiAdminUrl(route, { reset: 1 }) + `#/?eid=${id}`);
-      const crumbs = adminPage.locator('.breadcrumb');
+      const crumbs = adminPage.locator('.crm-container .breadcrumb');
       await expect(crumbs).toBeVisible();
       await expect(crumbs.getByRole('link', { name: 'Manage Elections' })).toBeVisible();
       await expect(crumbs.getByRole('link', { name })).toHaveAttribute('href', new RegExp(`overview.*eid=${id}`));
@@ -37,9 +38,18 @@ test.describe('Back end page frame', () => {
 
   test('Manage Elections is the root of the trail and is the current page', async ({ adminPage }) => {
     await adminPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
-    const crumbs = adminPage.locator('.breadcrumb');
+    // Scoped to CiviCRM's own breadcrumb: a Drupal or Joomla theme draws a breadcrumb of its own above the page.
+    const crumbs = adminPage.locator('.crm-container .breadcrumb');
     await expect(crumbs.locator('[aria-current="page"]')).toHaveText('Manage Elections');
-    await expect(crumbs.getByRole('link')).toHaveCount(0);
+    if (CMS === 'joomla') {
+      // Joomla's page template draws every step of the trail as a link: the page itself is a link to the top
+      // of the page, with its name marked as the current one.
+      await expect(crumbs.getByRole('link')).toHaveCount(1);
+      await expect(crumbs.getByRole('link')).toHaveAttribute('href', '#');
+    }
+    else {
+      await expect(crumbs.getByRole('link')).toHaveCount(0);
+    }
   });
 
   test('every list has Back and Back to Manage Elections on the left; Add is at the right end only where the list has one', async ({ adminPage }) => {
