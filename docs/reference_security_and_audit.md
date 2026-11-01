@@ -14,15 +14,15 @@ The extension is built so that the result of an election can be trusted: nobody 
 
 ## The audit log
 
-Every important change is written to a log in which each entry carries the hash of the one before it, so an entry edited or removed in the middle is found. It records changes to election settings, positions, nominations, results generation, anonymising, and ballots removed by someone other than the voter. It never records how anyone voted.
+Every important change is written to a log in which each entry carries a fingerprint of the one before it, so an entry edited or removed in the middle is found. It records changes to election settings, positions, nominations, results generation, anonymising, and ballots removed by someone other than the voter. It never records how anyone voted.
 
-Open it from the election overview (**Audit log**), or at `civicrm/elections/audit-log`. It is read-only.
+Open it from the election overview (**Audit Log**), or at `civicrm/elections/audit-log`. The page is titled **Audit Log**, has **Back** and **Back to Manage Elections** buttons, and lists **When**, **Who**, **What** and **Details** for each change, newest first, 50 to a page. **What** is in words such as "Election changed" or "Nomination created" (not a code), and **Who** shows "System" for a change made by the system. Times are shown in the site's time zone. It is read-only: entries cannot be changed or removed.
 
 ## The integrity check
 
-When the results are generated, a fingerprint of the ballots and of the results is written to the audit log. The election overview checks them and shows **Integrity**: *ok*, *changed* (something was altered after the results), or *cannot be checked* for results generated before this feature.
+When the results are generated, a fingerprint of the ballots and of the results is written to the audit log. The election overview checks them and shows **Audit log integrity** as a sentence: for example "The ballots and results are exactly as they were when the results were generated." when all is well, "The ballots have changed since the results were generated." (or "The results", or "The ballots and the results") when something was altered after the results, "The audit log has been altered" when an entry does not match the entry before it, and "These results were generated before fingerprints were recorded, so they cannot be checked." for results generated before this feature.
 
-When you publish the results, note the **audit log fingerprint** shown on the overview somewhere outside the website. It proves later that nothing was cut off the end of the log.
+When you publish the results, note the **Audit log fingerprint** shown on the overview somewhere outside the website. It is shown in full, with a **Copy** button. It proves later that nothing was cut off the end of the log.
 
 ## What the extension cannot prevent
 

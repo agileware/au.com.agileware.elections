@@ -4,13 +4,13 @@ The page that shows the results of an election can have a **logo**, a line of **
 
 You can set them in two places:
 
-- On the **Display** tab when you [create or edit an election](admin_create_election.md) (before it starts).
-- On the **Results page** form, opened with the **Results page** button on the [election overview](admin_election_overview.md). This works at any time.
+- On the **Display** tab when you [add or edit an election](admin_create_election.md) (before it starts), under the heading **Results page**.
+- On the **Results Page** form, opened with the **Results Page** button on the [election overview](admin_election_overview.md). This works at any time. The page has a breadcrumb (**Manage Elections** > the election's name > **Results Page**); select **Submit** to save it (the message "Results page saved." is shown), or **Back** or **Back to Manage Elections** to leave without saving.
 
 ## Logo, header and footer
 
 - **Header text**: plain text shown above the results, up to 200 characters.
-- **Header logo**: a PNG, JPEG, GIF or WebP picture, up to 2 MB and 4000 by 4000 pixels. It is shown above the results, up to 120 pixels high. Uploading a new picture replaces the old one, and **Remove the logo** takes it away. SVG pictures are not accepted. The picture is read and written again when it is uploaded, which removes anything hidden in the file.
+- **Logo**: a PNG, JPEG, GIF or WebP picture, up to 2 MB and 4000 by 4000 pixels. It is shown above the results, up to 120 pixels high. Uploading a new picture replaces the old one, and **Remove the logo** takes it away. SVG pictures are not accepted. The picture is read and written again when it is uploaded, which removes anything hidden in the file.
 - **Logo description**: what the logo shows, for people who cannot see it. It is needed whenever there is a logo.
 - **Footer text**: plain text shown below the results, up to 1000 characters.
 
@@ -18,9 +18,9 @@ The text is shown exactly as typed: it is plain text, so HTML and links are not 
 
 ## Celebration
 
-Tick **Display celebration effects on the Election results page**, then choose:
+Tick **Show a celebration on the results page**, then choose:
 
-- **Celebration effect**: **Confetti**, **Fireworks**, **Balloons**, **Golden sparkle**, **Ticker tape and spotlight**, or **Surprise me**, which gives each election one of the effects (always the same one for the same election). **Preview** shows the effect over the form.
+- **Celebration effect**: **Confetti**, **Fireworks**, **Balloons**, **Golden sparkle**, **Ticker tape and spotlight**, or **Surprise me**, which gives each election one of the effects (always the same one for the same election). **Preview** (next to the effect) shows the effect over the form.
 - **Celebration lasts (days)**: how many days after the results are published the celebration is shown, from 1 to 30 (5 by default).
 
 The celebration is shown every time the results page is opened, from the moment the results are published until the end of those days. After that the page is shown without it. It stops by itself after a few seconds, with the **Skip the celebration** button or with the Escape key, and it never gets in the way of clicking on the page.

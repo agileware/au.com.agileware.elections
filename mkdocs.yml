@@ -17,7 +17,7 @@ nav:
       - 'Elections settings': admin_election_settings.md
   - '3. Running an election':
       - 'Manage elections': admin_manage_elections.md
-      - 'Create an election': admin_create_election.md
+      - 'Add an election': admin_create_election.md
       - 'Add a position': admin_add_position.md
       - 'Edit a position': admin_edit_position.md
       - 'Reorder positions': admin_reorder_positions.md
@@ -35,7 +35,7 @@ nav:
       - 'Nominate someone': user_nominate.md
       - 'Second a nomination': user_second_nomination.md
       - 'Accept a nomination': user_accept_nomination.md
-      - 'Withdraw a nomination': user_withdraw_nomination.md
+      - 'Decline or withdraw a nomination': user_withdraw_nomination.md
       - 'Vote': user_vote.md
       - 'View the results': user_view_results.md
   - '5. Reference':

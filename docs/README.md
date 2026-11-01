@@ -19,10 +19,10 @@ Each election has individual settings which provide these capabilities:
 1. Number of nominations required for a person to become an eligible candidate for each election.
 1. Allow or disallow a user to change their vote.
 1. Choose what voters see about candidates: photos, written candidate statements on the ballot, who nominated each candidate, and how names (including nicknames) are shown.
-1. Anonymise votes after the election results are posted.
-1. Allow people who are not logged in to nominate, accept nominations and vote using a personalised link.
+1. Anonymise votes when the election results are generated.
+1. Allow people who are not logged in to nominate, accept nominations and vote using a personal link.
 
-A new election is created inactive, and must have at least one Position added and then be activated before it becomes visible and open for participation. See [How to activate an election](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/admin_activate_election.md).
+A new election is added inactive, and must have at least one position added and then be activated before it becomes visible and open for participation. See [How to activate an election](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/admin_activate_election.md).
 
 Viewing election results are shown below as an example.
 
@@ -39,7 +39,7 @@ Installation
 1. Download this repository(whole extension folder) to your CiviCRM extension directory (available at 'System Settings / Resource URLs').
 1. In CiviCRM, go to 'System Settings / Extensions' and enable **Elections**.
 1. 'Elections' will now be available in the 'CiviCRM' menu. 
-1. Click on the 'Elections' menu to display the Elections page.
+1. Click on the 'Elections' menu to display the Manage Elections page.
 
 Getting Started
 -------------
