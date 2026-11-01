@@ -46,7 +46,7 @@ class CRM_Elections_DateRulesTest extends api_v3_ElectionBaseTestCase {
   public function testNominationsMayOpenAtTheSameMomentTheElectionBecomesVisible() {
     $this->assertSame([], CRM_Elections_BAO_Election::compareDates($this->dates(['nomination_start_date' => '2031-01-01 09:00:00'])));
     $errors = CRM_Elections_BAO_Election::compareDates($this->dates(['nomination_start_date' => '2031-01-01 08:59:00']));
-    $this->assertSame(E::ts('Start date must not be before the visibility start date.'), $errors['nomination_start_date']);
+    $this->assertSame(E::ts('Nominations open must not be before Visible from.'), $errors['nomination_start_date']);
   }
 
   public function testNothingMayEndAfterTheElectionStopsBeingVisible() {
@@ -59,7 +59,7 @@ class CRM_Elections_DateRulesTest extends api_v3_ElectionBaseTestCase {
   public function testOnlyTheFirstProblemOfADateIsReported() {
     // Voting ends before it starts and also after visibility ends: one message for the field.
     $errors = CRM_Elections_BAO_Election::compareDates($this->dates(['voting_start_date' => '2031-05-01 09:00:00', 'voting_end_date' => '2031-04-01 09:00:00']));
-    $this->assertSame(E::ts('End date must be after start date.'), $errors['voting_end_date']);
+    $this->assertSame(E::ts('Voting closes must be after Voting opens.'), $errors['voting_end_date']);
   }
 
   public function testRuleTableIsUsableByTheBrowser() {
@@ -69,6 +69,21 @@ class CRM_Elections_DateRulesTest extends api_v3_ElectionBaseTestCase {
       $this->assertNotEmpty($rule['field']);
       $this->assertNotEmpty($rule['other']);
     }
+  }
+
+  public function testEveryMessageNamesItsDatesByTheLabelsOnTheForm() {
+    $labels = ['Visible from', 'Visible until', 'Nominations open', 'Nominations close', 'Candidates advertised from', 'Voting opens', 'Voting closes', 'Results published on'];
+    $messages = [];
+    foreach (CRM_Elections_BAO_Election::getDateRules() as $rule) {
+      $named = array_filter($labels, fn($label) => strpos($rule['message'], $label) !== FALSE);
+      $this->assertGreaterThanOrEqual(2, count($named), $rule['message'] . ' names both dates');
+      $this->assertStringEndsWith('.', $rule['message']);
+      foreach (['Start Date', 'End Date', 'start date', 'end date'] as $banned) {
+        $this->assertStringNotContainsString($banned, $rule['message']);
+      }
+      $messages[] = $rule['message'];
+    }
+    $this->assertSame(array_unique($messages), $messages, 'Each message is different, so each says which date it is about');
   }
 
 }

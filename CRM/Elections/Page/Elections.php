@@ -139,10 +139,8 @@ class CRM_Elections_Page_Elections extends CRM_Elections_Page_Base {
    * @param $elections
    */
   private function modifyElectionValues(&$elections) {
+    $contactId = CRM_Elections_Helper_Eligibility::getActingContactId();
     foreach ($elections as $index => $election) {
-      $isElectionInProcess = CRM_Elections_BAO_Election::isElectionInProcess($election['nomination_start_date']);
-      $elections[$index]['candelete'] = (!$isElectionInProcess || !$election['is_visible']);
-      $elections[$index]['canedit']   = (!$isElectionInProcess || !$election['is_visible']);
       $elections[$index]['hasNominationsStarted']   = CRM_Elections_BAO_Election::isTodayBetweenDates($election['nomination_start_date'], NULL);
       $elections[$index]['isVotingStarted'] = CRM_Elections_BAO_Election::isTodayBetweenDates($election['voting_start_date'], NULL);
       $elections[$index]['isResultsOut'] = (CRM_Elections_BAO_Election::isTodayBetweenDates($election['result_date'], NULL) && $election['has_results_generated']);
@@ -157,11 +155,15 @@ class CRM_Elections_Page_Elections extends CRM_Elections_Page_Base {
       $elections[$index]['isUserAllowedToVote'] = $variables['is_user_allowed_to_vote'];
       $elections[$index]['hasUserAlreadyVoted'] = $variables['has_user_already_voted'];
 
-      $elections[$index]['card'] = CRM_Elections_Helper_ElectionStatus::card($elections[$index]);
+      // What the person can do in this election decides the button on its card.
+      $elections[$index]['canNominate'] = (bool) CRM_Elections_Helper_Eligibility::canNominate($election['id']);
+      $elections[$index]['canVote'] = (bool) CRM_Elections_Helper_Eligibility::canVote($election['id']);
+      // Before voting every nominee is asked to answer; while voting is open only a person a voter wrote in.
+      $elections[$index]['hasPendingNomination'] = $contactId && !$elections[$index]['isVotingEnded']
+        ? (bool) CRM_Elections_Helper_ElectionStatus::nominationsAwaitingAnswer($election['id'], $contactId, $elections[$index]['isVotingStarted'])
+        : FALSE;
 
-      $elections[$index]['positions'] = civicrm_api3('ElectionPosition', 'getcount', [
-        'election_id' => $election['id'],
-      ]);
+      $elections[$index]['card'] = CRM_Elections_Helper_ElectionStatus::card($elections[$index]);
     }
   }
 

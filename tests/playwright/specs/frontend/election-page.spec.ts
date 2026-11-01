@@ -25,7 +25,7 @@ async function stepper(page: import('@playwright/test').Page) {
   const items = page.locator('.election-stepper .election-step');
   await expect(items).toHaveCount(4);
   const labels = await items.locator('.election-step-label').evaluateAll((els) => els.map((e) => (e.firstChild?.textContent || '').trim()));
-  expect(labels).toEqual(['Nominations', 'Candidates', 'Voting', 'Results']);
+  expect(labels).toEqual(['Nominations open', 'Candidates advertised', 'Voting open', 'Results published']);
   return {
     states: await items.evaluateAll((els) => els.map((e) => e.className.replace(/.*election-step-(passed|current|upcoming).*/, '$1'))),
     current: await page.locator('.election-stepper [aria-current="step"] .election-step-label').evaluateAll((els) => els.map((e) => (e.firstChild?.textContent || '').trim())),
@@ -35,11 +35,20 @@ async function stepper(page: import('@playwright/test').Page) {
 test('nominations: a voter is invited to nominate, an outsider is told they cannot', async ({ browser }) => {
   reseedCouncil();
   const voter = await view(browser, 'V01');
-  expect((await stepper(voter.page)).current).toEqual(['Nominations']);
+  expect((await stepper(voter.page)).current).toEqual(['Nominations open']);
   expect((await stepper(voter.page)).states).toEqual(['current', 'upcoming', 'upcoming', 'upcoming']);
   const panel = voter.page.locator('.election-next-action');
-  await expect(panel).toContainText('Nominations are open until');
-  await expect(panel.getByRole('link', { name: 'Submit Nomination' })).toBeVisible();
+  await expect(panel).toContainText('Nominations close on');
+  await expect(panel.getByRole('link', { name: 'Nominate', exact: true })).toBeVisible();
+  // The times are said once, with the zone's name, and there is no link to another site.
+  await expect(voter.page.locator('.election-timezone-note')).toHaveCount(1);
+  await expect(voter.page.locator('.election-timezone-note')).toContainText(/^Times are shown in \S+\.$/);
+  await expect(voter.page.locator('.election-timezone-note a')).toHaveCount(0);
+  await expect(voter.page.getByText(/You are taking part as Voter 01/)).toBeVisible();
+  // No administrator tools on the front end, and the welcome line is not a heading (it would break the heading order).
+  await expect(voter.page.getByRole('link', { name: /Edit Election|Delete Election|Create Election/ })).toHaveCount(0);
+  await expect(voter.page.locator('.welcome-message h1, .welcome-message h2')).toHaveCount(0);
+  expect(await voter.page.locator('.crm-container h1').count()).toBeLessThanOrEqual(1);
   await voter.close();
 
   const outsider = await view(browser, 'OUT');
@@ -59,7 +68,13 @@ test('the list of elections shows a card with the stage and the button for it', 
   await list.waitForLoadState('networkidle');
   const card = list.locator('.election-card', { hasText: 'Playwright Council Election' });
   await expect(card.locator('.election-badge')).toHaveText('Nominations open');
-  await expect(card.getByRole('link', { name: 'View and submit Nominations' })).toBeVisible();
+  // One button, the next step in the words of the standards, and no administrator links or time zone link.
+  await expect(card.locator('a.election-btn')).toHaveCount(1);
+  await expect(card.locator('a.election-btn')).toHaveText(/^(Nominate|Accept Nomination|View Election)/);
+  await expect(card.getByRole('link', { name: /Positions|Edit|Delete|Activate/ })).toHaveCount(0);
+  await expect(list.getByRole('link', { name: /Create Election|Add Election/ })).toHaveCount(0);
+  await expect(list.locator('.election-timezone-note')).toHaveCount(1);
+  await expect(list.locator('.election-card-timezone, .election-timezone-note a')).toHaveCount(0);
   await context.close();
 });
 
@@ -76,6 +91,7 @@ test('the list of elections opens on a personal link and keeps the link on its b
   const card = list.locator('.election-card', { hasText: 'Playwright Council Election' });
   await expect(card.locator('.election-badge')).toHaveText('Nominations open');
   const button = card.locator('a.election-btn').first();
+  await expect(button).toContainText('Nominate');
   await expect(button).toHaveAttribute('href', /cid=\d+/);
   await expect(button).toHaveAttribute('href', /cs=/);
   await button.click();
@@ -93,14 +109,14 @@ test('candidates: a nominee is asked to respond, everyone else sees the candidat
   expect(states).toEqual(['passed', 'current', 'upcoming', 'upcoming']);
   const panel = nominee.page.locator('.election-next-action');
   await expect(panel).toContainText('You have been nominated for');
-  await expect(panel).toContainText('accept or withdraw');
-  const respond = panel.getByRole('link', { name: 'Respond to Nomination' });
+  await expect(panel).toContainText('Accept or decline');
+  const respond = panel.getByRole('link', { name: 'Accept Nomination' });
   await expect(respond).toHaveAttribute('href', /nominations\/accept/);
   // Their own nominations, with where each stands and what they can do.
   const mine = nominee.page.locator('.election-my-nominations');
   await expect(mine.locator('.election-my-nomination').first()).toContainText('Waiting for your answer');
   await expect(mine.getByRole('link', { name: 'Accept Nomination' }).first()).toBeVisible();
-  await expect(mine.getByRole('link', { name: 'Withdraw Nomination' }).first()).toBeVisible();
+  await expect(mine.getByRole('link', { name: 'Decline' }).first()).toBeVisible();
   await nominee.close();
 
   // Someone who still needs another nominator is told so, and cannot accept yet.
@@ -110,9 +126,28 @@ test('candidates: a nominee is asked to respond, everyone else sees the candidat
   await unseconded.close();
 
   const voter = await view(browser, 'V05');
-  await expect(voter.page.locator('.election-next-action')).toContainText('Nominations are closed');
+  await expect(voter.page.locator('.election-next-action')).toContainText('Nominations closed on');
   await expect(voter.page.locator('.election-next-action').getByRole('link')).toHaveCount(0);
   await voter.close();
+
+  // The candidate page has one primary button at most, and a quiet link back to the election that keeps the
+  // election and the personal link. The old "Back" button is gone.
+  const ids = councilNominationIds(council().election_id);
+  const candidate = await view(browser, 'V05');
+  await candidate.page.goto(personaUrl('V05', 'civicrm/elections/candidate', { enid: ids['President|N01'] }));
+  await candidate.page.waitForLoadState('networkidle');
+  const back = candidate.page.getByRole('link', { name: 'Back to the election' });
+  await expect(back).toHaveCount(1);
+  await expect(back).toHaveClass(/election-btn-quiet/);
+  await expect(back).toHaveAttribute('href', /eid=\d+/);
+  await expect(back).toHaveAttribute('href', /cid=\d+/);
+  await expect(candidate.page.getByRole('link', { name: 'Back', exact: true })).toHaveCount(0);
+  await expect(candidate.page.locator('a.election-btn:not(.election-btn-quiet)')).toHaveCount(0);
+  await expect(candidate.page.locator('.election-chip').first()).toContainText(/Accepted|Waiting|Withdrawn/);
+  await back.click();
+  await candidate.page.waitForLoadState('networkidle');
+  await expect(candidate.page.locator('.election-stepper')).toBeVisible();
+  await candidate.close();
 });
 
 test('voting: vote now, change your vote, or not allowed to vote', async ({ browser }) => {
@@ -121,8 +156,8 @@ test('voting: vote now, change your vote, or not allowed to vote', async ({ brow
   advanceCouncil('fill-ballots');
   const newVoter = await view(browser, 'V29');
   expect((await stepper(newVoter.page)).states).toEqual(['passed', 'passed', 'current', 'upcoming']);
-  await expect(newVoter.page.locator('.election-next-action')).toContainText('Voting is open until');
-  await expect(newVoter.page.locator('.election-next-action').getByRole('link', { name: 'Vote Now' })).toBeVisible();
+  await expect(newVoter.page.locator('.election-next-action')).toContainText('Voting closes on');
+  await expect(newVoter.page.locator('.election-next-action').getByRole('link', { name: 'Vote', exact: true })).toBeVisible();
   await newVoter.close();
 
   const voted = await view(browser, 'V01');
@@ -166,19 +201,21 @@ test('ballot: ranks are checked as they are chosen and the vote is reviewed befo
   await setRank(second, '2');
   await expect(page.locator('.election-rank-problem')).toHaveCount(0);
 
-  // The vote is shown for review before anything is saved.
-  await page.getByRole('button', { name: 'Vote', exact: true }).click();
-  const dialog = page.getByRole('dialog', { name: 'Check your vote' });
+  // The vote is shown for review before anything is saved. The ballot's own words are the forms' (Review Your Vote,
+  // Go Back and Change, Submit Vote), so the buttons are found by place and the dialog by its role.
+  const submit = page.locator('.crm-election-form-block-container button.crm-button[type=submit]');
+  await submit.click();
+  const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
   await expect(dialog).toContainText('President');
   await expect(dialog.locator('li').first()).toContainText('rank 1');
-  await dialog.getByRole('button', { name: 'Go back and change' }).click();
+  await dialog.getByRole('button', { name: 'Go Back and Change' }).click();
   await expect(dialog).toBeHidden();
 
   // Confirming saves it, and the election page shows what was recorded.
-  await page.getByRole('button', { name: 'Vote', exact: true }).click();
-  await page.getByRole('dialog', { name: 'Check your vote' }).getByRole('button', { name: 'Confirm my vote' }).click();
-  await expect(page.getByText(/You have successfully voted/)).toBeVisible();
+  await submit.click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Submit Vote' }).click();
+  await expect(page.getByText(/Vote recorded/)).toBeVisible();
   await expect(page.locator('.election-your-vote')).toContainText('President');
   await close();
 });
@@ -188,7 +225,25 @@ test('closed: voting has closed and says when the results come', async ({ browse
   // Results are generated by the scheduled job once the results date is reached: before that, the page says so.
   const voter = await view(browser, 'V05');
   const text = await voter.page.locator('.crm-container').innerText();
-  expect(text).toMatch(/Voting has closed|The votes have been counted/);
+  expect(text).toMatch(/Voting closed on .*The results will be published on|The votes have been counted/);
+  expect(text).not.toMatch(/Voting has closed|until voting closes|is open until/);
+  // The summary is not there yet: one message that says so, with a way back to the election and no error styling.
+  await voter.page.goto(personaUrl('V05', 'civicrm/elections/summary'));
+  await voter.page.waitForLoadState('networkidle');
+  await expect(voter.page.locator('.crm-container')).toContainText('The results are not published yet. They will be published on');
+  await expect(voter.page.locator('.crm-container .messages')).toHaveCount(1);
+  await expect(voter.page.getByRole('link', { name: 'Back to the election' })).toHaveAttribute('href', /eid=\d+/);
   await voter.close();
+
+  // Once the results are out the summary has the way back, the time zone once, and the election page links to it quietly.
+  advanceCouncil('generate');
+  const after = await view(browser, 'V05');
+  await expect(after.page.getByRole('link', { name: 'View Election Summary' })).toHaveClass(/election-btn-quiet/);
+  await after.page.goto(personaUrl('V05', 'civicrm/elections/summary'));
+  await after.page.waitForLoadState('networkidle');
+  await expect(after.page.getByRole('link', { name: 'Back to the election' })).toHaveClass(/election-btn-quiet/);
+  await expect(after.page.locator('.crm-container')).toContainText(/Times are shown in \S+\./);
+  await expect(after.page.locator('.crm-container a[target=_blank]')).toHaveCount(0);
+  await after.close();
   reseedCouncil();
 });

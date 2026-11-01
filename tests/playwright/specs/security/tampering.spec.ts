@@ -40,8 +40,8 @@ function freshElectionAtVoting() {
 
 /** Open the review window for the filled-in ballot (the vote is only sent when it is confirmed). */
 async function review(page: Page) {
-  await page.getByRole('button', { name: 'Vote', exact: true }).click();
-  const dialog = page.getByRole('dialog', { name: 'Check your vote' });
+  await page.getByRole('button', { name: 'Review Your Vote', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Review Your Vote' });
   await expect(dialog).toBeVisible();
   return dialog;
 }
@@ -108,7 +108,7 @@ test('two ballots sent at the same moment leave one ballot', async ({ browser })
   }
   // Both forms are filled in and reviewed; confirm them together.
   const dialogs = await Promise.all(pages.map((p) => review(p)));
-  await Promise.all(dialogs.map((d) => d.getByRole('button', { name: 'Confirm my vote' }).click()));
+  await Promise.all(dialogs.map((d) => d.getByRole('button', { name: 'Submit Vote', exact: true }).click()));
   await Promise.all(pages.map((p) => p.waitForLoadState('networkidle')));
   expect(rowsFor(cid), 'one row for the one candidate ranked, however many requests arrived').toBe(1);
   for (const c of contexts) await c.close();
@@ -166,7 +166,7 @@ test('a form kept open past its stage does nothing', async ({ browser }) => {
     (document.querySelector(`input[name="candidate_${nominationId}"]`) as HTMLInputElement).value = '1';
   }, ids['President|N01']);
   moveToStage('results');
-  await (await review(ballot.page)).getByRole('button', { name: 'Confirm my vote' }).click();
+  await (await review(ballot.page)).getByRole('button', { name: 'Submit Vote', exact: true }).click();
   await ballot.page.waitForLoadState('networkidle');
   expect(rowsFor(data.links.V30.cid), 'a ballot sent after voting closed is not counted').toBe(0);
   await ballot.context.close();
@@ -196,7 +196,7 @@ test('a ballot changed before it is sent cannot reach another election or anothe
       document.querySelector('form')!.appendChild(extra);
     }
   }, [ids['President|N01'], notStanding]);
-  await (await review(page)).getByRole('button', { name: 'Confirm my vote' }).click();
+  await (await review(page)).getByRole('button', { name: 'Submit Vote', exact: true }).click();
   await page.waitForLoadState('networkidle');
   const rows = civiApi4<Array<{ election_nomination_id: number; member_id: number }>>('ElectionVote.get', { select: ['election_nomination_id', 'member_id'], where: [['member_id', '=', data.links.V30.cid]], limit: 0 });
   expect(rows.map((r) => r.election_nomination_id).filter((n) => n !== ids['President|N01'])).toEqual([]);

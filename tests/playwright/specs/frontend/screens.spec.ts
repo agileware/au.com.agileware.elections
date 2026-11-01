@@ -43,15 +43,17 @@ test('walk the whole election and take pictures', async ({ browser }) => {
   let ids: Record<string, number> = {};
 
   // Nominations
+  await shoot('1-nominations', 'election-list', 'V01', 'civicrm/elections');
   await shoot('1-nominations', 'election-voter', 'V01', 'civicrm/elections/view');
   await shoot('1-nominations', 'nominate-form', 'V01', 'civicrm/elections/nominations/create');
   await shoot('1-nominations', 'refused-outsider', 'OUT', 'civicrm/elections/nominations/create');
+  await shoot('1-nominations', 'not-found', 'V01', 'civicrm/elections/view', { eid: 987654 });
   advanceCouncil('fill-nominations');
   await shoot('1-nominations', 'election-with-nominations', 'V03', 'civicrm/elections/view');
   ids = councilNominationIds(council().election_id);
   await shoot('1-nominations', 'second-form', 'V12', 'civicrm/elections/nominations/create', { enid: ids['President|N08'] });
 
-  // Advertise: nominees accept or withdraw
+  // Advertise: nominees accept or decline
   moveToStage('advertise');
   await shoot('2-advertise', 'election-nominee', 'N01', 'civicrm/elections/view');
   await shoot('2-advertise', 'accept-form', 'N01', 'civicrm/elections/nominations/accept', { enid: ids['President|N01'] });

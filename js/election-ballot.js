@@ -12,7 +12,7 @@
   function positions($form) {
     return $form.find('.crm-vote-election-form-block').map(function () {
       var $block = $(this);
-      var title = $block.attr('data-position') || $.trim($block.find('> p').first().text());
+      var title = $block.attr('data-position') || $.trim($block.find('> .election-position-prompt').first().text());
       if ($block.attr('data-type') === 'question') {
         // A referendum question: one choice, no ranks.
         return {$block: $block, title: title, question: true, rows: [], seats: 1};
@@ -97,7 +97,7 @@
       var result = problemsIn(position);
       var $status = position.$block.find('.election-rank-status');
       if (!$status.length) {
-        $status = $('<p class="election-rank-status" aria-live="polite"></p>').appendTo(position.$block.find('> p').first().parent()).insertAfter(position.$block.find('> p').first());
+        $status = $('<p class="election-rank-status" aria-live="polite"></p>').insertAfter(position.$block.find('> .election-position-prompt').first());
       }
       $status.toggleClass('election-rank-problem', result.problems.length > 0);
       var counted = plurality ? text.chosen.replace('%1', result.ranked).replace('%2', position.seats) : text.counted.replace('%1', result.ranked).replace('%2', $.grep(position.rows, function (r) { return !r.writeIn; }).length);
@@ -111,11 +111,12 @@
   function summary($form) {
     var $list = $('<div class="election-review-list"></div>');
     var skipped = [];
+    var unanswered = [];
     $.each(positions($form), function (i, position) {
       if (position.question) {
         var $picked = position.$block.find('input[type="radio"]:checked');
         if (!$picked.length) {
-          skipped.push(position.title);
+          unanswered.push(position.title);
           return;
         }
         var $answer = $('<section class="election-review-position"></section>');
@@ -136,12 +137,15 @@
       $('<h3></h3>').text(text.positionTitle.replace('%1', title)).appendTo($section);
       var $ol = $(plurality ? '<ul></ul>' : '<ol></ol>').appendTo($section);
       $.each(ranked, function (j, row) {
-        $('<li></li>').text(plurality ? row.name : row.name + ' \u2013 ' + text.rank.replace('%1', rankOf(row))).appendTo($ol);
+        $('<li></li>').text(plurality ? row.name : text.rankedRow.replace('%1', row.name).replace('%2', rankOf(row))).appendTo($ol);
       });
       $list.append($section);
     });
     if (skipped.length) {
-      $('<p class="election-review-none"></p>').text(text.noPreference.replace('%1', skipped.join(', '))).appendTo($list);
+      $('<p class="election-review-none"></p>').text((plurality ? text.noChoice : text.noRank).replace('%1', skipped.join(', '))).appendTo($list);
+    }
+    if (unanswered.length) {
+      $('<p class="election-review-none"></p>').text(text.noAnswer.replace('%1', unanswered.join(', '))).appendTo($list);
     }
     return $list;
   }
@@ -186,6 +190,9 @@
     if (!$form.length || !text.confirm) {
       return;
     }
+    // With JavaScript the button opens the review window first; the vote is sent from there.
+    var $submit = $form.find('button[type="submit"].default').first();
+    $submit.contents().filter(function () { return this.nodeType === 3 && $.trim(this.nodeValue) !== ''; }).last().replaceWith(' ' + text.review);
     $form.on('change', 'input[name^="candidate_"], input[name^="writein"]', function () {
       check($form);
     });

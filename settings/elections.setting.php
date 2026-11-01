@@ -9,10 +9,10 @@ return [
     'default' => 'CMS',
     'html_type' => 'select',
     'add' => '1.0',
-    'title' => E::ts('Image Source'),
+    'title' => E::ts('Image source'),
     'is_domain' => 1,
     'is_contact' => 0,
-    'description' => E::ts('Select the source of the image to use for the candidate.'),
+    'description' => E::ts('Where candidate photos come from. CMS uses the picture of the website account, and Contact image uses the image on the CiviCRM contact.'),
     'settings_pages' => [
       'elections' => [
         'weight' => 15,
@@ -20,7 +20,7 @@ return [
     ],
     'options' => [
       'CMS' => E::ts('CMS'),
-      'Contact' => E::ts('Contact Image'),
+      'Contact' => E::ts('Contact image'),
     ],
   ],
   'elections_name_format' => [
@@ -29,10 +29,10 @@ return [
     'default' => 'display_name',
     'html_type' => 'select',
     'add' => '2.0',
-    'title' => E::ts('Candidate Name Format'),
+    'title' => E::ts('Candidate name format'),
     'is_domain' => 1,
     'is_contact' => 0,
-    'description' => E::ts('How the name of a candidate is shown on nominations, ballots and results. Nicknames are only shown for contacts that have one.'),
+    'description' => E::ts('How the name of a candidate is shown on nominations, ballots and results. Nicknames are only shown for people who have one.'),
     'settings_pages' => [
       'elections' => [
         'weight' => 20,

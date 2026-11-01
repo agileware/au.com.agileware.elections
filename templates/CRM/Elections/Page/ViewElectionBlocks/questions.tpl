@@ -6,7 +6,7 @@
       <h3>{$question.name|escape}</h3>
       {if $question.resolution_text|default:''}<p class="election-question-resolution">{$question.resolution_text|default:''|escape|nl2br}</p>{/if}
       {if $question.description|default:''}<p>{$question.description|default:''|escape|nl2br}</p>{/if}
-      <p class="election-question-choices">{ts}You can choose:{/ts} {foreach from=$question.options item=option name=choices}{$option.label|escape}{if !$smarty.foreach.choices.last}, {/if}{/foreach}</p>
+      <p class="election-question-choices">{$question.choicesLine|default:''|escape}</p>
     </div>
   {/foreach}
 </section>

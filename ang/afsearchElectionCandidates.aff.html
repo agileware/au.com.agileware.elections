@@ -1,16 +1,17 @@
 <div af-fieldset="">
-  <p>
-    <a class="af-button btn btn-default" crm-icon="fa-arrow-left" ng-href="{{ crmUrl('civicrm/elections/manage') }}">{{:: ts('Back to Manage Elections') }}</a>
-    <a class="af-button btn btn-primary" crm-icon="fa-user-plus" ng-href="{{ crmUrl('civicrm/elections/candidates/add', {eid: routeParams.eid}) }}">{{:: ts('Add Candidate') }}</a>
-  </p>
+  <div class="election-action-bar election-list-actions" role="group" aria-label="{{:: ts('Actions') }}">
+    <a class="af-button btn btn-default election-action-quiet election-back" crm-icon="fa-arrow-left" ng-href="{{ crmUrl('civicrm/elections/overview', {reset: 1, eid: routeParams.eid}) }}">{{:: ts('Back') }}</a>
+    <a class="af-button btn btn-default election-action-quiet election-back-manage" crm-icon="fa-arrow-left" ng-href="{{ crmUrl('civicrm/elections/manage') }}">{{:: ts('Back to Manage Elections') }}</a>
+    <a class="af-button btn btn-primary election-action-primary election-action-end" crm-icon="fa-plus" ng-href="{{ crmUrl('civicrm/elections/candidates/add', {eid: routeParams.eid}) }}">{{:: ts('Add Candidate') }}</a>
+  </div>
   <details class="af-container" af-title="Filters" open="">
     <div class="af-container af-layout-inline">
-      <af-field name="member_nominee.display_name" defn="{input_type: 'Text', label: 'Candidate'}" />
+      <af-field name="member_nominee.display_name" defn="{input_type: 'Text', label: 'Name'}" />
       <af-field name="election_position_id.name" defn="{input_type: 'Text', label: 'Position'}" />
       <af-field name="is_eligible_candidate" defn="{label: 'Eligible'}" />
       <af-field name="has_accepted_nomination" defn="{label: 'Accepted'}" />
     </div>
-    <button class="af-button btn btn-warning" type="reset" crm-icon="fa-undo">Reset</button>
+    <button class="af-button btn btn-link election-clear-filters" type="reset">Clear filters</button>
   </details>
-  <crm-search-display-table search-name="ElectionCandidates" display-name="ElectionCandidates_Table_1" filters="{'election_position_id.election_id': routeParams.eid}"></crm-search-display-table>
+  <crm-search-display-table election-list-table="candidates" search-name="ElectionCandidates" display-name="ElectionCandidates_Table_1" filters="{'election_position_id.election_id': routeParams.eid}"></crm-search-display-table>
 </div>

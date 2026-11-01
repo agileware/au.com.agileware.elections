@@ -51,22 +51,22 @@ class CRM_Elections_Helper_WriteIn {
       $contactId = $writeIn['contact_id'] ?? NULL;
       $rank = $writeIn['rank'] ?? NULL;
       if (!CRM_Utils_Rule::positiveInteger($positionId) || !CRM_Utils_Rule::positiveInteger($contactId) || !CRM_Utils_Rule::positiveInteger($rank)) {
-        return ['error' => 'A write-in needs a position, a person and a rank.', 'items' => []];
+        return ['error' => E::ts('Each write-in needs a person and a rank.'), 'items' => []];
       }
       $position = CRM_Core_DAO::executeQuery('SELECT id, quantity, write_ins_per_seat FROM civicrm_election_position WHERE id = %1 AND election_id = %2 AND IFNULL(position_type, "election") <> "referendum"', [1 => [(int) $positionId, 'Integer'], 2 => [(int) $election->id, 'Integer']]);
       if (!$position->fetch()) {
-        return ['error' => 'The selected position is not part of this election.', 'items' => []];
+        return ['error' => E::ts('That position is not part of this election.'), 'items' => []];
       }
       $places = self::places($position->toArray());
       if ($places < 1) {
-        return ['error' => 'Write-ins are not allowed for this position.', 'items' => []];
+        return ['error' => E::ts('Write-ins are not allowed for this position. Choose from the candidates listed.'), 'items' => []];
       }
       $perPosition[$positionId] = ($perPosition[$positionId] ?? 0) + 1;
       if ($perPosition[$positionId] > $places) {
-        return ['error' => 'There are more write-ins than this position allows.', 'items' => []];
+        return ['error' => E::ts('You have used more write-ins than this position allows.'), 'items' => []];
       }
       if (isset($seen[$positionId][$contactId])) {
-        return ['error' => 'A person can only be written in once for a position.', 'items' => []];
+        return ['error' => E::ts('Each person can be written in once for a position.'), 'items' => []];
       }
       $seen[$positionId][$contactId] = TRUE;
 
@@ -74,7 +74,7 @@ class CRM_Elections_Helper_WriteIn {
       $item = ['position_id' => (int) $positionId, 'contact_id' => (int) $contactId, 'rank' => (int) $rank, 'nomination_id' => NULL, 'kind' => 'new'];
       if ($existing->fetch()) {
         if ($existing->has_rejected_nomination) {
-          return ['error' => 'That person has declined or withdrawn for this position and cannot be written in.', 'items' => []];
+          return ['error' => E::ts('That person has declined or withdrawn for this position and cannot be written in.'), 'items' => []];
         }
         if ($existing->is_eligible_candidate && $existing->has_accepted_nomination) {
           $item['kind'] = 'candidate';
@@ -83,12 +83,12 @@ class CRM_Elections_Helper_WriteIn {
           $item['kind'] = 'pending';
         }
         else {
-          return ['error' => 'That person was nominated and has not accepted, so cannot be written in.', 'items' => []];
+          return ['error' => E::ts('That person has been nominated and has not accepted yet, so cannot be written in.'), 'items' => []];
         }
         $item['nomination_id'] = (int) $existing->id;
       }
       elseif (!self::canBeWrittenIn($election, (int) $contactId)) {
-        return ['error' => 'That person cannot be written in for this election.', 'items' => []];
+        return ['error' => E::ts('That person cannot be written in. Only people in the candidate groups can stand in this election.'), 'items' => []];
       }
       $items[] = $item;
     }
@@ -164,7 +164,7 @@ class CRM_Elections_Helper_WriteIn {
   public static function record($election, $positionId, $contactId) {
     $lock = Civi::lockManager()->acquire('data.elections.nominate.' . (int) $positionId . '.' . (int) $contactId, 10);
     if (!$lock->isAcquired()) {
-      throw new CRM_Elections_Exception(E::ts('This person is being written in. Please wait a moment and try again.'));
+      throw new CRM_Elections_Exception(E::ts('This person is being written in. Wait a moment and try again.'));
     }
     try {
       $existing = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_election_nomination WHERE election_position_id = %1 AND member_nominee = %2', [1 => [(int) $positionId, 'Integer'], 2 => [(int) $contactId, 'Integer']]);

@@ -28,7 +28,7 @@ function civicrm_api3_election_nomination_seconder_create($params) {
       'election_nomination_id' => $params['election_nomination_id'],
     ]);
     if ($nominationSeconderCount > 0) {
-      return civicrm_api3_create_error('Contact is already nominated by given nominator.');
+      return civicrm_api3_create_error(E::ts('You have already nominated this person for this position.'));
     }
 
     $electionInfo = civicrm_api3('ElectionNomination', 'get', [
@@ -43,11 +43,11 @@ function civicrm_api3_election_nomination_seconder_create($params) {
 
     $election = findElectionById($electionId, FALSE);
     if ($election->is_deleted || !$election->is_visible) {
-      return civicrm_api3_create_error('Nomination seconder cannot be added for a deleted election.');
+      return civicrm_api3_create_error(E::ts('Nominations cannot be added to an election that is deleted or not active.'));
     }
 
     if (!$election->isNominationsInProgress) {
-      return civicrm_api3_create_error('Nomination seconder cannot be added after nomination period is ended.');
+      return civicrm_api3_create_error(E::ts('Nominations closed on %1.', [1 => CRM_Utils_Date::customFormat($election->nomination_end_date)]));
     }
   }
 

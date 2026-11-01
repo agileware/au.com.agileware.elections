@@ -26,11 +26,9 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
 
     $withdrawing = $this->isWithdrawal();
     $this->addButtons([
-      [
-        'type' => 'submit',
-        'name' => $this->election->is_visible ? E::ts('Deactivate') : E::ts('Activate'),
-        'isDefault' => TRUE,
-      ],
+      $this->election->is_visible
+        ? ['type' => 'submit', 'name' => E::ts('Deactivate'), 'isDefault' => TRUE, 'icon' => 'fa-toggle-off', 'class' => 'election-danger']
+        : ['type' => 'submit', 'name' => E::ts('Activate'), 'isDefault' => TRUE, 'icon' => 'fa-toggle-on'],
       [
         'type' => 'cancel',
         'name' => E::ts('Cancel'),
@@ -50,6 +48,7 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
     }
 
     $this->assign('election', $this->election);
+    $this->assign('electionName', CRM_Elections_Helper_ResultsDisplay::decode($this->election->name));
     $this->assign('withdrawing', $withdrawing);
     $this->addElement('hidden', 'eid', $this->eId);
 
@@ -75,7 +74,7 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
    */
   public static function validateWithdrawal($values, $files, $name) {
     if (mb_strtolower(trim((string) ($values['confirm_name'] ?? ''))) !== mb_strtolower(trim((string) $name))) {
-      return ['confirm_name' => E::ts('The name does not match the name of this election.')];
+      return ['confirm_name' => E::ts('The name does not match. Type the election name exactly as shown.')];
     }
     return TRUE;
   }

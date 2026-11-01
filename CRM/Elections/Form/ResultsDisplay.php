@@ -36,7 +36,7 @@ class CRM_Elections_Form_ResultsDisplay extends CRM_Elections_Form_Base {
 
   public function setDefaultValues() {
     $election = findElectionById(retrieveElectionIdFromUrl($this));
-    return CRM_Elections_Helper_ResultsDisplay::getDefaults($election);
+    return $this->restoreInput(CRM_Elections_Helper_ResultsDisplay::getDefaults($election));
   }
 
   public function postProcess() {
@@ -48,11 +48,13 @@ class CRM_Elections_Form_ResultsDisplay extends CRM_Elections_Form_Base {
         ->setValues(CRM_Elections_Helper_ResultsDisplay::getValuesToSave($values))
         ->execute();
       CRM_Elections_Helper_ResultsDisplay::saveLogo($electionId, $values, CRM_Elections_Helper_ResultsDisplay::upload());
-      CRM_Core_Session::setStatus(E::ts('The results page has been saved.'), '', 'success');
     }
     catch (CRM_Core_Exception $e) {
-      CRM_Core_Session::setStatus($e->getMessage(), E::ts('Results page not saved'), 'error');
+      // The form stays, with what was entered (a picture has to be chosen again).
+      $this->stayOnForm($e->getMessage(), E::ts('Results page not saved'));
+      return;
     }
+    CRM_Core_Session::setStatus(E::ts('Results page saved.'), '', 'success');
     parent::postProcess();
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/elections/overview', 'reset=1&eid=' . $electionId));
   }

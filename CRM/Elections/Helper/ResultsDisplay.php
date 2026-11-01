@@ -69,10 +69,10 @@ class CRM_Elections_Helper_ResultsDisplay {
   public static function addFormElements($form) {
     $form->add('text', 'results_header_text', E::ts('Header text'), ['size' => 60, 'maxlength' => self::HEADER_MAX]);
     $form->add('textarea', 'results_footer_text', E::ts('Footer text'), ['cols' => 60, 'rows' => 4, 'maxlength' => self::FOOTER_MAX]);
-    $form->add('file', 'results_logo', E::ts('Header logo'), ['accept' => implode(',', array_keys(self::LOGO_TYPES))]);
+    $form->add('file', 'results_logo', E::ts('Logo'), ['accept' => implode(',', array_keys(self::LOGO_TYPES))]);
     $form->add('text', 'results_logo_alt', E::ts('Logo description'), ['size' => 60, 'maxlength' => 255]);
     $form->add('advcheckbox', 'results_remove_logo', E::ts('Remove the logo'));
-    $form->add('advcheckbox', 'celebration_enabled', E::ts('Display celebration effects on the Election results page'));
+    $form->add('advcheckbox', 'celebration_enabled', E::ts('Show a celebration on the results page'));
     $form->add('select', 'celebration_effect', E::ts('Celebration effect'), self::getEffects());
     $form->add('text', 'celebration_days', E::ts('Celebration lasts (days)'), ['size' => 4, 'maxlength' => 2, 'inputmode' => 'numeric']);
     $form->addFormRule(['CRM_Elections_Helper_ResultsDisplay', 'validateForm']);

@@ -21,7 +21,7 @@ test.afterAll(() => {
 test('there is no nomination form and the page says the organisers choose', async ({ personaGoto }) => {
   const page = await personaGoto('V01', 'civicrm/elections/view');
   await expect(page.getByText('chosen by the organisers').first()).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Submit Nomination' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Nominate', exact: true })).toHaveCount(0);
   const form = await personaGoto('V01', 'civicrm/elections/nominations/create');
   await expect(form.getByText('there are no online nominations')).toBeVisible();
 });
@@ -32,7 +32,7 @@ test('a candidate added by the organisers is asked to accept and becomes a candi
   advanceCouncil('to-advertise');
   const [nomination] = civiApi4<Array<{ id: number }>>('ElectionNomination.get', { select: ['id'], where: [['member_nominee', '=', data.links.N01.cid]] });
   const nominee = await personaGoto('N01', 'civicrm/elections/view');
-  await expect(nominee.getByRole('link', { name: /Accept Nomination|Respond to Nomination/ }).first()).toBeVisible();
+  await expect(nominee.getByRole('link', { name: /Accept Nomination/ }).first()).toBeVisible();
   const page = await persona('N01');
   await accept(page, 'N01', nomination.id, 'Chosen by the board', 'https://example.org/N01');
   await page.context().close();

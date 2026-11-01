@@ -40,7 +40,7 @@ test('the Results page form works on a running election and saves the logo, head
   await adminPage.locator('input[name="results_logo"]').setInputFiles({ name: 'logo.png', mimeType: 'image/png', buffer: PNG });
   await adminPage.getByLabel('Logo description').fill('Council crest');
   await adminPage.getByRole('button', { name: 'Submit' }).click();
-  await expect(adminPage.getByText('The results page has been saved.')).toBeVisible();
+  await expect(adminPage.getByText('Results page saved.')).toBeVisible();
   const [row] = civiApi4<any[]>('Election.get', { select: ['results_header_text', 'results_logo_file_id', 'results_logo_alt'], where: [['id', '=', electionId]] });
   expect(row.results_header_text).toBe('<b>Congratulations</b> to our new council');
   expect(row.results_logo_file_id).toBeTruthy();
@@ -166,7 +166,7 @@ test.describe('celebration', () => {
 test('the form previews the effect and only asks for the options when it is on', async ({ adminPage }) => {
   await adminPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
   await adminPage.getByRole('tab', { name: 'Display' }).click();
-  const toggle = adminPage.getByLabel('Display celebration effects on the Election results page');
+  const toggle = adminPage.getByLabel('Show a celebration on the results page');
   await toggle.uncheck();
   await expect(adminPage.getByLabel('Celebration effect', { exact: true })).toBeHidden();
   await toggle.check();

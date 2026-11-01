@@ -64,11 +64,11 @@ class CRM_Elections_VotingMethod {
     if ($method === self::PLURALITY) {
       foreach ($ranks as $rank) {
         if ((int) $rank !== 1) {
-          return 'In this election candidates are chosen, not ranked.';
+          return E::ts('This election does not use ranks. Tick the candidates you choose.');
         }
       }
       if (count($ranks) > max(1, (int) $seats)) {
-        return 'You can choose no more candidates than there are seats for the position.';
+        return E::ts('You can choose no more candidates than there are seats.');
       }
     }
     return NULL;
@@ -91,8 +91,8 @@ class CRM_Elections_VotingMethod {
     }
     return [
       E::ts('Use this form to vote for your preferred candidates in each position.'),
-      E::ts('Votes are numbered from 1 onwards, where 1 is your highest preference, followed by 2 and so on.'),
-      E::ts('For positions where multiple seats are available, you only need to vote once, with your order of preferences being considered across all seats.'),
+      E::ts('Give each candidate you want a rank. Rank 1 is your first choice.'),
+      E::ts('For positions with more than one seat, you vote once. Your ranks count across all the seats.'),
     ];
   }
 
@@ -134,7 +134,7 @@ class CRM_Elections_VotingMethod {
         ? E::ts('Vote for %1. Tick one candidate.', [1 => $name])
         : E::ts('Vote for %1. Tick up to %2 candidates.', [1 => $name, 2 => $seats]);
     }
-    return E::ts('Vote for %1. Please number the candidates from 1 to %2 in the order of your preferences.', [1 => $name, 2 => $candidates]);
+    return E::ts('Rank the candidates for %1, from 1 to %2.', [1 => $name, 2 => $candidates]);
   }
 
   /**

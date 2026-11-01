@@ -94,7 +94,7 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
   public function testSomeoneWhoIsNotAMemberCannotTakePartInNominations() {
     $fixture = Council::create();
     $position = $fixture->positions['President'];
-    $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('N01'), $fixture->id('OUT')), 'not allowed to nominate');
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('N01'), $fixture->id('OUT')), 'cannot nominate in this election');
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('OUT'), $fixture->id('V01')), 'can stand');
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('N01'), NULL));
   }
@@ -115,7 +115,7 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     $fixture = Council::create();
     $fixture->runNominations();
     CRM_Elections_Helper_Process::withdraw($fixture->nominations['Treasurer|N07'], $fixture->id('N07'), 'No thanks');
-    $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $fixture->positions['Treasurer'], $fixture->id('N07'), $fixture->id('V30')), 'withdrawn');
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $fixture->positions['Treasurer'], $fixture->id('N07'), $fixture->id('V30')), 'withdrew');
   }
 
   // ------------------------------------------------- nominee search (browser)
@@ -203,7 +203,7 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     $nomination = $fixture->nominations['President|N01'];
     // A nominator, another nominee and an outsider cannot accept for N01.
     foreach (['V01', 'N02', 'OUT'] as $persona) {
-      $this->assertRejected(fn() => CRM_Elections_Helper_Process::accept($nomination, $fixture->id($persona), 'Not mine'), 'not authorized');
+      $this->assertRejected(fn() => CRM_Elections_Helper_Process::accept($nomination, $fixture->id($persona), 'Not mine'), 'You do not have access to this nomination');
     }
     $this->assertEquals(0, $this->nominationField($fixture, 'President|N01', 'has_accepted_nomination'));
     CRM_Elections_Helper_Process::accept($nomination, $fixture->id('N01'));
@@ -214,13 +214,13 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     $fixture = Council::create();
     $fixture->runNominations();
     $fixture->moveToStage(Council::STAGE_ADVERTISE);
-    $this->assertRejected(fn() => CRM_Elections_Helper_Process::accept($fixture->nominations['President|N08'], $fixture->id('N08')), 'enough nominations');
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::accept($fixture->nominations['President|N08'], $fixture->id('N08')), 'needs more nominators');
   }
 
   public function testCannotAcceptTwiceOrAfterWithdrawing() {
     $fixture = Council::create()->playUntil(Council::STAGE_ADVERTISE);
-    $this->assertRejected(fn() => CRM_Elections_Helper_Process::accept($fixture->nominations['President|N01'], $fixture->id('N01')), 'already have accepted');
-    $this->assertRejected(fn() => CRM_Elections_Helper_Process::accept($fixture->nominations['President|N03'], $fixture->id('N03')), 'rejected');
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::accept($fixture->nominations['President|N01'], $fixture->id('N01')), 'already accepted');
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::accept($fixture->nominations['President|N03'], $fixture->id('N03')), 'declined or withdrew');
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::withdraw($fixture->nominations['President|N03'], $fixture->id('N03')), 'withdrawn');
   }
 
@@ -248,7 +248,7 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     }
     $this->assertFalse(CRM_Elections_Helper_Eligibility::canVote($fixture->electionId, $fixture->id('OUT')));
     $ballot = $fixture->ranksForApi(['President' => ['N01' => 1]]);
-    $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $fixture->id('OUT'), $ballot), 'not allowed to vote');
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $fixture->id('OUT'), $ballot), 'You cannot vote in this election');
     $this->assertSame(0, $this->countVotes($fixture));
   }
 
@@ -289,7 +289,7 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     $n02 = $fixture->nominations['President|N02'];
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $voter, []), 'at least one candidate');
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $voter, [$n01 => 1, $n02 => 1]), 'different');
-    $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $voter, [$n01 => 0]), 'positive');
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $voter, [$n01 => 0]), 'Choose a rank');
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $voter, [$n01 => 2]), 'rank 1');
     $this->assertSame(0, $this->countVotes($fixture, 'V29'));
   }
@@ -297,9 +297,9 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
   public function testVotingOnlyWhileVotingIsOpen() {
     $fixture = Council::create()->playUntil(Council::STAGE_ADVERTISE);
     $ballot = $fixture->ranksForApi(['President' => ['N01' => 1]]);
-    $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $fixture->id('V29'), $ballot), 'before voting');
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $fixture->id('V29'), $ballot), 'Voting has not opened yet');
     $fixture->moveToStage(Council::STAGE_RESULTS);
-    $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $fixture->id('V29'), $ballot), 'after voting');
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $fixture->id('V29'), $ballot), 'Voting closed on');
   }
 
   public function testAMemberCanChangeTheirVoteWhenRevotingIsAllowed() {

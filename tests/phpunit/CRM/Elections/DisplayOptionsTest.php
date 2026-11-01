@@ -108,4 +108,13 @@ class CRM_Elections_DisplayOptionsTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame('https://example.org/cv', $loaded['statement_url']);
   }
 
+  public function testTheStatementChoicesAreWordedAsOnTheForm() {
+    $this->assertSame([
+      CRM_Elections_BAO_Election::STATEMENTS_NONE => 'Not shown',
+      CRM_Elections_BAO_Election::STATEMENTS_LINK => 'Read statement',
+      CRM_Elections_BAO_Election::STATEMENTS_INLINE => 'In full',
+    ], CRM_Elections_BAO_Election::getStatementDisplayOptions());
+    $this->assertSame(['election' => 'Position', 'referendum' => 'Question'], CRM_Elections_BAO_ElectionPosition::getTypes());
+  }
+
 }

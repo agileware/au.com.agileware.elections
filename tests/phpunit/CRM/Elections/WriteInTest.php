@@ -123,7 +123,9 @@ class CRM_Elections_WriteInTest extends api_v3_ElectionBaseTestCase {
     $this->assertStringContainsString('n09.writein@example.org', $mails[0]['recipient_email']);
     $this->assertStringContainsString('written you in', $mails[0]['body']);
     $this->assertStringContainsString('nominations/accept', $mails[0]['body']);
-    $this->assertStringContainsString('nominations/reject', $mails[0]['body']);
+    $this->assertStringNotContainsString('nominations/reject', $mails[0]['body'], 'One link: the Accept Nomination screen has Decline on it');
+    $this->assertStringContainsString('Accept or decline your nomination', $mails[0]['body']);
+    $this->assertStringContainsString('Times are shown in', $mails[0]['body']);
   }
 
   public function testNothingShowsWhoWroteWhomIn() {
@@ -149,7 +151,7 @@ class CRM_Elections_WriteInTest extends api_v3_ElectionBaseTestCase {
 
   public function testTheSamePersonCannotBeRankedTwice() {
     $fixture = $this->voting();
-    $this->refused(fn() => $this->ballot($fixture, 'V01', ['N01' => 1], ['N01' => 2]), 'only be ranked once');
+    $this->refused(fn() => $this->ballot($fixture, 'V01', ['N01' => 1], ['N01' => 2]), 'be ranked once');
   }
 
   // ------------------------------------------------------------------ searching

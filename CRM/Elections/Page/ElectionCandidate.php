@@ -13,7 +13,7 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
 
     if (!$this->enId) {
       $this->enId = 0;
-      throwAccessDeniedPage($this);
+      throwNotFoundPage($this, E::ts('This candidate could not be found.'));
       parent::run();
       return;
     }
@@ -25,7 +25,7 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
       ]);
     }
     catch (CRM_Core_Exception $e) {
-      throwAccessDeniedException($this, E::ts('You are not authorized to access this page.'));
+      throwNotFoundPage($this, E::ts('This candidate could not be found.'));
       parent::run();
       return;
     }
@@ -45,7 +45,7 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
     $this->assign('positions', $positionsWithNominations);
     $this->assign('election', $this->election);
     $this->assign('canEditStatement', $this->canEditStatement());
-    CRM_Utils_System::setTitle($this->electionNomination['member_nominee.display_name'] . ' - ' . $this->election->name);
+    CRM_Utils_System::setTitle(E::ts('%1 - %2', [1 => $this->electionNomination['member_nominee.display_name'], 2 => $this->election->name]));
 
     $this->assign('checksum_query', [
       'query' => sprintf( 'eid=%s', $this->electionNomination['election_position_id.election_id'] )
@@ -83,11 +83,13 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
       }
     }
 
+    $this->assignBackToElection($this->electionNomination['election_position_id.election_id']);
+
     parent::run();
   }
 
   /**
-   * Show the "Edit statement" button to administrators, and to the candidate until voting starts.
+   * Show the "Edit Statement" button to administrators, and to the candidate until voting starts.
    *
    * @return bool
    */

@@ -1,1 +1,1 @@
-Voting has closed: the chance to accept for {$positionName|escape:'htmlall'} in {$electionName|escape:'htmlall'} has passed
+Voting closed on {$votingCloses|escape:'htmlall'}: you can no longer accept your nomination for {$positionName|escape:'htmlall'}

@@ -64,8 +64,25 @@
     });
   }
 
+  /** A date in the date and time format CiviCRM is set to use (the same as the date fields on the form). */
   function format(date) {
-    return date ? date.toLocaleString([], {dateStyle: 'medium', timeStyle: 'short'}) : '—';
+    if (!date) {
+      return ts('Not set');
+    }
+    if (CRM.utils && CRM.utils.formatDate) {
+      return CRM.utils.formatDate(date, null, true);
+    }
+    return date.toLocaleString();
+  }
+
+  /** "from X to Y", "from X" or "Not set", as one translated phrase. */
+  function describeRange(start, end) {
+    if (!start) {
+      return ts('Not set');
+    }
+    return end
+      ? ts('from %1 to %2', {1: format(start), 2: format(end)})
+      : ts('from %1', {1: format(start)});
   }
 
   function drawTimeline($form, dates, problems) {
@@ -76,7 +93,7 @@
       var end = stage.end ? dates[stage.end] : null;
       var $item = $('<li></li>');
       $('<span class="election-timeline-label"></span>').text(stage.label).appendTo($item);
-      var range = format(start) + (stage.end ? ' → ' + format(end) : (stage.until ? ' → ' + format(dates[stage.until]) : ''));
+      var range = describeRange(start, stage.end ? end : (stage.until ? dates[stage.until] : null));
       $('<span class="election-timeline-range"></span>').text(range).appendTo($item);
       var bad = problems[stage.start] || (stage.end && problems[stage.end]);
       if (bad) {

@@ -76,10 +76,10 @@ class CRM_Elections_BAO_ElectionNomination extends CRM_Elections_DAO_ElectionNom
   public static function addCandidate($positionId, $nomineeId, $accepted = TRUE, $statement = NULL) {
     $electionId = (int) CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_ElectionPosition', $positionId, 'election_id');
     if (!$electionId) {
-      throw new CRM_Elections_Exception(E::ts('The selected position is not part of this election.'));
+      throw new CRM_Elections_Exception(E::ts('That position is not part of this election.'));
     }
     if (CRM_Elections_BAO_ElectionPosition::isReferendum($positionId)) {
-      throw new CRM_Elections_Exception(E::ts('A referendum question has no candidates.'));
+      throw new CRM_Elections_Exception(E::ts('A question has no candidates.'));
     }
     $election = findElectionById($electionId);
     if ($election->is_deleted) {

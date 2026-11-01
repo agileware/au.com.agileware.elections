@@ -3,7 +3,7 @@ use CRM_Elections_ExtensionUtil as E;
 
 return [
   'type' => 'search',
-  'title' => E::ts('Election Audit Log'),
+  'title' => E::ts('Audit Log'),
   'icon' => 'fa-shield',
   'server_route' => 'civicrm/elections/audit-log',
   'permission' => ['access CiviCRM', 'administer Elections'],

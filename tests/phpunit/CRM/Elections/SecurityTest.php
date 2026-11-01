@@ -54,7 +54,7 @@ class CRM_Elections_SecurityTest extends api_v3_ElectionBaseTestCase {
     $this->refused(function () use ($nomination, $fixture) {
       // Even a member who may not vote cannot be given a ballot.
       civicrm_api3('ElectionVote', 'addvotes', ['election_id' => $fixture->electionId, 'member_id' => $fixture->id('OUT'), 'votes' => [['election_nomination_id' => $nomination, 'rank' => 1]]]);
-    }, 'not allowed to vote');
+    }, 'cannot vote in this election');
     $this->assertSame(0, (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote'));
     CRM_Elections_Helper_Process::vote($fixture->electionId, $fixture->id('V01'), [$nomination => 1]);
     $this->assertSame(1, (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote'));
@@ -141,7 +141,7 @@ class CRM_Elections_SecurityTest extends api_v3_ElectionBaseTestCase {
     // Someone who is not allowed to take part cannot nominate, or be nominated.
     $this->refused(function () use ($fixture, $positionId) {
       CRM_Elections_Helper_Process::nominate($fixture->electionId, $positionId, $fixture->id('N01'), $fixture->id('OUT'));
-    }, 'not allowed to nominate');
+    }, 'cannot nominate in this election');
     $this->refused(function () use ($fixture, $positionId) {
       CRM_Elections_Helper_Process::nominate($fixture->electionId, $positionId, $fixture->id('OUT'), $fixture->id('V01'));
     }, 'can be nominated');
@@ -165,13 +165,13 @@ class CRM_Elections_SecurityTest extends api_v3_ElectionBaseTestCase {
     $someoneElse = $fixture->id('V01');
     $this->refused(function () use ($nomination, $someoneElse) {
       CRM_Elections_Helper_Process::accept($nomination->id, $someoneElse, 'I accept for them');
-    }, 'not authorized', 'accepting for someone else');
+    }, 'do not have access', 'accepting for someone else');
     $this->refused(function () use ($nomination, $someoneElse) {
       CRM_Elections_Helper_Process::withdraw($nomination->id, $someoneElse, 'I withdraw them');
-    }, 'not authorized', 'withdrawing someone else');
+    }, 'do not have access', 'withdrawing someone else');
     $this->refused(function () use ($nomination) {
       CRM_Elections_Helper_Process::accept($nomination->id, NULL);
-    }, 'not authorized', 'no one');
+    }, 'do not have access', 'no one');
   }
 
   // ------------------------------------------------------------------ results

@@ -68,16 +68,16 @@ class CRM_Elections_VotingMethodTest extends api_v3_ElectionBaseTestCase {
       $questionsOnly = $text(CRM_Elections_VotingMethod::ballotInstructions($method, FALSE, TRUE));
       $this->assertStringContainsString('answer the questions', $questionsOnly);
       $this->assertStringNotContainsString('candidate', $questionsOnly);
-      $this->assertStringNotContainsString('numbered', $questionsOnly);
+      $this->assertStringNotContainsString('rank', $questionsOnly);
       $this->assertStringNotContainsString('Tick', $questionsOnly);
     }
     // Positions only: the method's own wording, nothing about questions.
-    $this->assertStringContainsString('numbered from 1', $text(CRM_Elections_VotingMethod::ballotInstructions('irv', TRUE, FALSE)));
+    $this->assertStringContainsString('Rank 1 is your first choice', $text(CRM_Elections_VotingMethod::ballotInstructions('irv', TRUE, FALSE)));
     $this->assertStringNotContainsString('Questions:', $text(CRM_Elections_VotingMethod::ballotInstructions('irv', TRUE, FALSE)));
     $this->assertStringContainsString('Tick the candidates', $text(CRM_Elections_VotingMethod::ballotInstructions('plurality', TRUE, FALSE)));
     // Both: the method's wording and the line about questions.
     $both = $text(CRM_Elections_VotingMethod::ballotInstructions('irv', TRUE, TRUE));
-    $this->assertStringContainsString('numbered from 1', $both);
+    $this->assertStringContainsString('Rank 1 is your first choice', $both);
     $this->assertStringContainsString('Questions: choose one answer', $both);
   }
 
@@ -138,7 +138,7 @@ class CRM_Elections_VotingMethodTest extends api_v3_ElectionBaseTestCase {
           ['election_nomination_id' => $this->nomination($fixture, 'President', 'N02'), 'rank' => 2],
         ],
       ]);
-    }, 'chosen, not ranked');
+    }, 'does not use ranks');
   }
 
   public function testSeveralSeatsAllowSeveralTicksButNotMore() {
@@ -158,7 +158,7 @@ class CRM_Elections_VotingMethodTest extends api_v3_ElectionBaseTestCase {
     civicrm_api3('ElectionVote', 'addvotes', ['election_id' => $fixture->electionId, 'member_id' => $fixture->id('V01'), 'votes' => [['election_nomination_id' => $a, 'rank' => 1], ['election_nomination_id' => $b, 'rank' => 2]]]);
     $this->expectRefusal(function () use ($fixture, $a, $b) {
       civicrm_api3('ElectionVote', 'addvotes', ['election_id' => $fixture->electionId, 'member_id' => $fixture->id('V02'), 'votes' => [['election_nomination_id' => $a, 'rank' => 1], ['election_nomination_id' => $b, 'rank' => 1]]]);
-    }, 'Rank must be different');
+    }, 'needs a different rank');
   }
 
   // ------------------------------------------------------------------ counting

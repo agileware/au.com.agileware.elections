@@ -22,7 +22,7 @@ export async function nominate(page: Page, persona: string, position: string, no
   else {
     await page.evaluate((id) => { (document.querySelector('#contact') as HTMLInputElement).value = String(id); }, nomineeContactId);
   }
-  await page.getByLabel('Why do you want to nominate this person for this position?').fill(reason);
+  await page.getByLabel('Reason for the nomination').fill(reason);
   await page.getByRole('button', { name: 'Nominate' }).click();
   await expect(page.getByText('Nomination submitted.')).toBeVisible();
 }
@@ -30,18 +30,18 @@ export async function nominate(page: Page, persona: string, position: string, no
 /** Accept a nomination through the Accept Nomination form. */
 export async function accept(page: Page, persona: string, nominationId: number, statement: string, link: string) {
   await page.goto(personaUrl(persona, 'civicrm/elections/nominations/accept', { enid: nominationId }));
-  await page.getByLabel('Candidate statement').fill(statement);
-  await page.getByLabel('Link to a longer statement or CV').fill(link);
+  await page.getByLabel('Statement', { exact: true }).fill(statement);
+  await page.getByLabel('Statement link').fill(link);
   await page.getByRole('button', { name: 'Accept' }).click();
   await expect(page.getByText('Nomination accepted.')).toBeVisible();
 }
 
-/** Withdraw a nomination through the Withdraw Nomination form. */
+/** Decline (before accepting) or withdraw (after accepting) a nomination through the same form. */
 export async function withdraw(page: Page, persona: string, nominationId: number, reason: string) {
   await page.goto(personaUrl(persona, 'civicrm/elections/nominations/reject', { enid: nominationId }));
   await page.getByLabel('Comments').fill(reason);
-  await page.getByRole('button', { name: 'Withdraw' }).click();
-  await expect(page.getByText('You have withdrawn the nomination.')).toBeVisible();
+  await page.getByRole('button', { name: /^(Decline|Withdraw)$/ }).click();
+  await expect(page.getByText(/^Nomination (declined|withdrawn)\.$/)).toBeVisible();
 }
 
 /**
@@ -60,13 +60,13 @@ export async function vote(page: Page, persona: string, ranks: Record<number, nu
       field.value = String(rank);
     }
   }, ranks);
-  await page.getByRole('button', { name: 'Vote', exact: true }).click();
+  await page.getByRole('button', { name: 'Review Your Vote', exact: true }).click();
   // The ballot shows the choices for review first; the vote is saved when it is confirmed.
-  const review = page.getByRole('dialog', { name: 'Check your vote' });
+  const review = page.getByRole('dialog', { name: 'Review Your Vote' });
   if (await review.waitFor({ state: 'visible', timeout: 3000 }).then(() => true, () => false)) {
-    await review.getByRole('button', { name: 'Confirm my vote' }).click();
+    await review.getByRole('button', { name: 'Submit Vote', exact: true }).click();
   }
-  await expect(page.getByText(/You have successfully voted/)).toBeVisible();
+  await expect(page.getByText('Vote recorded.')).toBeVisible();
 }
 
 /** Ballot of a persona as nomination id -> rank, from the plan the fixture wrote. */

@@ -1138,6 +1138,43 @@ ul#errorList {
     text-decoration: underline;
 }
 
+/* Front end pages (election list, election page, candidate page, results, error pages): the Back to the election
+   link, the one line about the time zone, the stage and status words, and the welcome line. */
+.crm-container .election-back {
+    margin: 0 0 1rem;
+}
+.election-timezone-note {
+    margin: 0 0 1rem;
+    font-size: 0.85em;
+}
+.crm-container .welcome-message .msg-text {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.4;
+    text-align: left;
+}
+.election-card-inactive {
+    --election-card-accent: var(--election-border, rgba(0, 0, 0, 0.4));
+}
+.election-badge-inactive,
+.election-chip-withdrawn {
+    border-style: dashed;
+}
+.election-chip-accepted {
+    font-weight: 600;
+}
+.crm-container .election-error-actions,
+.crm-container .election-results-links,
+.crm-container .election-candidate-actions {
+    margin: 1rem 0;
+}
+@media print {
+    .crm-container .election-back,
+    .crm-container .election-error-actions {
+        display: none !important;
+    }
+}
+
 /* Write-ins on the ballot */
 .crm-container .election-writein {
     margin: 1rem 0 0;
@@ -1323,6 +1360,104 @@ ul#errorList {
     opacity: 0.55;
     cursor: not-allowed;
 }
+/* Back end lists (the SearchKit pages): the action bar, the filters, the table and its card layout on a phone. */
+.election-list-actions .election-action-end {
+    margin-left: auto;
+}
+.crm-container .election-list-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    margin: 0;
+}
+.crm-container .election-list-actions a.btn.election-action-quiet,
+.crm-container .election-list-actions a.btn.election-action-quiet:visited {
+    background: transparent;
+    color: inherit;
+    border: 1px solid currentColor;
+}
+.crm-container .election-list-actions .btn.election-action-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+.crm-container .election-clear-filters {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+.election-time-zone-note {
+    margin: 0.5em 0;
+}
+.election-list-table table {
+    width: 100%;
+}
+.election-list-table td[data-field-name="lock_reason"] {
+    font-size: 0.9em;
+}
+.election-list-table .election-move-buttons {
+    display: inline-flex;
+    gap: 0.25em;
+    margin-left: 0.5em;
+    vertical-align: middle;
+}
+.election-list-table .election-move:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+@media (max-width: 768px), (pointer: coarse) {
+    .crm-container .election-list-actions .btn,
+    .election-list-table td .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+@media (max-width: 600px) {
+    .election-list-table table,
+    .election-list-table tbody,
+    .election-list-table tbody tr,
+    .election-list-table tbody td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    /* The headings stay for screen readers; each cell shows its own label instead. */
+    .election-list-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+    }
+    .election-list-table tbody tr {
+        margin: 0 0 1em;
+        padding: 0.5em;
+        border: 1px solid rgba(128, 128, 128, 0.5);
+        border-radius: 4px;
+    }
+    .election-list-table tbody td {
+        padding: 0.25em 0.5em;
+        border: 0;
+        text-align: left;
+        overflow-wrap: anywhere;
+    }
+    .election-list-table tbody td[data-label]:not([data-label=""])::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.85em;
+        font-weight: 600;
+        opacity: 0.8;
+    }
+    .election-list-table tbody td.election-cell-empty {
+        display: none;
+    }
+    .election-list-table tbody td.crm-search-col-type-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5em;
+    }
+    .crm-container .election-list-actions .election-action-end {
+        margin-left: 0;
+    }
+}
 .election-fingerprint {
     display: inline-block;
     max-width: 100%;
@@ -1339,4 +1474,81 @@ ul#errorList {
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5em;
+}
+
+/* Back end forms and dialogs (UI standards 3.5, 3.6, 9.2): group headings in order, the secondary button, the danger
+   button and the time zone line. */
+.crm-container .crm-election-form-block-container h2.election-form-group-heading,
+.crm-container .crm-election-overview h2 {
+    margin: 1.25rem 0 0.25rem;
+    font-size: 1.17em;
+}
+.crm-container .election-timezone-note {
+    margin: 0.5rem 0;
+}
+/* A button that is not the one primary action of the form (Fill in the dates, Preview): outlined, in the same
+   shape and colour as the primary one. */
+.crm-container .crm-election-form-block-container button.election-secondary-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    box-sizing: border-box;
+    min-height: 2.75rem;
+    padding: 0.5rem 1.25rem;
+    border: 2px solid var(--election-btn-bg);
+    border-radius: var(--election-radius, 4px);
+    background: transparent;
+    color: var(--election-btn-bg);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+.crm-container .crm-election-form-block-container button.election-secondary-button:hover,
+.crm-container .crm-election-form-block-container button.election-secondary-button:focus-visible {
+    background: var(--election-btn-bg);
+    color: var(--election-btn-color);
+}
+.crm-container .crm-election-form-block-container button.election-secondary-button:focus-visible {
+    outline: 3px solid var(--election-btn-bg);
+    outline-offset: 3px;
+}
+/* Delete and Deactivate: the danger colour, on the form and in the dialog's own button row. */
+.crm-container .crm-election-form-block-container button.crm-button.crm-button.election-danger,
+.crm-container .crm-election-form-block-container button.crm-button.crm-button.election-danger:hover,
+.crm-container .crm-election-form-block-container button.crm-button.crm-button.election-danger:focus-visible,
+.crm-container .ui-dialog-buttonpane .ui-button:has(.fa-trash),
+.crm-container .ui-dialog-buttonpane .ui-button:has(.fa-toggle-off) {
+    border-color: #b3261e;
+    background: #b3261e;
+    color: #fff;
+}
+.crm-container .ui-dialog-buttonpane .ui-button:has(.fa-trash) .ui-icon,
+.crm-container .ui-dialog-buttonpane .ui-button:has(.fa-toggle-off) .ui-icon {
+    color: #fff;
+}
+
+/* Front end forms and ballot: Back to the election, the answer buttons, the position headings (frontforms) */
+.crm-container .election-back-to-election {
+    margin: 0 0 1rem;
+}
+.crm-container .crm-submit-buttons .election-back-to-election {
+    margin: 0;
+}
+.crm-election-form-col-right.election-answer-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+}
+.crm-election-form-col-right.election-answer-buttons .crm-button,
+.crm-election-form-col-right.election-answer-buttons .election-btn {
+    margin: 0;
+}
+.crm-container .election-position-prompt {
+    margin: 0 0 0.75rem;
+    font-size: 1.15em;
+    line-height: 1.3;
+}
+.crm-container .election-static-label {
+    font-weight: 600;
 }

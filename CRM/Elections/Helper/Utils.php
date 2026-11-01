@@ -35,6 +35,61 @@ class CRM_Elections_Helper_Utils {
   }
 
   /**
+   * The address of the election page, for the Back to the election link of a front end form. A person on a
+   * personal link keeps it (the link is what lets them in), a person who is logged in does not need it.
+   *
+   * @param int $electionId
+   * @param int|string|null $cid
+   * @param string|null $cs
+   *
+   * @return string
+   */
+  public static function backToElectionUrl($electionId, $cid = NULL, $cs = NULL) {
+    $url = Civi::url('current://civicrm/elections/view')->addQuery(['eid' => (int) $electionId]);
+    if ($cid && $cs) {
+      $url->addQuery(['cid' => (int) $cid, 'cs' => (string) $cs]);
+    }
+    return (string) $url;
+  }
+
+  /**
+   * Give a front end form the Back to the election link (CRM/Elections/Frame/BackToElection.tpl).
+   *
+   * @param \CRM_Core_Form $form
+   * @param int $electionId
+   * @param int|string|null $cid
+   * @param string|null $cs
+   */
+  public static function assignBackToElection($form, $electionId, $cid = NULL, $cs = NULL) {
+    $form->assign('backToElectionUrl', self::backToElectionUrl($electionId, $cid, $cs));
+  }
+
+  /**
+   * Keep what a person typed on a form when a rule refuses it after the page was sent, so the form comes back
+   * with their input in it. Held in the session until the form is next shown, and then forgotten.
+   *
+   * @param string $formName
+   * @param array $values
+   */
+  public static function rememberInput($formName, array $values) {
+    CRM_Core_Session::singleton()->set('elections_input_' . $formName, $values);
+  }
+
+  /**
+   * The input kept by rememberInput(), once.
+   *
+   * @param string $formName
+   *
+   * @return array
+   */
+  public static function recallInput($formName) {
+    $session = CRM_Core_Session::singleton();
+    $values = $session->get('elections_input_' . $formName);
+    $session->set('elections_input_' . $formName, NULL);
+    return is_array($values) ? $values : [];
+  }
+
+  /**
    * A web address that is safe to use as a link: http or https only, otherwise an empty string.
    *
    * @param string|null $url

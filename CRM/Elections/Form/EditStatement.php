@@ -13,6 +13,7 @@ class CRM_Elections_Form_EditStatement extends CRM_Elections_Form_Base {
   private $cid = NULL;
   private $cs = NULL;
   private $electionNomination = NULL;
+  private $isAdminFrame = FALSE;
 
   public function preProcess() {
     $cid = CRM_Utils_Request::retrieve('cid', 'Positive');
@@ -25,7 +26,13 @@ class CRM_Elections_Form_EditStatement extends CRM_Elections_Form_Base {
 
   public function buildQuickForm() {
     $this->enId = CRM_Utils_Request::retrieve('enid', 'Positive', $this, FALSE, 0);
-    hideNonRequiredItemsOnPage($this);
+    // One form, two frames: an administrator in the back end gets the breadcrumb and Submit, Back, Back to
+    // Manage Elections; a candidate gets Submit and Back to the election.
+    $this->isAdminFrame = isElectionAdmin() && !isRequestUsingShortCode();
+    $this->assign('isAdminFrame', $this->isAdminFrame);
+    if (!$this->isAdminFrame) {
+      hideNonRequiredItemsOnPage($this);
+    }
 
     if (!$this->enId) {
       $this->enId = 0;
@@ -40,16 +47,29 @@ class CRM_Elections_Form_EditStatement extends CRM_Elections_Form_Base {
       ]);
     }
     catch (CRM_Core_Exception $e) {
-      throwAccessDeniedException($this, $e->getMessage());
+      // The technical reason goes to the log; the person is told what to do.
+      Civi::log()->warning('Elections: statement of nomination {id} could not be loaded: {message}', ['id' => $this->enId, 'message' => $e->getMessage()]);
+      throwAccessDeniedException($this, E::ts('This statement could not be found.'), [
+        'return_button_text' => E::ts('View Elections'),
+        'return_button_action' => (string) Civi::url('current://civicrm/elections'),
+      ]);
       return;
     }
 
     $election = findElectionById($this->electionNomination['election_position_id.election_id']);
+    $electionId = (int) $election->id;
     if (!$this->canEdit($election)) {
       throwAccessDeniedPage($this);
       return;
     }
-    CRM_Utils_System::setTitle(E::ts('Candidate Statement for %1', [
+    if ($this->isAdminFrame) {
+      $candidates = CRM_Elections_Helper_Frame::candidatesUrl($electionId);
+      CRM_Elections_Helper_Frame::assignToForm($this, CRM_Elections_Helper_Frame::trail($electionId, [[E::ts('Candidates'), $candidates]], E::ts('Edit Statement')), $candidates);
+    }
+    else {
+      CRM_Elections_Helper_Utils::assignBackToElection($this, $electionId, $this->cid, $this->cs);
+    }
+    CRM_Utils_System::setTitle(E::ts('Edit Statement for %1', [
       1 => CRM_Elections_Helper_Candidate::formatName(
         $this->electionNomination['member_nominee.display_name'],
         $this->electionNomination['member_nominee.first_name'] ?? NULL,
@@ -60,13 +80,13 @@ class CRM_Elections_Form_EditStatement extends CRM_Elections_Form_Base {
     ]));
 
     $this->assign('electionNomination', $this->electionNomination);
-    $this->add('textarea', 'comments', E::ts('Candidate statement'), ['cols' => 55, 'rows' => 8], FALSE);
-    $this->add('text', 'statement_url', E::ts('Link to a longer statement or CV'), ['size' => 55, 'maxlength' => 2048], FALSE);
+    $this->add('textarea', 'comments', E::ts('Statement'), ['cols' => 55, 'rows' => 8], FALSE);
+    $this->add('text', 'statement_url', E::ts('Statement link'), ['size' => 55, 'maxlength' => 2048], FALSE);
     $this->addElement('hidden', 'enid', $this->enId);
     $this->addButtons([
       [
         'type' => 'submit',
-        'name' => E::ts('Save'),
+        'name' => E::ts('Submit'),
         'isDefault' => TRUE,
       ],
     ]);
@@ -110,7 +130,8 @@ class CRM_Elections_Form_EditStatement extends CRM_Elections_Form_Base {
   }
 
   public function setDefaultValues() {
-    return [
+    // A statement that was refused comes back as the person wrote it.
+    return CRM_Elections_Helper_Utils::recallInput('statement') + [
       'comments' => $this->electionNomination['comments'] ?? '',
       'statement_url' => $this->electionNomination['statement_url'] ?? '',
     ];
@@ -119,7 +140,7 @@ class CRM_Elections_Form_EditStatement extends CRM_Elections_Form_Base {
   public function validate() {
     $values = $this->exportValues();
     if (!CRM_Elections_Helper_Candidate::isValidStatementUrl($values['statement_url'] ?? '')) {
-      $this->_errors['statement_url'] = E::ts('Enter a web address starting with http:// or https://');
+      $this->_errors['statement_url'] = E::ts('The statement link must start with http:// or https://.');
     }
     return parent::validate();
   }
@@ -128,22 +149,31 @@ class CRM_Elections_Form_EditStatement extends CRM_Elections_Form_Base {
     $values = $this->exportValues();
     $url = trim($values['statement_url'] ?? '');
 
-    civicrm_api3('ElectionNomination', 'create', [
-      'id' => $this->enId,
-      'comments' => $values['comments'],
-      'statement_url' => $url !== '' ? $url : NULL,
-    ]);
-    CRM_Core_Session::setStatus(E::ts('Statement saved.'), '', 'success');
-
-    $redirectUrl = Civi::url('current://civicrm/elections/candidate');
-    $redirectUrl->addQuery([
-      'enid' => $this->enId,
-      'eid' => $this->electionNomination['election_position_id.election_id'],
-    ]);
+    $electionId = $this->electionNomination['election_position_id.election_id'];
+    $query = ['enid' => $this->enId, 'eid' => $electionId];
     if ($this->cid && $this->cs) {
-      $redirectUrl->addQuery(['cid' => $this->cid, 'cs' => $this->cs]);
+      $query += ['cid' => $this->cid, 'cs' => $this->cs];
     }
-    CRM_Utils_System::redirect($redirectUrl);
+    try {
+      civicrm_api3('ElectionNomination', 'create', [
+        'id' => $this->enId,
+        'comments' => $values['comments'],
+        'statement_url' => $url !== '' ? $url : NULL,
+      ]);
+      CRM_Core_Session::setStatus(E::ts('Statement saved.'), '', 'success');
+    }
+    catch (CRM_Core_Exception $e) {
+      // The person stays on the form, with what they wrote still in it.
+      CRM_Core_Session::setStatus($e->getMessage(), E::ts('Statement not saved'), 'error');
+      CRM_Elections_Helper_Utils::rememberInput('statement', ['comments' => $values['comments'], 'statement_url' => $values['statement_url'] ?? '']);
+      CRM_Utils_System::redirect((string) Civi::url('current://civicrm/elections/candidate/statement')->addQuery($query));
+    }
+
+    if ($this->isAdminFrame) {
+      // Back to the list the administrator came from.
+      CRM_Utils_System::redirect(CRM_Elections_Helper_Frame::backUrl(CRM_Elections_Helper_Frame::candidatesUrl((int) $electionId)));
+    }
+    CRM_Utils_System::redirect(Civi::url('current://civicrm/elections/candidate')->addQuery($query));
 
     parent::postProcess();
   }

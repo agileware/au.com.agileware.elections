@@ -12,7 +12,7 @@ test.describe('Election positions (SearchKit list)', () => {
     addPosition(id, 'Alpha', 1);
     addPosition(id, 'Beta', 2, 2);
     await adminPage.goto(listUrl(id));
-    await expect(adminPage.getByRole('heading', { name: 'Election Positions' })).toBeVisible();
+    await expect(adminPage.getByRole('heading', { name: 'Positions', exact: true })).toBeVisible();
     const rows = adminPage.locator('crm-search-display-table tbody tr');
     await expect(rows).toHaveCount(2);
     await expect(rows.nth(0)).toContainText('Alpha');
@@ -20,6 +20,48 @@ test.describe('Election positions (SearchKit list)', () => {
     await expect(rows.nth(0).locator('.crm-draggable')).toBeVisible();
     await expect(adminPage.getByRole('link', { name: 'Add Position' })).toBeVisible();
     await expectNoPhpOutput(adminPage);
+  });
+
+  test('each row has Edit, Duplicate and Delete naming the position, and the heading says Position type', async ({ adminPage }) => {
+    const id = createElection(nm('Positions actions'));
+    addPosition(id, 'Alpha', 1);
+    await adminPage.goto(listUrl(id));
+    const row = adminPage.locator('crm-search-display-table tbody tr').first();
+    await expect(row.locator('td.crm-search-col-type-buttons a')).toHaveText(['Edit', 'Duplicate', 'Delete']);
+    for (const action of ['Edit', 'Duplicate', 'Delete']) {
+      await expect(row.getByRole('link', { name: `${action} Alpha` })).toBeVisible();
+    }
+    await expect(row.locator('td.crm-search-col-type-buttons a.btn-danger')).toHaveText(['Delete']);
+    await expect(adminPage.getByRole('columnheader', { name: 'Position type' })).toBeVisible();
+    await expect(row).toContainText('Position');
+    await row.getByRole('link', { name: 'Edit Alpha' }).click();
+    await expect(adminPage).toHaveURL(/positions(%2F|\/)create.*epid/);
+    await expect(adminPage.getByRole('button', { name: 'Submit' })).toBeVisible();
+  });
+
+  test('the drag handle is named and a row can be moved from the keyboard', async ({ adminPage }) => {
+    const id = createElection(nm('Positions keys'));
+    addPosition(id, 'Alpha', 1);
+    addPosition(id, 'Beta', 2);
+    addPosition(id, 'Gamma', 3);
+    await adminPage.goto(listUrl(id));
+    const rows = adminPage.locator('crm-search-display-table tbody tr');
+    await expect(rows).toHaveCount(3);
+    await expect(rows.nth(0).locator('.crm-draggable')).toHaveAttribute('aria-label', 'Drag to reorder');
+    await expect(rows.nth(0).getByRole('button', { name: 'Move up Alpha' })).toBeDisabled();
+    await expect(rows.nth(2).getByRole('button', { name: 'Move down Gamma' })).toBeDisabled();
+
+    await rows.nth(0).getByRole('button', { name: 'Move down Alpha' }).click();
+    await expect.poll(() => positionNames(id), { timeout: 15000 }).toEqual(['Beta', 'Alpha', 'Gamma']);
+    await expect(adminPage.getByRole('status').filter({ hasText: 'Alpha moved to place 2 of 3.' })).toHaveCount(1);
+    await adminPage.reload();
+    await expect(adminPage.locator('crm-search-display-table tbody tr').first()).toContainText('Beta');
+  });
+
+  test('a list with no positions says what to do', async ({ adminPage }) => {
+    const id = createElection(nm('Positions none'));
+    await adminPage.goto(listUrl(id));
+    await expect(adminPage.getByText('There are no positions yet. Select Add Position to add one.')).toBeVisible();
   });
 
   test('dragging a row changes the order and it is kept', async ({ adminPage }) => {
@@ -133,7 +175,7 @@ test.describe('Referendum questions', () => {
 
     // The list says which row is a question.
     await adminPage.goto(listUrl(id));
-    await expect(adminPage.locator('crm-search-display-table tbody tr').first()).toContainText('Referendum question');
+    await expect(adminPage.locator('crm-search-display-table tbody tr').first()).toContainText('Question');
     await expectNoPhpOutput(adminPage);
   });
 
@@ -144,15 +186,18 @@ test.describe('Referendum questions', () => {
     startElection(id);
     await adminPage.goto(listUrl(id));
     await expect(adminPage).toHaveURL(/position-list-active/);
-    await expect(adminPage.getByText('They cannot be changed while the election is active.')).toBeVisible();
+    await expect(adminPage.getByText('They cannot be changed because the election is locked: it is active and nominations have started.')).toBeVisible();
     const rows = adminPage.locator('crm-search-display-table tbody tr');
     await expect(rows).toHaveCount(2);
     await expect(rows.nth(0)).toContainText('Alpha');
     await expect(adminPage.locator('crm-search-display-table .crm-draggable')).toHaveCount(0);
+    // Add Position keeps its place, switched off, with the reason.
     await expect(adminPage.getByRole('link', { name: 'Add Position' })).toHaveCount(0);
+    await expect(adminPage.locator('.election-action-disabled', { hasText: 'Add Position' })).toContainText('Positions cannot be changed while the election is locked.');
     await expect(adminPage.getByRole('link', { name: 'Duplicate' })).toHaveCount(0);
     await expect(adminPage.getByRole('link', { name: 'Delete' })).toHaveCount(0);
     await expect(adminPage.getByText('Drag a row to change the order')).toHaveCount(0);
+    await expect(adminPage.getByRole('link', { name: 'Back', exact: true })).toBeVisible();
     await expect(adminPage.getByRole('link', { name: 'Back to Manage Elections' })).toBeVisible();
     await expectNoPhpOutput(adminPage);
   });

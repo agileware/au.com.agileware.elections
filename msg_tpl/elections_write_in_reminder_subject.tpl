@@ -1,1 +1,1 @@
-Reminder: please answer by {$votingCloses|escape:'htmlall'} for {$positionName|escape:'htmlall'} in {$electionName|escape:'htmlall'}
+Reminder: accept or decline your nomination for {$positionName|escape:'htmlall'} by {$votingCloses|escape:'htmlall'}

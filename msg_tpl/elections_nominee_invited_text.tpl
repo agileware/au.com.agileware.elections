@@ -1,9 +1,13 @@
 Dear {$nomineeName},
 
-You have been nominated for {$positionName} in the election "{$electionName}" and have enough nominations to stand.
+{$organisationName} is writing to you about the election "{$electionName}".
 
-Please accept or withdraw the nomination before voting opens on {$votingOpens}.
+You have been nominated for {$positionName} and have enough nominators to stand.
 
-Respond here: {$acceptUrl}
+Accept or decline your nomination before voting opens on {$votingOpens}.
+
+Accept or decline your nomination: {$acceptUrl}
 
 If you do nothing you will not be a candidate.
+
+Times are shown in {$timeZone}.

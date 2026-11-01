@@ -62,8 +62,10 @@ test('election pages fit and buttons are centred at every width', async ({ brows
   }
 
   await visit('nominations: election page', 'V01', 'civicrm/elections/view');
+  await visit('nominations: election list', 'V01', 'civicrm/elections');
   await visit('nominations: nominate form', 'V01', 'civicrm/elections/nominations/create');
   await visit('nominations: outsider refused', 'OUT', 'civicrm/elections/nominations/create');
+  await visit('nominations: unknown election', 'V01', 'civicrm/elections/view', { eid: 987654 });
   advanceCouncil('fill-nominations');
   await visit('nominations: with nominations', 'V03', 'civicrm/elections/view');
   const ids = councilNominationIds(council().election_id);

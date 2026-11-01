@@ -32,13 +32,13 @@ test('only the position that allows write-ins shows the write-in places', async 
   const page = await personaGoto('V01', 'civicrm/elections/vote');
   const places = page.locator('.election-writein');
   await expect(places).toHaveCount(1);
-  await expect(places).toContainText('Write in a candidate');
+  await expect(places).toContainText('Write someone in');
   await expect(places).toContainText('accept before voting closes');
   // One place to start; the button adds the next.
   await expect(places.locator('.election-writein-row:visible')).toHaveCount(1);
-  await page.getByRole('button', { name: 'Add another write-in' }).click();
+  await page.getByRole('button', { name: 'Add Another Write-in' }).click();
   await expect(places.locator('.election-writein-row:visible')).toHaveCount(2);
-  await expect(page.getByRole('button', { name: 'Add another write-in' })).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Add Another Write-in' })).toBeHidden();
   const result = await new AxeBuilder({ page }).include('.crm-container').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   expect(result.violations.filter((v) => ['serious', 'critical'].includes(v.impact || ''))).toEqual([]);
 });
@@ -63,12 +63,12 @@ test('a voter finds a person by name, writes them in, and sees them in the revie
     }
     (document.querySelector('input[name^="writeinrank_"]') as HTMLInputElement).value = '2';
   }, { [ids['President|N01']]: 1 });
-  await page.getByRole('button', { name: 'Vote', exact: true }).click();
-  const review = page.getByRole('dialog', { name: 'Check your vote' });
+  await page.getByRole('button', { name: 'Review Your Vote', exact: true }).click();
+  const review = page.getByRole('dialog', { name: 'Review Your Vote' });
   await expect(review).toBeVisible();
   await expect(review).toContainText('(written in)');
-  await review.getByRole('button', { name: 'Confirm my vote' }).click();
-  await expect(page.getByText(/You have successfully voted/)).toBeVisible();
+  await review.getByRole('button', { name: 'Submit Vote', exact: true }).click();
+  await expect(page.getByText('Vote recorded.')).toBeVisible();
   await page.context().close();
 
   const writeIns = civiApi4<any[]>('ElectionNomination.get', {
@@ -106,8 +106,9 @@ test('someone who declines cannot be written in again', async ({ persona }) => {
   const page = await persona('N10');
   await page.goto(personaUrl('N10', 'civicrm/elections/nominations/reject', { enid: nomination.id }));
   await page.getByLabel('Comments').fill('No thanks');
-  await page.getByRole('button', { name: 'Withdraw' }).click();
-  await expect(page.getByText('You have withdrawn the nomination.')).toBeVisible();
+  // A person who was written in has not accepted, so the answer is Decline.
+  await page.getByRole('button', { name: 'Decline', exact: true }).click();
+  await expect(page.getByText('Nomination declined.')).toBeVisible();
   await page.context().close();
   const rows = civiApi4<any[]>('ElectionNomination.get', { select: ['has_rejected_nomination'], where: [['id', '=', nomination.id]] });
   expect(rows[0].has_rejected_nomination).toBeTruthy();
@@ -131,7 +132,7 @@ test('once voting has closed the person who never answered is told, and cannot a
   await expect(page.locator('.crm-container')).toContainText('opportunity to answer this nomination has passed');
   await expect(page.locator('.crm-container')).toContainText('You are not on the ballot');
   await expect(page.getByRole('button', { name: 'Accept' })).toHaveCount(0);
-  await expect(page.getByRole('link', { name: 'View the election' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Back to the election' })).toBeVisible();
   await page.context().close();
   const rows = civiApi4<any[]>('ElectionNomination.get', { select: ['has_accepted_nomination'], where: [['id', '=', nomination.id]] });
   expect(rows[0].has_accepted_nomination).toBeFalsy();

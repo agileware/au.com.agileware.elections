@@ -6,10 +6,10 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
   private $eId = 0;
   private $isElectionAdmin = FALSE;
   private $election = NULL;
-  private $isElectionRunning = FALSE;
 
   public function getTemplateFileName() {
-    if ($this->election->has_results_generated) {
+    // A refused page is the error page, whatever the election holds.
+    if (!$this->throwError && $this->election && $this->election->has_results_generated) {
       return 'CRM/Elections/Page/ElectionResults.tpl';
     }
     return parent::getTemplateFileName();
@@ -22,7 +22,11 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
       parent::run();
       return;
     }
-    $this->election = findElectionById($this->eId);
+    $this->election = findElectionForPage($this, $this->eId);
+    if (!$this->election) {
+      parent::run();
+      return;
+    }
 
     // User is not logged in, and the election does not allow checksum access
     if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && !filter_var($this->election->allow_checksum_access, FILTER_VALIDATE_BOOL) ) {
@@ -44,14 +48,9 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
       $positions = CRM_Elections_BAO_ElectionResult::getResultsAndSummary($this->election->id);
       $this->assign('positions', $positions);
       $this->assign('resultStatuses', CRM_Elections_BAO_Election::getResultStatues());
-      CRM_Utils_System::setTitle(E::ts('%1 - Result', [1 => $this->election->name]));
+      CRM_Utils_System::setTitle(E::ts('Results for %1', [1 => $this->election->name]));
     }
     else {
-      $canEdit = $this->election->canEdit();
-      $this->isElectionRunning = ($canEdit !== TRUE) ? TRUE : FALSE;
-
-      $this->assign('isElectionAdmin', $this->isElectionAdmin);
-      $this->assign('isElectionRunning', $this->isElectionRunning);
       $this->assign('isAllowedToNominate', CRM_Elections_Helper_Eligibility::canNominate($this->eId));
       $this->assignPositions();
       $positionsWithNominations = CRM_Elections_BAO_ElectionPosition::findWithNominationsByElectionId($this->eId);
@@ -150,6 +149,7 @@ class CRM_Elections_Page_ViewElection extends CRM_Elections_Page_Base {
     foreach ($electionPositions['values'] as $position) {
       if (($position['position_type'] ?? '') === CRM_Elections_BAO_ElectionPosition::TYPE_REFERENDUM) {
         $position['options'] = CRM_Elections_BAO_ElectionPosition::getOptions($position['id']);
+        $position['choicesLine'] = E::ts('The choices are %1.', [1 => implode(', ', array_column($position['options'], 'label'))]);
         $questions[] = $position;
       }
     }

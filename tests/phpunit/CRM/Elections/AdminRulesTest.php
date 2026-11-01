@@ -25,7 +25,7 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
   public function testAnElectionWithoutPositionsCannotBeActivated() {
     $election = $this->inactiveElection();
     $this->expectException(CRM_Core_Exception::class);
-    $this->expectExceptionMessage('At least one Position');
+    $this->expectExceptionMessage('Add at least one position');
     \Civi\Api4\Election::update(FALSE)->addWhere('id', '=', $election['id'])->addValue('is_visible', TRUE)->execute();
   }
 
@@ -74,9 +74,9 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
 
   public function testStageAndLockedFollowTheElectionsState() {
     $cases = [
-      [api_v3_ElectionBaseTestCase::$ELECTION_NOT_STARTED, 1, 'not_running', FALSE],
+      [api_v3_ElectionBaseTestCase::$ELECTION_NOT_STARTED, 1, 'upcoming', FALSE],
       [api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, 1, 'nominations', TRUE],
-      [api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, 0, 'not_running', FALSE],
+      [api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, 0, 'inactive', FALSE],
       [api_v3_ElectionBaseTestCase::$ELECTION_ADVERTISE_CANDIDATES_STARTED, 1, 'candidates', TRUE],
       [api_v3_ElectionBaseTestCase::$ELECTION_VOTING_IN_PROGRESS, 1, 'voting', TRUE],
     ];
@@ -128,6 +128,17 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
       CRM_Elections_Helper_Guard::$withdrawing = FALSE;
     }
     $this->assertEquals(0, CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], 'is_visible'));
+  }
+
+  public function testTheReasonAnElectionCannotBeEditedOrDeletedIsASentenceThatSaysWhatToDo() {
+    $election = $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $this->inactiveElection());
+    CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET is_visible = 1 WHERE id = %1', [1 => [$election['id'], 'Integer']]);
+    $loaded = findElectionById($election['id']);
+    foreach ([$loaded->canEdit(), $loaded->canDelete()] as $reason) {
+      $this->assertIsString($reason);
+      $this->assertStringContainsString('Deactivate the election', $reason);
+      $this->assertStringEndsWith('.', $reason);
+    }
   }
 
   // -------------------------------------------------------------- positions

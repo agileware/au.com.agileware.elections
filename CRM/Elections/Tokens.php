@@ -16,7 +16,7 @@ class CRM_Elections_Tokens {
 	 * @return string
 	 */
 	protected static function registerCtx(TokenRegisterEvent $entity, string $field, string $label){
-		$entity->register($field, $label . ' :: ' . E::ts('Elections') );
+		$entity->register($field, E::ts('%1 :: Elections', [1 => $label]));
 	}
 
 	public static function register(TokenRegisterEvent $e) {
@@ -28,10 +28,10 @@ class CRM_Elections_Tokens {
 		if (in_array('activityId', $context['schema'])) {
 			$entity = $e->entity(self::TOKEN);
 
-			self::registerCtx($entity, 'election_name', E::ts('Election Name'));
-			self::registerCtx($entity, 'election_position', E::ts('Election Position'));
-			self::registerCtx($entity, 'nominator_name', E::ts('Nominator Name'));
-			self::registerCtx($entity, 'nominee_name', E::ts('Nominee Name'));
+			self::registerCtx($entity, 'election_name', E::ts('Election name'));
+			self::registerCtx($entity, 'election_position', E::ts('Position'));
+			self::registerCtx($entity, 'nominator_name', E::ts('Nominator name'));
+			self::registerCtx($entity, 'nominee_name', E::ts('Nominee name'));
 		}
 	}
 

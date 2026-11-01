@@ -35,11 +35,11 @@ class CRM_Elections_Form_DuplicateElectionPosition extends CRM_Elections_Form_Ba
   public function postProcess() {
     $values = $this->exportValues();
     try {
-      $copy = CRM_Elections_BAO_ElectionPosition::duplicate($this->positionId, $values['name']);
-      CRM_Core_Session::setStatus(E::ts('"%1" has been added.', [1 => $copy['name']]), '', 'success');
+      CRM_Elections_BAO_ElectionPosition::duplicate($this->positionId, $values['name']);
+      CRM_Core_Session::setStatus(E::ts('Position duplicated.'), '', 'success');
     }
     catch (CRM_Core_Exception $e) {
-      CRM_Core_Session::setStatus($e->getMessage(), E::ts('Position not copied'), 'error');
+      CRM_Core_Session::setStatus($e->getMessage(), E::ts('Position not duplicated'), 'error');
     }
     $this->finish(CRM_Utils_System::url('civicrm/elections/positions', 'reset=1&eid=' . $this->position['election_id']));
   }

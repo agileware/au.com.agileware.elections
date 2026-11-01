@@ -1,1 +1,1 @@
-You have been nominated for {$positionName|escape:'htmlall'} in {$electionName|escape:'htmlall'}
+Accept or decline your nomination for {$positionName|escape:'htmlall'} in {$electionName|escape:'htmlall'}

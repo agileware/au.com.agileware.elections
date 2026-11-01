@@ -35,11 +35,11 @@ async function tickAndVote(page: import('@playwright/test').Page, persona: strin
   for (const key of choices) {
     await page.locator(`input[type="checkbox"][name="candidate_${ids[key]}"]`).check();
   }
-  await page.getByRole('button', { name: 'Vote', exact: true }).click();
-  const review = page.getByRole('dialog', { name: 'Check your vote' });
+  await page.getByRole('button', { name: 'Review Your Vote', exact: true }).click();
+  const review = page.getByRole('dialog', { name: 'Review Your Vote' });
   await expect(review).toBeVisible();
-  await review.getByRole('button', { name: 'Confirm my vote' }).click();
-  await expect(page.getByText(/You have successfully voted/)).toBeVisible();
+  await review.getByRole('button', { name: 'Submit Vote', exact: true }).click();
+  await expect(page.getByText('Vote recorded.')).toBeVisible();
 }
 
 test('the ballot has tick boxes and says how many can be chosen', async ({ personaGoto }) => {
@@ -47,7 +47,7 @@ test('the ballot has tick boxes and says how many can be chosen', async ({ perso
   await expect(page.getByText('Tick the candidates you want to vote for.')).toBeVisible();
   await expect(page.locator('input[type="checkbox"][name^="candidate_"]').first()).toBeVisible();
   await expect(page.getByText('Tick one candidate.').first()).toBeVisible();
-  await expect(page.getByText(/Please number the candidates/)).toHaveCount(0);
+  await expect(page.getByText(/Rank the candidates for/)).toHaveCount(0);
   const result = await new AxeBuilder({ page }).include('.crm-container').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   expect(result.violations.filter((v) => ['serious', 'critical'].includes(v.impact || ''))).toEqual([]);
 });
@@ -57,9 +57,9 @@ test('ticking more candidates than there are seats is stopped', async ({ persona
   await page.locator(`input[type="checkbox"][name="candidate_${ids['President|N01']}"]`).check();
   await page.locator(`input[type="checkbox"][name="candidate_${ids['President|N02']}"]`).check();
   await expect(page.getByText('You can choose no more than 1.')).toBeVisible();
-  await page.getByRole('button', { name: 'Vote', exact: true }).click();
-  await expect(page.getByRole('dialog', { name: 'Check your vote' })).toHaveCount(0);
-  await expect(page.getByText(/You have successfully voted/)).toHaveCount(0);
+  await page.getByRole('button', { name: 'Review Your Vote', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Review Your Vote' })).toHaveCount(0);
+  await expect(page.getByText('Vote recorded.')).toHaveCount(0);
 });
 
 test('voters tick their choices and see them on the election page', async ({ persona }) => {

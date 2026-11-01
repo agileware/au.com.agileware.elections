@@ -1,5 +1,5 @@
 import { test, expect, civiAdminUrl, expectNoPhpOutput } from '../../fixtures/base';
-import { civiEval } from '../../fixtures/civi';
+import { civiApi4, civiEval } from '../../fixtures/civi';
 import { addNomination, addPosition, createElection, createMembers, nm, removeRunData, removeRunMembers, startElection } from '../../fixtures/data';
 
 test.afterAll(() => {
@@ -65,6 +65,31 @@ test.describe('Election overview', () => {
     const grid = await adminPage.locator('.election-overview-grid').boundingBox();
     expect(bar!.y).toBeLessThan(grid!.y);
     await expectNoPhpOutput(adminPage);
+  });
+
+  test('the blocks have headings in order, one time zone line and labelled tables', async ({ adminPage }) => {
+    const id = createElection(nm('Overview structure'));
+    await adminPage.goto(overviewUrl(id));
+    await expect(adminPage.locator('.crm-election-overview h3')).toHaveCount(0);
+    await expect(adminPage.locator('.crm-election-overview h2').first()).toBeVisible();
+    await expect(adminPage.getByText(/^Times are shown in /)).toHaveCount(1);
+    await expect(adminPage.locator('.election-counts th[scope="row"]')).toHaveCount(5);
+    await expect(adminPage.locator('.election-counts')).toContainText('Nominees with enough nominations');
+    await expect(adminPage.locator('.crm-election-overview')).not.toContainText('Eligible candidates');
+    // The icons are hidden from assistive technology without also being given a role.
+    await expect(adminPage.locator('.election-action-bar .crm-i[role]')).toHaveCount(0);
+  });
+
+  test('numbers of people are worded for one and for many', async ({ adminPage }) => {
+    const { groupId, ids } = createMembers(['Jo']);
+    const id = createElection(nm('Overview plurals'), { groupId });
+    const chair = addPosition(id, 'Chair', 1);
+    addNomination(chair, ids.Jo, { accepted: true });
+    startElection(id);
+    civiApi4('Election.update', { values: { nomination_groups: String(groupId) }, where: [['id', '=', id]] });
+    await adminPage.goto(overviewUrl(id));
+    await expect(adminPage.locator('.election-overview-roles')).toContainText('1 person may vote');
+    await expect(adminPage.locator('.election-overview-roles')).toContainText('1 person may nominate and second');
   });
 
   test('the audit log shows readable labels and the whole fingerprint above the table, with a Copy button', async ({ adminPage }) => {

@@ -19,7 +19,7 @@
 {/if}
 
 {if $position.result_status == $resultStatuses.results_equal_seats}
-    <p>{ts}The number of candidates remaining equals the number of position holders. These candidates are the winners.{/ts}</p>
+    <p>{ts}The number of candidates equals the number of seats, so all of them are elected.{/ts}</p>
 {/if}
 
 {if $position.result_status == $resultStatuses.results_passed}

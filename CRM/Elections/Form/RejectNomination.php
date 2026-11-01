@@ -12,6 +12,7 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
   private $cid = NULL;
   private $cs = NULL;
   private $electionNomination = NULL;
+  private $isCandidate = FALSE;
 
   public function buildQuickForm() {
     $this->enId = CRM_Utils_Request::retrieve('enid', 'Positive', $this, FALSE, 0);
@@ -38,11 +39,17 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
       ]);
     }
     catch (CRM_Core_Exception $e) {
-      throwAccessDeniedException($this, E::ts('You are not authorized to access this page.'));
+      throwAccessDeniedException($this, E::ts('You do not have access to this nomination. Log in as the person who was nominated, or use the personal link in your email.'));
       return;
     }
 
     $election = findElectionById($this->electionNomination['election_position_id.election_id']);
+    CRM_Elections_Helper_Utils::assignBackToElection($this, $election->id, $this->cid, $this->cs);
+    // The words follow what the person has done so far: a nominee who has not accepted declines, a candidate
+    // who accepted withdraws. Decision R2 (a stored difference between the two) plugs in here: it will replace
+    // $this->isCandidate, which for now is read from has_accepted_nomination.
+    $this->isCandidate = $this->electionNomination['has_accepted_nomination'] == 1;
+    $this->assign('isCandidate', $this->isCandidate);
     if ((!$election->isVisible && !isElectionAdmin())) {
       throwAccessDeniedPage($this);
       return;
@@ -55,7 +62,8 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
     }
 
     if ($this->electionNomination['has_rejected_nomination'] == 1) {
-      throwAccessDeniedException($this, E::ts('You have withdrawn this nomination.'));
+      // R2: say Declined or Withdrawn once the two are stored apart.
+      throwAccessDeniedException($this, E::ts('You have already declined or withdrawn this nomination.'));
       return;
     }
 
@@ -63,18 +71,22 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
       // Written in by a voter and not yet answered: can decline until voting closes.
       if ($election->isVotingEnded) {
         throwAccessDeniedException($this, CRM_Elections_Helper_WriteIn::closedMessage($election, $this->electionNomination['election_position_id.name']), [
-          'return_button_text' => E::ts('View the election'),
+          'errorKind' => 'status',
+          'return_button_text' => E::ts('Back to the election'),
           'return_button_action' => CRM_Elections_Helper_Mailer::link($election, $nomineeId, 'civicrm/elections/view'),
         ]);
         return;
       }
     }
     elseif ($election->isVotingStarted) {
-      throwAccessDeniedException($this, E::ts('You cannot withdraw the nomination once voting is started.'));
+      throwAccessDeniedException($this, $this->isCandidate
+        ? E::ts('You can no longer withdraw because voting has started.')
+        : E::ts('You can no longer decline this nomination because voting has started.'));
       return;
     }
 
     $this->assign('electionNomination', $this->electionNomination);
+    CRM_Utils_System::setTitle($this->isCandidate ? E::ts('Withdraw Nomination') : E::ts('Decline Nomination'));
 
     $this->add('textarea', 'nominationcomments', E::ts('Comments'), ['cols' => 55, 'rows' => 6], FALSE);
     $this->addElement('hidden', 'enid', $this->enId);
@@ -100,7 +112,7 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
     $this->addButtons([
       [
         'type' => 'submit',
-        'name' => E::ts('Withdraw'),
+        'name' => $this->isCandidate ? E::ts('Withdraw') : E::ts('Decline'),
         'isDefault' => TRUE,
       ],
     ]);
@@ -124,11 +136,12 @@ class CRM_Elections_Form_RejectNomination extends CRM_Elections_Form_Base {
     $values = $this->exportValues();
 
     try {
+      // R2: this is the call that records the answer; it will record which of the two it was.
       CRM_Elections_Helper_Process::withdraw($this->enId, CRM_Elections_Helper_Eligibility::getActingContactId(), $values['nominationcomments']);
-      CRM_Core_Session::setStatus(E::ts('You have withdrawn the nomination.'), '', 'success');
+      CRM_Core_Session::setStatus($this->isCandidate ? E::ts('Nomination withdrawn.') : E::ts('Nomination declined.'), '', 'success');
     }
     catch (CRM_Core_Exception $e) {
-      CRM_Core_Session::setStatus($e->getMessage(), '', 'error');
+      CRM_Core_Session::setStatus($e->getMessage(), $this->isCandidate ? E::ts('Nomination not withdrawn') : E::ts('Nomination not declined'), 'error');
     }
 
     // Redirect back to the main election info view

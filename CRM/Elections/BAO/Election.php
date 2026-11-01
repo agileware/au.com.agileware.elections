@@ -40,9 +40,9 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
    */
   public static function getStatementDisplayOptions() {
     return [
-      self::STATEMENTS_NONE => E::ts('Not on the ballot'),
-      self::STATEMENTS_LINK => E::ts('Expandable "Read statement" on the ballot'),
-      self::STATEMENTS_INLINE => E::ts('In full on the ballot'),
+      self::STATEMENTS_NONE => E::ts('Not shown'),
+      self::STATEMENTS_LINK => E::ts('Read statement'),
+      self::STATEMENTS_INLINE => E::ts('In full'),
     ];
   }
 
@@ -191,13 +191,13 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
         return E::ts('Nominations are open. People nominate and second each other on the website; you can also add candidates directly.');
 
       case 'advertise':
-        return E::ts('Nominees are accepting or withdrawing. Check the candidates before voting opens.');
+        return E::ts('Nominees are accepting or declining. Check the candidates before voting opens.');
 
       case 'voting':
         return E::ts('Voting is open. Who is standing is now fixed; you can still correct statements.');
 
       case 'closed':
-        return E::ts('Voting has closed. Results are calculated by the scheduled job and published on the results date.');
+        return E::ts('Voting closed. The results are calculated by the scheduled job and published on the date set for them.');
 
       default:
         return E::ts('The results are published.');
@@ -217,7 +217,7 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
   public static function assertCanActivate($electionId) {
     $positions = (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_position WHERE election_id = %1', [1 => [$electionId, 'Positive']]);
     if ($positions < 1) {
-      throw new CRM_Elections_Exception(E::ts('At least one Position must be defined before the Election can be active.'));
+      throw new CRM_Elections_Exception(E::ts('Add at least one position before activating the election.'));
     }
   }
 
@@ -305,11 +305,11 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
    */
   public function canEdit() {
     if ($this->canDelete() !== TRUE) {
-      return 'Election details cannot be edited once it has been run.';
+      return E::ts('This election is active and its nominations have started, so it cannot be edited. Deactivate the election to edit it.');
     }
 
     if ($this->is_deleted) {
-      return 'Election has been deleted and cannot be edited.';
+      return E::ts('This election is deleted, so it cannot be edited.');
     }
 
     return TRUE;
@@ -322,7 +322,7 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
    */
   public function canDelete() {
     if (self::isElectionInProcess($this->nomination_start_date) && $this->is_visible) {
-      return 'Election cannot be deleted once it has been run.';
+      return E::ts('This election is active and its nominations have started, so it cannot be deleted. Deactivate the election first.');
     }
 
     return TRUE;
@@ -412,17 +412,17 @@ class CRM_Elections_BAO_Election extends CRM_Elections_DAO_Election {
       return ['field' => $field, 'rule' => $rule, 'other' => $other, 'message' => $message];
     };
     return [
-      $rule('visibility_end_date', 'after', 'visibility_start_date', E::ts('End date must be after start date.')),
-      $rule('nomination_start_date', 'notBefore', 'visibility_start_date', E::ts('Start date must not be before the visibility start date.')),
-      $rule('nomination_end_date', 'after', 'nomination_start_date', E::ts('End date must be after start date.')),
-      $rule('nomination_end_date', 'notAfter', 'visibility_end_date', E::ts('End date must be before visibility end date.')),
-      $rule('advertise_candidates_date', 'after', 'nomination_end_date', E::ts('Start Date must be after nomination end date.')),
-      $rule('advertise_candidates_date', 'notAfter', 'visibility_end_date', E::ts('Start Date must be before visibility end date.')),
-      $rule('voting_start_date', 'after', 'advertise_candidates_date', E::ts('Start date must be after advertise candidate date.')),
-      $rule('voting_end_date', 'after', 'voting_start_date', E::ts('End date must be after start date.')),
-      $rule('voting_end_date', 'notAfter', 'visibility_end_date', E::ts('End date must be before visibility end date.')),
-      $rule('result_date', 'after', 'voting_end_date', E::ts('Start Date must be after voting end date.')),
-      $rule('result_date', 'notAfter', 'visibility_end_date', E::ts('Start Date must be before visibility end date.')),
+      $rule('visibility_end_date', 'after', 'visibility_start_date', E::ts('Visible until must be after Visible from.')),
+      $rule('nomination_start_date', 'notBefore', 'visibility_start_date', E::ts('Nominations open must not be before Visible from.')),
+      $rule('nomination_end_date', 'after', 'nomination_start_date', E::ts('Nominations close must be after Nominations open.')),
+      $rule('nomination_end_date', 'notAfter', 'visibility_end_date', E::ts('Nominations close must not be after Visible until.')),
+      $rule('advertise_candidates_date', 'after', 'nomination_end_date', E::ts('Candidates advertised from must be after Nominations close.')),
+      $rule('advertise_candidates_date', 'notAfter', 'visibility_end_date', E::ts('Candidates advertised from must not be after Visible until.')),
+      $rule('voting_start_date', 'after', 'advertise_candidates_date', E::ts('Voting opens must be after Candidates advertised from.')),
+      $rule('voting_end_date', 'after', 'voting_start_date', E::ts('Voting closes must be after Voting opens.')),
+      $rule('voting_end_date', 'notAfter', 'visibility_end_date', E::ts('Voting closes must not be after Visible until.')),
+      $rule('result_date', 'after', 'voting_end_date', E::ts('Results published on must be after Voting closes.')),
+      $rule('result_date', 'notAfter', 'visibility_end_date', E::ts('Results published on must not be after Visible until.')),
     ];
   }
 

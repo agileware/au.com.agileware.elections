@@ -15,7 +15,7 @@ return [
         'api_entity' => 'ElectionAudit',
         'api_params' => [
           'version' => 4,
-          'select' => ['id', 'election_id', 'created_date', 'contact_id.display_name', 'action', 'details'],
+          'select' => ['id', 'election_id', 'created_date', 'contact_id.display_name', 'action_label', 'details_text'],
           'orderBy' => [],
           'where' => [],
           'groupBy' => [],
@@ -40,7 +40,8 @@ return [
         'saved_search_id.name' => 'ElectionAudit',
         'type' => 'table',
         'settings' => [
-          'description' => E::ts('Entries cannot be changed or removed. Each carries a hash of the entry before it, which is checked on the election overview.'),
+          'description' => E::ts('One row for each change recorded in this election, newest first. Entries cannot be changed or removed: each carries a fingerprint of the entry before it, which is checked on the Election Overview.'),
+          'noResultsText' => E::ts('There are no audit log entries for this election yet.'),
           'sort' => [['id', 'DESC']],
           'limit' => 50,
           'pager' => ['show_count' => TRUE],
@@ -48,8 +49,8 @@ return [
           'columns' => [
             ['type' => 'field', 'key' => 'created_date', 'dataType' => 'Timestamp', 'label' => E::ts('When'), 'sortable' => TRUE],
             ['type' => 'field', 'key' => 'contact_id.display_name', 'dataType' => 'String', 'label' => E::ts('Who'), 'sortable' => TRUE, 'empty_value' => E::ts('System')],
-            ['type' => 'field', 'key' => 'action', 'dataType' => 'String', 'label' => E::ts('What'), 'sortable' => TRUE],
-            ['type' => 'field', 'key' => 'details', 'dataType' => 'Text', 'label' => E::ts('Details'), 'sortable' => FALSE],
+            ['type' => 'field', 'key' => 'action_label', 'dataType' => 'String', 'label' => E::ts('What'), 'sortable' => TRUE],
+            ['type' => 'field', 'key' => 'details_text', 'dataType' => 'String', 'label' => E::ts('Details'), 'sortable' => FALSE],
           ],
           'actions' => FALSE,
           'classes' => ['table', 'table-striped'],

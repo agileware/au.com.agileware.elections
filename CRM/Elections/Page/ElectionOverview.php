@@ -52,10 +52,11 @@ class CRM_Elections_Page_ElectionOverview extends CRM_Elections_Page_Base {
     $this->assign('eligibleVoters', $voters);
     // Who is in each role, shown when the election has groups of its own for nominating or standing.
     $roles = [];
-    foreach (['nominating' => E::ts('May nominate and second'), 'candidate' => E::ts('May stand as candidates')] as $role => $label) {
+    // The template words each role as one sentence with its own plural.
+    foreach (['nominating', 'candidate'] as $role) {
       $own = $role === 'nominating' ? $election->nomination_groups : $election->candidate_groups;
       if (trim((string) $own, ',') !== '') {
-        $roles[] = ['label' => $label, 'count' => CRM_Elections_Helper_Eligibility::countContactsInGroups(CRM_Elections_Helper_Eligibility::groupsFor($election, $role))];
+        $roles[] = ['role' => $role, 'count' => CRM_Elections_Helper_Eligibility::countContactsInGroups(CRM_Elections_Helper_Eligibility::groupsFor($election, $role))];
       }
     }
     $this->assign('eligibleRoles', $roles);
@@ -71,10 +72,21 @@ class CRM_Elections_Page_ElectionOverview extends CRM_Elections_Page_Base {
       ORDER BY p.sortorder, c.sort_name
     ', [1 => [(int) $eId, 'Integer']]);
     while ($dao->fetch()) {
+      // The status is one short phrase; whether the person was reminded or told is a separate note.
+      $note = '';
+      if (!$dao->accepted && !$dao->declined) {
+        if ($votingEnded && $dao->write_in_closed_notified_date) {
+          $note = E::ts('Told that voting closed');
+        }
+        elseif (!$votingEnded && $dao->write_in_reminded_date) {
+          $note = E::ts('Reminded');
+        }
+      }
       $writeIns[] = [
         'position' => $dao->position,
         'name' => $dao->display_name,
-        'status' => $dao->accepted ? E::ts('Accepted: on the ballot') : ($dao->declined ? E::ts('Declined') : ($votingEnded ? ($dao->write_in_closed_notified_date ? E::ts('Did not answer before voting closed (told)') : E::ts('Did not answer before voting closed')) : ($dao->write_in_reminded_date ? E::ts('Waiting for an answer (reminded)') : E::ts('Waiting for an answer')))),
+        'status' => $dao->accepted ? E::ts('Accepted') : ($dao->declined ? E::ts('Declined') : ($votingEnded ? E::ts('Did not answer before voting closed') : E::ts('Waiting for an answer'))),
+        'note' => $note,
       ];
     }
     $this->assign('writeIns', $writeIns);

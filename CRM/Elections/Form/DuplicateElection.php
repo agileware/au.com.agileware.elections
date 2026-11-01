@@ -20,7 +20,7 @@ class CRM_Elections_Form_DuplicateElection extends CRM_Elections_Form_Base {
     CRM_Utils_System::setTitle(E::ts('Duplicate Election'));
 
     $this->add('text', 'name', E::ts('Name of the copy'), ['size' => 40], TRUE);
-    $this->add('datepicker', 'visibility_start_date', E::ts('Start date of the copy'), [], TRUE);
+    $this->add('datepicker', 'visibility_start_date', E::ts('Visible from'), [], TRUE);
     $this->addElement('hidden', 'eid', $this->eId);
     $this->assign('election', $this->election);
     $this->addButtons([
@@ -31,17 +31,23 @@ class CRM_Elections_Form_DuplicateElection extends CRM_Elections_Form_Base {
   }
 
   public function setDefaultValues() {
-    return [
+    return $this->restoreInput([
       'name' => E::ts('Copy of %1', [1 => $this->election->name]),
       'visibility_start_date' => date('Y-m-d H:i:s', strtotime('+1 day')),
-    ];
+    ]);
   }
 
   public function postProcess() {
     $values = $this->exportValues();
     $shift = strtotime($values['visibility_start_date']) - strtotime($this->election->visibility_start_date);
-    $copy = CRM_Elections_BAO_Election::duplicate($this->eId, $values['name'], $shift);
-    CRM_Core_Session::setStatus(E::ts('"%1" has been created as a copy. It is inactive until you activate it.', [1 => $copy['name']]), '', 'success');
+    try {
+      CRM_Elections_BAO_Election::duplicate($this->eId, $values['name'], $shift);
+    }
+    catch (CRM_Core_Exception $e) {
+      $this->stayOnForm($e->getMessage(), E::ts('Election not duplicated'));
+      return;
+    }
+    CRM_Core_Session::setStatus(E::ts('Election duplicated. It is inactive until you activate it.'), '', 'success');
     $this->finish(CRM_Utils_System::url('civicrm/elections/manage', 'reset=1'));
   }
 

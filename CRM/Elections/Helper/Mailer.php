@@ -105,8 +105,8 @@ class CRM_Elections_Helper_Mailer {
     return self::send($workflow, $election, $contactId, [
       'nomineeName' => $nomination['member_nominee.display_name'],
       'positionName' => $nomination['election_position_id.name'],
+      // One link: the Accept Nomination screen has Decline on it too.
       'acceptUrl' => self::link($election, $contactId, 'civicrm/elections/nominations/accept', ['enid' => (int) $nominationId]),
-      'declineUrl' => self::link($election, $contactId, 'civicrm/elections/nominations/reject', ['enid' => (int) $nominationId]),
     ]);
   }
 
@@ -246,6 +246,9 @@ class CRM_Elections_Helper_Mailer {
         'votingOpens' => CRM_Utils_Date::customFormat($election->voting_start_date),
         'votingCloses' => CRM_Utils_Date::customFormat($election->voting_end_date),
         'viewUrl' => self::link($election, $contactId, 'civicrm/elections/view'),
+        // Who is writing, and the time zone every date in the email is in.
+        'organisationName' => CRM_Core_BAO_Domain::getDomain()->name,
+        'timeZone' => date_default_timezone_get(),
       ];
       [$sent] = CRM_Core_BAO_MessageTemplate::sendTemplate(($templateId ? ['messageTemplateID' => (int) $templateId] : ['workflow' => $workflow]) + [
         'tplParams' => $vars,
@@ -257,7 +260,7 @@ class CRM_Elections_Helper_Mailer {
       return (bool) $sent;
     }
     catch (\Throwable $e) {
-      Civi::log()->error('Elections: email {workflow} to contact {contact} was not sent: {message}', ['workflow' => $workflow, 'contact' => $contactId, 'message' => $e->getMessage()]);
+      Civi::log()->error(sprintf('Elections: email %s to contact %d was not sent: %s', $workflow, (int) $contactId, $e->getMessage()));
       return FALSE;
     }
   }
