@@ -22,11 +22,11 @@ Each election has individual settings which provide these capabilities:
 1. Anonymise votes after the election results are posted.
 1. Allow people who are not logged in to nominate, accept nominations and vote using a personalised link.
 
-A new election is created inactive, and must have at least one Position added and then be activated before it becomes visible and open for participation. See [How to activate an election](docs/admin_activate_election.md).
+A new election is created inactive, and must have at least one Position added and then be activated before it becomes visible and open for participation. See [How to activate an election](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/admin_activate_election.md).
 
 Viewing election results are shown below as an example.
 
-![Elections](docs/images/user_view_results/03.gif)  
+![Elections](https://github.com/agileware/au.com.agileware.elections/raw/master/docs/images/user_view_results/03.gif)  
 
 Prerequisites
 -------------
@@ -44,12 +44,12 @@ Installation
 Getting Started
 -------------
 
-Read the [documentation](docs/index.md)  to get started setting up your first election. It covers the [types of elections and options](docs/election_types.md) (ranked choice, most votes, write-ins and referendum questions) and has [workflow diagrams](docs/workflows.md) of the stages, nominations, voting and results.
+Read the [documentation](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/index.md)  to get started setting up your first election. It covers the [types of elections and options](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/election_types.md) (ranked choice, most votes, write-ins and referendum questions) and has [workflow diagrams](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/workflows.md) of the stages, nominations, voting and results.
 
 Settings
 -------------
 
-Once enabled, a global **Elections Settings** page is available at 'System Settings / Elections Settings' which controls the source of candidate photos and the default format of candidate names (for example including nicknames) shown throughout the extension. See [Elections Settings](docs/admin_election_settings.md) for details.
+Once enabled, a global **Elections Settings** page is available at 'System Settings / Elections Settings' which controls the source of candidate photos and the default format of candidate names (for example including nicknames) shown throughout the extension. See [Elections Settings](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/admin_election_settings.md) for details.
 
 WordPress Short-codes
 -------------
@@ -77,7 +77,7 @@ Sponsorship
 
 Development of this CiviCRM extension and development of the PHP Unit Tests was kindly sponsored by [Linux Australia](https://linux.org.au).
 
-![Linux Australia](docs/images/linux-australia-logo.png) 
+![Linux Australia](https://github.com/agileware/au.com.agileware.elections/raw/master/docs/images/linux-australia-logo.png) 
 
 About the Authors
 ------
@@ -95,4 +95,4 @@ This CiviCRM extension was developed by the team at [Agileware](https://agilewar
 
 Support your Australian [CiviCRM](https://civicrm.org) developers, [contact Agileware](https://agileware.com.au/contact) today!
 
-![Agileware](docs/images/agileware-logo.png)
+![Agileware](https://github.com/agileware/au.com.agileware.elections/raw/master/docs/logo/agileware-logo.png)
