@@ -31,7 +31,7 @@
                             <span class="election-chip election-chip-accepted">{ts}Accepted{/ts}</span><br><br>
                             {include file="CRM/Elections/Page/CandidateStatement.tpl" statementText=$positionNomination.comments|default:'' statementUrl=$positionNomination.statement_url|default:'' statementDisplay='inline'}
                         {elseif $positionNomination.has_rejected_nomination == 1}
-                            <span class="election-chip election-chip-withdrawn">{ts}Withdrawn{/ts}</span><br><br>
+                            <span class="election-chip election-chip-withdrawn">{if $positionNomination.has_withdrawn_nomination == 1}{ts}Withdrawn{/ts}{else}{ts}Declined{/ts}{/if}</span><br><br>
                             {$positionNomination.rejection_comments|escape|nl2br}
                         {elseif $positionNomination.is_eligible_candidate == 1}
                             <span class="election-chip election-chip-waiting">{ts}Waiting for an answer{/ts}</span>

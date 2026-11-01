@@ -44,7 +44,7 @@
                                             <br>
                                             {$seconder.comments|escape|nl2br}
                                         {elseif $seconder.has_rejected_nomination == 1}
-                                            <span class="election-chip election-chip-withdrawn">{ts}Withdrawn{/ts}</span>
+                                            <span class="election-chip election-chip-withdrawn">{if $seconder.has_withdrawn_nomination == 1}{ts}Withdrawn{/ts}{else}{ts}Declined{/ts}{/if}</span>
                                             <br>
                                             <br>
                                             {$seconder.rejection_comments|escape|nl2br}

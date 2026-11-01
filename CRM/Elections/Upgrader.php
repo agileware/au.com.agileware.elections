@@ -310,6 +310,18 @@ class CRM_Elections_Upgrader extends CRM_Extension_Upgrader_Base {
   }
 
   /**
+   * Version 2.1.0: a nominee who says no before accepting has declined; a candidate who pulls out after
+   * accepting has withdrawn. Both stay has_rejected_nomination, so nothing that counts or hides them changes, and
+   * has_withdrawn_nomination records which of the two it was. Nominations that were refused before this step
+   * cannot be told apart (the data never said), so they are shown as declined.
+   */
+  public function upgrade_20130() {
+    Civi::log()->info('Applying update 20130');
+    $this->ensureColumn('civicrm_election_nomination', 'has_withdrawn_nomination', 'TINYINT NULL DEFAULT 0');
+    return TRUE;
+  }
+
+  /**
    * Add a column unless it already exists, so upgrade steps can safely be re-run.
    *
    * @param string $table

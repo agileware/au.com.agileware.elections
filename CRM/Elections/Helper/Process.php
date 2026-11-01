@@ -149,7 +149,7 @@ class CRM_Elections_Helper_Process {
       throw new CRM_Elections_Exception(E::ts('You have already accepted this nomination.'));
     }
     if ($nomination['has_rejected_nomination'] == 1) {
-      throw new CRM_Elections_Exception(E::ts('You cannot accept a nomination that you declined or withdrew.'));
+      throw new CRM_Elections_Exception($nomination['has_withdrawn_nomination'] == 1 ? E::ts('You cannot accept a nomination that you withdrew.') : E::ts('You cannot accept a nomination that you declined.'));
     }
     if (!CRM_Elections_Helper_Candidate::isValidStatementUrl($statementUrl)) {
       throw new CRM_Elections_Exception(E::ts('The statement link must start with http:// or https://.'));
@@ -187,7 +187,7 @@ class CRM_Elections_Helper_Process {
     self::assertElectionOpenToNominees($election, E::ts('You cannot withdraw the nomination once voting is started.'), $writeIn);
 
     if ($nomination['has_rejected_nomination'] == 1) {
-      throw new CRM_Elections_Exception(E::ts('You have withdrawn this nomination.'));
+      throw new CRM_Elections_Exception($nomination['has_withdrawn_nomination'] == 1 ? E::ts('You have already withdrawn this nomination.') : E::ts('You have already declined this nomination.'));
     }
     if ($writeIn && $election->isVotingStarted && $nomination['has_accepted_nomination'] == 1) {
       // Voters have seen them on the ballot since they accepted, as with any other candidate.
@@ -200,6 +200,8 @@ class CRM_Elections_Helper_Process {
         'id' => $nominationId,
         'rejection_comments' => $comments,
         'has_rejected_nomination' => 1,
+        // After accepting it is a withdrawal; before, a refusal.
+        'has_withdrawn_nomination' => $nomination['has_accepted_nomination'] == 1 ? 1 : 0,
         'has_accepted_nomination' => 0,
       ]);
     }
@@ -245,7 +247,7 @@ class CRM_Elections_Helper_Process {
     $nominations = civicrm_api3('ElectionNomination', 'get', [
       'id' => $nominationId,
       'member_nominee' => $contactId,
-      'return' => ['is_eligible_candidate', 'has_accepted_nomination', 'has_rejected_nomination', 'is_write_in', 'election_position_id.election_id'],
+      'return' => ['is_eligible_candidate', 'has_accepted_nomination', 'has_rejected_nomination', 'has_withdrawn_nomination', 'is_write_in', 'election_position_id.election_id'],
     ]);
     if ($nominations['count'] != 1) {
       throw new CRM_Elections_Exception(E::ts('You do not have access to this nomination. Log in as the person who was nominated, or use the personal link in your email.'));

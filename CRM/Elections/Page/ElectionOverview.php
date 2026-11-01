@@ -64,7 +64,7 @@ class CRM_Elections_Page_ElectionOverview extends CRM_Elections_Page_Base {
     $writeIns = [];
     $votingEnded = !empty($election->isVotingEnded);
     $dao = CRM_Core_DAO::executeQuery('
-      SELECT p.name AS position, c.display_name, n.has_accepted_nomination AS accepted, n.has_rejected_nomination AS declined, n.write_in_reminded_date, n.write_in_closed_notified_date
+      SELECT p.name AS position, c.display_name, n.has_accepted_nomination AS accepted, n.has_rejected_nomination AS declined, n.has_withdrawn_nomination AS withdrawn, n.write_in_reminded_date, n.write_in_closed_notified_date
       FROM civicrm_election_nomination n
       INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
       INNER JOIN civicrm_contact c ON c.id = n.member_nominee
@@ -85,7 +85,7 @@ class CRM_Elections_Page_ElectionOverview extends CRM_Elections_Page_Base {
       $writeIns[] = [
         'position' => $dao->position,
         'name' => $dao->display_name,
-        'status' => $dao->accepted ? E::ts('Accepted') : ($dao->declined ? E::ts('Declined') : ($votingEnded ? E::ts('Did not answer before voting closed') : E::ts('Waiting for an answer'))),
+        'status' => $dao->accepted ? E::ts('Accepted') : ($dao->declined ? ($dao->withdrawn ? E::ts('Withdrawn') : E::ts('Declined')) : ($votingEnded ? E::ts('Did not answer before voting closed') : E::ts('Waiting for an answer'))),
         'note' => $note,
       ];
     }

@@ -220,8 +220,27 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
   public function testCannotAcceptTwiceOrAfterWithdrawing() {
     $fixture = Council::create()->playUntil(Council::STAGE_ADVERTISE);
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::accept($fixture->nominations['President|N01'], $fixture->id('N01')), 'already accepted');
-    $this->assertRejected(fn() => CRM_Elections_Helper_Process::accept($fixture->nominations['President|N03'], $fixture->id('N03')), 'declined or withdrew');
-    $this->assertRejected(fn() => CRM_Elections_Helper_Process::withdraw($fixture->nominations['President|N03'], $fixture->id('N03')), 'withdrawn');
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::accept($fixture->nominations['President|N03'], $fixture->id('N03')), 'you declined');
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::withdraw($fixture->nominations['President|N03'], $fixture->id('N03')), 'already declined');
+  }
+
+  public function testSayingNoBeforeAcceptingIsDeclinedAndPullingOutAfterwardsIsWithdrawn() {
+    $fixture = Council::create()->playUntil(Council::STAGE_ADVERTISE);
+    // President N03 said no without accepting; Council Member 3 N10 accepted and then pulled out.
+    $this->assertEquals(1, $this->nominationField($fixture, 'President|N03', 'has_rejected_nomination'));
+    $this->assertEquals(0, $this->nominationField($fixture, 'President|N03', 'has_withdrawn_nomination'));
+    $this->assertEquals(1, $this->nominationField($fixture, 'Council Member 3|N10', 'has_rejected_nomination'));
+    $this->assertEquals(1, $this->nominationField($fixture, 'Council Member 3|N10', 'has_withdrawn_nomination'));
+
+    $status = fn($key) => \Civi\Api4\ElectionNomination::get(FALSE)->addSelect('nomination_status')->addWhere('id', '=', $fixture->nominations[$key])->execute()->first()['nomination_status'];
+    $this->assertSame('declined', $status('President|N03'));
+    $this->assertSame('withdrawn', $status('Council Member 3|N10'));
+    $this->assertSame('candidate', $status('President|N01'));
+    $this->assertSame('nominee', $status('President|N08'));
+
+    // The words a person is shown differ too.
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::accept($fixture->nominations['President|N03'], $fixture->id('N03')), 'you declined');
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::accept($fixture->nominations['Council Member 3|N10'], $fixture->id('N10')), 'you withdrew');
   }
 
   public function testAcceptingNeedsAWebAddressForTheStatementLink() {

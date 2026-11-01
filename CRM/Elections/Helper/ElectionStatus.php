@@ -189,7 +189,7 @@ class CRM_Elections_Helper_ElectionStatus {
       return [];
     }
     $dao = CRM_Core_DAO::executeQuery('
-      SELECT n.id, p.name AS position, n.is_eligible_candidate, n.has_accepted_nomination, n.has_rejected_nomination, n.is_write_in,
+      SELECT n.id, p.name AS position, n.is_eligible_candidate, n.has_accepted_nomination, n.has_rejected_nomination, n.has_withdrawn_nomination, n.is_write_in,
              (SELECT COUNT(DISTINCT s.member_nominator) FROM civicrm_election_nomination_seconder s WHERE s.election_nomination_id = n.id) AS nominators
       FROM civicrm_election_nomination n
       INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
@@ -205,8 +205,8 @@ class CRM_Elections_Helper_ElectionStatus {
       $beforeVoting = !$election->isVotingStarted;
       $actions = [];
       if ($dao->has_rejected_nomination) {
-        $state = 'withdrawn';
-        $label = E::ts('Withdrawn');
+        $state = $dao->has_withdrawn_nomination ? 'withdrawn' : 'declined';
+        $label = $dao->has_withdrawn_nomination ? E::ts('Withdrawn') : E::ts('Declined');
       }
       elseif ($dao->is_eligible_candidate && $dao->has_accepted_nomination) {
         $state = 'accepted';

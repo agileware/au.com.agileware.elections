@@ -6,7 +6,7 @@ class CRM_Elections_BAO_ElectionNomination extends CRM_Elections_DAO_ElectionNom
   /**
    * Fields that decide who is on the ballot. They are frozen once voting starts.
    */
-  const BALLOT_FIELDS = ['is_eligible_candidate', 'has_accepted_nomination', 'has_rejected_nomination', 'member_nominee', 'election_position_id'];
+  const BALLOT_FIELDS = ['is_eligible_candidate', 'has_accepted_nomination', 'has_rejected_nomination', 'has_withdrawn_nomination', 'member_nominee', 'election_position_id'];
 
   /**
    * Fields an administrator can still correct while voting is open.
@@ -26,7 +26,7 @@ class CRM_Elections_BAO_ElectionNomination extends CRM_Elections_DAO_ElectionNom
    */
   public static function assertCanChange($nominationId, array $changes) {
     $current = CRM_Core_DAO::executeQuery('
-      SELECT n.is_eligible_candidate, n.has_accepted_nomination, n.has_rejected_nomination, n.member_nominee, n.election_position_id, n.comments, n.statement_url, n.rejection_comments, p.election_id
+      SELECT n.is_eligible_candidate, n.has_accepted_nomination, n.has_rejected_nomination, n.has_withdrawn_nomination, n.member_nominee, n.election_position_id, n.comments, n.statement_url, n.rejection_comments, p.election_id
       FROM civicrm_election_nomination n
       INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
       WHERE n.id = %1

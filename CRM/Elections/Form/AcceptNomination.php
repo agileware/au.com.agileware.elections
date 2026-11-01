@@ -35,7 +35,7 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
         'id' => $this->enId,
         'member_nominee' => $nomineeId,
         'is_eligible_candidate' => 1,
-        'return' => ['has_accepted_nomination', 'is_write_in', 'election_position_id.name', 'has_rejected_nomination', 'election_position_id.election_id.name', 'election_position_id.election_id'],
+        'return' => ['has_accepted_nomination', 'is_write_in', 'election_position_id.name', 'has_rejected_nomination', 'has_withdrawn_nomination', 'election_position_id.election_id.name', 'election_position_id.election_id'],
       ]);
     } catch (CRM_Core_Exception $e) {
       throwAccessDeniedException($this, E::ts('You do not have access to this nomination. Log in as the person who was nominated, or use the personal link in your email.'));
@@ -61,7 +61,7 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
     }
 
     if ($this->electionNomination['has_rejected_nomination'] == 1) {
-      throwAccessDeniedException($this, E::ts('You cannot accept a nomination that you declined or withdrew.'));
+      throwAccessDeniedException($this, !empty($this->electionNomination['has_withdrawn_nomination']) ? E::ts('You cannot accept a nomination that you withdrew.') : E::ts('You cannot accept a nomination that you declined.'));
       return;
     }
 
