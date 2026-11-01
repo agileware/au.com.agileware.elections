@@ -28,13 +28,17 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
     $this->addButtons([
       [
         'type' => 'submit',
-        'name' => $withdrawing ? E::ts('Withdraw Election') : (($this->election->is_visible) ? E::ts('Deactivate Election') : E::ts('Activate Election')),
+        'name' => $this->election->is_visible ? E::ts('Deactivate') : E::ts('Activate'),
         'isDefault' => TRUE,
+      ],
+      [
+        'type' => 'cancel',
+        'name' => E::ts('Cancel'),
       ],
     ]);
 
     if ($withdrawing) {
-      CRM_Utils_System::setTitle(E::ts('Withdraw Election'));
+      CRM_Utils_System::setTitle(E::ts('Deactivate Election'));
       $this->add('text', 'confirm_name', E::ts('Type the name of the election to confirm'), ['size' => 40, 'autocomplete' => 'off'], TRUE);
       $this->addFormRule(['CRM_Elections_Form_ElectionVisibility', 'validateWithdrawal'], $this->election->name);
     }
@@ -53,8 +57,8 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
   }
 
   /**
-   * An election that is active and has started is locked. Switching it off is a withdrawal: it
-   * hides the election from everybody and lets it be edited again, so the name has to be typed.
+   * An election that is active and has started is locked. Deactivating it then hides the election from
+   * everybody and lets it be edited again, so the name has to be typed.
    *
    * @return bool
    */
@@ -97,7 +101,7 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
       finally {
         CRM_Elections_Helper_Guard::$withdrawing = FALSE;
       }
-      CRM_Core_Session::setStatus($withdrawn ? E::ts('Election has been withdrawn.') : ($isActive ? E::ts('Election has been deactivated successfully.') : E::ts('Election has been activated successfully.')), '', 'success');
+      CRM_Core_Session::setStatus($isActive ? E::ts('Election deactivated.') : E::ts('Election activated.'), '', 'success');
     }
     catch (CRM_Core_Exception $e) {
       CRM_Core_Session::setStatus($e->getMessage(), E::ts('Election not changed'), 'error');

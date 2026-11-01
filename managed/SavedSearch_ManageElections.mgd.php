@@ -98,8 +98,7 @@ return [
               'size' => 'btn-xs',
               'links' => [
                 ['path' => 'civicrm/elections/visibility?eid=[id]', 'entity' => '', 'action' => '', 'join' => '', 'target' => 'crm-popup', 'icon' => 'fa-toggle-on', 'text' => E::ts('Activate'), 'style' => 'success', 'task' => '', 'conditions' => [['is_visible', '=', FALSE]]],
-                ['path' => 'civicrm/elections/visibility?eid=[id]', 'entity' => '', 'action' => '', 'join' => '', 'target' => 'crm-popup', 'icon' => 'fa-toggle-off', 'text' => E::ts('Deactivate'), 'style' => 'warning', 'task' => '', 'conditions' => [['is_visible', '=', TRUE], ['is_locked', '=', FALSE]]],
-                ['path' => 'civicrm/elections/visibility?eid=[id]', 'entity' => '', 'action' => '', 'join' => '', 'target' => 'crm-popup', 'icon' => 'fa-ban', 'text' => E::ts('Withdraw'), 'style' => 'danger', 'task' => '', 'conditions' => [['is_locked', '=', TRUE]]],
+                ['path' => 'civicrm/elections/visibility?eid=[id]', 'entity' => '', 'action' => '', 'join' => '', 'target' => 'crm-popup', 'icon' => 'fa-toggle-off', 'text' => E::ts('Deactivate'), 'style' => 'warning', 'task' => '', 'conditions' => [['is_visible', '=', TRUE]]],
                 ['path' => 'civicrm/elections/positions?eid=[id]', 'entity' => '', 'action' => '', 'join' => '', 'target' => '', 'icon' => 'fa-list-ol', 'text' => E::ts('Positions'), 'style' => 'default', 'task' => '', 'conditions' => []],
                 ['path' => 'civicrm/elections/candidate-list#/?eid=[id]', 'entity' => '', 'action' => '', 'join' => '', 'target' => '', 'icon' => 'fa-users', 'text' => E::ts('Candidates'), 'style' => 'default', 'task' => '', 'conditions' => []],
                 ['path' => 'civicrm/elections/create?eid=[id]', 'entity' => '', 'action' => '', 'join' => '', 'target' => '', 'icon' => 'fa-pencil', 'text' => E::ts('Edit'), 'style' => 'default', 'task' => '', 'conditions' => [['is_locked', '=', FALSE]]],

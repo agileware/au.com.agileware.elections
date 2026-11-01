@@ -2,7 +2,7 @@
     {if $withdrawing}
     <div class="messages warning no-popup election-visibility-message">
         <strong>{ts}This election is active and its nominations have started.{/ts}</strong>
-        {ts}Withdrawing it hides every page of the election from everyone except administrators, and it can then be edited again. The withdrawal is written to the audit log.{/ts}
+        {ts}Deactivating it hides every page of the election from everyone except administrators, and it can then be edited again. The change is written to the audit log.{/ts}
     </div>
     <table class="form-layout">
         <tr>
@@ -13,9 +13,9 @@
     {else}
     <div class="messages status no-popup election-visibility-message">
         {if $election->is_visible}
-            {ts}This will restrict all pages for this election to administrators.{/ts}
+            {ts}This hides every page of the election from everyone except administrators.{/ts}
         {else}
-            {ts}This will remove the administrator restriction on all pages for this election.{/ts}
+            {ts}This shows the election to people, from its visible from date until its visible until date.{/ts}
         {/if}
     </div>
     {/if}

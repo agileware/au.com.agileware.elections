@@ -121,7 +121,7 @@ test.describe('Referendum questions', () => {
     await adminPage.locator('#pass_threshold_choice').selectOption('66.67');
     await adminPage.locator('#quorum_percent').fill('40');
     await adminPage.locator('#resolution_text').fill('That the constitution be replaced.');
-    await adminPage.getByRole('button', { name: 'Create' }).click();
+    await adminPage.getByRole('button', { name: 'Submit' }).click();
 
     await expect.poll(() => civiApi4<any[]>('ElectionPosition.get', { select: ['position_type', 'pass_threshold', 'quorum_percent', 'resolution_text'], where: [['election_id', '=', id]] }).length).toBe(1);
     const [position] = civiApi4<any[]>('ElectionPosition.get', { select: ['id', 'position_type', 'pass_threshold', 'quorum_percent', 'resolution_text'], where: [['election_id', '=', id]] });

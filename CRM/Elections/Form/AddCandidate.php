@@ -18,7 +18,8 @@ class CRM_Elections_Form_AddCandidate extends CRM_Elections_Form_Base {
     }
     $this->eId = CRM_Utils_Request::retrieve('eid', 'Positive', $this, TRUE);
     $this->election = findElectionById($this->eId);
-    CRM_Utils_System::setTitle(E::ts('Add Candidate to %1', [1 => $this->election->name]));
+    CRM_Utils_System::setTitle(E::ts('Add Candidate'));
+    CRM_Elections_Helper_Frame::assignToForm($this, CRM_Elections_Helper_Frame::trail((int) $this->eId, [[E::ts('Candidates'), CRM_Elections_Helper_Frame::candidatesUrl((int) $this->eId)]], E::ts('Add Candidate')), CRM_Elections_Helper_Frame::candidatesUrl((int) $this->eId));
 
     $positions = [];
     foreach (civicrm_api3('ElectionPosition', 'get', ['election_id' => $this->eId, 'options' => ['limit' => 0, 'sort' => 'sortorder ASC']])['values'] as $position) {
@@ -38,10 +39,7 @@ class CRM_Elections_Form_AddCandidate extends CRM_Elections_Form_Base {
     $this->add('advcheckbox', 'accepted', E::ts('The candidate has accepted'));
     $this->add('textarea', 'statement', E::ts('Candidate statement'), ['cols' => 55, 'rows' => 5], FALSE);
     $this->addElement('hidden', 'eid', $this->eId);
-    $this->addButtons([
-      ['type' => 'submit', 'name' => E::ts('Add Candidate'), 'isDefault' => TRUE],
-      ['type' => 'cancel', 'name' => E::ts('Cancel')],
-    ]);
+    CRM_Elections_Helper_Frame::addSubmitButtons($this);
     $this->assign('election', $this->election);
     $this->assign('contactsHidden', CRM_Elections_Helper_Visibility::contactsHidden(array_map('intval', $groups)));
     parent::buildQuickForm();

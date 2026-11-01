@@ -23,11 +23,14 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     $this->assign('groupsHidden', CRM_Elections_Helper_Visibility::groupsHidden());
     if ($this->eId) {
       $this->pageTitle = E::ts('Edit Election');
-      CRM_Utils_System::setTitle($this->pageTitle);
+      CRM_Elections_Helper_Frame::assignToForm($this, CRM_Elections_Helper_Frame::trail((int) $this->eId, [], $this->pageTitle), CRM_Elections_Helper_Frame::overviewUrl((int) $this->eId));
     }
     else {
       $this->eId = 0;
+      $this->pageTitle = E::ts('Add Election');
+      CRM_Elections_Helper_Frame::assignToForm($this, CRM_Elections_Helper_Frame::trail(0, [], $this->pageTitle), CRM_Elections_Helper_Frame::managerUrl());
     }
+    CRM_Utils_System::setTitle($this->pageTitle);
     parent::buildQuickForm();
   }
 
@@ -220,13 +223,7 @@ class CRM_Elections_Form_CreateElection extends CRM_Elections_Form_Base {
     $this->add('select', 'name_format', E::ts('Candidate name format'), ['' => E::ts('Use the site setting')] + CRM_Elections_Helper_Candidate::getNameFormats());
 
     // Submit button
-    $this->addButtons([
-      [
-        'type' => 'submit',
-        'name' => E::ts('Submit'),
-        'isDefault' => TRUE,
-      ],
-    ]);
+    CRM_Elections_Helper_Frame::addSubmitButtons($this);
   }
 
   public function validate() {

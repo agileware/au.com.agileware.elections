@@ -38,8 +38,11 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
     $this->assign('election', $this->election);
     $this->addFormElements();
 
-    CRM_Utils_System::setTitle(E::ts('Add Election Position for %1', [1 => $this->election->name]));
+    CRM_Utils_System::setTitle(E::ts('Add Position'));
     parent::buildQuickForm();
+    $title = $this->epId ? E::ts('Edit Position') : E::ts('Add Position');
+    CRM_Utils_System::setTitle($title);
+    CRM_Elections_Helper_Frame::assignToForm($this, CRM_Elections_Helper_Frame::trail((int) $this->eId, [[E::ts('Positions'), CRM_Elections_Helper_Frame::positionsUrl((int) $this->eId)]], $title), CRM_Elections_Helper_Frame::positionsUrl((int) $this->eId));
   }
 
   public function setDefaultValues() {
@@ -76,7 +79,6 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
         }
         $default['description']   = (!empty($this->electionPosition['description'])) ? $this->electionPosition['description'] : '';
 
-        CRM_Utils_System::setTitle(E::ts('Edit Election Position for %1', [1 => $this->electionPosition['name']]));
       }
       else {
         $this->epId = 0;
@@ -121,13 +123,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
     $this->addElement('hidden', 'epid', $this->epId);
 
     // Submit button
-    $this->addButtons([
-        [
-          'type' => 'submit',
-          'name' => E::ts(($this->epId) ? 'Edit Position' : 'Create'),
-          'isDefault' => TRUE,
-        ],
-    ]);
+    CRM_Elections_Helper_Frame::addSubmitButtons($this);
   }
 
   public function validate() {

@@ -45,6 +45,7 @@ class CRM_Elections_Form_DeleteElectionPosition extends CRM_Elections_Form_Base 
       ],
     ]);
 
+    $this->assign('deleteMessage', E::ts('This deletes the position and the nominations made for it. They cannot be recovered.'));
     $this->addElement('hidden', 'eid', $this->eId);
     $this->addElement('hidden', 'epid', $this->epId);
 
@@ -56,7 +57,7 @@ class CRM_Elections_Form_DeleteElectionPosition extends CRM_Elections_Form_Base 
        'id' => $this->electionPosition['id'],
     ]);
 
-    CRM_Core_Session::setStatus(E::ts('Election position has been deleted successfully.'), '', 'success');
+    CRM_Core_Session::setStatus(E::ts('Position deleted.'), '', 'success');
 
     parent::postProcess();
 

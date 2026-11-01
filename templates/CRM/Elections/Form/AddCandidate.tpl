@@ -14,5 +14,6 @@
   </table>
   <div class="crm-submit-buttons">
     {include file="CRM/common/formButtons.tpl" location="bottom"}
+    {if !$isPopup}{include file="CRM/Elections/Frame/BackButtons.tpl"}{/if}
   </div>
 </div>

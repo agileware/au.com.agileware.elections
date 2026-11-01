@@ -62,6 +62,37 @@ class CRM_Elections_Helper_Frame {
     return ($parts['path'] ?? '') . '?' . ($parts['query'] ?? '');
   }
 
+  public static function positionsUrl(int $electionId): string {
+    return CRM_Utils_System::url('civicrm/elections/positions', 'reset=1&eid=' . $electionId, FALSE, NULL, FALSE);
+  }
+
+  public static function candidatesUrl(int $electionId): string {
+    return CRM_Utils_System::url('civicrm/elections/candidate-list', 'reset=1', FALSE, '/?eid=' . $electionId, FALSE);
+  }
+
+  /**
+   * True when the form is open in a popup over the list it came from. A popup has no breadcrumb and no Back
+   * buttons: it has Submit and Cancel, and closes itself.
+   */
+  public static function isPopup(): bool {
+    return (bool) CRM_Utils_Request::retrieve('snippet', 'String');
+  }
+
+  /**
+   * The buttons of an edit form: Submit, and Cancel only in a popup. On a full page the Back buttons come
+   * after Submit from the template (CRM/Elections/Frame/BackButtons.tpl).
+   *
+   * @param \CRM_Core_Form $form
+   */
+  public static function addSubmitButtons($form): void {
+    $buttons = [['type' => 'submit', 'name' => E::ts('Submit'), 'isDefault' => TRUE]];
+    if (self::isPopup()) {
+      $buttons[] = ['type' => 'cancel', 'name' => E::ts('Cancel')];
+    }
+    $form->addButtons($buttons);
+    $form->assign('isPopup', self::isPopup());
+  }
+
   public static function electionName(int $electionId): ?string {
     if ($electionId <= 0) {
       return NULL;

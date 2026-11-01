@@ -30,16 +30,16 @@ test.afterAll(() => {
 
 test('the Results page form works on a running election and saves the logo, header and footer', async ({ adminPage }) => {
   await adminPage.goto(civiAdminUrl('civicrm/elections/results-display', { reset: 1, eid: electionId }));
-  await expect(adminPage.getByRole('heading', { name: /Results page for/ })).toBeVisible();
+  await expect(adminPage.getByRole('heading', { name: 'Results Page', level: 2 })).toBeVisible();
   await adminPage.getByLabel('Header text').fill('<b>Congratulations</b> to our new council');
   await adminPage.getByLabel('Footer text').fill('Thank you for voting.\nSee you at the AGM.');
   await adminPage.locator('input[name="results_logo"]').setInputFiles({ name: 'logo.png', mimeType: 'image/png', buffer: PNG });
   // A logo needs a description.
-  await adminPage.getByRole('button', { name: 'Save' }).click();
+  await adminPage.getByRole('button', { name: 'Submit' }).click();
   await expect(adminPage.getByText('Describe the logo for people who cannot see it.').first()).toBeVisible();
   await adminPage.locator('input[name="results_logo"]').setInputFiles({ name: 'logo.png', mimeType: 'image/png', buffer: PNG });
   await adminPage.getByLabel('Logo description').fill('Council crest');
-  await adminPage.getByRole('button', { name: 'Save' }).click();
+  await adminPage.getByRole('button', { name: 'Submit' }).click();
   await expect(adminPage.getByText('The results page has been saved.')).toBeVisible();
   const [row] = civiApi4<any[]>('Election.get', { select: ['results_header_text', 'results_logo_file_id', 'results_logo_alt'], where: [['id', '=', electionId]] });
   expect(row.results_header_text).toBe('<b>Congratulations</b> to our new council');
@@ -52,7 +52,7 @@ test('a refused picture is explained', async ({ adminPage }) => {
   await adminPage.goto(civiAdminUrl('civicrm/elections/results-display', { reset: 1, eid: electionId }));
   await adminPage.locator('input[name="results_logo"]').setInputFiles({ name: 'logo.svg', mimeType: 'image/svg+xml', buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>') });
   await adminPage.getByLabel('Logo description').fill('A picture');
-  await adminPage.getByRole('button', { name: 'Save' }).click();
+  await adminPage.getByRole('button', { name: 'Submit' }).click();
   await expect(adminPage.getByText('The logo must be a PNG, JPEG, GIF or WebP picture.').first()).toBeVisible();
 });
 

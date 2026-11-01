@@ -116,7 +116,7 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
       $this->fail('Switching off an active election must be refused.');
     }
     catch (CRM_Core_Exception $e) {
-      $this->assertStringContainsString('Use Withdraw', $e->getMessage());
+      $this->assertStringContainsString('Use Deactivate', $e->getMessage());
     }
     $this->assertEquals(1, CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], 'is_visible'));
 

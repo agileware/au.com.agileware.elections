@@ -32,6 +32,8 @@ class CRM_Elections_Form_DeleteElection extends CRM_Elections_Form_Base {
       $this->eId = 0;
     }
     $this->addElement('hidden', 'eid', $this->eId);
+    CRM_Utils_System::setTitle(E::ts('Delete Election'));
+    $this->assign('deleteMessage', E::ts('This deletes the election. It can no longer be seen or used, and its positions, nominations and votes cannot be recovered.'));
     parent::buildQuickForm();
   }
 
@@ -53,7 +55,7 @@ class CRM_Elections_Form_DeleteElection extends CRM_Elections_Form_Base {
 
       $election->is_deleted = 1;
       if ($election->save()) {
-        CRM_Core_Session::setStatus(E::ts('Election has been deleted successfully.'), '', 'success');
+        CRM_Core_Session::setStatus(E::ts('Election deleted.'), '', 'success');
       }
       else {
         CRM_Core_Session::setStatus(E::ts('Error occurred while deleting an election.'), '', 'danger');

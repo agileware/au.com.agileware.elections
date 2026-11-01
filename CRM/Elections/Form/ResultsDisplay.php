@@ -22,14 +22,12 @@ class CRM_Elections_Form_ResultsDisplay extends CRM_Elections_Form_Base {
       return;
     }
     $this->election = findElectionById($this->eId);
-    CRM_Utils_System::setTitle(E::ts('Results page for %1', [1 => $this->election->name]));
+    CRM_Utils_System::setTitle(E::ts('Results Page'));
+    CRM_Elections_Helper_Frame::assignToForm($this, CRM_Elections_Helper_Frame::trail((int) $this->eId, [], E::ts('Results Page')), CRM_Elections_Helper_Frame::overviewUrl((int) $this->eId));
 
     CRM_Elections_Helper_ResultsDisplay::addFormElements($this);
     $this->addElement('hidden', 'eid', $this->eId);
-    $this->addButtons([
-      ['type' => 'submit', 'name' => E::ts('Save'), 'isDefault' => TRUE],
-      ['type' => 'cancel', 'name' => E::ts('Cancel')],
-    ]);
+    CRM_Elections_Helper_Frame::addSubmitButtons($this);
     $this->assign('election', $this->election);
     $this->assign('resultsLogo', CRM_Elections_Helper_ResultsDisplay::getDisplay($this->election, 'eid=' . (int) $this->eId, FALSE));
     CRM_Elections_Helper_ResultsDisplay::addPageResources();
