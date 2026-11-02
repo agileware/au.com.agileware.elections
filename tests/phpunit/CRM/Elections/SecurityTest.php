@@ -269,6 +269,29 @@ class CRM_Elections_SecurityTest extends api_v3_ElectionBaseTestCase {
     \Civi\Api4\Election::update(FALSE)->addWhere('id', '=', $fixture->electionId)->addValue('show_photos', FALSE)->execute();
   }
 
+  public function testAnInactiveElectionThatHasBallotsKeepsItsRulesLockedAndNothingElse() {
+    // Deactivating a running election (as an administrator may) does not unlock what decides who votes and how votes
+    // count: ballots exist. The name and the display options can still be corrected.
+    $fixture = $this->fixture(CRM_Elections_Test_CouncilFixture::STAGE_VOTING);
+    CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET is_visible = 0 WHERE id = %1', [1 => [$fixture->electionId, 'Integer']]);
+    $current = civicrm_api3('Election', 'getsingle', ['id' => $fixture->electionId]);
+    $this->assertEmpty($current['is_visible']);
+    $this->assertSame(TRUE, (new CRM_Elections_BAO_Election())->findById($fixture->electionId)->canEdit(), 'The form opens for an inactive election');
+
+    $changes = [
+      'anonymize_votes' => empty($current['anonymize_votes']) ? 1 : 0,
+      'required_nominations' => (int) $current['required_nominations'] + 5,
+      'allowed_groups' => '999999',
+    ];
+    foreach ($changes as $field => $value) {
+      $this->refused(function () use ($fixture, $field, $value) {
+        \Civi\Api4\Election::update(FALSE)->addWhere('id', '=', $fixture->electionId)->addValue($field, $value)->execute();
+      }, 'cannot be changed once people have voted', $field);
+    }
+    \Civi\Api4\Election::update(FALSE)->addWhere('id', '=', $fixture->electionId)->addValue('name', 'Corrected name')->addValue('show_photos', FALSE)->execute();
+    $this->assertSame('Corrected name', CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $fixture->electionId, 'name'));
+  }
+
   public function testAContactInARunningElectionCannotBeDeleted() {
     $fixture = $this->fixture(CRM_Elections_Test_CouncilFixture::STAGE_VOTING);
     foreach (['N01', 'V01'] as $persona) {

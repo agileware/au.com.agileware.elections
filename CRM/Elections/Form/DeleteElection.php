@@ -34,7 +34,7 @@ class CRM_Elections_Form_DeleteElection extends CRM_Elections_Form_Base {
       $this->assign('deleteBlocked', $canDelete);
     }
     else {
-      $this->assign('deleteMessage', E::ts('This deletes the election "%1". It can no longer be seen or used, and its positions, nominations and votes cannot be recovered.', [1 => CRM_Elections_Helper_ResultsDisplay::decode($election->name)]));
+      $this->assign('deleteMessage', E::ts('This deletes the election "%1". It can no longer be seen or used, and it cannot be restored from this screen.', [1 => CRM_Elections_Helper_ResultsDisplay::decode($election->name)]));
     }
 
     $buttons = [];
