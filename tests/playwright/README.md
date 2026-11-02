@@ -46,6 +46,20 @@ ddev exec 'cd /path/to/extension/tests/playwright && bash fixtures/setup-environ
 ddev exec 'cd /path/to/extension/tests/playwright && BASE_URL=http://localhost npx playwright test'
 ```
 
+### Keeping Chromium across `ddev stop` and `ddev start`
+
+Chromium needs system libraries, and a DDEV container loses anything installed in it when the site is stopped. Two small
+files in the DDEV project (`.ddev/`, outside this repository) keep them:
+
+- `.ddev/web-build/Dockerfile.playwright` installs the libraries and fonts when the image is built. The package list is what
+  `npx playwright install-deps --dry-run chromium` reports (after `sudo apt-get update`) for the container's Debian version:
+  `RUN apt-get update && apt-get install -y --no-install-recommends <packages> && rm -rf /var/lib/apt/lists/*`.
+- `.ddev/config.playwright.yaml` sets `web_environment: [PLAYWRIGHT_BROWSERS_PATH=/mnt/ddev-global-cache/ms-playwright]`, so the
+  browser itself is downloaded once into DDEV's global cache and shared by every site on the machine.
+
+Run `ddev restart` once to rebuild, then `npm install` and `npx playwright install chromium` in this directory. After that
+`ddev stop` and `ddev start` need no reinstall.
+
 `/path/to/extension` is where the extension is deployed on the site (for example
 `/var/www/html/httpdocs/CRM/extensions/au.com.agileware.elections`). The tests run inside the
 container, so `CIVI_EXEC_PREFIX` stays empty. Outside the container set
