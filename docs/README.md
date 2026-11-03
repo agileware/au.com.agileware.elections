@@ -1,28 +1,92 @@
-**Elections** (au.com.agileware.elections) is a CiviCRM extension which facilitates an on-line election which is suitable for the establishment of committees, fulfilling of volunteer roles and other governing bodies for an organisation.
+**Elections** (au.com.agileware.elections) turns your CiviCRM into a place where your organisation can hold real elections: nominate people, put them on a ballot, let your members vote, and publish the results, with no spreadsheets, no separate voting service and no export of your member list to a third party. Your people are already in CiviCRM, so the election already knows who they are, which groups they belong to, and how to reach them.
 
-1. Any number of positions can be advertised as being available.
-1. People can be nominated or nominate themselves for one or more of the advertised positions.
-1. Nominations can require one or more other people to second them before the nominee becomes an eligible candidate.
-1. People can vote for the nominees.
-1. Election results are calculated using the [instant-runoff voting (IRV) method](https://en.wikipedia.org/wiki/Instant-runoff_voting).
-1. Election results are then displayed and kept as a historical record.
-1. Multiple elections can be run concurrently.
+It runs on **WordPress, Drupal and Joomla**, works on a phone, and is built to be used by everyone: keyboard and screen reader friendly, with light and dark appearance.
 
-Using this extension you can run as many elections you want using your CiviCRM site. This extension also provides the unique ability to control who can participate in each election using CiviCRM Groups and CiviCRM Smart Groups. So you can run elections for country, regional, state-based or any criteria at all.
+This page is a tour of what is possible. The **[documentation](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/index.md)** is the full guide, with step by step instructions, diagrams and every option explained: it is worth reading before you set up your first election.
 
-Election process is based on the Voting features which were originally implemented in [MemberDB](https://www.flamingspork.com/projects/memberdb/)
+What you can run with it
+------------------------
 
-Each election has individual settings which provide these capabilities:
+Anything where a group of people chooses someone, or says yes or no, on your CiviCRM site:
 
-1. Each election can be assigned unique dates for each stage of the process.
-1. Restrict participation in a specific election using CiviCRM Groups and CiviCRM Smart Groups.
-1. Number of nominations required for a person to become an eligible candidate for each election.
-1. Allow or disallow a user to change their vote.
-1. Choose what voters see about candidates: photos, written candidate statements on the ballot, who nominated each candidate, and how names (including nicknames) are shown.
-1. Anonymise votes when the election results are generated.
-1. Allow people who are not logged in to nominate, accept nominations and vote using a personal link.
+  * **Committee and board elections.** President, Secretary, Treasurer and three committee members, each with its own candidates, on one ballot.
+  * **Annual general meetings.** Positions and yes or no questions together: a motion to change the constitution, to raise fees, or to allow proxy votes, with a pass threshold and a quorum.
+  * **Volunteer roles.** Let members nominate each other, or put themselves forward, and have the nominee accept before they appear on the ballot.
+  * **Regional, state or chapter delegates.** Give each region its own election and use a CiviCRM group, or a smart group built from addresses, so only the right people see it and vote.
+  * **Award and grants panels.** Turn online nominating off and let the organisers choose the candidates, or use one group to nominate and a different group to be eligible to stand.
+  * **Show and event picks.** Use "most votes win" for people's choice, steward or stallholder selections where each voter ticks the people they like.
+  * **Ballots at any time of year.** Run several elections at once, each with its own dates and its own groups, and keep the results as a record.
 
-A new election is added inactive, and must have at least one position added and then be activated before it becomes visible and open for participation. See [How to activate an election](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/admin_activate_election.md).
+How an election works
+---------------------
+
+1. **Set it up.** Choose the dates, who can take part, how votes are counted and what voters see. A quick set-up fills in a sensible timetable for you.
+1. **Add the positions and questions.** Any number, in any order, with the seats to be filled and, if you want, write-ins.
+1. **Nominations.** People nominate others or themselves. A nominee who has enough nominations, and seconds if you require them, is invited by email to accept or decline, and can add a statement and a link.
+1. **Voting.** Voters see the candidates, their statements and photos, rank or tick their choices, review the ballot and submit it. If you allow it, they can change their vote until voting closes.
+1. **Results.** On the date you set, the winners are published, with how each was decided, and kept as a historical record.
+
+Everything an election does follows the stage it is in, so organisers and members always see where it is and what they can do next.
+
+What you can configure
+----------------------
+
+Each election has its own settings, so a large annual election and a small workshop vote can sit side by side.
+
+**Who takes part**
+
+  * Separate groups for who may **vote**, who may **nominate** and who may **stand**, using CiviCRM Groups and Smart Groups. Anything you can express as a group becomes an electorate: country, region, membership type, committee, or any other criterion.
+  * No CiviCRM Membership is needed: being in one of the election's groups is what counts.
+  * People who are not logged in can take part with a **personal link** sent by email, if you allow it.
+
+**How people get on the ballot**
+
+  * Members nominate each other and themselves, or only the organisers choose the candidates.
+  * The number of nominations, and seconds, a person needs before they can stand.
+  * Nominees accept or decline, and candidates write a statement with an optional link to a longer statement or CV, which they can correct until voting ends.
+  * Optional **write-ins**: voters add a person who is not listed, who is then invited to accept before voting closes.
+
+**How votes are cast and counted**
+
+  * **Ranked choice** (instant-runoff) or **most votes win**.
+  * One or more seats for each position.
+  * **Yes or no questions** (referendum questions) on the same ballot, with your own wording (For and Against, Approve and Reject), an optional Abstain, a pass threshold from a simple majority to two thirds or any percentage, a quorum, and the full resolution text.
+  * Allow or disallow changing a vote.
+
+**What people see**
+
+  * Photos, written statements on the ballot or a click away, who nominated each candidate, and how names are shown, including nicknames.
+  * A stage stepper and a single "what you can do now" button on each election.
+  * A results page of your own, with a header, a footer, a logo, and an optional celebration when the winners appear.
+  * Emails to nominees and people written in, using message templates you can edit in CiviCRM.
+
+**Trust and privacy**
+
+  * **Anonymise votes** when the results are generated, so nobody, including administrators, can tell who voted for whom.
+  * One ballot for each person, enforced by the database. Results are generated once.
+  * Results show winners, not counts, and a tie is shown as a tie.
+  * A tamper-evident **audit log** with a fingerprint you can write down, and an integrity check on the election overview.
+  * The settings that decide who votes and how votes count are locked once ballots exist.
+
+**Running it**
+
+  * Manage elections, positions, candidates, results and the audit log from searchable lists, with drag and drop ordering, duplicate, and activate or deactivate in one click.
+  * An overview of each election: stage, timeline, turnout and integrity.
+  * **Duplicate** last year's election to start this year's with the same positions.
+  * Add it to a WordPress page with a short code, or use the pages CiviCRM provides on Drupal and Joomla.
+
+Read the documentation
+----------------------
+
+The [documentation](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/index.md) explains every screen and option in plain language, with workflow diagrams for each kind of election. Start with the first two chapters, then follow the third to set up your first election:
+
+  * **Introduction**: [types of elections and options](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/election_types.md) (positions and questions, ranked choice and most votes, who can take part and how people get on the ballot) and [workflow diagrams](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/workflows.md) of the whole election lifecycle.
+  * **Set up your site**: [initial set up](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/setup.md) (scheduled jobs, permissions, personal links, the pages to create on WordPress, Drupal and Joomla), [roles and permissions](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/roles_and_permissions.md) and the [site-wide settings](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/admin_election_settings.md).
+  * **Running an election**: [manage elections](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/admin_manage_elections.md), [add an election](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/admin_create_election.md), add [positions](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/admin_add_position.md), [write-ins](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/admin_write_ins.md) and [referendum questions](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/admin_referendum.md), then [activate](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/admin_activate_election.md) it, shape the [results page](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/admin_results_page.md) and follow it through on the [election overview](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/admin_election_overview.md).
+  * **Taking part**: how people [nominate someone](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/user_nominate.md), [accept a nomination](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/user_accept_nomination.md), [vote](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/user_vote.md) and [view the results](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/user_view_results.md).
+  * **Reference**: [emails and scheduled jobs](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/reference_emails_and_jobs.md), and [security and audit](https://github.com/agileware/au.com.agileware.elections/blob/master/docs/reference_security_and_audit.md) (the guarantees, the audit log and the integrity check).
+
+Elections is based on the voting features first built into [MemberDB](https://www.flamingspork.com/projects/memberdb/).
 
 Viewing election results are shown below as an example.
 
