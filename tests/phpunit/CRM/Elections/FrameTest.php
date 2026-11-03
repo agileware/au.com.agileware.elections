@@ -50,6 +50,22 @@ class CRM_Elections_FrameTest extends api_v3_ElectionBaseTestCase {
     $this->assertNull($trail[1][1]);
   }
 
+  public function testALinkBackToAListNamesTheElectionBecauseTheBrowserLeavesOutTheFragment() {
+    // The browser's referrer has no part after the #, which is where the lists read their election from.
+    $url = 'https://example.org/wp-admin/admin.php?page=CiviCRM&q=civicrm%2Felections%2Fposition-list&reset=1';
+    $fixed = CRM_Elections_Helper_Frame::withElection($url, 9);
+    $this->assertStringContainsString('eid=9', $fixed);
+    $this->assertStringContainsString('#/?eid=9', $fixed);
+    $this->assertStringContainsString('position-list', $fixed);
+    foreach (['candidate-list', 'result-list', 'audit-log', 'position-list-active'] as $list) {
+      $this->assertStringContainsString('#/?eid=4', CRM_Elections_Helper_Frame::withElection('/civicrm/elections/' . $list . '/?reset=1', 4), $list);
+    }
+    // Anything else, and a request with no election, is left alone.
+    $overview = 'https://example.org/wp-admin/admin.php?page=CiviCRM&q=civicrm%2Felections%2Foverview&reset=1&eid=9';
+    $this->assertSame($overview, CRM_Elections_Helper_Frame::withElection($overview, 9));
+    $this->assertSame($url, CRM_Elections_Helper_Frame::withElection($url, 0));
+  }
+
   public function testBackGoesToThePageThePersonCameFromOnlyIfItIsOnThisSite() {
     $fallback = CRM_Elections_Helper_Frame::managerUrl();
     $oldReferer = $_SERVER['HTTP_REFERER'] ?? NULL;

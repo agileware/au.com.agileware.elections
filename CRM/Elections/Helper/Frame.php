@@ -25,6 +25,31 @@ class CRM_Elections_Helper_Frame {
     ];
   }
 
+  /**
+   * The lists of one election. Each is drawn by Afform and reads the election from the address after the #, which a
+   * browser does not send as the page it came from, so a link back to one must carry the election itself.
+   */
+  const ELECTION_LISTS = ['position-list', 'position-list-active', 'candidate-list', 'result-list', 'audit-log'];
+
+  /**
+   * The address of one of the lists of an election, with the election in the query and after the # (where the list
+   * reads it).
+   */
+  public static function listUrl(string $route, int $electionId): string {
+    return CRM_Utils_System::url($route, 'reset=1&eid=' . $electionId, FALSE, '/?eid=' . $electionId, FALSE);
+  }
+
+  /**
+   * An address that is one of the lists of an election, made to name the election the person was working on. Any
+   * other address is returned as it is.
+   */
+  public static function withElection(string $url, int $electionId): string {
+    if ($electionId > 0 && preg_match('~civicrm(?:/|%2F)elections(?:/|%2F)(' . implode('|', array_map('preg_quote', self::ELECTION_LISTS)) . ')(?![\w-])~i', $url, $match)) {
+      return self::listUrl('civicrm/elections/' . strtolower($match[1]), $electionId);
+    }
+    return $url;
+  }
+
   public static function managerUrl(): string {
     return CRM_Utils_System::url(self::MANAGE_PATH, 'reset=1', FALSE, NULL, FALSE);
   }
@@ -51,7 +76,8 @@ class CRM_Elections_Helper_Frame {
     foreach ($candidates as $candidate) {
       $url = CRM_Elections_Helper_Utils::localUrlOrNull($candidate);
       if ($url !== NULL && self::pathAndQuery($url) !== $here) {
-        return $url;
+        // A list of the election being worked on: keep the election, which the browser's referrer leaves out.
+        return self::withElection($url, (int) CRM_Utils_Request::retrieve('eid', 'Positive'));
       }
     }
     return $fallback;

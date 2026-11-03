@@ -1342,11 +1342,6 @@ ul#errorList {
     gap: 0.5em;
     margin: 1em 0;
 }
-.election-action-bar .button {
-    font-size: 0.9em;
-    padding-left: 0.7em;
-    padding-right: 0.7em;
-}
 .election-action-bar .button,
 .crm-submit-buttons .election-back,
 .crm-submit-buttons .election-back-manage {
@@ -1605,4 +1600,69 @@ ul#errorList {
     vertical-align: top;
     padding-left: 0.4em;
     padding-right: 0.4em;
+}
+
+/*
+ * One size for every action button: Submit, Back, Back to Manage Elections and the buttons of the action rows.
+ * CiviCRM's own submit button, its link buttons and SearchKit's Bootstrap buttons each have their own size, so
+ * they are all set here to the same height, padding, type size and weight.
+ */
+.crm-container .crm-submit-buttons .crm-button,
+.crm-container .crm-submit-buttons button.crm-form-submit,
+.crm-container .crm-submit-buttons a.button,
+.crm-container .election-action-bar a.button,
+.crm-container .election-action-bar span.button,
+.crm-container .election-action-bar a.btn,
+.crm-container .election-action-bar button.button {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    /* !important: CiviCRM sets the size of its own buttons with its own important rules. */
+    /* The same fixed height for every button, whatever the theme gives its own buttons. */
+    height: 2.5em !important;
+    min-height: 2.5em !important;
+    padding: 0 0.9em !important;
+    border-width: 1px !important;
+    font-size: 0.95em !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+.crm-container .crm-submit-buttons .crm-button > span,
+.crm-container .crm-submit-buttons a.button > span,
+.crm-container .election-action-bar a.button > span,
+.crm-container .election-action-bar span.button > span,
+.crm-container .election-action-bar button.button > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+}
+.crm-container .crm-submit-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5em;
+}
+
+/* The back buttons of the SearchKit lists (Bootstrap buttons) are quiet like the ones of the forms. */
+.crm-container a.btn.election-action-quiet,
+.crm-container a.btn.election-action-quiet:visited {
+    background: transparent;
+    color: inherit;
+    border: 1px solid currentColor;
+}
+
+/* The icon inside a button never makes the button taller (some themes stretch icons to the height of the button). */
+.crm-container .crm-submit-buttons .crm-i,
+.crm-container .election-action-bar .crm-i {
+    height: auto !important;
+    min-height: 0 !important;
+    width: auto;
+    line-height: 1;
+    flex: 0 0 auto;
 }

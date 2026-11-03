@@ -15,14 +15,22 @@
   var ts = CRM.ts('au.com.agileware.elections');
   var settings = CRM.electionsLists || {};
 
+  // The lists read the election from the address after the #. When the page was opened with it in the query only (an
+  // old link, or a Back button, since the browser leaves what follows the # out of the page a person came from), put
+  // it there before the list starts, so the list never shows every election's rows.
+  var electionInQuery = /[?&]eid=(\d+)/.exec(window.location.search);
+  if (electionInQuery && !/[?&]eid=\d+/.test(window.location.hash)) {
+    window.location.hash = '#/?eid=' + electionInQuery[1];
+  }
+
   // What each list is called for a screen reader, and whether it shows dates (so the time zone line is shown).
   var pages = {
     manage: {caption: ts('Elections'), dates: true},
-    positions: {caption: ts('Positions'), reorder: true},
-    locked: {caption: ts('Positions')},
-    candidates: {caption: ts('Candidates')},
-    results: {caption: ts('Results')},
-    audit: {caption: ts('Audit Log'), dates: true}
+    positions: {caption: ts('Positions'), reorder: true, election: true},
+    locked: {caption: ts('Positions'), election: true},
+    candidates: {caption: ts('Candidates'), election: true},
+    results: {caption: ts('Results'), election: true},
+    audit: {caption: ts('Audit Log'), dates: true, election: true}
   };
 
   // A page the person has just finished with: Back does not return to a form that was submitted.
@@ -71,6 +79,25 @@
         var queued = false;
 
         host.classList.add('election-list-table');
+
+        // A list is of one election. Without one it would show the rows of every election, with buttons that lead to
+        // the wrong election: say so instead and send the person to Manage Elections.
+        if (config.election && !/[?&]eid=\d+/.test(window.location.hash)) {
+          host.style.display = 'none';
+          Array.prototype.forEach.call(host.parentNode.querySelectorAll('.election-action-end'), function (button) {
+            button.style.display = 'none';
+          });
+          var missing = document.createElement('div');
+          missing.className = 'messages status no-popup election-no-election';
+          missing.setAttribute('role', 'status');
+          missing.appendChild(document.createTextNode(ts('This list belongs to one election. Open it from the election\'s overview.') + ' '));
+          var toManage = document.createElement('a');
+          toManage.href = CRM.url('civicrm/elections/manage');
+          toManage.textContent = ts('Manage Elections');
+          missing.appendChild(toManage);
+          host.parentNode.insertBefore(missing, host);
+          return;
+        }
 
         // The line above a list with dates: which time zone the times are in, once, and not in every cell.
         if (config.dates && settings.timeZone && !(host.previousElementSibling && host.previousElementSibling.classList.contains('election-time-zone-note'))) {

@@ -140,4 +140,62 @@ test.describe('Back end page frame', () => {
     const edit = await row.getByRole('link', { name: /^Edit\b/ }).boundingBox();
     expect(edit!.height).toBeGreaterThanOrEqual(44);
   });
+
+  test('Back from an Edit Position form returns to the same election\'s positions, and editing again stays in that election', async ({ adminPage }) => {
+    const name = nm('Frame back');
+    const id = createElection(name);
+    addPosition(id, 'Chair', 1);
+    addPosition(id, 'Treasurer', 2);
+    // Another election with a position of its own: it must never appear in this election's list.
+    const other = createElection(nm('Frame other'));
+    addPosition(other, 'Other chair', 1);
+
+    await adminPage.goto(civiAdminUrl('civicrm/elections/overview', { reset: 1, eid: id }));
+    await adminPage.getByRole('link', { name: 'Positions', exact: true }).click();
+    await expect(adminPage.getByRole('link', { name: 'Edit Chair', exact: true })).toBeVisible();
+    await adminPage.getByRole('link', { name: 'Edit Chair', exact: true }).click();
+    await expect(adminPage.getByRole('heading', { name: 'Edit Position' })).toBeVisible();
+    await adminPage.getByRole('link', { name: 'Back', exact: true }).click();
+
+    // The list is of this election (the election is in the address, though the referrer had none).
+    await expect(adminPage).toHaveURL(new RegExp(`eid=${id}`));
+    await expect(adminPage.getByRole('link', { name: 'Edit Chair', exact: true })).toBeVisible();
+    await expect(adminPage.getByText('Other chair')).toHaveCount(0);
+    await expect(adminPage.locator('.crm-container .breadcrumb').getByRole('link', { name })).toBeVisible();
+    // Editing again opens the same election's position.
+    await adminPage.getByRole('link', { name: 'Edit Treasurer', exact: true }).click();
+    await expect(adminPage.getByRole('heading', { name: 'Edit Position' })).toBeVisible();
+    await expect(adminPage.locator('.crm-container .breadcrumb').getByRole('link', { name })).toBeVisible();
+  });
+
+  test('a list opened with no election says so instead of showing every election', async ({ adminPage }) => {
+    await adminPage.goto(civiAdminUrl('civicrm/elections/position-list', { reset: 1 }));
+    await expect(adminPage.locator('.election-no-election')).toContainText('belongs to one election');
+    await expect(adminPage.locator('.election-list-table')).toBeHidden();
+  });
+
+  test('a list opened with the election only in the query finds it', async ({ adminPage }) => {
+    const name = nm('Frame query');
+    const id = createElection(name);
+    addPosition(id, 'Chair', 1);
+    await adminPage.goto(civiAdminUrl('civicrm/elections/position-list', { reset: 1, eid: id }));
+    await expect(adminPage.getByRole('link', { name: 'Edit Chair', exact: true })).toBeVisible();
+    await expect(adminPage.locator('.election-no-election')).toHaveCount(0);
+  });
+
+  test('Submit and the back buttons are the same size', async ({ adminPage }) => {
+    const id = createElection(nm('Frame buttons'));
+    await adminPage.goto(civiAdminUrl('civicrm/elections/candidates/add', { reset: 1, eid: id }));
+    const sizes = await adminPage.locator('.crm-submit-buttons .crm-button, .crm-submit-buttons a.button, .crm-submit-buttons button').evaluateAll((els) => els.map((e) => {
+      const box = e.getBoundingClientRect();
+      const style = getComputedStyle(e);
+      return { text: (e.textContent || '').trim(), height: Math.round(box.height), font: style.fontSize, weight: style.fontWeight };
+    }));
+    expect(sizes.length).toBeGreaterThanOrEqual(3);
+    for (const size of sizes) {
+      expect(size.height, size.text).toBe(sizes[0].height);
+      expect(size.font, size.text).toBe(sizes[0].font);
+      expect(size.weight, size.text).toBe(sizes[0].weight);
+    }
+  });
 });
