@@ -1,4 +1,4 @@
-**Elections** (au.com.agileware.elections) turns your CiviCRM into a place where your organisation can hold real elections: nominate people, put them on a ballot, let your members vote, and publish the results, with no spreadsheets, no separate voting service and no export of your member list to a third party. Your people are already in CiviCRM, so the election already knows who they are, which groups they belong to, and how to reach them.
+**Elections** (au.com.agileware.elections) turns your CiviCRM into a place where your organisation can hold real elections: nominate people, put them on a ballot, let your people vote, and publish the results, with no spreadsheets, no separate voting service and no export of your contacts to a third party. Your people are already in CiviCRM, so the election already knows who they are, which groups they belong to, and how to reach them.
 
 It runs on **WordPress, Drupal and Joomla**, works on a phone, and is built to be used by everyone: keyboard and screen reader friendly, with light and dark appearance.
 
@@ -9,9 +9,9 @@ What you can run with it
 
 Anything where a group of people chooses someone, or says yes or no, on your CiviCRM site:
 
-  * **Committee and board elections.** President, Secretary, Treasurer and three committee members, each with its own candidates, on one ballot.
+  * **Committee and board elections.** President, Secretary, Treasurer and three committee positions, each with its own candidates, on one ballot.
   * **Annual general meetings.** Positions and yes or no questions together: a motion to change the constitution, to raise fees, or to allow proxy votes, with a pass threshold and a quorum.
-  * **Volunteer roles.** Let members nominate each other, or put themselves forward, and have the nominee accept before they appear on the ballot.
+  * **Volunteer roles.** Let people nominate each other, or put themselves forward, and have the nominee accept before they appear on the ballot.
   * **Regional, state or chapter delegates.** Give each region its own election and use a CiviCRM group, or a smart group built from addresses, so only the right people see it and vote.
   * **Award and grants panels.** Turn online nominating off and let the organisers choose the candidates, or use one group to nominate and a different group to be eligible to stand.
   * **Show and event picks.** Use "most votes win" for people's choice, steward or stallholder selections where each voter ticks the people they like.
@@ -26,7 +26,7 @@ How an election works
 1. **Voting.** Voters see the candidates, their statements and photos, rank or tick their choices, review the ballot and submit it. If you allow it, they can change their vote until voting closes.
 1. **Results.** On the date you set, the winners are published, with how each was decided, and kept as a historical record.
 
-Everything an election does follows the stage it is in, so organisers and members always see where it is and what they can do next.
+Everything an election does follows the stage it is in, so organisers and voters always see where it is and what they can do next.
 
 What you can configure
 ----------------------
@@ -35,13 +35,13 @@ Each election has its own settings, so a large annual election and a small works
 
 **Who takes part**
 
-  * Separate groups for who may **vote**, who may **nominate** and who may **stand**, using CiviCRM Groups and Smart Groups. Anything you can express as a group becomes an electorate: country, region, membership type, committee, or any other criterion.
+  * Separate groups for who may **vote**, who may **nominate** and who may **stand**, using CiviCRM Groups and Smart Groups. Anything you can express as a group becomes an electorate: country, region, interest, committee, or any other criterion.
   * No CiviCRM Membership is needed: being in one of the election's groups is what counts.
   * People who are not logged in can take part with a **personal link** sent by email, if you allow it.
 
 **How people get on the ballot**
 
-  * Members nominate each other and themselves, or only the organisers choose the candidates.
+  * People nominate each other and themselves, or only the organisers choose the candidates.
   * The number of nominations, and seconds, a person needs before they can stand.
   * Nominees accept or decline, and candidates write a statement with an optional link to a longer statement or CV, which they can correct until voting ends.
   * Optional **write-ins**: voters add a person who is not listed, who is then invited to accept before voting closes.

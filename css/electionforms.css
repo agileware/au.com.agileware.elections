@@ -1604,12 +1604,14 @@ ul#errorList {
 
 /*
  * One size for every action button: Submit, Back, Back to Manage Elections and the buttons of the action rows.
+ * Only back end forms (those whose footer has the Back button) and the action rows: the front end forms keep their own
+ * buttons, which are sized for touch.
  * CiviCRM's own submit button, its link buttons and SearchKit's Bootstrap buttons each have their own size, so
  * they are all set here to the same height, padding, type size and weight.
  */
-.crm-container .crm-submit-buttons .crm-button,
-.crm-container .crm-submit-buttons button.crm-form-submit,
-.crm-container .crm-submit-buttons a.button,
+.crm-container .crm-submit-buttons:has(.election-back) .crm-button,
+.crm-container .crm-submit-buttons:has(.election-back) button.crm-form-submit,
+.crm-container .crm-submit-buttons:has(.election-back) a.button,
 .crm-container .election-action-bar a.button,
 .crm-container .election-action-bar span.button,
 .crm-container .election-action-bar a.btn,
@@ -1629,8 +1631,8 @@ ul#errorList {
     border-radius: 4px;
     white-space: nowrap;
 }
-.crm-container .crm-submit-buttons .crm-button > span,
-.crm-container .crm-submit-buttons a.button > span,
+.crm-container .crm-submit-buttons:has(.election-back) .crm-button > span,
+.crm-container .crm-submit-buttons:has(.election-back) a.button > span,
 .crm-container .election-action-bar a.button > span,
 .crm-container .election-action-bar span.button > span,
 .crm-container .election-action-bar button.button > span {
@@ -1642,7 +1644,7 @@ ul#errorList {
     min-height: 0 !important;
     height: auto !important;
 }
-.crm-container .crm-submit-buttons {
+.crm-container .crm-submit-buttons:has(.election-back) {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -1658,7 +1660,7 @@ ul#errorList {
 }
 
 /* The icon inside a button never makes the button taller (some themes stretch icons to the height of the button). */
-.crm-container .crm-submit-buttons .crm-i,
+.crm-container .crm-submit-buttons:has(.election-back) .crm-i,
 .crm-container .election-action-bar .crm-i {
     height: auto !important;
     min-height: 0 !important;
