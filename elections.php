@@ -149,6 +149,10 @@ function elections_civicrm_pageRun(&$page) {
   if ($page instanceof CRM_Elections_Page_Base) {
     elections_send_referrer_policy();
   }
+  // The SearchKit screens are drawn by Afform: give them the breadcrumb of the election, not CiviCRM's menu trail.
+  if (class_exists('CRM_Afform_Page_AfformBase') && $page instanceof CRM_Afform_Page_AfformBase) {
+    CRM_Elections_Helper_Frame::applyToListPage();
+  }
 }
 
 /**
@@ -158,6 +162,7 @@ function elections_civicrm_buildForm($formName, &$form) {
   if ($form instanceof CRM_Elections_Form_Base) {
     elections_send_referrer_policy();
   }
+  CRM_Elections_Helper_SettingsFrame::buildForm($formName, $form);
 }
 
 /**
@@ -309,6 +314,95 @@ function isElectionAdmin() {
 }
 
 /**
+ * Send the HTTP status of a refused or missing page (403 or 404) on WordPress, Drupal and Joomla.
+ *
+ * The page is still drawn as usual, so the person reads the reason. A popup is left alone: CiviCRM shows a failed
+ * popup as a network error, not as the message. Nothing is sent once the page has started to be written.
+ *
+ * @param int $code
+ */
+function electionsSetHttpStatus($code) {
+  $code = (int) $code;
+  if (CRM_Utils_Request::retrieve('snippet', 'String')) {
+    return;
+  }
+  try {
+    $framework = CRM_Core_Config::singleton()->userFramework;
+    if ($framework === 'WordPress') {
+      if (!headers_sent() && function_exists('status_header')) {
+        status_header($code);
+      }
+      return;
+    }
+    if ($framework === 'Joomla' && class_exists('\Joomla\CMS\Factory')) {
+      \Joomla\CMS\Factory::getApplication()->setHeader('status', (string) $code, TRUE);
+    }
+    elseif (strpos((string) $framework, 'Drupal') === 0 && class_exists('\Drupal') && \Drupal::hasContainer()) {
+      // Drupal answers with its own response object, so the status is set on it as it leaves.
+      \Drupal::service('event_dispatcher')->addListener('kernel.response', function ($event) use ($code) {
+        $event->getResponse()->setStatusCode($code);
+      }, -1000);
+    }
+    if (!headers_sent()) {
+      http_response_code($code);
+    }
+  }
+  catch (\Throwable $e) {
+    Civi::log()->debug('Elections: could not send the HTTP status {code}: {message}', ['code' => $code, 'message' => $e->getMessage()]);
+  }
+}
+
+/**
+ * What a person who may not see a page is told, and the one link that helps them.
+ *
+ * Someone with no login and no valid personal link is asked to log in. Anyone else is told they have no access
+ * and who to ask. Nothing says whether the election exists.
+ *
+ * @return array
+ *   The message, then the options for throwAccessDeniedException().
+ */
+function electionsNoAccess() {
+  $loggedIn = CRM_Core_Session::singleton()->getLoggedInContactID();
+  if (empty($loggedIn) && empty(CRM_Elections_Helper_Eligibility::getActingContactId())) {
+    return [
+      E::ts('You need to be logged in to see this election. Log in, or use your personal link.'),
+      ['return_button_text' => E::ts('Log in'), 'return_button_action' => electionsLoginUrl()],
+    ];
+  }
+  return [E::ts('You do not have access to this page. Ask the organisers if you think you should.'), []];
+}
+
+/**
+ * The login page, coming back to the page the person asked for.
+ *
+ * @return string
+ */
+function electionsLoginUrl() {
+  $query = [];
+  foreach (['eid', 'enid'] as $key) {
+    $value = CRM_Utils_Request::retrieve($key, 'Positive');
+    if ($value) {
+      $query[$key] = $value;
+    }
+  }
+  return getLoginPageURL(CRM_Utils_System::url(CRM_Utils_System::currentPath(), $query, TRUE, NULL, FALSE, TRUE));
+}
+
+/**
+ * The list of elections, keeping a personal link working for a person who has no login.
+ *
+ * @return string
+ */
+function electionsListUrl() {
+  $url = Civi::url('current://civicrm/elections');
+  $personal = ltrim(CRM_Elections_Page_Elections::personalLinkQuery(), '&');
+  if ($personal !== '') {
+    $url->addQuery($personal);
+  }
+  return (string) $url->setHtmlEscape(FALSE);
+}
+
+/**
  * Throw unauthorized message if logged in contact is not allowed to perform certain actions.
  *
  * @throws CRM_Extension_Exception
@@ -316,7 +410,8 @@ function isElectionAdmin() {
  */
 function throwUnauthorizedMessageIfRequired($formOrPage) {
   if (!isElectionAdmin()) {
-    throwAccessDeniedException($formOrPage, E::ts('You are not authorized to perform this action.'));
+    [$message, $options] = electionsNoAccess();
+    throwAccessDeniedException($formOrPage, $message, $options);
     return TRUE;
   }
   return FALSE;
@@ -325,21 +420,38 @@ function throwUnauthorizedMessageIfRequired($formOrPage) {
 /**
  * Throw access denied exception with custom message.
  *
+ * Writes the page the person sees (CRM/Elections/Helper/Error.tpl): the message, and one link away from it.
+ *
  * @param $exceptionMessage
+ *   What the person cannot do and how to get access, already translated.
+ * @param array $pageOptions
+ *   - return_button_text, return_button_action: the link, both already translated and ready to print. Without
+ *     them the link is "View Elections". An older call passes [''] for no link at all.
+ *   - status: the HTTP status to send, 403 unless the page says otherwise.
+ *   - kind: error (the default), or status for a page that tells the person where things stand and is not a
+ *     refusal.
+ *   - title: the page title.
  * @throws CRM_Extension_Exception
  */
 function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions = []) {
   $formOrPage->throwError = TRUE;
   $formOrPage->assign('errormessage', $exceptionMessage);
 
-  if (empty($pageOptions)) {
-    $pageOptions['return_button_text'] = E::ts('Return to Elections');
-    $pageOptions['return_button_action'] = Civi::url('current://civicrm/elections');
+  $noLink = array_key_exists(0, $pageOptions);
+  $text = $pageOptions['return_button_text'] ?? '';
+  $action = $pageOptions['return_button_action'] ?? '';
+  if (!$noLink && ($text === '' || $action === '')) {
+    $text = E::ts('View Elections');
+    $action = electionsListUrl();
   }
+  $formOrPage->assign('return_button_text', $noLink ? '' : $text);
+  $formOrPage->assign('return_button_action', $noLink ? '' : (string) $action);
+  $formOrPage->assign('errorKind', ($pageOptions['kind'] ?? 'error') === 'status' ? 'status' : 'error');
 
-  foreach ($pageOptions as $optionKey => $pageOption) {
-    $formOrPage->assign($optionKey, $pageOption);
+  if (!empty($pageOptions['title'])) {
+    CRM_Utils_System::setTitle($pageOptions['title']);
   }
+  electionsSetHttpStatus($pageOptions['status'] ?? 403);
 }
 
 /**
@@ -350,7 +462,7 @@ function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions
  */
 function throwNonMemberAccessDenied($formOrPage) {
   $formOrPage->assign('nonmember', TRUE);
-  throwAccessDeniedException($formOrPage, E::ts('You may only see this page if you can take part in this election.'));
+  throwAccessDeniedException($formOrPage, E::ts('You are not in a group that can take part in this election. Ask the organisers if you think you should be.'), ['title' => E::ts('Access Denied')]);
 }
 
 /**
@@ -359,8 +471,37 @@ function throwNonMemberAccessDenied($formOrPage) {
  * @throws CRM_Extension_Exception
  */
 function throwAccessDeniedPage($formOrPage) {
-  $formOrPage->throwError = TRUE;
-  $formOrPage->assign('errormessage', E::ts('You are not authorized to access this page.'));
+  [$message, $options] = electionsNoAccess();
+  throwAccessDeniedException($formOrPage, $message, $options + ['title' => E::ts('Access Denied')]);
+}
+
+/**
+ * Show the page that says an election, or a person's nomination in it, could not be found (HTTP 404).
+ *
+ * @param string $message
+ *   Already translated. The election is the default.
+ */
+function throwNotFoundPage($formOrPage, $message = '') {
+  throwAccessDeniedException($formOrPage, $message !== '' ? $message : E::ts('This election could not be found.'), [
+    'status' => 404,
+    'title' => E::ts('Not Found'),
+  ]);
+}
+
+/**
+ * Find the election for a page or form. When there is none, the page becomes the "not found" page.
+ *
+ * @param int $electionId
+ *
+ * @return CRM_Elections_BAO_Election|null
+ *   NULL once the page has been turned into the "not found" page: the caller shows it and stops.
+ */
+function findElectionForPage($formOrPage, $electionId) {
+  if ($electionId && CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election WHERE id = %1', [1 => [(int) $electionId, 'Integer']])) {
+    return findElectionById($electionId);
+  }
+  throwNotFoundPage($formOrPage);
+  return NULL;
 }
 
 /**
@@ -374,7 +515,7 @@ function retrieveElectionIdFromUrl($form)
 {
     $eId = CRM_Utils_Request::retrieve('eid', 'Positive', $form, FALSE, 0);
     if (!$eId) {
-        throwAccessDeniedException($form, E::ts('Unable to view this Election, Election ID parameter missing.'), ['']);
+        throwNotFoundPage($form, E::ts('This page needs an election. Go to the list of elections and choose one.'));
         return -1;
     }
     return $eId;
@@ -402,7 +543,11 @@ function retrieveContactChecksumFromUrl( $form )
 
     if ( !$results['valid'] ) {
       // Invalid checksum
-      throwAccessDeniedException( $form, E::ts('Unauthorised. Invalid contact credentials.'), [''] );
+      throwAccessDeniedException($form, E::ts('This personal link does not work. Log in, or ask the organisers for a new link.'), [
+        'return_button_text' => E::ts('Log in'),
+        'return_button_action' => electionsLoginUrl(),
+        'title' => E::ts('Access Denied'),
+      ]);
       return false;
     }
 
@@ -410,7 +555,7 @@ function retrieveContactChecksumFromUrl( $form )
   }
 
   // Otherwise, something is missing
-  throwAccessDeniedException( $form, E::ts('Unauthorised. Missing valid contact credentials.'), [''] );
+  throwAccessDeniedPage($form);
   return false;
 }
 

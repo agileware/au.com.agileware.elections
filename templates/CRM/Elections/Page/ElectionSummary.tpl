@@ -1,3 +1,4 @@
+{if $backToElectionUrl}<p class="election-back">{include file="CRM/Elections/Frame/BackToElection.tpl"}</p>{/if}
 {include file="CRM/Elections/Page/ResultsHeader.tpl"}
 {include file="CRM/Elections/Page/WelcomeMessage.tpl"}
 
@@ -7,8 +8,8 @@
     <p>{ts}The votes have been counted for this election.  A breakdown of the nominations and results for each position is shown below.{/ts}</p>
 </div>
 
-{capture assign=resultDate}<span class="crm-election-date">{$election->result_date|crmDate} <a target="_blank" href="{$siteTimeZoneConvertUrl}">({$siteTimeZone})</a></span>{/capture}
-<p>{ts 1=$resultDate}Results published on %1{/ts}</p>
+{capture assign=resultDate}<span class="crm-election-date">{$election->result_date|crmDate}</span>{/capture}
+<p>{ts 1=$resultDate}Results published on %1.{/ts} {$siteTimeZoneLine|escape}</p>
 
 {foreach from=$positions item=position}
     <h2>{$position.name|escape}</h2>
@@ -28,7 +29,7 @@
                         {if $candidate.is_winner|default:false}
                             <li>{$candidate.$memberdisplayname|escape}</li>
                         {elseif $candidate.is_tied|default:false}
-                            <li>{$candidate.$memberdisplayname|escape} {ts}(tied){/ts}</li>
+                            <li>{ts 1=$candidate.$memberdisplayname|escape}%1 (tied){/ts}</li>
                         {/if}
                     {/foreach}
                 </ul>

@@ -25,9 +25,12 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
       return;
     }
     $this->election = findElectionById($this->eId);
-    $canEdit = $this->election->canEdit();
-    if ($canEdit !== TRUE && $this->election->is_visible) {
-      throw new CRM_Extension_Exception($canEdit);
+    if ($this->election->canEdit() !== TRUE && $this->election->is_visible) {
+      throwAccessDeniedException($this, E::ts('Positions cannot be changed while the election is active and its nominations have started. Deactivate the election first.'), [
+        'return_button_text' => E::ts('Back to Manage Elections'),
+        'return_button_action' => CRM_Elections_Helper_Frame::managerUrl(),
+      ]);
+      return;
     }
 
     $this->epId = CRM_Utils_Request::retrieve('epid', 'Positive', $this, FALSE, 0);
@@ -38,8 +41,11 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
     $this->assign('election', $this->election);
     $this->addFormElements();
 
-    CRM_Utils_System::setTitle(E::ts('Add Election Position for %1', [1 => $this->election->name]));
+    CRM_Utils_System::setTitle(E::ts('Add Position'));
     parent::buildQuickForm();
+    $title = $this->epId ? E::ts('Edit Position') : E::ts('Add Position');
+    CRM_Utils_System::setTitle($title);
+    CRM_Elections_Helper_Frame::assignToForm($this, CRM_Elections_Helper_Frame::trail((int) $this->eId, [[E::ts('Positions'), CRM_Elections_Helper_Frame::positionsUrl((int) $this->eId)]], $title), CRM_Elections_Helper_Frame::positionsUrl((int) $this->eId));
   }
 
   public function setDefaultValues() {
@@ -76,13 +82,12 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
         }
         $default['description']   = (!empty($this->electionPosition['description'])) ? $this->electionPosition['description'] : '';
 
-        CRM_Utils_System::setTitle(E::ts('Edit Election Position for %1', [1 => $this->electionPosition['name']]));
       }
       else {
         $this->epId = 0;
       }
     }
-    return $default;
+    return $this->restoreInput($default);
   }
 
   /**
@@ -106,35 +111,29 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
     // election information fields
     $this->add('text', 'name', E::ts('Name'), ['size' => 35], TRUE);
     $this->add('text', 'quantity', E::ts('Seats'), ['size' => 15], TRUE);
-    $this->add('text', 'sortorder', E::ts('Order'), ['size' => 15], TRUE);
-    $this->add('select', 'position_type', E::ts('Type'), CRM_Elections_BAO_ElectionPosition::getTypes(), TRUE);
-    $this->add('text', 'yes_label', E::ts('Wording of Yes'), ['size' => 25, 'maxlength' => 255]);
-    $this->add('text', 'no_label', E::ts('Wording of No'), ['size' => 25, 'maxlength' => 255]);
-    $this->add('text', 'abstain_label', E::ts('Wording of Abstain'), ['size' => 25, 'maxlength' => 255]);
+    $this->add('text', 'sortorder', E::ts('Order on the ballot'), ['size' => 15], TRUE);
+    $this->add('select', 'position_type', E::ts('Position type'), CRM_Elections_BAO_ElectionPosition::getTypes(), TRUE);
+    $this->add('text', 'yes_label', E::ts('Wording for Yes'), ['size' => 25, 'maxlength' => 255]);
+    $this->add('text', 'no_label', E::ts('Wording for No'), ['size' => 25, 'maxlength' => 255]);
+    $this->add('text', 'abstain_label', E::ts('Wording for Abstain'), ['size' => 25, 'maxlength' => 255]);
     $this->add('select', 'pass_threshold_choice', E::ts('Passes when'), self::thresholdOptions());
-    $this->add('text', 'pass_threshold_custom', E::ts('Percentage'), ['size' => 6]);
-    $this->add('text', 'quorum_percent', E::ts('Quorum'), ['size' => 6]);
-    $this->add('textarea', 'resolution_text', E::ts('Resolution'), ['cols' => 55, 'rows' => 6], FALSE);
+    $this->add('text', 'pass_threshold_custom', E::ts('Pass percentage'), ['size' => 6]);
+    $this->add('text', 'quorum_percent', E::ts('Quorum (% of voters)'), ['size' => 6]);
+    $this->add('textarea', 'resolution_text', E::ts('Resolution text'), ['cols' => 55, 'rows' => 6], FALSE);
     $this->add('select', 'write_ins_per_seat', E::ts('Write-ins per seat'), array_combine(range(0, CRM_Elections_Helper_WriteIn::MAX_PER_SEAT), range(0, CRM_Elections_Helper_WriteIn::MAX_PER_SEAT)), TRUE);
     $this->add('textarea', 'description', E::ts('Description'), ['cols' => 55, 'rows' => 6], FALSE);
     $this->addElement('hidden', 'eid', $this->eId);
     $this->addElement('hidden', 'epid', $this->epId);
 
     // Submit button
-    $this->addButtons([
-        [
-          'type' => 'submit',
-          'name' => E::ts(($this->epId) ? 'Edit Position' : 'Create'),
-          'isDefault' => TRUE,
-        ],
-    ]);
+    CRM_Elections_Helper_Frame::addSubmitButtons($this);
   }
 
   public function validate() {
     $values = $this->exportValues();
 
-    if (!CRM_Utils_Rule::positiveInteger($values['quantity'])) {
-      $this->_errors['quantity'] = E::ts('Seats must be a valid positive integer.');
+    if (!CRM_Utils_Rule::positiveInteger($values['quantity']) || ((int) $values['quantity'] < 1)) {
+      $this->_errors['quantity'] = E::ts('Seats must be a whole number of 1 or more.');
     }
 
     if (($values['position_type'] ?? '') === CRM_Elections_BAO_ElectionPosition::TYPE_REFERENDUM) {
@@ -151,7 +150,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
     }
 
     if (!CRM_Utils_Rule::positiveInteger($values['sortorder']) || ($values['sortorder'] <= 0)) {
-      $this->_errors['sortorder'] = E::ts('Order must be a valid positive integer.');
+      $this->_errors['sortorder'] = E::ts('Order on the ballot must be a whole number of 1 or more.');
     }
 
     return parent::validate();
@@ -177,7 +176,7 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
       'created_by'   => CRM_Core_Session::singleton()->getLoggedInContactID(),
     ];
 
-    $successMessage = E::ts('Election position has been created successfully.');
+    $successMessage = E::ts('Position added.');
     $electionPosition = NULL;
     if ($epId) {
       $electionPosition = civicrm_api3('ElectionPosition', 'get', [
@@ -188,12 +187,19 @@ class CRM_Elections_Form_CreateElectionPosition extends CRM_Elections_Form_Base 
 
     if (isset($electionPosition) && $electionPosition['count']) {
       $params['id'] = $epId;
-      $successMessage = E::ts('Election position has been edited successfully.');
+      $successMessage = E::ts('Position saved.');
     }
 
-    $electionPosition = civicrm_api3('ElectionPosition', 'create', $params);
-    if ($isQuestion) {
-      CRM_Elections_BAO_ElectionPosition::saveOptions((int) $electionPosition['id'], ['yes' => $values['yes_label'] ?? '', 'no' => $values['no_label'] ?? '', 'abstain' => $values['abstain_label'] ?? '']);
+    try {
+      $electionPosition = civicrm_api3('ElectionPosition', 'create', $params);
+      if ($isQuestion) {
+        CRM_Elections_BAO_ElectionPosition::saveOptions((int) $electionPosition['id'], ['yes' => $values['yes_label'] ?? '', 'no' => $values['no_label'] ?? '', 'abstain' => $values['abstain_label'] ?? '']);
+      }
+    }
+    catch (CRM_Core_Exception $e) {
+      // The refusal is shown as it is written (a guard says what is not allowed and what to do), and the form stays with its input.
+      $this->stayOnForm($e->getMessage(), $epId ? E::ts('Position not saved') : E::ts('Position not added'));
+      return;
     }
     parent::postProcess();
 

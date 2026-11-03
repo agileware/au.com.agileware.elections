@@ -14,6 +14,7 @@
  * @property bool|string $is_eligible_candidate
  * @property bool|string $has_accepted_nomination
  * @property bool|string $has_rejected_nomination
+ * @property bool|string $has_withdrawn_nomination
  * @property string $created_at
  * @property string $updated_at
  * @property string $member_nominee

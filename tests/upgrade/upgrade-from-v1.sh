@@ -10,7 +10,7 @@ SITE=$(cd "$1" && pwd); DOCROOT=$2; CV=$3
 EXT_DIR=$(cd "$(dirname "$0")/../.." && pwd)
 V1=$(mktemp -d)
 BACKUP="$V1/before.sql.gz"
-git -C "$EXT_DIR" archive master | tar -x -C "$V1"
+git -C "$EXT_DIR" archive 1.3.2 | tar -x -C "$V1"
 status=1
 cd "$SITE" || exit 1
 echo "== saving the database"; ddev export-db --file="$BACKUP" >/dev/null 2>&1 || { echo "could not save the database"; exit 1; }

@@ -32,7 +32,7 @@ class CompilerPass implements CompilerPassInterface {
       $typeFactoryDefinition->addMethodCall('addAction', [
         'IsUserAllowedToVoteAction',
         'Civi\Elections\ActionProvider\IsUserAllowedToVoteAction',
-        E::ts('Check whether the user may vote'),
+        E::ts('Check whether a person may vote'),
         [
           AbstractAction::SINGLE_CONTACT_ACTION_TAG,
           AbstractAction::DATA_RETRIEVAL_TAG

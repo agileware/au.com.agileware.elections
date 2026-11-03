@@ -34,7 +34,7 @@ function civicrm_api3_election_create($params) {
   if (!isset($params['has_results_generated']) || $params['has_results_generated'] != 1) {
     $errors = CRM_Elections_BAO_Election::compareDates($params, $apiDateFormat);
     if (!empty($errors)) {
-      return civicrm_api3_create_error('Please correct the form errors.', [
+      return civicrm_api3_create_error(E::ts('Fix the problems and try again.'), [
           'errors' => $errors,
       ]);
     }
@@ -44,11 +44,13 @@ function civicrm_api3_election_create($params) {
       $currentTime = new DateTime();
       $nominationStartDate = DateTime::createFromFormat('Y-m-d H:i:s', $election->nomination_start_date);
       if (CRM_Elections_Helper_Dates::compare($nominationStartDate->format($apiDateFormat), $currentTime->format($apiDateFormat), $apiDateFormat) == 1 && isset($params['is_deleted']) && $params['is_deleted'] == 1 && $election->is_visible == 1) {
-        return civicrm_api3_create_error('Election cannot be deleted once it has been started');
+        return civicrm_api3_create_error(E::ts('This election is active and its nominations have started, so it cannot be deleted. Deactivate it first.'));
       }
     }
   }
-  $params['created_by'] = CRM_Core_Session::singleton()->getLoggedInContactID();
+  if (empty($params['id'])) {
+    $params['created_by'] = CRM_Core_Session::singleton()->getLoggedInContactID();
+  }
   return _civicrm_api3_basic_create(_civicrm_api3_get_BAO(__FUNCTION__), $params);
 }
 

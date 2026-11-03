@@ -25,38 +25,47 @@ class CRM_Elections_Form_DeleteElectionPosition extends CRM_Elections_Form_Base 
       return;
     }
     $this->election = findElectionById($this->eId);
-    $canEdit = $this->election->canEdit();
-    if ($canEdit !== TRUE) {
-      throw new CRM_Extension_Exception($canEdit);
-    }
-    if (!$this->getElectionPosition()) {
-      return;
-    }
-
-    $this->addButtons([
-      [
-        'type' => 'submit',
-        'name' => E::ts('Delete'),
-        'isDefault' => TRUE,
-      ],
-      [
-        'type' => 'cancel',
-        'name' => E::ts('Cancel'),
-      ],
-    ]);
-
+    CRM_Utils_System::setTitle(E::ts('Delete Position'));
     $this->addElement('hidden', 'eid', $this->eId);
+
+    $buttons = [];
+    if ($this->election->canEdit() !== TRUE) {
+      // Say why inside the dialog, and leave only Cancel: there is nothing to confirm.
+      $this->assign('deleteBlocked', E::ts('Positions cannot be deleted while the election is active and its nominations have started. Deactivate the election first.'));
+    }
+    elseif (!$this->getElectionPosition()) {
+      $this->assign('deleteBlocked', E::ts('The position could not be found.'));
+    }
+    else {
+      $this->assign('deleteMessage', E::ts('This deletes the position "%1" and the nominations made for it. They cannot be recovered.', [1 => CRM_Elections_Helper_ResultsDisplay::decode($this->electionPosition['name'] ?? '')]));
+      $buttons[] = ['type' => 'submit', 'name' => E::ts('Delete'), 'isDefault' => TRUE, 'icon' => 'fa-trash', 'class' => 'election-danger'];
+    }
     $this->addElement('hidden', 'epid', $this->epId);
+    $buttons[] = ['type' => 'cancel', 'name' => E::ts('Cancel')];
+    $this->addButtons($buttons);
 
     parent::buildQuickForm();
   }
 
   public function postProcess() {
-    civicrm_api3('ElectionPosition', 'delete', [
-       'id' => $this->electionPosition['id'],
-    ]);
+    $values = $this->exportValues();
+    $this->eId = (int) ($values['eid'] ?? 0);
+    $this->epId = (int) ($values['epid'] ?? 0);
+    if (!$this->getElectionPosition()) {
+      $this->stayOnForm(E::ts('The position could not be found.'), E::ts('Position not deleted'));
+      return;
+    }
+    try {
+      civicrm_api3('ElectionPosition', 'delete', [
+        'id' => $this->electionPosition['id'],
+      ]);
+    }
+    catch (CRM_Core_Exception $e) {
+      $this->stayOnForm($e->getMessage(), E::ts('Position not deleted'));
+      return;
+    }
 
-    CRM_Core_Session::setStatus(E::ts('Election position has been deleted successfully.'), '', 'success');
+    CRM_Core_Session::setStatus(E::ts('Position deleted.'), '', 'success');
 
     parent::postProcess();
 
@@ -70,7 +79,6 @@ class CRM_Elections_Form_DeleteElectionPosition extends CRM_Elections_Form_Base 
     }
 
     if ($this->epId == 0) {
-      throwAccessDeniedPage($this);
       return FALSE;
     }
 
@@ -80,9 +88,10 @@ class CRM_Elections_Form_DeleteElectionPosition extends CRM_Elections_Form_Base 
     ]);
 
     if ($this->electionPosition['count'] == 0) {
-      throwAccessDeniedPage($this);
       return FALSE;
     }
+    // The API returns the matches keyed by id.
+    $this->electionPosition = reset($this->electionPosition['values']);
 
     return TRUE;
   }

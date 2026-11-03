@@ -1,9 +1,11 @@
 <div class="crm-election-form-block-container">
 
+  {if $backToElectionUrl}{include file="CRM/Elections/Frame/BackToElection.tpl"}{/if}
+
   {include file="CRM/Elections/Page/WelcomeMessage.tpl"}
 
   <div class="crm-elections-helptext-block">
-    <p>{ts}Use this form to nominate someone to a given position in this election by selecting the relevant position and then searching for your nominee by name or email. Only persons that can vote in this election may be nominated.{/ts} </p>
+    <p>{ts}Choose a position, then search for the person you want to nominate by name or email. Only people who can vote in this election can be nominated.{/ts}</p>
   </div>
 
   <div class="crm-election-form-row">
@@ -26,7 +28,7 @@
 
   <div class="crm-election-form-row">
     <div class="crm-election-form-col-left full">
-      <label>{$form.reason.label}</label>
+      {$form.reason.label}
     </div>
     <div class="crm-election-form-col-right half">
       {$form.reason.html}
@@ -47,7 +49,7 @@
 {literal}
   <script>
     CRM.$.fn.select2.defaults.formatInputTooShort = function() {
-        return '{/literal}{ts escape='js'}Start typing a name or email...{/ts}{literal}';
+        return '{/literal}{ts escape='js'}Type a name or email{/ts}{literal}';
     };
   </script>
 {/literal}

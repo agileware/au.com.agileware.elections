@@ -53,6 +53,11 @@ class CRM_Elections_MailerTest extends api_v3_ElectionBaseTestCase {
     $this->assertCount(1, $mails);
     $this->assertStringContainsString('n01.mailer@example.org', $mails[0]['recipient_email']);
     $this->assertStringContainsString('nominated for President', $mails[0]['headers'] . $mails[0]['body']);
+    // The subject says what the person is asked to do, and the body names the time zone once and has one link.
+    $this->assertStringContainsString('Accept or decline your nomination for President', $mails[0]['headers']);
+    $this->assertStringNotContainsStringIgnoringCase('please', $mails[0]['headers'] . $mails[0]['body']);
+    $this->assertStringContainsString('Times are shown in ' . date_default_timezone_get(), $mails[0]['body']);
+    $this->assertStringNotContainsString('nominations/reject', $mails[0]['body']);
     $nomination = $fixture->nominations['President|N01'] ?? CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_election_nomination WHERE election_position_id = %1 AND member_nominee = %2', [1 => [$fixture->positions['President'], 'Integer'], 2 => [$fixture->id('N01'), 'Integer']]);
     $body = $mails[0]['body'];
     $this->assertStringContainsString('enid=' . $nomination, $body);

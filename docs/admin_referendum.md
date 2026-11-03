@@ -1,21 +1,21 @@
 # Referendum questions
 
-A position can be a **referendum question** instead of a seat people stand for: a yes or no question that voters answer on the same ballot as the positions. One election can hold both.
+A position can be a **question** (a referendum question) instead of a seat people stand for: a yes or no question that voters answer on the same ballot as the positions. One election can hold both.
 
 ## Adding a question
 
-**Add Position**, then set **Type** to *Referendum question*. The seats and write-in fields go away and these appear:
+Select **Add Position**, then set **Position type** to *Question*. The seats and write-in fields go away and these appear:
 
-- **Wording of Yes / No / Abstain**: what the voter sees, for example For and Against, or Approve and Reject. Yes and No always exist. Abstain only appears if you give it wording. An abstention counts towards the quorum and not towards the percentage.
+- **Wording for Yes**, **Wording for No** and **Wording for Abstain**: what the voter sees, for example For and Against, or Approve and Reject. Yes and No always exist. Abstain only appears if you give it wording. An abstention counts towards the quorum and not towards the percentage.
 - **Passes when**: the share of Yes out of Yes plus No needed to pass. *Simple majority* means more than half, so a tie fails. *Two thirds*, *three quarters* or another percentage mean at least that share.
-- **Quorum** (optional): the share of the people allowed to vote who must take part (abstentions count). If fewer take part the result is "no quorum, not decided". Leave it empty for no quorum.
-- **Resolution**: the full wording, shown above the question on the election page, the ballot and the results.
+- **Quorum (% of voters)** (optional): the share of the people allowed to vote who must take part (abstentions count). If fewer take part the result is "no quorum, not decided". Leave it empty for no quorum.
+- **Resolution text**: the full wording, shown above the question on the election page, the ballot and the results.
 
 The question and its wording are frozen once the election starts, like every position.
 
 ## On the ballot
 
-Each question is a set of radio buttons. A voter chooses one, or leaves the question unanswered, and can change their answer as long as changing a vote is allowed. The review step shows the answer before anything is saved. Voters are not asked to rank anything.
+Each question is a set of radio buttons. A voter chooses one, or leaves the question unanswered, and can change their answer as long as changing a vote is allowed. The **Review Your Vote** window shows the answer before anything is saved. Voters are not asked to rank anything.
 
 ## Results
 

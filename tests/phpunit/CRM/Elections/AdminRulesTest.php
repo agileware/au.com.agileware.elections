@@ -25,7 +25,7 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
   public function testAnElectionWithoutPositionsCannotBeActivated() {
     $election = $this->inactiveElection();
     $this->expectException(CRM_Core_Exception::class);
-    $this->expectExceptionMessage('At least one Position');
+    $this->expectExceptionMessage('Add at least one position');
     \Civi\Api4\Election::update(FALSE)->addWhere('id', '=', $election['id'])->addValue('is_visible', TRUE)->execute();
   }
 
@@ -38,13 +38,45 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
     $this->assertEquals(0, CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], 'is_visible'));
   }
 
+  public function testEditingAnActiveElectionKeepsItActiveAndKeepsItsCreator() {
+    $election = $this->inactiveElection();
+    $this->createElectionPosition($election);
+    \Civi\Api4\Election::update(FALSE)->addWhere('id', '=', $election['id'])->addValue('is_visible', TRUE)->execute();
+    $creator = $this->individualCreate();
+    CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET created_by = %1 WHERE id = %2', [1 => [$creator, 'Integer'], 2 => [$election['id'], 'Integer']]);
+
+    // What the Edit Election form adds to a save: nothing for an election that exists, so it is not switched off.
+    $this->assertSame([], CRM_Elections_Form_CreateElection::valuesForNewElection($election['id']));
+    $new = CRM_Elections_Form_CreateElection::valuesForNewElection(0);
+    $this->assertSame(0, $new['is_visible']);
+    $this->assertArrayHasKey('created_by', $new);
+
+    $params = ['id' => $election['id'], 'name' => 'Renamed ' . uniqid()];
+    foreach (['visibility_start_date', 'visibility_end_date', 'nomination_start_date', 'nomination_end_date', 'advertise_candidates_date', 'voting_start_date', 'voting_end_date', 'result_date'] as $field) {
+      $params[$field] = CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], $field);
+    }
+    // Someone else edits it.
+    $editor = $this->individualCreate();
+    CRM_Core_Session::singleton()->set('userID', $editor);
+    try {
+      $this->callAPISuccess('Election', 'create', $params);
+    }
+    finally {
+      CRM_Core_Session::singleton()->set('userID', NULL);
+    }
+
+    $this->assertEquals(1, CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], 'is_visible'));
+    $this->assertEquals($creator, CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], 'created_by'));
+    $this->assertEquals($params['name'], CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], 'name'));
+  }
+
   // ------------------------------------------------- active (locked) and stage
 
   public function testStageAndLockedFollowTheElectionsState() {
     $cases = [
-      [api_v3_ElectionBaseTestCase::$ELECTION_NOT_STARTED, 1, 'not_running', FALSE],
+      [api_v3_ElectionBaseTestCase::$ELECTION_NOT_STARTED, 1, 'upcoming', FALSE],
       [api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, 1, 'nominations', TRUE],
-      [api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, 0, 'not_running', FALSE],
+      [api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, 0, 'inactive', FALSE],
       [api_v3_ElectionBaseTestCase::$ELECTION_ADVERTISE_CANDIDATES_STARTED, 1, 'candidates', TRUE],
       [api_v3_ElectionBaseTestCase::$ELECTION_VOTING_IN_PROGRESS, 1, 'voting', TRUE],
     ];
@@ -84,7 +116,7 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
       $this->fail('Switching off an active election must be refused.');
     }
     catch (CRM_Core_Exception $e) {
-      $this->assertStringContainsString('Use Withdraw', $e->getMessage());
+      $this->assertStringContainsString('Use Deactivate', $e->getMessage());
     }
     $this->assertEquals(1, CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], 'is_visible'));
 
@@ -96,6 +128,17 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
       CRM_Elections_Helper_Guard::$withdrawing = FALSE;
     }
     $this->assertEquals(0, CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $election['id'], 'is_visible'));
+  }
+
+  public function testTheReasonAnElectionCannotBeEditedOrDeletedIsASentenceThatSaysWhatToDo() {
+    $election = $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $this->inactiveElection());
+    CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET is_visible = 1 WHERE id = %1', [1 => [$election['id'], 'Integer']]);
+    $loaded = findElectionById($election['id']);
+    foreach ([$loaded->canEdit(), $loaded->canDelete()] as $reason) {
+      $this->assertIsString($reason);
+      $this->assertStringContainsString('Deactivate the election', $reason);
+      $this->assertStringEndsWith('.', $reason);
+    }
   }
 
   // -------------------------------------------------------------- positions

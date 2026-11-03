@@ -14,7 +14,11 @@ class CRM_Elections_Page_ElectionSummary extends CRM_Elections_Page_Base {
       parent::run();
       return;
     }
-    $this->election = findElectionById($this->eId);
+    $this->election = findElectionForPage($this, $this->eId);
+    if (!$this->election) {
+      parent::run();
+      return;
+    }
 
     // User is not logged in, and the election does not allow checksum access
     if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && !filter_var($this->election->allow_checksum_access, FILTER_VALIDATE_BOOL) ) {
@@ -25,10 +29,23 @@ class CRM_Elections_Page_ElectionSummary extends CRM_Elections_Page_Base {
 
     $this->isElectionAdmin = isElectionAdmin();
 
+    // An election that people cannot see has no summary for them either, and the page does not say it exists.
+    if (!$this->isElectionAdmin && !$this->election->isVisible) {
+      throwAccessDeniedPage($this);
+      parent::run();
+      return;
+    }
+
     CRM_Utils_System::setTitle(E::ts('Election Summary for %1', [1 => $this->election->name]));
 
     if (!$this->election->isResultsOut) {
-      throwAccessDeniedException($this, E::ts('Election summary is not available yet.'));
+      $this->assignBackToElection($this->eId);
+      throwAccessDeniedException($this, E::ts('The results are not published yet. They will be published on %1.', [1 => CRM_Utils_Date::customFormat($this->election->result_date)]), [
+        'return_button_text' => E::ts('Back to the election'),
+        'return_button_action' => $this->getTemplateVars('backToElectionUrl'),
+        'title' => E::ts('Election Summary'),
+        'kind' => 'status',
+      ]);
       parent::run();
       return;
     }
@@ -75,6 +92,7 @@ class CRM_Elections_Page_ElectionSummary extends CRM_Elections_Page_Base {
     }
 
     CRM_Elections_Helper_ResultsDisplay::assignToPage($this, $this->election, $this->getTemplateVars('checksum_query')['query'] ?? sprintf('eid=%s', $this->eId), FALSE);
+    $this->assignBackToElection($this->eId);
 
     parent::run();
   }

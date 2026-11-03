@@ -23,33 +23,34 @@ New to the extension? Read chapters 1 and 2, then follow chapter 3 to set up you
 
 ### 3. Running an election (administrators)
 1. [Manage elections](admin_manage_elections.md): the list of elections and what you can do with each.
-2. [Create an election](admin_create_election.md): dates and settings, including the voting method, groups, emails and display options.
+2. [Add an election](admin_create_election.md): dates and settings, including the voting method, groups, emails, display and privacy options.
 3. Add the positions and questions: [add a position](admin_add_position.md), [edit a position](admin_edit_position.md), [reorder positions](admin_reorder_positions.md), [delete a position](admin_delete_position.md).
    - [Write-ins](admin_write_ins.md): let voters add a person to the ballot.
    - [Referendum questions](admin_referendum.md): yes or no questions with a threshold and quorum.
 4. [Activate the election](admin_activate_election.md) so people can see it.
 5. Make the [results page](admin_results_page.md) your own: a logo, header and footer text and a celebration.
-6. Follow it through with the [election overview](admin_election_overview.md) (stage, timeline, turnout, results and integrity) and manage the [candidates](admin_candidates.md).
+6. Follow it through with the [election overview](admin_election_overview.md) (stage, timeline, turnout, audit log and integrity) and manage the [candidates](admin_candidates.md).
 7. [Edit](admin_edit_election.md), [duplicate](admin_duplicate_election.md) or [delete](admin_delete_election.md) an election.
 
 ### 4. Taking part (voters and candidates)
 Follow the stages in order:
 1. [Nominate someone](user_nominate.md) and [second a nomination](user_second_nomination.md).
-2. [Accept a nomination](user_accept_nomination.md) (including when you are written in) or [withdraw it](user_withdraw_nomination.md).
+2. [Accept a nomination](user_accept_nomination.md) (including when you are written in), or [decline or withdraw it](user_withdraw_nomination.md).
 3. [Vote](user_vote.md): ranked choice, most votes, write-ins and questions.
 4. [View the results](user_view_results.md).
 
 ### 5. Reference
 - [Emails and scheduled jobs](reference_emails_and_jobs.md): the message templates and the three jobs.
 - [Security and audit](reference_security_and_audit.md): the guarantees, the audit log and the integrity check.
+- [Reporting a security problem](https://github.com/agileware/au.com.agileware.elections/blob/master/SECURITY.md): the security policy and supported versions.
 
 ## An election at a glance
 
-An election moves through fixed stages, each opened by a date: Nominations, Advertise Candidates, Voting, Results. Each stage is described, with diagrams for every kind of election, in [Workflows](workflows.md).
+An election moves through fixed stages, each opened by a date: Nominations open, Candidates advertised, Voting open, Results published. Each stage is described, with diagrams for every kind of election, in [Workflows](workflows.md).
 
 ```mermaid
 flowchart LR
-    A["Created<br/>inactive"] --> B["Activated<br/>visible"] --> C["Nominations"] --> D["Advertise<br/>Candidates"] --> E["Voting"] --> F["Results"] --> G["Hidden"]
+    A["Added<br/>Inactive"] --> B["Activated<br/>Not started"] --> C["Nominations<br/>open"] --> D["Candidates<br/>advertised"] --> E["Voting<br/>open"] --> F["Results<br/>published"] --> G["Hidden"]
 ```
 
-An election which is not activated, or which has no positions, is never shown to end users, whatever its dates. The election's dates and settings are explained in [Create an election](admin_create_election.md).
+An election which is not activated, or which has no positions, is never shown to end users, whatever its dates. The election's dates and settings are explained in [Add an election](admin_create_election.md).

@@ -54,7 +54,7 @@ class CRM_Elections_SecurityTest extends api_v3_ElectionBaseTestCase {
     $this->refused(function () use ($nomination, $fixture) {
       // Even a member who may not vote cannot be given a ballot.
       civicrm_api3('ElectionVote', 'addvotes', ['election_id' => $fixture->electionId, 'member_id' => $fixture->id('OUT'), 'votes' => [['election_nomination_id' => $nomination, 'rank' => 1]]]);
-    }, 'not allowed to vote');
+    }, 'cannot vote in this election');
     $this->assertSame(0, (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote'));
     CRM_Elections_Helper_Process::vote($fixture->electionId, $fixture->id('V01'), [$nomination => 1]);
     $this->assertSame(1, (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote'));
@@ -141,7 +141,7 @@ class CRM_Elections_SecurityTest extends api_v3_ElectionBaseTestCase {
     // Someone who is not allowed to take part cannot nominate, or be nominated.
     $this->refused(function () use ($fixture, $positionId) {
       CRM_Elections_Helper_Process::nominate($fixture->electionId, $positionId, $fixture->id('N01'), $fixture->id('OUT'));
-    }, 'not allowed to nominate');
+    }, 'cannot nominate in this election');
     $this->refused(function () use ($fixture, $positionId) {
       CRM_Elections_Helper_Process::nominate($fixture->electionId, $positionId, $fixture->id('OUT'), $fixture->id('V01'));
     }, 'can be nominated');
@@ -165,13 +165,13 @@ class CRM_Elections_SecurityTest extends api_v3_ElectionBaseTestCase {
     $someoneElse = $fixture->id('V01');
     $this->refused(function () use ($nomination, $someoneElse) {
       CRM_Elections_Helper_Process::accept($nomination->id, $someoneElse, 'I accept for them');
-    }, 'not authorized', 'accepting for someone else');
+    }, 'do not have access', 'accepting for someone else');
     $this->refused(function () use ($nomination, $someoneElse) {
       CRM_Elections_Helper_Process::withdraw($nomination->id, $someoneElse, 'I withdraw them');
-    }, 'not authorized', 'withdrawing someone else');
+    }, 'do not have access', 'withdrawing someone else');
     $this->refused(function () use ($nomination) {
       CRM_Elections_Helper_Process::accept($nomination->id, NULL);
-    }, 'not authorized', 'no one');
+    }, 'do not have access', 'no one');
   }
 
   // ------------------------------------------------------------------ results
@@ -267,6 +267,29 @@ class CRM_Elections_SecurityTest extends api_v3_ElectionBaseTestCase {
     }
     // What does not affect who votes or how votes are counted can still be changed.
     \Civi\Api4\Election::update(FALSE)->addWhere('id', '=', $fixture->electionId)->addValue('show_photos', FALSE)->execute();
+  }
+
+  public function testAnInactiveElectionThatHasBallotsKeepsItsRulesLockedAndNothingElse() {
+    // Deactivating a running election (as an administrator may) does not unlock what decides who votes and how votes
+    // count: ballots exist. The name and the display options can still be corrected.
+    $fixture = $this->fixture(CRM_Elections_Test_CouncilFixture::STAGE_VOTING);
+    CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET is_visible = 0 WHERE id = %1', [1 => [$fixture->electionId, 'Integer']]);
+    $current = civicrm_api3('Election', 'getsingle', ['id' => $fixture->electionId]);
+    $this->assertEmpty($current['is_visible']);
+    $this->assertSame(TRUE, (new CRM_Elections_BAO_Election())->findById($fixture->electionId)->canEdit(), 'The form opens for an inactive election');
+
+    $changes = [
+      'anonymize_votes' => empty($current['anonymize_votes']) ? 1 : 0,
+      'required_nominations' => (int) $current['required_nominations'] + 5,
+      'allowed_groups' => '999999',
+    ];
+    foreach ($changes as $field => $value) {
+      $this->refused(function () use ($fixture, $field, $value) {
+        \Civi\Api4\Election::update(FALSE)->addWhere('id', '=', $fixture->electionId)->addValue($field, $value)->execute();
+      }, 'cannot be changed once people have voted', $field);
+    }
+    \Civi\Api4\Election::update(FALSE)->addWhere('id', '=', $fixture->electionId)->addValue('name', 'Corrected name')->addValue('show_photos', FALSE)->execute();
+    $this->assertSame('Corrected name', CRM_Core_DAO::getFieldValue('CRM_Elections_DAO_Election', $fixture->electionId, 'name'));
   }
 
   public function testAContactInARunningElectionCannotBeDeleted() {

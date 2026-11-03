@@ -39,14 +39,14 @@ async function answer(page: import('@playwright/test').Page, persona: string, ch
   }
   // A ballot needs something on it: the uncontested Secretary has one candidate.
   await page.locator('input[name^="candidate_"]').first().evaluate((el) => { (el as HTMLInputElement).value = '1'; });
-  await page.getByRole('button', { name: 'Vote', exact: true }).click();
-  const review = page.getByRole('dialog', { name: 'Check your vote' });
+  await page.getByRole('button', { name: 'Review Your Vote', exact: true }).click();
+  const review = page.getByRole('dialog', { name: 'Review Your Vote' });
   await expect(review).toBeVisible();
   if (choice) {
     await expect(review).toContainText(choice);
   }
-  await review.getByRole('button', { name: 'Confirm my vote' }).click();
-  await expect(page.getByText(/You have successfully voted/)).toBeVisible();
+  await review.getByRole('button', { name: 'Submit Vote', exact: true }).click();
+  await expect(page.getByText('Vote recorded.')).toBeVisible();
 }
 
 test('the question is on the ballot with its wording and no rank boxes', async ({ personaGoto }) => {
@@ -61,7 +61,7 @@ test('the question is on the ballot with its wording and no rank boxes', async (
   await expect(question.getByRole('radio', { name: 'Abstain' })).toBeVisible();
   await expect(question.locator('input[name^="candidate_"]')).toHaveCount(0);
   // The ballot also has positions, so the introduction still explains ranking as well as the questions.
-  await expect(page.getByText('Votes are numbered from 1 onwards')).toBeVisible();
+  await expect(page.getByText('Rank 1 is your first choice.')).toBeVisible();
   await expect(page.getByText('Questions: choose one answer for each question')).toBeVisible();
   const result = await new AxeBuilder({ page }).include('.crm-container').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   expect(result.violations.filter((v) => ['serious', 'critical'].includes(v.impact || ''))).toEqual([]);

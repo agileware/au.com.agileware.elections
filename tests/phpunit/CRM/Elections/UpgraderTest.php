@@ -33,6 +33,7 @@ class CRM_Elections_UpgraderTest extends \PHPUnit\Framework\TestCase implements 
     $this->upgrader()->upgrade_20090();
     $this->upgrader()->upgrade_20100();
     $this->upgrader()->upgrade_20110();
+    $this->upgrader()->upgrade_20120();
     parent::tearDown();
   }
 
@@ -249,6 +250,29 @@ class CRM_Elections_UpgraderTest extends \PHPUnit\Framework\TestCase implements 
     finally {
       CRM_Core_DAO::executeQuery("UPDATE civicrm_msg_template SET msg_title = 'Election - Remind written-in person' WHERE workflow_name = 'elections_write_in_reminder'");
       $this->upgrader()->upgrade_20100();
+    }
+  }
+
+  public function testUpgrade20120ReplacesTheEmailWordingOnlyWhereTheSiteDidNotEditIt() {
+    CRM_Core_ManagedEntities::singleton(TRUE)->reconcile();
+    $old = 'You have been nominated for {$positionName} in {$electionName}';
+    // An older site: the nominee email still has the 2.0.0 subject in both copies; the reminder was edited by the site.
+    CRM_Core_DAO::executeQuery("UPDATE civicrm_msg_template SET msg_subject = %1 WHERE workflow_name = 'elections_nominee_invited'", [1 => [$old, 'String']]);
+    CRM_Core_DAO::executeQuery("UPDATE civicrm_msg_template SET msg_subject = 'Reminder from our council' WHERE workflow_name = 'elections_write_in_reminder' AND is_reserved = 0");
+    CRM_Core_DAO::executeQuery("UPDATE civicrm_msg_template SET msg_subject = 'older reminder subject' WHERE workflow_name = 'elections_write_in_reminder' AND is_reserved = 1");
+    try {
+      $this->assertTrue($this->upgrader()->upgrade_20120());
+      $subject = fn($workflow, $reserved) => CRM_Core_DAO::singleValueQuery('SELECT msg_subject FROM civicrm_msg_template WHERE workflow_name = %1 AND is_reserved = %2', [1 => [$workflow, 'String'], 2 => [$reserved, 'Integer']]);
+      $this->assertStringContainsString('Accept or decline your nomination', $subject('elections_nominee_invited', 0));
+      $this->assertStringContainsString('Accept or decline your nomination', $subject('elections_nominee_invited', 1));
+      $this->assertSame('Reminder from our council', $subject('elections_write_in_reminder', 0), 'A template the site edited is left as it is');
+      $this->assertStringContainsString('Reminder: accept or decline', $subject('elections_write_in_reminder', 1), 'The reserved original is always refreshed');
+      $this->assertTrue($this->upgrader()->upgrade_20120(), 'It can run again');
+    }
+    finally {
+      // Put the editable copy back as the extension ships it (the reserved original is the same text).
+      CRM_Core_DAO::executeQuery("UPDATE civicrm_msg_template d INNER JOIN civicrm_msg_template r ON r.workflow_name = d.workflow_name AND r.is_reserved = 1 SET d.msg_subject = r.msg_subject, d.msg_text = r.msg_text, d.msg_html = r.msg_html WHERE d.workflow_name = 'elections_write_in_reminder' AND d.is_reserved = 0");
+      $this->upgrader()->upgrade_20120();
     }
   }
 

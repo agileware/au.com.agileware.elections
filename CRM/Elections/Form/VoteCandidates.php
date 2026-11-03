@@ -24,6 +24,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       return;
     }
     $this->election = findElectionById($this->eId);
+    CRM_Elections_Helper_Utils::assignBackToElection($this, $this->eId, $this->cid, $this->cs);
     $this->method = CRM_Elections_VotingMethod::normalise($this->election->voting_method);
 
     // Election is not visible
@@ -44,10 +45,17 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       return;
     }
 
-    // Already voted
-    if ( !isMemberAllowedToReVote( $this->eId ) && hasLoggedInUserAlreadyVoted( $this->eId ) ) {
-      throwAccessDeniedException( $this, E::ts('You have already voted in this election.') );
+    // Already voted, and the election does not let people change their vote
+    $hasVoted = hasLoggedInUserAlreadyVoted($this->eId);
+    if ( !isMemberAllowedToReVote( $this->eId ) && $hasVoted ) {
+      throwAccessDeniedException($this, E::ts('You have already voted in this election, and it does not let people change their vote.'), [
+        'return_button_text' => E::ts('Back to the election'),
+        'return_button_action' => CRM_Elections_Helper_Utils::backToElectionUrl($this->eId, $this->cid, $this->cs),
+      ]);
+      return;
     }
+    // Only a voter who may change an earlier vote is told that this one replaces it.
+    $this->assign('replacesVote', $hasVoted);
 
     // Check if there are positions or candidates
     $this->assign('election', $this->election); // Assign the election from class to the template (QuickForms)
@@ -56,7 +64,11 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     }
 
     if ( $this->election->isVotingEnded ) {
-      throwAccessDeniedException($this, E::ts('Voting is closed on %1', [1 => CRM_Utils_Date::customFormat($this->election->voting_end_date)]));
+      throwAccessDeniedException($this, E::ts('Voting closed on %1.', [1 => CRM_Utils_Date::customFormat($this->election->voting_end_date)]), [
+        'errorKind' => 'status',
+        'return_button_text' => E::ts('Back to the election'),
+        'return_button_action' => CRM_Elections_Helper_Utils::backToElectionUrl($this->eId, $this->cid, $this->cs),
+      ]);
       return;
     }
 
@@ -79,12 +91,14 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     $this->addButtons([
       [
         'type' => 'submit',
-        'name' => E::ts('Vote'),
+        // Without JavaScript the button sends the vote straight away, so it says so; with JavaScript the ballot
+        // changes it to Review Your Vote (js/election-ballot.js) and the vote is sent from the review window.
+        'name' => E::ts('Submit Vote'),
         'isDefault' => TRUE,
       ],
     ]);
 
-    CRM_Utils_System::setTitle(E::ts('You are Voting for %1', [1 => $this->election->name]));
+    CRM_Utils_System::setTitle(E::ts('Ballot for %1', [1 => $this->election->name]));
 
     Civi::resources()
       ->addVars('electionsBallot', [
@@ -97,17 +111,25 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
         'duplicate' => E::ts('Rank %1 is given to more than one candidate.'),
         'needFirst' => E::ts('Give your first choice the rank 1.'),
         'counted' => E::ts('%1 of %2 candidates ranked.'),
-        'reviewTitle' => E::ts('Check your vote'),
-        'reviewIntro' => E::ts('This is how your vote will be recorded. Nothing is saved until you confirm.'),
+        'review' => E::ts('Review Your Vote'),
+        'reviewTitle' => E::ts('Review Your Vote'),
+        'reviewIntro' => E::ts('This is how your vote will be recorded. Nothing is saved until you select Submit Vote.'),
         'positionTitle' => E::ts('Vote for %1'),
-        'noPreference' => E::ts('No preference given for: %1.'),
-        'rank' => E::ts('rank %1'),
-        'back' => E::ts('Go back and change'),
-        'confirm' => E::ts('Confirm my vote'),
+        'noRank' => E::ts('You have not ranked anyone for %1.'),
+        'noChoice' => E::ts('You have not chosen anyone for %1.'),
+        'noAnswer' => E::ts('You have not answered %1.'),
+        'rankedRow' => E::ts('%1, rank %2'),
+        'back' => E::ts('Go Back and Change'),
+        'confirm' => E::ts('Submit Vote'),
       ])
       ->addScriptFile(E::LONG_NAME, 'js/election-ballot.js', 100, 'page-footer');
 
     parent::buildQuickForm();
+  }
+
+  public function setDefaultValues() {
+    // A ballot that was refused after it was sent comes back as the person filled it in.
+    return CRM_Elections_Helper_Utils::recallInput('ballot');
   }
 
   private function throwExceptionIfNoCandidates() {
@@ -121,7 +143,11 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     }
 
     if (!$hasCandidatesInOnePosition) {
-      throwAccessDeniedException($this, E::ts('Candidates are not available in election for voting.'));
+      throwAccessDeniedException($this, E::ts('There are no candidates to vote for yet.'), [
+        'errorKind' => 'status',
+        'return_button_text' => E::ts('Back to the election'),
+        'return_button_action' => CRM_Elections_Helper_Utils::backToElectionUrl($this->eId, $this->cid, $this->cs),
+      ]);
       return TRUE;
     }
     return FALSE;
@@ -231,7 +257,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
         $this->addElement('checkbox', $element['key'], htmlspecialchars((string) $element['name'], ENT_QUOTES, 'UTF-8'));
         continue;
       }
-      $this->add('select2', $element['key'], htmlspecialchars((string) $element['name'], ENT_QUOTES, 'UTF-8'), $this->getVoteSelectionByPosition($element['position_id']), FALSE, ['placeholder' => E::ts('- Rank -')]);
+      $this->add('select2', $element['key'], htmlspecialchars((string) $element['name'], ENT_QUOTES, 'UTF-8'), $this->getVoteSelectionByPosition($element['position_id']), FALSE, ['placeholder' => E::ts('Select a rank')]);
     }
   }
 
@@ -245,9 +271,9 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       $rows = [];
       for ($n = 1; $n <= $places; $n++) {
         $row = ['person' => "writein_{$positionId}_{$n}", 'rank' => "writeinrank_{$positionId}_{$n}", 'number' => $n];
-        $this->addEntityRef($row['person'], E::ts('Write-in %1', [1 => $n]), [
+        $this->addEntityRef($row['person'], $places > 1 ? E::ts('Write someone in (place %1)', [1 => $n]) : E::ts('Write someone in'), [
           'entity' => 'ElectionNominee',
-          'placeholder' => E::ts('- Type at least 3 letters of a name -'),
+          'placeholder' => E::ts('Type at least 3 letters of a name'),
           'api' => ['election_id' => $this->election->id, 'write_in' => 1],
         ], FALSE);
         if ($this->method !== CRM_Elections_VotingMethod::PLURALITY) {
@@ -255,7 +281,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
           for ($i = 1; $i <= count($position['candidates']) + $places; $i++) {
             $options[] = ['text' => $i, 'id' => $i];
           }
-          $this->add('select2', $row['rank'], E::ts('Rank of write-in %1', [1 => $n]), $options, FALSE, ['placeholder' => E::ts('- Rank -')]);
+          $this->add('select2', $row['rank'], $places > 1 ? E::ts('Rank for place %1', [1 => $n]) : E::ts('Rank'), $options, FALSE, ['placeholder' => E::ts('Select a rank')]);
         }
         $rows[] = $row;
       }
@@ -292,7 +318,11 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     ]);
 
     if ($this->electionPositions['count'] == 0) {
-      throwAccessDeniedException($this, E::ts('Positions are not added in election for voting.'));
+      throwAccessDeniedException($this, E::ts('There are no positions to vote on yet.'), [
+        'errorKind' => 'status',
+        'return_button_text' => E::ts('Back to the election'),
+        'return_button_action' => CRM_Elections_Helper_Utils::backToElectionUrl($this->eId, $this->cid, $this->cs),
+      ]);
       return FALSE;
     }
 
@@ -310,7 +340,11 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     ]);
 
     if ($this->electionCandidates == 0) {
-      throwAccessDeniedException($this, E::ts('Nominations are not added in election for voting.'));
+      throwAccessDeniedException($this, E::ts('There are no candidates to vote for yet.'), [
+        'errorKind' => 'status',
+        'return_button_text' => E::ts('Back to the election'),
+        'return_button_action' => CRM_Elections_Helper_Utils::backToElectionUrl($this->eId, $this->cid, $this->cs),
+      ]);
       return FALSE;
     }
 
@@ -379,7 +413,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
         }
         $value = $values[$key];
         if ($value != '' && !CRM_Utils_Rule::positiveInteger($value)) {
-          $this->_errors[$key] = E::ts('Rank must be a valid positive integer.');
+          $this->_errors[$key] = E::ts('Choose a rank from the list.');
         }
 
         // Similar ranks to different candidates are not allowed.
@@ -387,7 +421,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
           $voteRanksByPosition[$element['position_id']][] = $value;
         }
         elseif ($value != '') {
-          $this->_errors[$key] = E::ts('Rank must be different for each candidate.');
+          $this->_errors[$key] = E::ts('Each candidate needs a different rank.');
         }
 
       }
@@ -397,7 +431,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       $rank = $writeIn['rank'];
       if (CRM_Utils_Rule::positiveInteger($rank)) {
         if (in_array($rank, $voteRanksByPosition[$writeIn['position_id']] ?? [])) {
-          $this->_errors[$writeIn['row']['rank']] = E::ts('Rank must be different for each candidate.');
+          $this->_errors[$writeIn['row']['rank']] = E::ts('Each candidate needs a different rank.');
         }
         $voteRanksByPosition[$writeIn['position_id']][] = $rank;
       }
@@ -407,7 +441,7 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       if (array_filter($ranksByPosition)) {
         $ranks = array_values($ranksByPosition);
         if (!in_array(1, $ranks)) {
-          $this->_errors['_qf_default'] = E::ts('For each position, you may or may not assign a number to candidates. But if you are assigning numbers for a position, you must assign number 1 to at least one candidate.');
+          $this->_errors['_qf_default'] = E::ts('For %1, give your first choice the rank 1.', [1 => $this->electionPositions[$positionId]['name']]);
         }
       }
     }
@@ -465,6 +499,8 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
     catch (CRM_Core_Exception $e) {
       // Something the form could not know (for example a person who has declined since the page opened).
       CRM_Core_Session::setStatus($e->getMessage(), E::ts('Your vote was not saved'), 'error');
+      // The ballot comes back with the choices the person made, so they can fix it and send it again.
+      CRM_Elections_Helper_Utils::rememberInput('ballot', array_filter($values, fn($key) => preg_match('/^(candidate|writein|writeinrank|option)_/', (string) $key), ARRAY_FILTER_USE_KEY));
       $back = Civi::url('current://civicrm/elections/vote')->addQuery(['eid' => $this->eId]);
       if ($this->cid && $this->cs) {
         $back->addQuery(['cid' => $this->cid, 'cs' => $this->cs]);
@@ -476,19 +512,8 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
       'member_cid' => $member_cid,
     ]);
 
-    if ( $this->cid && $this->cs ) {
-      // User is validated by cs and cid, not logged in.
-      // Indicate the voting was done as the validated user.
-      $contact = \Civi\Api4\Contact::get(FALSE)
-                                    ->addSelect('display_name')
-                                    ->addWhere('id', '=', $this->cid)
-                                    ->execute()
-                                    ->first();
-
-      CRM_Core_Session::setStatus(E::ts('You have successfully voted as %1 in the election.', [1 => $contact['display_name']]), '', 'success');
-    } else {
-      CRM_Core_Session::setStatus(E::ts('You have successfully voted in the election.'), '', 'success');
-    }
+    // The election page then says when, and who the person is acting as.
+    CRM_Core_Session::setStatus(E::ts('Vote recorded.'), '', 'success');
 
     parent::postProcess();
 

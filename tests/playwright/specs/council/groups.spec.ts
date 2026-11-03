@@ -29,19 +29,21 @@ test.afterAll(() => {
   civiEval(`foreach (civicrm_api3('Group', 'get', ['name' => ['LIKE' => 'pw_%'], 'options' => ['limit' => 0]])['values'] as $g) { civicrm_api3('Group', 'delete', ['id' => $g['id']]); }`);
 });
 
-test('someone who can only vote is told they cannot nominate', async ({ personaGoto }) => {
+test('someone who can only vote is told they cannot nominate', async ({ personaGoto, allowedProblems }) => {
+  // A refused page says why and is sent as HTTP 403.
+  allowedProblems.push(/403/);
   const page = await personaGoto('V03', 'civicrm/elections/view');
   await expect(page.getByText('You are not able to nominate in this election.')).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Submit Nomination' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Nominate', exact: true })).toHaveCount(0);
   const form = await personaGoto('V03', 'civicrm/elections/nominations/create');
-  await expect(form.getByText('You may only see this page if you can take part in this election.')).toBeVisible();
+  await expect(form.getByText('You are not in a group that can take part in this election.')).toBeVisible();
 });
 
 test('a member of the nomination group nominates a person who may stand', async ({ persona }) => {
   const data = council();
   const page = await persona('V01');
   await page.goto(personaUrl('V01', 'civicrm/elections/view'));
-  await expect(page.getByRole('link', { name: 'Submit Nomination' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Nominate', exact: true })).toBeVisible();
   await nominate(page, 'V01', 'President', 'N01', data.links.N01.cid, 'N01 may stand');
   await page.context().close();
   const rows = civiApi4<any[]>('ElectionNomination.get', { select: ['id'], where: [['election_position_id.election_id', '=', data.election_id]], limit: 0 });
@@ -56,7 +58,7 @@ test('a person outside the candidate group cannot be nominated, and nothing is s
   await page.locator('#s2id_position').click();
   await page.locator('.select2-result-label', { hasText: /^President$/ }).click();
   await page.evaluate((id) => { (document.querySelector('#contact') as HTMLInputElement).value = String(id); }, data.links.N05.cid);
-  await page.getByLabel('Why do you want to nominate this person for this position?').fill('N05 is outside the candidate group');
+  await page.getByLabel('Reason for the nomination').fill('N05 is outside the candidate group');
   await page.getByRole('button', { name: 'Nominate' }).click();
   await expect(page.getByText('Nomination submitted.')).toHaveCount(0);
   await page.context().close();
@@ -70,7 +72,7 @@ test('the overview shows who is in each role', async ({ browser }) => {
     return;
   }
   await admin.page.goto(civiAdminUrl('civicrm/elections/overview', { reset: 1, eid: council().election_id }));
-  await expect(admin.page.locator('.election-overview-roles')).toContainText('May nominate and second: 2');
-  await expect(admin.page.locator('.election-overview-roles')).toContainText('May stand as candidates: 2');
+  await expect(admin.page.locator('.election-overview-roles')).toContainText('2 people may nominate and second');
+  await expect(admin.page.locator('.election-overview-roles')).toContainText('2 people may stand as candidates');
   await admin.close();
 });

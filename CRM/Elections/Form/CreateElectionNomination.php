@@ -25,6 +25,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
       return;
     }
     $this->election = findElectionById($this->eId);
+    CRM_Elections_Helper_Utils::assignBackToElection($this, $this->eId, $this->cid, $this->cs);
 
     // User is not logged in, and the election does not allow checksum access
     if ( empty( \CRM_Core_Session::getLoggedInContactID() ) && !filter_var($this->election->allow_checksum_access, FILTER_VALIDATE_BOOL) ) {
@@ -58,7 +59,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     $this->assign('election', $this->election);
     $this->assign('isElectionAdmin', $this->isElectionAdmin);
 
-    CRM_Utils_System::setTitle(E::ts('Submit Nomination for %1', [1 => $this->election->name]));
+    CRM_Utils_System::setTitle(E::ts('Nominate in %1', [1 => $this->election->name]));
 
     if ( $this->cid && $this->cs ) {
       // Expose to Smarty
@@ -100,7 +101,8 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
       $this->_defaults['position'] = $this->secondElectionNomination['election_position_id'];
       $this->_defaults['contact'] = $this->secondElectionNomination['member_nominee'];
     }
-    return $this->_defaults;
+    // A nomination that was refused comes back with what the person had chosen and written.
+    return CRM_Elections_Helper_Utils::recallInput('nominate') + $this->_defaults;
   }
 
   /**
@@ -127,14 +129,17 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
     }
 
     if (empty($positions)) {
-      throwAccessDeniedException($this, E::ts('There are no positions available for selected election.'));
+      throwAccessDeniedException($this, E::ts('There are no positions to nominate for yet. Come back when the organisers have added them.'), [
+        'return_button_text' => E::ts('Back to the election'),
+        'return_button_action' => CRM_Elections_Helper_Utils::backToElectionUrl($this->eId, $this->cid, $this->cs),
+      ]);
       return;
     }
 
-    $this->add('select2', 'position', E::ts('Nominated Position'), $positions, TRUE, ['placeholder' => E::ts('- Select Position -')]);
-    $this->addEntityRef('contact', 'Nominee', [
+    $this->add('select2', 'position', E::ts('Position'), $positions, TRUE, ['placeholder' => E::ts('Select a position')]);
+    $this->addEntityRef('contact', E::ts('Nominee'), [
       'entity' => 'ElectionNominee',
-      'placeholder' => E::ts('- Select Nominee -'),
+      'placeholder' => E::ts('Select a person'),
       'api' => [
         'election_id' => $this->election->id,
       ],
@@ -144,7 +149,7 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
       $this->addElement('hidden', 'cid', $this->cid);
       $this->addElement('hidden', 'cs', $this->cs);
     }
-    $this->add('textarea', 'reason', E::ts('Why do you want to nominate this person for this position?'), ['cols' => 55, 'rows' => 6], FALSE);
+    $this->add('textarea', 'reason', E::ts('Reason for the nomination'), ['cols' => 55, 'rows' => 6], FALSE);
 
     $this->addButtons([
       [
@@ -184,7 +189,17 @@ class CRM_Elections_Form_CreateElectionNomination extends CRM_Elections_Form_Bas
       CRM_Core_Session::setStatus(E::ts('Nomination submitted.'), '', 'success');
     }
     catch (CRM_Core_Exception $e) {
-      CRM_Core_Session::setStatus($e->getMessage(), '', 'error');
+      // The person stays on the form, with what they chose and wrote still in it.
+      CRM_Core_Session::setStatus($e->getMessage(), E::ts('Nomination not submitted'), 'error');
+      CRM_Elections_Helper_Utils::rememberInput('nominate', array_intersect_key($values, array_flip(['position', 'contact', 'reason'])));
+      $formUrl = Civi::url('current://civicrm/elections/nominations/create')->addQuery(['eid' => $this->eId]);
+      if ($this->enId) {
+        $formUrl->addQuery(['enid' => $this->enId]);
+      }
+      if ($this->cid && $this->cs) {
+        $formUrl->addQuery(['cid' => $this->cid, 'cs' => $this->cs]);
+      }
+      CRM_Utils_System::redirect($formUrl);
     }
 
     parent::postProcess();

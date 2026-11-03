@@ -29,17 +29,17 @@ class CRM_Elections_Helper_Referendum {
       $positionId = $choice['position_id'] ?? NULL;
       $optionId = $choice['option_id'] ?? NULL;
       if (!CRM_Utils_Rule::positiveInteger($positionId) || !CRM_Utils_Rule::positiveInteger($optionId)) {
-        return ['error' => 'A choice needs a question and an option.', 'items' => []];
+        return ['error' => E::ts('Each answer needs a question and a choice.'), 'items' => []];
       }
       $isQuestion = CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_position WHERE id = %1 AND election_id = %2 AND position_type = "referendum"', [1 => [(int) $positionId, 'Integer'], 2 => [(int) $election->id, 'Integer']]);
       if (!$isQuestion) {
-        return ['error' => 'That is not a question of this election.', 'items' => []];
+        return ['error' => E::ts('That is not a question in this election.'), 'items' => []];
       }
       if (!CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_option WHERE id = %1 AND election_position_id = %2', [1 => [(int) $optionId, 'Integer'], 2 => [(int) $positionId, 'Integer']])) {
-        return ['error' => 'That option does not belong to the question.', 'items' => []];
+        return ['error' => E::ts('That answer does not belong to the question.'), 'items' => []];
       }
       if (isset($seen[$positionId])) {
-        return ['error' => 'Only one choice can be made on a question.', 'items' => []];
+        return ['error' => E::ts('Only one choice can be made on a question.'), 'items' => []];
       }
       $seen[$positionId] = TRUE;
       $items[] = ['position_id' => (int) $positionId, 'option_id' => (int) $optionId];

@@ -1,9 +1,11 @@
 Dear {$nomineeName},
 
-This is a reminder that you have been written in for {$positionName} in the election "{$electionName}" and have not answered yet.
+{$organisationName} is writing to you about the election "{$electionName}".
 
-Voting closes on {$votingCloses}. Votes for you only count if you accept before then.
+This is a reminder that a voter has written you in for {$positionName} and you have not answered yet.
 
-Accept or decline here: {$acceptUrl}
+Accept or decline your nomination before voting closes on {$votingCloses}. Votes for you only count if you accept before then. If you do not answer, the votes written in for you are dropped.
 
-To decline: {$declineUrl}
+Accept or decline your nomination: {$acceptUrl}
+
+Times are shown in {$timeZone}.

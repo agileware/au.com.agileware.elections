@@ -94,7 +94,7 @@ function civicrm_api3_election_vote_delete($params) {
 function civicrm_api3_election_vote_deletevotes($params) {
   $electionId = $params['election_id'];
   if (is_array($params['member_id'])) {
-    return civicrm_api3_create_error('Multiple members are not yet supported.');
+    return civicrm_api3_create_error(E::ts('Only one voter can be given at a time.'));
   }
   $previousVotes = civicrm_api3('ElectionVote', 'get', [
     'election_nomination_id.election_position_id.election_id.id' => $electionId,
@@ -126,43 +126,44 @@ function civicrm_api3_election_vote_addvotes($params) {
 
   $election = findElectionById($electionId, FALSE);
   if ($election->is_deleted || !$election->is_visible) {
-    return civicrm_api3_create_error('Votes cannot be added for deleted election.');
+    return civicrm_api3_create_error(E::ts('This election is not open for voting.'));
   }
 
   if (!$election->isVotingStarted) {
-    return civicrm_api3_create_error('Votes cannot be added before voting period is started.');
+    return civicrm_api3_create_error(E::ts('Voting has not opened yet. It opens on %1.', [1 => CRM_Utils_Date::customFormat($election->voting_start_date)]));
   }
 
   if ($election->isVotingEnded) {
-    return civicrm_api3_create_error('Votes cannot be added after voting period is ended.');
+    return civicrm_api3_create_error(E::ts('Voting closed on %1, so votes can no longer be added or changed.', [1 => CRM_Utils_Date::customFormat($election->voting_end_date)]));
   }
 
   if (is_array($params['member_id'])) {
-    return civicrm_api3_create_error('Multiple members are not yet supported.');
+    return civicrm_api3_create_error(E::ts('Only one voter can be given at a time.'));
   }
 
   if (!isLoggedInMemberAllowedToVote($election->id, $params['member_id'])) {
-    return civicrm_api3_create_error('Member is not allowed to vote in given election.');
+    return civicrm_api3_create_error(E::ts('You cannot vote in this election. Only people in its voting groups can vote. Ask the organisers if you think you should be able to.'));
   }
 
   // One ballot at a time for each member: two requests sent together (a double click, a second tab, a
   // script) must not both find "has not voted yet" and both write a ballot.
   $lock = Civi::lockManager()->acquire('data.elections.vote.' . (int) $election->id . '.' . (int) $params['member_id'], 10);
   if (!$lock->isAcquired()) {
-    return civicrm_api3_create_error('Your ballot is already being saved. Please wait a moment and try again.');
+    return civicrm_api3_create_error(E::ts('Your vote is being saved. Wait a moment, then check the election page to see that it was recorded.'));
   }
   try {
     // Check everything before touching an earlier ballot, so a rejected ballot never costs someone their vote.
     $hasVoted = hasLoggedInUserAlreadyVoted($election->id, $params['member_id']);
     if ($hasVoted && !$election->allow_revote) {
-      return civicrm_api3_create_error('Member has already voted in given election.');
+      return civicrm_api3_create_error(E::ts('You have already voted in this election, and it does not let people change their vote.'));
     }
 
     $votes = $params['votes'] ?? [];
     $writeIns = $params['write_ins'] ?? [];
     $optionVotes = $params['option_votes'] ?? [];
     if (!is_array($writeIns) || !is_array($optionVotes)) {
-      return civicrm_api3_create_error('Write-ins and choices must be lists.');
+      Civi::log()->warning('Elections: a ballot for election {election} was refused because its write-ins or choices were not lists.', ['election' => (int) $election->id]);
+      return civicrm_api3_create_error(E::ts('Your ballot could not be read. Reload the page and fill it in again.'));
     }
     $choices = CRM_Elections_Helper_Referendum::resolve($election, $optionVotes);
     if ($choices['error']) {
@@ -225,7 +226,7 @@ function civicrm_api3_election_vote_addvotes($params) {
   }
 
   return civicrm_api3_create_success([
-    'message' => (count($votes) + count($choices['items'])) . ' has been added successfully.',
+    'message' => E::ts('Vote recorded.'),
   ], $params, 'ElectionVote', 'addvotes');
 }
 
@@ -258,19 +259,19 @@ function civicrm_api3_election_vote_get($params) {
 function _civicrm_api3_election_vote_validate_ballot($electionId, $votes, array $writeIns = [], $choices = 0) {
   $votes = is_array($votes) ? $votes : [];
   if (empty($votes) && empty($writeIns) && !$choices) {
-    return 'A ballot must rank at least one candidate.';
+    return E::ts('Choose at least one candidate or answer at least one question before you submit your vote.');
   }
 
   $nominationIds = [];
   foreach ($votes as $vote) {
     if (!isset($vote['election_nomination_id']) || !CRM_Utils_Rule::positiveInteger($vote['election_nomination_id'])) {
-      return 'Each vote must be for a candidate.';
+      return E::ts('Each choice must be a candidate on the ballot.');
     }
     if (!isset($vote['rank']) || !CRM_Utils_Rule::positiveInteger($vote['rank']) || (int) $vote['rank'] < 1) {
-      return 'Rank must be a valid positive integer.';
+      return E::ts('Choose a rank from the list.');
     }
     if (in_array($vote['election_nomination_id'], $nominationIds)) {
-      return 'A candidate can only be ranked once.';
+      return E::ts('Each candidate can be ranked once.');
     }
     $nominationIds[] = $vote['election_nomination_id'];
   }
@@ -279,7 +280,7 @@ function _civicrm_api3_election_vote_validate_ballot($electionId, $votes, array 
   foreach ($writeIns as $writeIn) {
     if ($writeIn['kind'] === 'candidate') {
       if (in_array($writeIn['nomination_id'], $nominationIds)) {
-        return 'A candidate can only be ranked once.';
+        return E::ts('Each candidate can be ranked once.');
       }
       $nominationIds[] = $writeIn['nomination_id'];
       $votes[] = ['election_nomination_id' => $writeIn['nomination_id'], 'rank' => $writeIn['rank']];
@@ -320,7 +321,7 @@ function _civicrm_api3_election_vote_validate_ballot($electionId, $votes, array 
   foreach ($votes as $vote) {
     $positionId = $candidates[$vote['election_nomination_id']] ?? NULL;
     if (!$positionId) {
-      return 'You can only vote for candidates of this election.';
+      return E::ts('You can only vote for candidates on the ballot of this election.');
     }
     $choices[] = [$positionId, $vote['rank']];
   }
@@ -329,18 +330,18 @@ function _civicrm_api3_election_vote_validate_ballot($electionId, $votes, array 
   }
   foreach ($choices as [$positionId, $rank]) {
     if ((int) $rank > (int) ($candidateCounts[$positionId] ?? 0)) {
-      return 'A rank cannot be higher than the number of candidates for the position.';
+      return E::ts('A rank cannot be higher than the number of candidates for the position.');
     }
     // Ranked choice gives each candidate a different rank; ticks all have rank 1.
     if ($method !== CRM_Elections_VotingMethod::PLURALITY && in_array($rank, $ranksByPosition[$positionId] ?? [])) {
-      return 'Rank must be different for each candidate.';
+      return E::ts('Each candidate needs a different rank.');
     }
     $ranksByPosition[$positionId][] = $rank;
   }
   $seats = CRM_Core_DAO::executeQuery('SELECT id, quantity FROM civicrm_election_position WHERE election_id = %1', [1 => [$electionId, 'Positive']])->fetchMap('id', 'quantity');
   foreach ($ranksByPosition as $positionId => $ranks) {
     if (!in_array(1, $ranks)) {
-      return 'If you rank candidates for a position you must give one of them rank 1.';
+      return E::ts('Give your first choice the rank 1.');
     }
     $methodError = CRM_Elections_VotingMethod::validatePosition($method, $ranks, $seats[$positionId] ?? 1);
     if ($methodError) {

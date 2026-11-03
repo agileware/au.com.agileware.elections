@@ -1,6 +1,6 @@
 <h2>{ts}Positions{/ts}</h2>
 {if empty($positions)}
-    <p class="no-result-message">{ts}Positions are not added yet.{/ts}</p>
+    <p class="no-result-message">{ts}There are no positions yet.{/ts}</p>
 {/if}
 {foreach from =$positions key=k item=position}
   {if $position.position_type|default:'election' != 'referendum'}

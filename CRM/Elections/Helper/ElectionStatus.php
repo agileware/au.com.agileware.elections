@@ -31,14 +31,14 @@ class CRM_Elections_Helper_ElectionStatus {
       'deleted' => [0, NULL],
     ][$stage] ?? [0, NULL];
     $steps = [
-      ['key' => 'nominations', 'label' => E::ts('Nominations'), 'from' => $election->nomination_start_date, 'to' => $election->nomination_end_date],
-      ['key' => 'candidates', 'label' => E::ts('Candidates'), 'from' => $election->advertise_candidates_date, 'to' => NULL],
-      ['key' => 'voting', 'label' => E::ts('Voting'), 'from' => $election->voting_start_date, 'to' => $election->voting_end_date],
-      ['key' => 'results', 'label' => E::ts('Results'), 'from' => $election->result_date, 'to' => NULL],
+      ['key' => 'nominations', 'label' => E::ts('Nominations open'), 'from' => $election->nomination_start_date, 'to' => $election->nomination_end_date],
+      ['key' => 'candidates', 'label' => E::ts('Candidates advertised'), 'from' => $election->advertise_candidates_date, 'to' => NULL],
+      ['key' => 'voting', 'label' => E::ts('Voting open'), 'from' => $election->voting_start_date, 'to' => $election->voting_end_date],
+      ['key' => 'results', 'label' => E::ts('Results published'), 'from' => $election->result_date, 'to' => NULL],
     ];
     foreach ($steps as $index => &$step) {
       $step['state'] = $position[1] === $index ? 'current' : ($index < $position[0] ? 'passed' : 'upcoming');
-      $step['stateLabel'] = ['current' => E::ts('current stage'), 'passed' => E::ts('finished'), 'upcoming' => E::ts('not started')][$step['state']];
+      $step['stateLabel'] = ['current' => E::ts('current stage'), 'passed' => E::ts('finished'), 'upcoming' => E::ts('not yet started')][$step['state']];
     }
     return $steps;
   }
@@ -61,8 +61,9 @@ class CRM_Elections_Helper_ElectionStatus {
     $date = function ($value) {
       return CRM_Utils_Date::customFormat($value);
     };
+    // The address is not HTML-escaped here: the template escapes it once when it prints it.
     $link = function ($label, $path, $extra = '') use ($query) {
-      return ['label' => $label, 'url' => CRM_Utils_System::url($path, $query . $extra)];
+      return ['label' => $label, 'url' => CRM_Utils_System::url($path, $query . $extra, FALSE, NULL, FALSE)];
     };
     $stage = $election->getStage()['key'];
 
@@ -70,7 +71,7 @@ class CRM_Elections_Helper_ElectionStatus {
       return ['type' => 'done', 'message' => E::ts('The votes have been counted. The results are below.'), 'actions' => []];
     }
     if ($election->isVotingEnded) {
-      return ['type' => 'closed', 'message' => E::ts('Voting has closed. The results will be published on %1.', [1 => $date($election->result_date)]), 'actions' => []];
+      return ['type' => 'closed', 'message' => E::ts('Voting closed on %1. The results will be published on %2.', [1 => $date($election->voting_end_date), 2 => $date($election->result_date)]), 'actions' => []];
     }
 
     if ($election->isVotingStarted) {
@@ -80,20 +81,19 @@ class CRM_Elections_Helper_ElectionStatus {
         return [
           'type' => 'action',
           'message' => E::ts('A voter has written you in for %1. Votes for you count only if you accept before voting closes on %2.', [1 => implode(', ', array_column($writtenIn, 'position')), 2 => $date($election->voting_end_date)]),
-          'actions' => [$link(E::ts('Respond to Nomination'), 'civicrm/elections/nominations/accept', '&enid=' . (int) $writtenIn[0]['id'])],
+          'actions' => [$link(E::ts('Accept Nomination'), 'civicrm/elections/nominations/accept', '&enid=' . (int) $writtenIn[0]['id'])],
         ];
       }
       if (!$state['canVote']) {
-        return ['type' => 'closed', 'message' => E::ts('Voting is open until %1. Only people in this election\'s groups can vote in it.', [1 => $date($election->voting_end_date)]), 'actions' => []];
+        return ['type' => 'closed', 'message' => E::ts('Voting closes on %1. Only people in this election\'s groups can vote in it.', [1 => $date($election->voting_end_date)]), 'actions' => []];
       }
       if ($state['hasVoted']) {
-        $message = E::ts('You voted on %1.', [1 => $date($state['voteDate'])]);
         if ($state['allowedToChangeVote']) {
-          return ['type' => 'done', 'message' => $message . ' ' . E::ts('You can change your vote until %1.', [1 => $date($election->voting_end_date)]), 'actions' => [$link(E::ts('Change Vote'), 'civicrm/elections/vote')]];
+          return ['type' => 'done', 'message' => E::ts('You voted on %1. You can change your vote until voting closes on %2.', [1 => $date($state['voteDate']), 2 => $date($election->voting_end_date)]), 'actions' => [$link(E::ts('Change Vote'), 'civicrm/elections/vote')]];
         }
-        return ['type' => 'done', 'message' => $message . ' ' . E::ts('Thank you for voting.'), 'actions' => []];
+        return ['type' => 'done', 'message' => E::ts('You voted on %1. Your vote cannot be changed.', [1 => $date($state['voteDate'])]), 'actions' => []];
       }
-      return ['type' => 'action', 'message' => (CRM_Elections_VotingMethod::normalise($election->voting_method) === CRM_Elections_VotingMethod::PLURALITY ? E::ts('Voting is open until %1. Choose the candidates for each position to cast your vote.', [1 => $date($election->voting_end_date)]) : E::ts('Voting is open until %1. Rank the candidates for each position to cast your vote.', [1 => $date($election->voting_end_date)])), 'actions' => [$link(E::ts('Vote Now'), 'civicrm/elections/vote')]];
+      return ['type' => 'action', 'message' => (CRM_Elections_VotingMethod::normalise($election->voting_method) === CRM_Elections_VotingMethod::PLURALITY ? E::ts('Voting closes on %1. Choose the candidates for each position to cast your vote.', [1 => $date($election->voting_end_date)]) : E::ts('Voting closes on %1. Rank the candidates for each position to cast your vote.', [1 => $date($election->voting_end_date)])), 'actions' => [$link(E::ts('Vote'), 'civicrm/elections/vote')]];
     }
 
     // Before voting: nominees who have been nominated are asked to respond.
@@ -103,8 +103,8 @@ class CRM_Elections_Helper_ElectionStatus {
       $opens = $date($election->voting_start_date);
       return [
         'type' => 'action',
-        'message' => E::ts('You have been nominated for %1. Please accept or withdraw before voting opens on %2.', [1 => $positions, 2 => $opens]),
-        'actions' => [$link(E::ts('Respond to Nomination'), 'civicrm/elections/nominations/accept', '&enid=' . (int) $pending[0]['id'])],
+        'message' => E::ts('You have been nominated for %1. Accept or decline before voting opens on %2.', [1 => $positions, 2 => $opens]),
+        'actions' => [$link(E::ts('Accept Nomination'), 'civicrm/elections/nominations/accept', '&enid=' . (int) $pending[0]['id'])],
       ];
     }
 
@@ -114,15 +114,15 @@ class CRM_Elections_Helper_ElectionStatus {
     }
     if ($election->isNominationsInProgress) {
       if ($state['canNominate']) {
-        return ['type' => 'action', 'message' => E::ts('Nominations are open until %1. Nominate someone, or second a nomination that needs a second.', [1 => $date($election->nomination_end_date)]), 'actions' => [$link(E::ts('Submit Nomination'), 'civicrm/elections/nominations/create')]];
+        return ['type' => 'action', 'message' => E::ts('Nominations close on %1. Nominate someone, or second a nomination that needs a second.', [1 => $date($election->nomination_end_date)]), 'actions' => [$link(E::ts('Nominate'), 'civicrm/elections/nominations/create')]];
       }
-      return ['type' => 'info', 'message' => E::ts('Nominations are open until %1. You are not able to nominate in this election.', [1 => $date($election->nomination_end_date)]), 'actions' => []];
+      return ['type' => 'info', 'message' => E::ts('Nominations close on %1. You are not able to nominate in this election.', [1 => $date($election->nomination_end_date)]), 'actions' => []];
     }
     if ($election->advertiseCandidatesStarted) {
-      return ['type' => 'info', 'message' => E::ts('Nominations are closed. The candidates are listed below. Voting opens on %1.', [1 => $date($election->voting_start_date)]), 'actions' => []];
+      return ['type' => 'info', 'message' => E::ts('Nominations closed on %1. The candidates are listed below. Voting opens on %2.', [1 => $date($election->nomination_end_date), 2 => $date($election->voting_start_date)]), 'actions' => []];
     }
     if ($election->isNominationsStarted) {
-      return ['type' => 'info', 'message' => E::ts('Nominations are closed. The candidates will be listed from %1. Voting opens on %2.', [1 => $date($election->advertise_candidates_date), 2 => $date($election->voting_start_date)]), 'actions' => []];
+      return ['type' => 'info', 'message' => E::ts('Nominations closed on %1. The candidates will be listed from %2. Voting opens on %3.', [1 => $date($election->nomination_end_date), 2 => $date($election->advertise_candidates_date), 3 => $date($election->voting_start_date)]), 'actions' => []];
     }
     return ['type' => 'info', 'message' => E::ts('Nominations open on %1. The positions are listed below.', [1 => $date($election->nomination_start_date)]), 'actions' => []];
   }
@@ -130,7 +130,8 @@ class CRM_Elections_Helper_ElectionStatus {
   /**
    * The person's own ballot, in the order they ranked, for each position. Only they see it.
    *
-   * Empty once the votes are anonymised (the ballot no longer says whose it is).
+   * Empty when the election anonymises its votes, even while voting is open and the votes still say whose they
+   * are (they are counted first and anonymised after), and empty once they have been anonymised.
    *
    * @param CRM_Elections_BAO_Election $election
    * @param int $contactId
@@ -139,7 +140,7 @@ class CRM_Elections_Helper_ElectionStatus {
    *   Each with position and candidates: a list of names, first choice first.
    */
   public static function ownBallot($election, $contactId) {
-    if (!$contactId) {
+    if (!$contactId || !empty($election->anonymize_votes)) {
       return [];
     }
     $dao = CRM_Core_DAO::executeQuery('
@@ -188,7 +189,7 @@ class CRM_Elections_Helper_ElectionStatus {
       return [];
     }
     $dao = CRM_Core_DAO::executeQuery('
-      SELECT n.id, p.name AS position, n.is_eligible_candidate, n.has_accepted_nomination, n.has_rejected_nomination, n.is_write_in,
+      SELECT n.id, p.name AS position, n.is_eligible_candidate, n.has_accepted_nomination, n.has_rejected_nomination, n.has_withdrawn_nomination, n.is_write_in,
              (SELECT COUNT(DISTINCT s.member_nominator) FROM civicrm_election_nomination_seconder s WHERE s.election_nomination_id = n.id) AS nominators
       FROM civicrm_election_nomination n
       INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
@@ -196,7 +197,7 @@ class CRM_Elections_Helper_ElectionStatus {
       ORDER BY p.sortorder, n.id
     ', [1 => [(int) $election->id, 'Integer'], 2 => [(int) $contactId, 'Integer']]);
     $link = function ($label, $path, $id, $quiet = FALSE) use ($query) {
-      return ['label' => $label, 'url' => CRM_Utils_System::url($path, $query . '&enid=' . (int) $id), 'quiet' => $quiet];
+      return ['label' => $label, 'url' => CRM_Utils_System::url($path, $query . '&enid=' . (int) $id, FALSE, NULL, FALSE), 'quiet' => $quiet];
     };
     $required = (int) $election->required_nominations;
     $rows = [];
@@ -204,15 +205,15 @@ class CRM_Elections_Helper_ElectionStatus {
       $beforeVoting = !$election->isVotingStarted;
       $actions = [];
       if ($dao->has_rejected_nomination) {
-        $state = 'withdrawn';
-        $label = E::ts('Withdrawn');
+        $state = $dao->has_withdrawn_nomination ? 'withdrawn' : 'declined';
+        $label = $dao->has_withdrawn_nomination ? E::ts('Withdrawn') : E::ts('Declined');
       }
       elseif ($dao->is_eligible_candidate && $dao->has_accepted_nomination) {
         $state = 'accepted';
         $label = E::ts('Accepted: you are a candidate');
         if ($beforeVoting) {
-          $actions[] = $link(E::ts('Edit statement'), 'civicrm/elections/candidate/statement', $dao->id);
-          $actions[] = $link(E::ts('Withdraw Nomination'), 'civicrm/elections/nominations/reject', $dao->id, TRUE);
+          $actions[] = $link(E::ts('Edit Statement'), 'civicrm/elections/candidate/statement', $dao->id);
+          $actions[] = $link(E::ts('Withdraw'), 'civicrm/elections/nominations/reject', $dao->id, TRUE);
         }
       }
       elseif ($dao->is_eligible_candidate) {
@@ -221,7 +222,7 @@ class CRM_Elections_Helper_ElectionStatus {
         // A person written in can answer until voting closes.
         if ($beforeVoting || ($dao->is_write_in && !$election->isVotingEnded)) {
           $actions[] = $link(E::ts('Accept Nomination'), 'civicrm/elections/nominations/accept', $dao->id);
-          $actions[] = $link(E::ts('Withdraw Nomination'), 'civicrm/elections/nominations/reject', $dao->id, TRUE);
+          $actions[] = $link(E::ts('Decline'), 'civicrm/elections/nominations/reject', $dao->id, TRUE);
         }
       }
       else {
@@ -229,7 +230,7 @@ class CRM_Elections_Helper_ElectionStatus {
         $missing = max(1, $required - (int) $dao->nominators);
         $label = E::ts('Waiting for %1 more nominator', [1 => $missing, 'plural' => 'Waiting for %count more nominators', 'count' => $missing]);
         if ($beforeVoting) {
-          $actions[] = $link(E::ts('Withdraw Nomination'), 'civicrm/elections/nominations/reject', $dao->id, TRUE);
+          $actions[] = $link(E::ts('Decline'), 'civicrm/elections/nominations/reject', $dao->id, TRUE);
         }
       }
       $rows[] = ['position' => $dao->position, 'state' => $state, 'stateLabel' => $label, 'actions' => $actions];
@@ -263,43 +264,70 @@ class CRM_Elections_Helper_ElectionStatus {
   }
 
   /**
-   * What one election's card in the list says: its stage, one line about the next date, and the button.
+   * What one election's card in the list says: its stage, one line about the next date, a line about the person's
+   * own vote, and the button for the next step.
+   *
+   * The button is the one next step from plan/20-ui-standards.md 3.8: Accept Nomination, Nominate, Vote, View
+   * Results, or View Election when there is nothing to do. It always opens the election page, where the same
+   * step is the one button of the panel.
    *
    * @param array $election
-   *   An election as the list builds it: dates and the flags hasNominationsStarted, isNominationsInProgress,
-   *   advertiseCandidatesStarted, isVotingStarted, isVotingEnded, isResultsOut and isUserAllowedToVote.
+   *   An election as the list builds it: its dates, is_visible, the flags hasNominationsStarted,
+   *   isNominationsInProgress, advertiseCandidatesStarted, isVotingStarted, isVotingEnded, isResultsOut and
+   *   isUserAllowedToVote, and what the person can do: canNominate, canVote, hasPendingNomination (a nomination
+   *   waiting for their answer), hasUserAlreadyVoted and userVoteDate.
    *
    * @return array
-   *   stage (a key for styling), stageLabel, line (plain words with the date in them) and button (a label, or '').
+   *   stage (a key for styling), stageLabel, line (plain words with the date in them), voteLine (about the
+   *   person's own vote, or ''), and button (a label).
    */
   public static function card(array $election) {
     $date = function ($value) {
       return CRM_Utils_Date::customFormat($value);
     };
+    $view = E::ts('View Election');
+    $pending = !empty($election['hasPendingNomination']);
+    $voteLine = '';
+
     if (!empty($election['isResultsOut'])) {
-      return ['stage' => 'results', 'stageLabel' => E::ts('Results published'), 'line' => E::ts('Results published on %1', [1 => $date($election['result_date'])]), 'button' => E::ts('View Election results')];
+      $card = ['stage' => 'results', 'stageLabel' => E::ts('Results published'), 'line' => E::ts('Results published on %1.', [1 => $date($election['result_date'])]), 'button' => E::ts('View Results')];
     }
-    if (!empty($election['isVotingEnded'])) {
-      return ['stage' => 'closed', 'stageLabel' => E::ts('Voting closed'), 'line' => E::ts('Election results will be available on %1', [1 => $date($election['result_date'])]), 'button' => E::ts('View the Candidates')];
+    elseif (!empty($election['isVotingEnded'])) {
+      $card = ['stage' => 'closed', 'stageLabel' => E::ts('Voting closed'), 'line' => E::ts('Results will be published on %1.', [1 => $date($election['result_date'])]), 'button' => $view];
     }
-    if (!empty($election['isVotingStarted'])) {
-      $card = ['stage' => 'voting', 'stageLabel' => E::ts('Voting open'), 'line' => E::ts('Voting will close on %1', [1 => $date($election['voting_end_date'])]), 'button' => E::ts('Vote in the Election')];
-      if (empty($election['isUserAllowedToVote'])) {
-        $card['button'] = '';
+    elseif (!empty($election['isVotingStarted'])) {
+      $voted = !empty($election['hasUserAlreadyVoted']);
+      $canVote = (!array_key_exists('canVote', $election) || !empty($election['canVote'])) && !empty($election['isUserAllowedToVote']);
+      $card = ['stage' => 'voting', 'stageLabel' => E::ts('Voting open'), 'line' => E::ts('Voting closes on %1.', [1 => $date($election['voting_end_date'])]), 'button' => $pending ? E::ts('Accept Nomination') : ($canVote && !$voted ? E::ts('Vote') : $view)];
+      if ($voted) {
+        $voteLine = !empty($election['isUserAllowedToVote'])
+          ? E::ts('You voted on %1. You can change your vote until voting closes on %2.', [1 => $date($election['userVoteDate']), 2 => $date($election['voting_end_date'])])
+          : E::ts('You voted on %1. Your vote cannot be changed.', [1 => $date($election['userVoteDate'])]);
       }
-      return $card;
     }
-    if (!empty($election['advertiseCandidatesStarted'])) {
-      return ['stage' => 'advertise', 'stageLabel' => E::ts('Candidates announced'), 'line' => E::ts('Voting will open on %1', [1 => $date($election['voting_start_date'])]), 'button' => E::ts('View the Candidates')];
+    elseif (!empty($election['advertiseCandidatesStarted'])) {
+      $card = ['stage' => 'advertise', 'stageLabel' => E::ts('Candidates advertised'), 'line' => E::ts('Voting opens on %1.', [1 => $date($election['voting_start_date'])]), 'button' => $pending ? E::ts('Accept Nomination') : $view];
     }
-    if (!empty($election['isNominationsInProgress'])) {
+    elseif (!empty($election['isNominationsInProgress'])) {
       $online = !array_key_exists('allow_online_nominations', $election) || $election['allow_online_nominations'] === NULL || $election['allow_online_nominations'] === '' || !empty($election['allow_online_nominations']);
-      return ['stage' => 'nominations', 'stageLabel' => E::ts('Nominations open'), 'line' => $online ? E::ts('Nominations will close on %1', [1 => $date($election['nomination_end_date'])]) : E::ts('The organisers are choosing the candidates'), 'button' => $online ? E::ts('View and submit Nominations') : E::ts('View the Nominations')];
+      $card = ['stage' => 'nominations', 'stageLabel' => E::ts('Nominations open'), 'line' => $online ? E::ts('Nominations close on %1.', [1 => $date($election['nomination_end_date'])]) : E::ts('The organisers are choosing the candidates.'), 'button' => $pending ? E::ts('Accept Nomination') : ($online && !empty($election['canNominate']) ? E::ts('Nominate') : $view)];
     }
-    if (!empty($election['hasNominationsStarted'])) {
-      return ['stage' => 'advertise', 'stageLabel' => E::ts('Nominations closed'), 'line' => E::ts('Candidates will be advertised from %1', [1 => $date($election['advertise_candidates_date'])]), 'button' => E::ts('View the Nominations')];
+    elseif (!empty($election['hasNominationsStarted'])) {
+      $card = ['stage' => 'advertise', 'stageLabel' => E::ts('Nominations closed'), 'line' => E::ts('Candidates advertised from %1.', [1 => $date($election['advertise_candidates_date'])]), 'button' => $pending ? E::ts('Accept Nomination') : $view];
     }
-    return ['stage' => 'upcoming', 'stageLabel' => E::ts('Not started'), 'line' => E::ts('Nominations will open on %1', [1 => $date($election['nomination_start_date'])]), 'button' => ''];
+    else {
+      $card = ['stage' => 'upcoming', 'stageLabel' => E::ts('Not started'), 'line' => E::ts('Nominations open on %1.', [1 => $date($election['nomination_start_date'])]), 'button' => $view];
+    }
+
+    // The stage of an inactive election is Inactive, whatever its dates say. Only administrators see one, so there
+    // is nothing for them to do on the card but look.
+    if (array_key_exists('is_visible', $election) && empty($election['is_visible'])) {
+      $card['stage'] = 'inactive';
+      $card['stageLabel'] = E::ts('Inactive');
+      $card['button'] = $view;
+    }
+    $card['voteLine'] = $voteLine;
+    return $card;
   }
 
 }

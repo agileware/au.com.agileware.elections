@@ -35,14 +35,15 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
         'id' => $this->enId,
         'member_nominee' => $nomineeId,
         'is_eligible_candidate' => 1,
-        'return' => ['has_accepted_nomination', 'is_write_in', 'election_position_id.name', 'has_rejected_nomination', 'election_position_id.election_id.name', 'election_position_id.election_id'],
+        'return' => ['has_accepted_nomination', 'is_write_in', 'election_position_id.name', 'has_rejected_nomination', 'has_withdrawn_nomination', 'election_position_id.election_id.name', 'election_position_id.election_id'],
       ]);
     } catch (CRM_Core_Exception $e) {
-      throwAccessDeniedException($this, E::ts('You are not authorized to access this page.'));
+      throwAccessDeniedException($this, E::ts('You do not have access to this nomination. Log in as the person who was nominated, or use the personal link in your email.'));
       return;
     }
 
     $election = findElectionById($this->electionNomination['election_position_id.election_id']);
+    CRM_Elections_Helper_Utils::assignBackToElection($this, $election->id, $this->cid, $this->cs);
     if ((!$election->isVisible && !isElectionAdmin())) {
       throwAccessDeniedPage($this);
       return;
@@ -55,12 +56,12 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
     }
 
     if ($this->electionNomination['has_accepted_nomination'] == 1) {
-      throwAccessDeniedException($this, E::ts('You already have accepted this nomination.'));
+      throwAccessDeniedException($this, E::ts('You have already accepted this nomination.'));
       return;
     }
 
     if ($this->electionNomination['has_rejected_nomination'] == 1) {
-      throwAccessDeniedException($this, E::ts('You cannot accept a rejected nomination.'));
+      throwAccessDeniedException($this, !empty($this->electionNomination['has_withdrawn_nomination']) ? E::ts('You cannot accept a nomination that you withdrew.') : E::ts('You cannot accept a nomination that you declined.'));
       return;
     }
 
@@ -68,22 +69,29 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
       // Written in by a voter: can answer until voting closes.
       if ($election->isVotingEnded) {
         throwAccessDeniedException($this, CRM_Elections_Helper_WriteIn::closedMessage($election, $this->electionNomination['election_position_id.name']), [
-          'return_button_text' => E::ts('View the election'),
+          'errorKind' => 'status',
+          'return_button_text' => E::ts('Back to the election'),
           'return_button_action' => CRM_Elections_Helper_Mailer::link($election, $nomineeId, 'civicrm/elections/view'),
         ]);
         return;
       }
     }
     elseif ($election->isVotingStarted) {
-      throwAccessDeniedException($this, E::ts('You cannot accept the nomination once voting has started.'));
+      throwAccessDeniedException($this, E::ts('You can no longer accept this nomination because voting has started.'));
       return;
     }
 
     $this->assign('electionNomination', $this->electionNomination);
 
-    $this->add('textarea', 'nominationcomments', E::ts('Candidate statement'), ['cols' => 55, 'rows' => 6], FALSE);
-    $this->add('text', 'statement_url', E::ts('Link to a longer statement or CV'), ['size' => 55, 'maxlength' => 2048], FALSE);
+    $this->add('textarea', 'nominationcomments', E::ts('Statement'), ['cols' => 55, 'rows' => 6], FALSE);
+    $this->add('text', 'statement_url', E::ts('Statement link'), ['size' => 55, 'maxlength' => 2048], FALSE);
     $this->addElement('hidden', 'enid', $this->enId);
+    // The other answer, on the screen where a person can say why (the Decline screen).
+    $declineUrl = Civi::url('current://civicrm/elections/nominations/reject')->addQuery(['enid' => $this->enId]);
+    if ($this->cid && $this->cs) {
+      $declineUrl->addQuery(['cid' => $this->cid, 'cs' => $this->cs]);
+    }
+    $this->assign('declineUrl', (string) $declineUrl);
 
     if ( $this->cid && $this->cs ) {
       // Expose to Smarty
@@ -129,7 +137,7 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
   public function validate() {
     $values = $this->exportValues();
     if (!CRM_Elections_Helper_Candidate::isValidStatementUrl($values['statement_url'] ?? '')) {
-      $this->_errors['statement_url'] = E::ts('Enter a web address starting with http:// or https://');
+      $this->_errors['statement_url'] = E::ts('The statement link must start with http:// or https://.');
     }
     return parent::validate();
   }
@@ -142,7 +150,7 @@ class CRM_Elections_Form_AcceptNomination extends CRM_Elections_Form_Base {
       CRM_Core_Session::setStatus(E::ts('Nomination accepted.'), '', 'success');
     }
     catch (CRM_Core_Exception $e) {
-      CRM_Core_Session::setStatus($e->getMessage(), '', 'error');
+      CRM_Core_Session::setStatus($e->getMessage(), E::ts('Nomination not accepted'), 'error');
     }
 
     // Redirect back to the main election info view

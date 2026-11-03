@@ -137,6 +137,19 @@ return [
         'duplicate_matching',
       ],
     ],
+    'has_withdrawn_nomination' => [
+      'title' => E::ts('Has Withdrawn Nomination'),
+      'sql_type' => 'boolean',
+      'input_type' => 'CheckBox',
+      'description' => E::ts('Boolean field to identify if the candidate withdrew after accepting. Declined nominations have has_rejected_nomination only.'),
+      'add' => '6.16',
+      'default' => FALSE,
+      'usage' => [
+        'import',
+        'export',
+        'duplicate_matching',
+      ],
+    ],
     'created_at' => [
       'title' => E::ts('Created At'),
       'sql_type' => 'timestamp',

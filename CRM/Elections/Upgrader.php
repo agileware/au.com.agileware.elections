@@ -269,6 +269,59 @@ class CRM_Elections_Upgrader extends CRM_Extension_Upgrader_Base {
   }
 
   /**
+   * Version 2.1.0: the wording of the emails follows the user interface standards. Message templates are never
+   * overwritten by the extension's managed entities, so installed sites keep the old text unless it is replaced
+   * here: the reserved original always, and the editable default only when the site never changed it (it still
+   * matches the reserved original). A template a site has edited is left as it is.
+   */
+  public function upgrade_20120() {
+    Civi::log()->info('Applying update 20120');
+    foreach (['elections_nominee_invited', 'elections_write_in_invited', 'elections_write_in_reminder', 'elections_write_in_closed'] as $workflow) {
+      $new = [];
+      foreach (['subject', 'text', 'html'] as $part) {
+        $file = E::path('msg_tpl/' . $workflow . '_' . $part . '.tpl');
+        if (!is_file($file)) {
+          continue 2;
+        }
+        $new[$part] = $part === 'subject' ? trim(file_get_contents($file)) : file_get_contents($file);
+      }
+      $copies = [];
+      $dao = CRM_Core_DAO::executeQuery('SELECT id, is_reserved, msg_subject, msg_text, msg_html FROM civicrm_msg_template WHERE workflow_name = %1', [1 => [$workflow, 'String']]);
+      while ($dao->fetch()) {
+        $copies[$dao->is_reserved ? 'reserved' : 'default'] = ['id' => (int) $dao->id, 'subject' => $dao->msg_subject, 'text' => $dao->msg_text, 'html' => $dao->msg_html];
+      }
+      $untouched = isset($copies['reserved'], $copies['default'])
+        && $copies['reserved']['subject'] === $copies['default']['subject']
+        && $copies['reserved']['text'] === $copies['default']['text']
+        && $copies['reserved']['html'] === $copies['default']['html'];
+      foreach (['reserved', 'default'] as $kind) {
+        if (!isset($copies[$kind]) || ($kind === 'default' && !$untouched)) {
+          continue;
+        }
+        CRM_Core_DAO::executeQuery('UPDATE civicrm_msg_template SET msg_subject = %1, msg_text = %2, msg_html = %3 WHERE id = %4', [
+          1 => [$new['subject'], 'String'],
+          2 => [$new['text'], 'String'],
+          3 => [$new['html'], 'String'],
+          4 => [$copies[$kind]['id'], 'Integer'],
+        ]);
+      }
+    }
+    return TRUE;
+  }
+
+  /**
+   * Version 2.1.0: a nominee who says no before accepting has declined; a candidate who pulls out after
+   * accepting has withdrawn. Both stay has_rejected_nomination, so nothing that counts or hides them changes, and
+   * has_withdrawn_nomination records which of the two it was. Nominations that were refused before this step
+   * cannot be told apart (the data never said), so they are shown as declined.
+   */
+  public function upgrade_20130() {
+    Civi::log()->info('Applying update 20130');
+    $this->ensureColumn('civicrm_election_nomination', 'has_withdrawn_nomination', 'TINYINT NULL DEFAULT 0');
+    return TRUE;
+  }
+
+  /**
    * Add a column unless it already exists, so upgrade steps can safely be re-run.
    *
    * @param string $table

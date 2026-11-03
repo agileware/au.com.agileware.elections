@@ -15,8 +15,48 @@ test.describe('Manage Elections (SearchKit list)', () => {
     await expect(row.getByRole('link', { name: '2', exact: true })).toBeVisible();
     await expect(row.getByText('No', { exact: true })).toBeVisible();
     await expect(row.getByRole('link', { name: 'Edit' })).toBeVisible();
-    await expect(adminPage.getByRole('link', { name: 'Create Election' })).toBeVisible();
+    await expect(adminPage.getByRole('link', { name: 'Add Election' })).toBeVisible();
     await expectNoPhpOutput(adminPage);
+  });
+
+  test('the only button above the list is Add Election, and it opens the Add Election form', async ({ adminPage }) => {
+    await adminPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
+    const bar = adminPage.locator('.election-list-actions');
+    await expect(bar.getByRole('link')).toHaveText(['Add Election']);
+    await bar.getByRole('link', { name: 'Add Election' }).click();
+    await expect(adminPage).toHaveURL(/elections%2Fcreate|elections\/create/);
+    await expect(adminPage.getByRole('button', { name: 'Submit' })).toBeVisible();
+  });
+
+  test('each row has Edit, Duplicate, Activate and Delete in that order, each naming its election', async ({ adminPage }) => {
+    const id = createElection(nm('Row actions'));
+    addPosition(id, 'Chair', 1);
+    await adminPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
+    const row = adminPage.locator('tr', { hasText: nm('Row actions') });
+    const links = row.locator('td.crm-search-col-type-buttons a');
+    await expect(links).toHaveText(['Edit', 'Duplicate', 'Activate', 'Delete']);
+    for (const action of ['Edit', 'Duplicate', 'Activate', 'Delete']) {
+      await expect(row.getByRole('link', { name: `${action} ${nm('Row actions')}` })).toBeVisible();
+    }
+    // The election's name opens its overview; there are no Positions or Candidates buttons in the row.
+    await expect(row.getByRole('link', { name: nm('Row actions'), exact: true })).toHaveAttribute('href', /overview/);
+    for (const name of ['Positions', 'Candidates']) {
+      await expect(links.filter({ hasText: name })).toHaveCount(0);
+    }
+    // Only Delete is in the danger style.
+    await expect(row.locator('td.crm-search-col-type-buttons a.btn-danger')).toHaveText(['Delete']);
+    // The stage uses the words of the standard.
+    await expect(row.getByText('Inactive', { exact: true })).toBeVisible();
+  });
+
+  test('the list says which time zone the times are in, and the empty state says what to do', async ({ adminPage }) => {
+    await adminPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
+    await expect(adminPage.locator('.election-time-zone-note')).toContainText(/^Times are shown in .+\.$/);
+    await expect(adminPage.locator('.election-time-zone-note')).toHaveCount(1);
+    await adminPage.locator('details.af-container af-field[name="name"] input').fill(`no such election ${RUN}`);
+    await expect(adminPage.getByText('No elections found. Clear the filters, or select Add Election to create one.')).toBeVisible();
+    await adminPage.getByRole('button', { name: 'Clear filters' }).click();
+    await expect(adminPage.locator('crm-search-display-table tbody tr[data-entity-id]').first()).toBeVisible();
   });
 
   test('an election with no positions cannot be activated', async ({ adminPage }) => {
@@ -25,8 +65,8 @@ test.describe('Manage Elections (SearchKit list)', () => {
     const row = adminPage.locator('tr', { hasText: nm('Needs positions') });
     await row.getByRole('link', { name: 'Activate' }).click();
     const dialog = adminPage.locator('.ui-dialog');
-    await dialog.getByRole('button', { name: 'Activate Election' }).click();
-    await expect(adminPage.getByText('At least one Position must be defined before the Election can be active.')).toBeVisible();
+    await dialog.getByRole('button', { name: 'Activate' }).click();
+    await expect(adminPage.getByText('Add at least one position before activating the election.')).toBeVisible();
     await expect(adminPage.locator('tr', { hasText: nm('Needs positions') }).getByText('No', { exact: true })).toBeVisible();
     expect(isActive(id)).toBe(false);
   });
@@ -38,12 +78,12 @@ test.describe('Manage Elections (SearchKit list)', () => {
     const row = adminPage.locator('tr', { hasText: nm('Toggle me') });
 
     await row.getByRole('link', { name: 'Activate' }).click();
-    await adminPage.locator('.ui-dialog').getByRole('button', { name: 'Activate Election' }).click();
+    await adminPage.locator('.ui-dialog').getByRole('button', { name: 'Activate' }).click();
     await expect(row.getByText('Yes', { exact: true })).toBeVisible();
     expect(isActive(id)).toBe(true);
 
     await row.getByRole('link', { name: 'Deactivate' }).click();
-    await adminPage.locator('.ui-dialog').getByRole('button', { name: 'Deactivate Election' }).click();
+    await adminPage.locator('.ui-dialog').getByRole('button', { name: 'Deactivate' }).click();
     await expect(row.getByText('No', { exact: true })).toBeVisible();
     expect(isActive(id)).toBe(false);
   });
@@ -58,7 +98,7 @@ test.describe('Manage Elections (SearchKit list)', () => {
     catch (e: any) {
       message = String(e.stderr || e.message);
     }
-    expect(message).toContain('At least one Position');
+    expect(message).toContain('Add at least one position');
     expect(isActive(id)).toBe(false);
   });
 
@@ -80,39 +120,40 @@ test.describe('Manage Elections (SearchKit list)', () => {
     const positions = civiApi4<Array<{ name: string }>>('ElectionPosition.get', { select: ['name'], where: [['election_id', '=', copies[0].id]], orderBy: { sortorder: 'ASC' } });
     expect(positions.map((p) => p.name)).toEqual(['Chair', 'Treasurer']);
   });
-  test('an active election shows no button that would change it', async ({ adminPage }) => {
+
+  test('a running election has no Edit or Delete, only Deactivate (which asks for its name)', async ({ adminPage }) => {
     const id = createElection(nm('Locked row'));
     addPosition(id, 'Chair', 1);
     startElection(id);
     await adminPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
     const row = adminPage.locator('tr', { hasText: nm('Locked row') });
     await expect(row).toBeVisible();
-    for (const name of ['Edit', 'Delete', 'Deactivate', 'Activate']) {
-      await expect(row.getByRole('link', { name })).toHaveCount(0);
+    for (const name of ['Edit', 'Delete', 'Activate']) {
+      await expect(row.getByRole('link', { name: new RegExp(`^${name}\\b`) })).toHaveCount(0);
     }
-    await expect(row.getByRole('link', { name: 'Withdraw', exact: true })).toBeVisible();
-    await expect(row.getByRole('link', { name: 'Positions' }).first()).toBeVisible();
-    await expect(row.getByRole('link', { name: 'Candidates' })).toBeVisible();
-    await expect(row.getByRole('link', { name: 'Duplicate' })).toBeVisible();
+    await expect(row.getByRole('link', { name: /^Deactivate\b/ })).toBeVisible();
+    await expect(row.getByRole('link', { name: /^Duplicate\b/ })).toBeVisible();
+    // The reason is shown as text in place of the Edit and Delete buttons.
+    await expect(row.getByText('Locked: nominations have started.')).toBeVisible();
     await expect(row.getByText('Nominations open', { exact: true })).toBeVisible();
   });
 
-  test('withdrawing an active election needs its name typed', async ({ adminPage }) => {
+  test('deactivating a running election needs its name typed', async ({ adminPage }) => {
     const id = createElection(nm('Pull back'));
     addPosition(id, 'Chair', 1);
     startElection(id);
     await adminPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
-    await adminPage.locator('tr', { hasText: nm('Pull back') }).getByRole('link', { name: 'Withdraw', exact: true }).click();
+    await adminPage.locator('tr', { hasText: nm('Pull back') }).getByRole('link', { name: /^Deactivate\b/ }).click();
     const dialog = adminPage.locator('.ui-dialog');
     await expect(dialog.getByText('active and its nominations have started')).toBeVisible();
-    await dialog.getByRole('button', { name: 'Withdraw Election' }).click();
+    await dialog.getByRole('button', { name: 'Deactivate' }).click();
     await expect(dialog.getByText('This field is required')).toBeVisible();
     await dialog.getByLabel('Type the name of the election to confirm').fill('Something else');
-    await dialog.getByRole('button', { name: 'Withdraw Election' }).click();
+    await dialog.getByRole('button', { name: 'Deactivate' }).click();
     await expect(dialog.getByText('does not match')).toBeVisible();
     expect(isActive(id)).toBe(true);
     await dialog.getByLabel('Type the name of the election to confirm').fill(nm('Pull back'));
-    await dialog.getByRole('button', { name: 'Withdraw Election' }).click();
+    await dialog.getByRole('button', { name: 'Deactivate' }).click();
     await expect(adminPage.locator('tr', { hasText: nm('Pull back') }).getByRole('link', { name: 'Edit' })).toBeVisible();
     expect(isActive(id)).toBe(false);
   });
@@ -124,10 +165,10 @@ test.describe('Manage Elections (SearchKit list)', () => {
     createElection(nm('Stage idle'));
     await adminPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
     const filters = adminPage.locator('details.af-container');
-    for (const text of ['Part of the election', 'switched on for voters', 'Where the election is now', 'whose voting closes in this period', 'whose results are published in this period']) {
+    for (const text of ['Part of the election', 'Yes shows active elections', 'Where the election is now', 'whose voting closes in this period', 'whose results are published in this period']) {
       await expect(filters.getByText(text)).toBeVisible();
     }
-    for (const label of ['Election', 'Active', 'Stage', 'Voting closes', 'Results']) {
+    for (const label of ['Election', 'Active', 'Stage', 'Voting closes', 'Results published']) {
       await expect(filters.getByText(label, { exact: true }).first()).toBeVisible();
     }
     await expect(adminPage.locator('tr', { hasText: nm('Stage open') })).toBeVisible();

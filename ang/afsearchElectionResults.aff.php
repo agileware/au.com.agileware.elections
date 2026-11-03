@@ -3,7 +3,7 @@ use CRM_Elections_ExtensionUtil as E;
 
 return [
   'type' => 'search',
-  'title' => E::ts('Election Results'),
+  'title' => E::ts('Results'),
   'icon' => 'fa-trophy',
   'server_route' => 'civicrm/elections/result-list',
   'permission' => ['access CiviCRM', 'administer Elections'],

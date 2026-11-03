@@ -48,10 +48,11 @@ return [
         'saved_search_id.name' => 'ElectionResults',
         'type' => 'table',
         'settings' => [
-          'description' => E::ts('The ranking for each position after the votes were counted. The number of seats for a position says how many of the top ranks win.'),
+          'description' => E::ts('One row for each ranked candidate of each position, after the votes were counted. The number of seats for a position says how many of the top ranks win.'),
+          'noResultsText' => E::ts('There are no results yet. Results appear after voting closes and the results are generated.'),
           'sort' => [['election_position_id.sortorder', 'ASC'], ['rank', 'ASC']],
-          'limit' => 100,
-          'pager' => [],
+          'limit' => 50,
+          'pager' => ['show_count' => TRUE],
           'placeholder' => 5,
           'columns' => [
             ['type' => 'field', 'key' => 'election_position_id.name', 'dataType' => 'String', 'label' => E::ts('Position'), 'sortable' => TRUE],

@@ -44,8 +44,11 @@ class CRM_Elections_WordingTest extends \PHPUnit\Framework\TestCase {
     return $matches[1];
   }
 
-  public function testNothingAPersonReadsSaysMemberOrMembership() {
-    $found = [];
+  /**
+   * What a person can read in every file: file name => list of texts.
+   */
+  private function readableTexts() {
+    $all = [];
     foreach ($this->files() as $file) {
       $relative = substr($file, strlen($this->root()) + 1);
       $contents = file_get_contents($file);
@@ -66,6 +69,14 @@ class CRM_Elections_WordingTest extends \PHPUnit\Framework\TestCase {
       else {
         $texts = [$contents];
       }
+      $all[$relative] = $texts;
+    }
+    return $all;
+  }
+
+  public function testNothingAPersonReadsSaysMemberOrMembership() {
+    $found = [];
+    foreach ($this->readableTexts() as $relative => $texts) {
       foreach ($texts as $text) {
         foreach (self::ALLOWED as $allowed) {
           $text = str_replace($allowed, '', $text);
@@ -78,6 +89,36 @@ class CRM_Elections_WordingTest extends \PHPUnit\Framework\TestCase {
       }
     }
     $this->assertSame([], $found, "Use \"people\" instead of \"member\":\n" . implode("\n", $found));
+  }
+
+  /**
+   * Wording that the interface standards rule out of every screen, message and email: "please" for a normal step,
+   * "click here", the old "Return to Elections" link, and the old name for declining ("rejected nomination").
+   * "Please" is kept for apologies only, and there are none.
+   */
+  public function testNothingAPersonReadsUsesWordsTheStandardsRuleOut() {
+    $banned = [
+      '/\bplease\b/i' => 'please',
+      '/\bclick here\b/i' => 'click here',
+      '/\bReturn to Elections\b/' => 'Return to Elections',
+      '/\brejected nomination\b/i' => 'rejected nomination',
+    ];
+    $found = [];
+    foreach ($this->readableTexts() as $relative => $texts) {
+      if (strpos($relative, 'js/') === 0 || strpos($relative, 'docs/') === 0 || $relative === 'README.md') {
+        // Scripts hold code as well as words (the ballot's own words are passed in from PHP and checked there),
+        // and the documentation may ask its readers for something, for example to report a problem privately.
+        continue;
+      }
+      foreach ($texts as $text) {
+        foreach ($banned as $pattern => $word) {
+          if (preg_match($pattern, $text)) {
+            $found[] = $relative . ': ' . $word;
+          }
+        }
+      }
+    }
+    $this->assertSame([], $found, "Words that are not used:\n" . implode("\n", array_unique($found)));
   }
 
 }

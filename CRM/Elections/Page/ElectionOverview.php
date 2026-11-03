@@ -23,19 +23,23 @@ class CRM_Elections_Page_ElectionOverview extends CRM_Elections_Page_Base {
     $election = findElectionById($eId);
     $stage = $election->getStage();
     $counts = CRM_Elections_BAO_Election::getCounts($eId);
-    CRM_Utils_System::setTitle(E::ts('Election: %1', [1 => $election->name]));
+    CRM_Utils_System::setTitle($election->name, '<span class="election-overview-kicker">' . E::ts('Election Overview') . '</span> ' . htmlspecialchars(CRM_Elections_Helper_ResultsDisplay::decode($election->name), ENT_QUOTES, 'UTF-8'));
+    CRM_Elections_Helper_Frame::assign($this, CRM_Elections_Helper_Frame::overviewTrail((int) $eId), CRM_Elections_Helper_Frame::managerUrl());
+    Civi::resources()
+      ->addScriptFile(E::LONG_NAME, 'js/election-copy.js', 110, 'page-footer')
+      ->addVars('electionsCopy', ['copy' => E::ts('Copy'), 'copied' => E::ts('Copied'), 'failed' => E::ts('Select the fingerprint and copy it')]);
 
     $now = new DateTime();
     $timeline = [];
     foreach ([
-      'visibility_start_date' => E::ts('Visible to people'),
+      'visibility_start_date' => E::ts('Visible from'),
       'nomination_start_date' => E::ts('Nominations open'),
       'nomination_end_date' => E::ts('Nominations close'),
       'advertise_candidates_date' => E::ts('Candidates advertised'),
       'voting_start_date' => E::ts('Voting opens'),
       'voting_end_date' => E::ts('Voting closes'),
       'result_date' => E::ts('Results published'),
-      'visibility_end_date' => E::ts('Hidden from people'),
+      'visibility_end_date' => E::ts('Visible until'),
     ] as $field => $label) {
       $when = DateTime::createFromFormat('Y-m-d H:i:s', $election->$field);
       $timeline[] = ['label' => $label, 'date' => $election->$field, 'passed' => $when && $when <= $now];
@@ -48,10 +52,11 @@ class CRM_Elections_Page_ElectionOverview extends CRM_Elections_Page_Base {
     $this->assign('eligibleVoters', $voters);
     // Who is in each role, shown when the election has groups of its own for nominating or standing.
     $roles = [];
-    foreach (['nominating' => E::ts('May nominate and second'), 'candidate' => E::ts('May stand as candidates')] as $role => $label) {
+    // The template words each role as one sentence with its own plural.
+    foreach (['nominating', 'candidate'] as $role) {
       $own = $role === 'nominating' ? $election->nomination_groups : $election->candidate_groups;
       if (trim((string) $own, ',') !== '') {
-        $roles[] = ['label' => $label, 'count' => CRM_Elections_Helper_Eligibility::countContactsInGroups(CRM_Elections_Helper_Eligibility::groupsFor($election, $role))];
+        $roles[] = ['role' => $role, 'count' => CRM_Elections_Helper_Eligibility::countContactsInGroups(CRM_Elections_Helper_Eligibility::groupsFor($election, $role))];
       }
     }
     $this->assign('eligibleRoles', $roles);
@@ -59,7 +64,7 @@ class CRM_Elections_Page_ElectionOverview extends CRM_Elections_Page_Base {
     $writeIns = [];
     $votingEnded = !empty($election->isVotingEnded);
     $dao = CRM_Core_DAO::executeQuery('
-      SELECT p.name AS position, c.display_name, n.has_accepted_nomination AS accepted, n.has_rejected_nomination AS declined, n.write_in_reminded_date, n.write_in_closed_notified_date
+      SELECT p.name AS position, c.display_name, n.has_accepted_nomination AS accepted, n.has_rejected_nomination AS declined, n.has_withdrawn_nomination AS withdrawn, n.write_in_reminded_date, n.write_in_closed_notified_date
       FROM civicrm_election_nomination n
       INNER JOIN civicrm_election_position p ON p.id = n.election_position_id
       INNER JOIN civicrm_contact c ON c.id = n.member_nominee
@@ -67,10 +72,21 @@ class CRM_Elections_Page_ElectionOverview extends CRM_Elections_Page_Base {
       ORDER BY p.sortorder, c.sort_name
     ', [1 => [(int) $eId, 'Integer']]);
     while ($dao->fetch()) {
+      // The status is one short phrase; whether the person was reminded or told is a separate note.
+      $note = '';
+      if (!$dao->accepted && !$dao->declined) {
+        if ($votingEnded && $dao->write_in_closed_notified_date) {
+          $note = E::ts('Told that voting closed');
+        }
+        elseif (!$votingEnded && $dao->write_in_reminded_date) {
+          $note = E::ts('Reminded');
+        }
+      }
       $writeIns[] = [
         'position' => $dao->position,
         'name' => $dao->display_name,
-        'status' => $dao->accepted ? E::ts('Accepted: on the ballot') : ($dao->declined ? E::ts('Declined') : ($votingEnded ? ($dao->write_in_closed_notified_date ? E::ts('Did not answer before voting closed (told)') : E::ts('Did not answer before voting closed')) : ($dao->write_in_reminded_date ? E::ts('Waiting for an answer (reminded)') : E::ts('Waiting for an answer')))),
+        'status' => $dao->accepted ? E::ts('Accepted') : ($dao->declined ? ($dao->withdrawn ? E::ts('Withdrawn') : E::ts('Declined')) : ($votingEnded ? E::ts('Did not answer before voting closed') : E::ts('Waiting for an answer'))),
+        'note' => $note,
       ];
     }
     $this->assign('writeIns', $writeIns);
@@ -84,7 +100,10 @@ class CRM_Elections_Page_ElectionOverview extends CRM_Elections_Page_Base {
     $this->assign('auditRecent', CRM_Elections_Helper_Audit::entries($eId, 8));
     $this->assign('timeline', $timeline);
     $this->assign('nextStep', CRM_Elections_BAO_Election::getNextStep($stage, $counts));
-    $this->assign('canEdit', $election->canEdit() === TRUE);
+    $canEdit = $election->canEdit();
+    $this->assign('canEdit', $canEdit === TRUE);
+    $this->assign('editReason', $canEdit === TRUE ? '' : (string) $canEdit);
+    $this->assign('isActive', !empty($election->is_visible));
     parent::run();
   }
 

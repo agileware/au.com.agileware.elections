@@ -36,6 +36,40 @@ test.describe('Election candidates (SearchKit list)', () => {
     await expectNoPhpOutput(adminPage);
   });
 
+  test('the name comes first and Edit Statement is the only row button, naming the person', async ({ adminPage }) => {
+    const { groupId, ids } = createMembers(['Ida']);
+    const election = createElection(nm('Cand row'), { groupId });
+    addNomination(addPosition(election, 'Chair', 1), ids.Ida, { accepted: true, statement: 'Words' });
+    await adminPage.goto(listUrl(election));
+    const headings = adminPage.locator('crm-search-display-table thead th');
+    await expect(headings.first()).toHaveText('Name');
+    await expect(headings.nth(1)).toHaveText('Position');
+    const row = adminPage.locator('crm-search-display-table tbody tr').first();
+    await expect(row.locator('td.crm-search-col-type-buttons a')).toHaveText(['Edit Statement']);
+    await expect(row.getByRole('link', { name: /^Edit Statement .*Ida/ })).toBeVisible();
+    await row.getByRole('link', { name: /^Edit Statement/ }).click();
+    await expect(adminPage).toHaveURL(/candidate(%2F|\/)statement.*enid/);
+    await expect(adminPage.getByRole('button', { name: 'Submit' })).toBeVisible();
+  });
+
+  test('the Add Candidate button is at the right end of the row with Back and Back to Manage Elections', async ({ adminPage }) => {
+    const election = createElection(nm('Cand bar'));
+    addPosition(election, 'Chair', 1);
+    await adminPage.goto(listUrl(election));
+    const bar = adminPage.locator('.election-list-actions');
+    await expect(bar.getByRole('link')).toHaveText(['Back', 'Back to Manage Elections', 'Add Candidate']);
+    const [back, manage, add] = await Promise.all(['Back', 'Back to Manage Elections', 'Add Candidate'].map((name) => bar.getByRole('link', { name, exact: true }).boundingBox()));
+    expect(back!.y + back!.height / 2).toBeCloseTo(add!.y + add!.height / 2, -1);
+    expect(add!.x).toBeGreaterThan(manage!.x + manage!.width);
+  });
+
+  test('an empty list says what to do', async ({ adminPage }) => {
+    const election = createElection(nm('Cand empty'));
+    addPosition(election, 'Chair', 1);
+    await adminPage.goto(listUrl(election));
+    await expect(adminPage.getByText('There are no candidates to show.')).toBeVisible();
+  });
+
   test('a statement can be edited in place', async ({ adminPage }) => {
     const { groupId, ids } = createMembers(['Cy']);
     const election = createElection(nm('Cand edit'), { groupId });
@@ -58,8 +92,8 @@ test.describe('Election candidates (SearchKit list)', () => {
     await adminPage.locator('#s2id_contact, .crm-form-entityref').first().click();
     await adminPage.locator('.select2-input:visible').fill('Di');
     await adminPage.locator('.select2-result-label', { hasText: 'Di' }).first().click();
-    await adminPage.getByLabel('Candidate statement').fill('Added by the board');
-    await adminPage.getByRole('button', { name: 'Add Candidate' }).click();
+    await adminPage.getByLabel(/^\s*Statement\s*\*?\s*$/).fill('Added by the board');
+    await adminPage.getByRole('button', { name: 'Submit' }).click();
     await expect(adminPage.locator('crm-search-display-table tbody tr', { hasText: 'Di' })).toBeVisible();
     expect(nomineeNames(election).some((n) => n.includes('Di'))).toBe(true);
     const [nomination] = civiApi4<Array<{ id: number }>>('ElectionNomination.get', { select: ['id'], where: [['member_nominee', '=', ids.Di]] });

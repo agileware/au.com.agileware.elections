@@ -17,8 +17,8 @@ class CRM_Elections_BAO_ElectionPosition extends CRM_Elections_DAO_ElectionPosit
    */
   public static function getTypes() {
     return [
-      self::TYPE_ELECTION => E::ts('Election position'),
-      self::TYPE_REFERENDUM => E::ts('Referendum question'),
+      self::TYPE_ELECTION => E::ts('Position'),
+      self::TYPE_REFERENDUM => E::ts('Question'),
     ];
   }
 
@@ -97,10 +97,10 @@ class CRM_Elections_BAO_ElectionPosition extends CRM_Elections_DAO_ElectionPosit
   public static function assertCanChange($electionId) {
     $election = findElectionById($electionId, FALSE);
     if ($election->is_deleted) {
-      throw new CRM_Elections_Exception(E::ts('Election position cannot be added/modified for deleted election.'));
+      throw new CRM_Elections_Exception(E::ts('This election is deleted, so its positions cannot be added or changed.'));
     }
     if ($election->isNominationsStarted && $election->is_visible == 1) {
-      throw new CRM_Elections_Exception(E::ts('This election is active, so its positions cannot be changed. Positions can be changed only before nominations start, or while the election is switched off.'));
+      throw new CRM_Elections_Exception(E::ts('This election is active, so its positions cannot be changed. Positions can be changed only before nominations start, or while the election is inactive.'));
     }
   }
 
@@ -196,7 +196,7 @@ class CRM_Elections_BAO_ElectionPosition extends CRM_Elections_DAO_ElectionPosit
   public static function findWithNominationsByElectionId($electionId) {
     $nominations = civicrm_api3('ElectionNomination', 'get', [
       'election_position_id.election_id'  => $electionId,
-      'return' => array_merge(['member_nominee.image_URL', 'election_position_id', 'comments', 'statement_url', 'is_eligible_candidate', 'id', 'has_rejected_nomination', 'rejection_comments', 'has_accepted_nomination', 'member_nominee'], CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS),
+      'return' => array_merge(['member_nominee.image_URL', 'election_position_id', 'comments', 'statement_url', 'is_eligible_candidate', 'id', 'has_rejected_nomination', 'has_withdrawn_nomination', 'rejection_comments', 'has_accepted_nomination', 'member_nominee'], CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS),
       'options' => ['limit' => 0],
     ]);
 

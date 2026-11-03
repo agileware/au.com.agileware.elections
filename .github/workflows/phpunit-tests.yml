@@ -2,7 +2,7 @@ name: PHPUnit tests
 
 on:
   push:
-    branches: [master, version-2]
+    branches: [master]
   pull_request:
   workflow_dispatch: {}
 

@@ -1,12 +1,13 @@
 <div class="crm-election-form-block-container">
-    <div class="crm-submit-buttons">
-        {include file="CRM/common/formButtons.tpl" location="top"}
+    {if $deleteBlocked}
+    <div class="messages error no-popup election-delete-message" role="alert">
+        {$deleteBlocked|escape}
     </div>
-    <div class="messages status no-popup election-delete-message">
-        <div class="icon inform-icon"></div>
-        <span class="font-red bold">{ts}WARNING: This action cannot be undone.{/ts}</span><br>
-        {ts}Click 'Delete' if you want to continue.{/ts}
+    {else}
+    <div class="messages warning no-popup election-delete-message" role="alert">
+        {$deleteMessage|escape}
     </div>
+    {/if}
     <div class="crm-submit-buttons">
         {include file="CRM/common/formButtons.tpl" location="bottom"}
     </div>

@@ -9,8 +9,8 @@
       </li>
     {/foreach}
   </ol>
-  <p class="election-stepper-note">{ts}Times are shown in{/ts} <a target="_blank" rel="noopener noreferrer" href="{$siteTimeZoneConvertUrl|escape}">{$siteTimeZone|escape}</a></p>
 </nav>
+<p class="election-stepper-note election-timezone-note">{$siteTimeZoneLine|escape}</p>
 
 <section class="election-next-action election-next-{$electionNextAction.type|escape}" aria-label="{ts}What you can do now{/ts}">
   <p class="election-next-message">{$electionNextAction.message|escape}</p>

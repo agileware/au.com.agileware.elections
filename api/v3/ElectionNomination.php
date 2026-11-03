@@ -28,7 +28,7 @@ function civicrm_api3_election_nomination_create($params) {
       'election_position_id' => $params['election_position_id'],
     ]);
     if ($nominationsCount > 0) {
-      return civicrm_api3_create_error('Member is already nominated for the selected position.');
+      return civicrm_api3_create_error(E::ts('This person is already nominated for this position.'));
     }
 
     $electionPosition = civicrm_api3('ElectionPosition', 'getsingle', [
@@ -37,15 +37,15 @@ function civicrm_api3_election_nomination_create($params) {
     $electionId = $electionPosition['election_id'];
     $election = findElectionById($electionId, FALSE);
     if ($election->is_deleted || !$election->is_visible) {
-      return civicrm_api3_create_error('Nomination cannot be added for deleted election.');
+      return civicrm_api3_create_error(E::ts('Nominations cannot be added to an election that is deleted or not active.'));
     }
 
     if (!$election->isNominationsStarted) {
-      return civicrm_api3_create_error('Nomination cannot be added before nomination period is started.');
+      return civicrm_api3_create_error(E::ts('Nominations are not open yet. They open on %1.', [1 => CRM_Utils_Date::customFormat($election->nomination_start_date)]));
     }
 
     if (!$election->isNominationsInProgress) {
-      return civicrm_api3_create_error('Nomination cannot be added after nomination period is ended.');
+      return civicrm_api3_create_error(E::ts('Nominations closed on %1.', [1 => CRM_Utils_Date::customFormat($election->nomination_end_date)]));
     }
 
   }

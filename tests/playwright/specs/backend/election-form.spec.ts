@@ -29,15 +29,15 @@ async function fillValidDates(page: Page) {
 }
 
 test.describe('election form', () => {
-  test('has Election, Dates, Participation and Display tabs', async ({ adminPage }) => {
+  test('has Details, Dates, Participation, Display, Emails and Privacy tabs', async ({ adminPage }) => {
     await adminPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
     const tabs = adminPage.getByRole('tab');
-    await expect(tabs).toHaveText(['Election', 'Dates', 'Participation', 'Display']);
+    await expect(tabs).toHaveText(['Details', 'Dates', 'Participation', 'Display', 'Emails', 'Privacy']);
     await expect(adminPage.locator('#name')).toBeVisible();
-    await expect(adminPage.getByLabel('Anonymise Votes')).toBeHidden();
+    await expect(adminPage.getByLabel('Anonymise votes')).toBeHidden();
 
-    await adminPage.getByRole('tab', { name: 'Participation' }).click();
-    await expect(adminPage.getByLabel('Anonymise Votes')).toBeVisible();
+    await adminPage.getByRole('tab', { name: 'Privacy' }).click();
+    await expect(adminPage.getByLabel('Anonymise votes')).toBeVisible();
     await expect(adminPage.locator('#name')).toBeHidden();
 
     // Keyboard: arrow keys move between tabs.
@@ -45,6 +45,61 @@ test.describe('election form', () => {
     await adminPage.keyboard.press('ArrowRight');
     await expect(adminPage.getByRole('tab', { name: 'Display' })).toHaveAttribute('aria-selected', 'true');
     await expectNoPhpOutput(adminPage);
+  });
+
+  test('every date has its own name, its own help and the time zone is shown once', async ({ adminPage }) => {
+    await adminPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
+    await expect(adminPage.getByText('Fields marked * are required.')).toBeVisible();
+    await adminPage.getByRole('tab', { name: 'Dates' }).click();
+    const labels = ['Visible from', 'Visible until', 'Nominations open', 'Nominations close', 'Candidates advertised from', 'Voting opens', 'Voting closes', 'Results published on'];
+    for (const label of labels) {
+      await expect(adminPage.locator('label').filter({ hasText: new RegExp(`^\\s*${label}\\s*\\*?\\s*$`) }), label).toHaveCount(1);
+    }
+    await expect(adminPage.locator('label', { hasText: /^(Start|End) Date/ })).toHaveCount(0);
+    // One line, with the name of the zone, above the dates.
+    await expect(adminPage.getByText(/^Times are shown in /)).toHaveCount(1);
+    // One sentence of help under each date.
+    await expect(adminPage.locator('.election-form-panel#election-panel-dates tr[class*="crm-create-election-form-block-"] .description')).toHaveCount(8);
+    // Group headings come after the page heading, in order.
+    await expect(adminPage.locator('#election-panel-dates h3')).toHaveCount(0);
+    await expect(adminPage.locator('#election-panel-dates h2.election-form-group-heading').first()).toBeVisible();
+    // The quick set-up button is not a second primary button.
+    await expect(adminPage.locator('#election-quick-fill')).not.toHaveClass(/crm-button/);
+  });
+
+  test('the labels, placeholders and choices follow the standard', async ({ adminPage }) => {
+    await adminPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
+    await adminPage.getByRole('tab', { name: 'Participation' }).click();
+    // The group choices are searchable widgets: the visible search box carries the label too (the hidden input behind it is not a control).
+    for (const label of ['Voting groups', 'Nominating groups', 'Candidate groups']) {
+      await expect(adminPage.getByRole('textbox', { name: new RegExp(`^${label}\\s*\\*?$`) }), label).toBeVisible();
+    }
+    for (const label of ['Voting method', 'Required nominations', 'Allow people to nominate online', 'Allow people to change their vote', 'Allow people to take part without logging in']) {
+      await expect(adminPage.getByLabel(label), label).toBeVisible();
+    }
+    // An empty searchable choice shows its placeholder as the value of its search box.
+    await expect(adminPage.locator('#s2id_allowed_groups .select2-input')).toHaveValue('Select groups');
+    await expect(adminPage.locator('#s2id_nomination_groups .select2-input')).toHaveValue('Same as voting groups');
+    await expect(adminPage.locator('body')).not.toContainText('- Select');
+    await adminPage.getByRole('tab', { name: 'Dates' }).click();
+    await expect(adminPage.locator('#quick_cycle option').first()).toHaveText('Select a cycle');
+    await adminPage.getByRole('tab', { name: 'Display' }).click();
+    await expect(adminPage.getByLabel('Show candidate statements').locator('option')).toHaveText(['Not shown', 'Read statement', 'In full']);
+    await expect(adminPage.getByLabel('Show a celebration on the results page')).toBeVisible();
+    await expect(adminPage.getByLabel('Logo', { exact: true })).toBeVisible();
+    await adminPage.getByRole('tab', { name: 'Emails' }).click();
+    await expect(adminPage.getByLabel('Email people about their nominations')).toBeVisible();
+  });
+
+  test('saving with a required nominations that is not a whole number names the field', async ({ adminPage }) => {
+    await adminPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
+    await adminPage.locator('#name').fill('Playwright labels check');
+    await adminPage.getByRole('tab', { name: 'Participation' }).click();
+    await adminPage.getByLabel('Required nominations').fill('abc');
+    await adminPage.getByRole('button', { name: 'Submit' }).click();
+    await expect(adminPage.getByText('Required nominations must be a whole number of 1 or more.').first()).toBeVisible();
+    // Back on the same form with what was typed.
+    await expect(adminPage.locator('#name')).toHaveValue('Playwright labels check');
   });
 
   test('shows a date problem straight away and a timeline of the stages', async ({ adminPage }) => {
@@ -58,7 +113,7 @@ test.describe('election form', () => {
 
     // Nominations end before they start.
     await setDate(adminPage, 'nomination_end_date', '2031-01-02 09:00:00');
-    await expect(adminPage.locator('.election-date-problem').first()).toHaveText('End date must be after start date.');
+    await expect(adminPage.locator('.election-date-problem').first()).toHaveText('Nominations close must be after Nominations open.');
     await expect(adminPage.locator('.election-timeline-problem')).toHaveCount(1);
     await expect(adminPage.getByRole('tab', { name: 'Dates' })).toHaveClass(/has-problem/);
 
@@ -66,7 +121,7 @@ test.describe('election form', () => {
     await setDate(adminPage, 'nomination_end_date', '2031-01-12 17:00:00');
     await setDate(adminPage, 'voting_end_date', '2031-04-30 17:00:00');
     // The voting end date is past the end of visibility, and now the results date comes before it.
-    await expect(adminPage.locator('.election-date-problem')).toHaveText(['End date must be before visibility end date.', 'Start Date must be after voting end date.']);
+    await expect(adminPage.locator('.election-date-problem')).toHaveText(['Voting closes must not be after Visible until.', 'Results published on must be after Voting closes.']);
 
     await setDate(adminPage, 'voting_end_date', '2031-01-27 17:00:00');
     await expect(adminPage.locator('.election-date-problem')).toHaveCount(0);
@@ -74,19 +129,19 @@ test.describe('election form', () => {
 
   test('saving with a problem opens the tab that has it and keeps the form', async ({ adminPage }) => {
     await adminPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
-    // Empty form: the first required field is on the Election tab.
+    // Empty form: the first required field is on the Details tab.
     await adminPage.getByRole('tab', { name: 'Display' }).click();
     await adminPage.getByRole('button', { name: 'Submit' }).click();
-    await expect(adminPage.getByRole('tab', { name: 'Election' })).toHaveAttribute('aria-selected', 'true');
+    await expect(adminPage.getByRole('tab', { name: 'Details' })).toHaveAttribute('aria-selected', 'true');
     await expect(adminPage.locator('#name')).toBeVisible();
   });
   test('the nomination email is chosen from the message templates, with a link for people who may edit them', async ({ adminPage, managerPage }) => {
     await adminPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
-    await adminPage.getByRole('tab', { name: 'Participation' }).click();
-    const choice = adminPage.getByLabel('Nomination email');
+    await adminPage.getByRole('tab', { name: 'Emails' }).click();
+    const choice = adminPage.getByLabel('Nomination email template');
     await expect(choice).toBeVisible();
     await expect(choice.locator('option:checked')).toHaveText('Election - Invite nominee');
-    await expect(adminPage.getByRole('link', { name: 'Edit message templates' })).toBeVisible();
+    await expect(adminPage.getByRole('link', { name: 'Edit message templates (opens in a new tab)' })).toBeVisible();
     await expect(adminPage.getByText('{$nomineeName}', { exact: false })).toBeVisible();
 
     // Only when emails are on.
@@ -97,8 +152,8 @@ test.describe('election form', () => {
 
     // An organiser who cannot edit message templates still chooses one, without the link.
     await managerPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
-    await managerPage.getByRole('tab', { name: 'Participation' }).click();
-    await expect(managerPage.getByLabel('Nomination email')).toBeVisible();
+    await managerPage.getByRole('tab', { name: 'Emails' }).click();
+    await expect(managerPage.getByLabel('Nomination email template')).toBeVisible();
     await expect(managerPage.getByRole('link', { name: 'Edit message templates' })).toHaveCount(0);
   });
   test('the quick set-up fills in valid dates for each cycle', async ({ adminPage }) => {

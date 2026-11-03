@@ -13,9 +13,7 @@
     {/if}
 
     <h2>{ts}Election Results{/ts}</h2>
-    <center>
-        <a href="{crmURL p="civicrm/elections/summary" q="`$checksum_query['query']`"}">{ts}View the Election summary{/ts}</a>
-    </center>
+    <p class="election-results-links"><a href="{crmURL p="civicrm/elections/summary" q="`$checksum_query['query']`"}" class="election-btn election-btn-quiet">{ts}View Election Summary{/ts}</a></p>
 
     {foreach from = $positions key = k item = position}
       {if $position.position_type|default:'election' == 'referendum'}
@@ -31,7 +29,7 @@
         </div>
       {else}
         <div class="crm-election-position-result-block election-result-position">
-            <h3>{if $position.quantity > 1}{ts 1=$position.name}Winners for %1{/ts}{else}{ts 1=$position.name}Winner for %1{/ts}{/if}</h3>
+            <h3>{ts 1=$position.name|escape count=$position.quantity plural="Winners for %1"}Winner for %1{/ts}</h3>
             <span class="winner-type-label">
                 {include file="CRM/Elections/Page/PositionResultTypeMessage.tpl"}
              </span>

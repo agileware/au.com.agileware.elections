@@ -73,12 +73,12 @@ class CRM_Elections_SeparateGroupsTest extends api_v3_ElectionBaseTestCase {
 
     $this->refused(function () use ($fixture, $position) {
       CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('N01'), $fixture->id('V02'), 'not in the group');
-    }, 'not allowed to nominate');
+    }, 'cannot nominate in this election');
     $result = CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('N01'), $fixture->id('V01'), 'in the group');
     $this->assertNotEmpty($result['nomination_id']);
     $this->refused(function () use ($fixture, $position) {
       CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('N01'), $fixture->id('V03'), 'second, not in the group');
-    }, 'not allowed to nominate');
+    }, 'cannot nominate in this election');
   }
 
   public function testOnlyThePeopleInTheCandidateGroupCanBeNominatedOrAdded() {

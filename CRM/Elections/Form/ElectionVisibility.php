@@ -26,15 +26,17 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
 
     $withdrawing = $this->isWithdrawal();
     $this->addButtons([
+      $this->election->is_visible
+        ? ['type' => 'submit', 'name' => E::ts('Deactivate'), 'isDefault' => TRUE, 'icon' => 'fa-toggle-off', 'class' => 'election-danger']
+        : ['type' => 'submit', 'name' => E::ts('Activate'), 'isDefault' => TRUE, 'icon' => 'fa-toggle-on'],
       [
-        'type' => 'submit',
-        'name' => $withdrawing ? E::ts('Withdraw Election') : (($this->election->is_visible) ? E::ts('Deactivate Election') : E::ts('Activate Election')),
-        'isDefault' => TRUE,
+        'type' => 'cancel',
+        'name' => E::ts('Cancel'),
       ],
     ]);
 
     if ($withdrawing) {
-      CRM_Utils_System::setTitle(E::ts('Withdraw Election'));
+      CRM_Utils_System::setTitle(E::ts('Deactivate Election'));
       $this->add('text', 'confirm_name', E::ts('Type the name of the election to confirm'), ['size' => 40, 'autocomplete' => 'off'], TRUE);
       $this->addFormRule(['CRM_Elections_Form_ElectionVisibility', 'validateWithdrawal'], $this->election->name);
     }
@@ -46,6 +48,7 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
     }
 
     $this->assign('election', $this->election);
+    $this->assign('electionName', CRM_Elections_Helper_ResultsDisplay::decode($this->election->name));
     $this->assign('withdrawing', $withdrawing);
     $this->addElement('hidden', 'eid', $this->eId);
 
@@ -53,8 +56,8 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
   }
 
   /**
-   * An election that is active and has started is locked. Switching it off is a withdrawal: it
-   * hides the election from everybody and lets it be edited again, so the name has to be typed.
+   * An election that is active and has started is locked. Deactivating it then hides the election from
+   * everybody and lets it be edited again, so the name has to be typed.
    *
    * @return bool
    */
@@ -71,7 +74,7 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
    */
   public static function validateWithdrawal($values, $files, $name) {
     if (mb_strtolower(trim((string) ($values['confirm_name'] ?? ''))) !== mb_strtolower(trim((string) $name))) {
-      return ['confirm_name' => E::ts('The name does not match the name of this election.')];
+      return ['confirm_name' => E::ts('The name does not match. Type the election name exactly as shown.')];
     }
     return TRUE;
   }
@@ -97,7 +100,7 @@ class CRM_Elections_Form_ElectionVisibility extends CRM_Elections_Form_Base {
       finally {
         CRM_Elections_Helper_Guard::$withdrawing = FALSE;
       }
-      CRM_Core_Session::setStatus($withdrawn ? E::ts('Election has been withdrawn.') : ($isActive ? E::ts('Election has been deactivated successfully.') : E::ts('Election has been activated successfully.')), '', 'success');
+      CRM_Core_Session::setStatus($isActive ? E::ts('Election deactivated.') : E::ts('Election activated.'), '', 'success');
     }
     catch (CRM_Core_Exception $e) {
       CRM_Core_Session::setStatus($e->getMessage(), E::ts('Election not changed'), 'error');

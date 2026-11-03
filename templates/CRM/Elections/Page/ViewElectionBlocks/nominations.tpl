@@ -2,21 +2,21 @@
     {if $election->advertiseCandidatesStarted}
         {ts}Candidates{/ts}
     {else}
-        {ts}Existing Nominations{/ts}
+        {ts}Nominations{/ts}
     {/if}
 </h2>
 {if empty($nominations) or empty($positions)}
-    <p class="no-result-message">{ts}Positions are not added yet to be nominated.{/ts}</p>
+    <p class="no-result-message">{ts}There are no positions yet.{/ts}</p>
 {/if}
 
 {foreach from = $nominations key = k item = nomination}
   {if $nomination.position_type|default:'election' != 'referendum'}
     <div class="crm-election-position-nominations-block">
 
-        <h3>{if $election->advertiseCandidatesStarted}{ts 1=$nomination.name}Candidates for %1{/ts}{else}{ts 1=$nomination.name}Nominations for %1{/ts}{/if}</h3>
+        <h3>{if $election->advertiseCandidatesStarted}{ts 1=$nomination.name|escape}Candidates for %1{/ts}{else}{ts 1=$nomination.name|escape}Nominations for %1{/ts}{/if}</h3>
 
         {if empty($nomination.nominations) and !$election->advertiseCandidatesStarted}
-            <p>{ts}There are no existing nominations{/ts}</p>
+            <p>{ts}There are no nominations yet.{/ts}</p>
         {/if}
         {assign var="candidatesCount" value=0}
         {if !empty($nomination.nominations)}
@@ -38,19 +38,18 @@
                                     {$seconder.$scKey|escape}<br>
 
                                     {if !$election->isVotingStarted and ($seconder.is_eligible_candidate == 1)}
-                                        {ts}Candidate Status:{/ts}
                                         {if $seconder.has_accepted_nomination == 1}
-                                            {ts}Accepted{/ts}
+                                            <span class="election-chip election-chip-accepted">{ts}Accepted{/ts}</span>
                                             <br>
                                             <br>
                                             {$seconder.comments|escape|nl2br}
                                         {elseif $seconder.has_rejected_nomination == 1}
-                                            {ts}Withdrawn{/ts}
+                                            <span class="election-chip election-chip-withdrawn">{if $seconder.has_withdrawn_nomination == 1}{ts}Withdrawn{/ts}{else}{ts}Declined{/ts}{/if}</span>
                                             <br>
                                             <br>
                                             {$seconder.rejection_comments|escape|nl2br}
                                         {else}
-                                            {ts}Pending{/ts}
+                                            <span class="election-chip election-chip-waiting">{ts}Waiting for an answer{/ts}</span>
                                         {/if}
                                     {/if}
 
@@ -64,11 +63,11 @@
                             {if $isAllowedToNominate}
                             {if $election->isNominationsInProgress and $election->required_nominations >= 2 and $seconder.is_eligible_candidate != 1}
                                 <div class="clearfix"></div>
-                                <a href="{crmURL p="civicrm/elections/nominations/create" q="`$checksum_query['query']`&enid=`$seconder.id`"}" class="election-btn">{ts}Need Second{/ts}</a>
+                                <a href="{crmURL p="civicrm/elections/nominations/create" q="`$checksum_query['query']`&enid=`$seconder.id`"}" class="election-btn election-btn-quiet">{ts}Second Nomination{/ts}<span class="election-visually-hidden">: {$seconder.$scKey|escape}</span></a>
                             {/if}
                             {if $election->isNominationsInProgress and $seconder.has_rejected_nomination == 0 and $seconder.has_accepted_nomination == 0 and $seconder.is_eligible_candidate == 1}
                                 <div class="clearfix"></div>
-                                <a href="{crmURL p="civicrm/elections/nominations/create" q="`$checksum_query['query']`&enid=`$seconder.id`"}" class="election-btn">{ts}Nominate{/ts}</a>
+                                <a href="{crmURL p="civicrm/elections/nominations/create" q="`$checksum_query['query']`&enid=`$seconder.id`"}" class="election-btn election-btn-quiet">{ts}Nominate{/ts}<span class="election-visually-hidden">: {$seconder.$scKey|escape}</span></a>
                             {/if}
 
                             {/if}
@@ -79,9 +78,9 @@
             </div>
             {if empty($candidatesCount) or (empty($nomination.nominations) and !$election->advertiseCandidatesStarted) or ($election->advertiseCandidatesStarted and empty($candidatesCount))}
                 {if $election->advertiseCandidatesStarted}
-                    <p>{ts}There are no eligible candidates.{/ts}</p>
+                    <p>{ts}There are no candidates yet.{/ts}</p>
                 {else}
-                    <p>{ts}There are no eligible nominations.{/ts}</p>
+                    <p>{ts}There are no nominations yet.{/ts}</p>
                 {/if}
             {/if}
         {/if}

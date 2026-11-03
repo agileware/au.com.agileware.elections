@@ -56,16 +56,16 @@ class VoteAction extends AbstractAction {
     $voter_contact_id = $parameters->getParameter('voter_contact_id');
     $election = findElectionById($election_id);
     if (!$election->isVisible) {
-      throw new InvalidParameterException(E::ts('Voting is closed.'));
+      throw new InvalidParameterException(E::ts('This election is not open for voting.'));
     }
     if (!$election->isVotingStarted) {
-      throw new InvalidParameterException(E::ts('Voting is closed.'));
+      throw new InvalidParameterException(E::ts('Voting has not opened yet.'));
     }
     if ($election->isVotingEnded) {
       throw new InvalidParameterException(E::ts('Voting is closed.'));
     }
     if (hasLoggedInUserAlreadyVoted($election_id, $voter_contact_id)) {
-      throw new InvalidParameterException(E::ts('User has already voted.'));
+      throw new InvalidParameterException(E::ts('This person has already voted.'));
     }
     return $return;
   }
@@ -89,7 +89,7 @@ class VoteAction extends AbstractAction {
 
     return new SpecificationBag([
       new Specification('election_id', 'Integer', E::ts('Election ID'), true, null, null, $elections),
-      new Specification('anonymize_vote', 'Boolean', E::ts('Anonymize vote')),
+      new Specification('anonymize_vote', 'Boolean', E::ts('Anonymise votes')),
     ]);
   }
 
