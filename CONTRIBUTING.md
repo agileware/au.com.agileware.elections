@@ -2,7 +2,7 @@
 
 ## Tests
 
-Every push to `master` and `version-2`, and every pull request, runs three GitHub workflows (reusable workflows from [agileware/ci-workflows](https://github.com/agileware/ci-workflows)):
+Every push to `master`, and every pull request, runs three GitHub workflows (reusable workflows from [agileware/ci-workflows](https://github.com/agileware/ci-workflows)):
 
 - **PHPUnit tests**: the headless PHPUnit suite (`tests/phpunit`).
 - **frontend tests**: the Playwright browser tests (`tests/playwright`), a full mock council election on WordPress, plus the back end screens.
