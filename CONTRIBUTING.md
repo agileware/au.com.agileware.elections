@@ -1,5 +1,7 @@
 # Contributing
 
+The developer guide ([`developer/`](developer/README.md)) explains how to set up test sites on WordPress, Drupal and Joomla, seed them with elections and run every test suite. [`AGENTS.md`](AGENTS.md) is the short list of rules for developers and AI assistants.
+
 ## Tests
 
 Every push to `master`, and every pull request, runs three GitHub workflows (reusable workflows from [agileware/ci-workflows](https://github.com/agileware/ci-workflows)):
@@ -21,6 +23,6 @@ Everyone who takes part is called "people" (voters, nominees, candidates, organi
 ## Versioning and releases
 
 - The extension version lives in the `<version>` element of `info.xml`. Bump it, and `<releaseDate>`, on `master` as part of any release.
-- Releases are cut from a `release` branch, not `master` directly, so that `.github`, `tests`, `.gitignore` and this file never reach client sites (civicrm.org's extension directory installs whatever a version tag points at, in full).
+- Releases are cut from a `release` branch, not `master` directly, so that `.github`, `tests`, `developer`, `AGENTS.md`, `.gitignore` and this file never reach client sites (civicrm.org's extension directory installs whatever a version tag points at, in full).
 - To cut a release: bump `<version>`/`<releaseDate>` on `master` and merge that, then run **Cut release** from the Actions tab with a version matching what you just bumped. It builds the filtered `release` branch, tags it, and publishes the GitHub Release.
-- The `release` branch has to exist before the first cut. Create it once by hand: branch `release` from `master`, remove `.github`, `tests`, `.gitignore` and `CONTRIBUTING.md`, commit and push (the first cut resets it to the filtered tree anyway). Do not use the **Init release** workflow: it refuses to run because `cut-release.yml` is already in the repository.
+- The `release` branch has to exist before the first cut. Create it once by hand: branch `release` from `master`, remove `.github`, `tests`, `developer`, `AGENTS.md`, `.gitignore` and `CONTRIBUTING.md`, commit and push (the first cut resets it to the filtered tree anyway). Do not use the **Init release** workflow: it refuses to run because `cut-release.yml` is already in the repository.
