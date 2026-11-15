@@ -297,6 +297,11 @@ install_drupal() {
   ( cd "$SITE" && ddev composer config --json extra.enable-patching true \
       && ddev composer config extra.compile-mode all \
       && ddev composer config extra.civicrm-asset.path web/libraries/civicrm )
+  # Every PhpSpreadsheet 5.x release that CiviCRM 6.19 allows has a published security advisory, so Composer's
+  # default blocking of insecure packages refuses to install CiviCRM. This is a throwaway test site on a local
+  # machine, so the blocking is switched off for this project only. Do not copy this to a real site.
+  warn "Turning off Composer's blocking of packages with security advisories for this test site (CiviCRM's PhpSpreadsheet dependency has advisories). Do not copy this setting to a real site."
+  ( cd "$SITE" && ddev composer config audit.block-insecure false )
   # CiviCRM's code goes in before Drush, as the CiviCRM installation guide asks.
   if [ ! -d "$SITE/web/modules/contrib/civicrm" ]; then
     ( cd "$SITE" && ddev composer require "civicrm/civicrm-core:$CIVI_VERSION" "civicrm/civicrm-packages:$CIVI_VERSION" "civicrm/civicrm-drupal-8:$CIVI_VERSION" --no-interaction )

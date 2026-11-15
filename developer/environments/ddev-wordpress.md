@@ -1,6 +1,6 @@
 # DDEV test site: WordPress
 
-Written from the existing setup, 2026-11-15; not yet followed from scratch.
+Written from the existing setup, 2026-11-15. The kit builds a new site of this kind from nothing (`create-site.sh <cms>`); that path was followed on 2026-11-15 and is described in [`../ddev-kit/README.md`](../ddev-kit/README.md). The rest of this page describes the maintainers' existing site and was written from it.
 
 The WordPress site (`elections2`) is the main development site: PHPUnit, the upgrade test and the Playwright suite all run here. The review site `election-test` is built the same way on a newer CiviCRM; see [beekeepers-review-site.md](beekeepers-review-site.md).
 

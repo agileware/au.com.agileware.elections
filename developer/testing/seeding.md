@@ -1,6 +1,6 @@
 # Seeding test data
 
-Written from the existing setup, 2026-11-15; not yet followed from scratch. The `tests/seed/` scripts were written for this page and have only had a syntax check.
+Verified with: the `tests/seed/` scripts run on clean WordPress, Drupal 11 and Joomla 5.4 sites built by the DDEV kit, CiviCRM 6.19.5, 2026-11-15. The council fixture steps below are written from the existing setup.
 
 There are two kinds of test data. They do different jobs and do not share code.
 

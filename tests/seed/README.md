@@ -4,7 +4,7 @@ Scripts that fill a CiviCRM site with the invented **Beekeepers Association of A
 
 The folder is left out of the released extension (`tests` is not in the release package). How the scripts fit with the other test data is in [`developer/testing/seeding.md`](../../developer/testing/seeding.md).
 
-Written for `cv scr` and CiviCRM only, so the same scripts run on WordPress, Drupal and Joomla. The one script that needs a CMS is `wordpress-logins.php`. Not yet run on a clean site of each CMS: the first run on a new site is also the test of these scripts.
+Written for `cv scr` and CiviCRM only, so the same scripts run on WordPress, Drupal and Joomla. The one script that needs a CMS is `wordpress-logins.php`. Run on a clean site of each CMS on 2026-11-15 (CiviCRM 6.19.5): `seed.php` (twice), `links.php` and `move-election.php` on WordPress, Drupal and Joomla; `wordpress-logins.php` on WordPress.
 
 ## Run them
 

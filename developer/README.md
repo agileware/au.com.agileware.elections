@@ -22,9 +22,9 @@ The status says how far each section has been checked. Pages marked "not yet fol
 
 | Section | Contents | Status |
 |---|---|---|
-| [`environments/`](environments/README.md) | DDEV sites for WordPress, Drupal and Joomla; CiviCRM 6.16 and 6.19; the workspace layout; browser testing set-up; the Beekeepers review site | Written from the existing sites; not yet followed from scratch |
-| [`ddev-kit/`](ddev-kit/README.md) | The files to copy into a DDEV site, and `create-site.sh`, which builds a test site for each CMS | Written; not yet run |
-| [`testing/`](testing/README.md) | PHPUnit, Playwright on each CMS, the upgrade test, seeding test data, personas, CI, known CMS differences, manual browser testing | Written from the existing setup; not yet followed from scratch |
+| [`environments/`](environments/README.md) | DDEV sites for WordPress, Drupal and Joomla; CiviCRM 6.16 and 6.19; the workspace layout; browser testing set-up; the Beekeepers review site | Written from the existing sites; a new site for each CMS was built from scratch with the kit |
+| [`ddev-kit/`](ddev-kit/README.md) | The files to copy into a DDEV site, and `create-site.sh`, which builds a test site for each CMS | Followed from scratch for WordPress, Drupal and Joomla (2026-11-15) |
+| [`testing/`](testing/README.md) | PHPUnit, Playwright on each CMS, the upgrade test, seeding test data, personas, CI, known CMS differences, manual browser testing | Playwright and seeding verified on all three CMSs; the other pages written from the existing setup |
 | [`architecture/`](architecture/README.md) | Code map, data model and upgrade steps, voting methods, security model, lists and the page frame | Written from the code (2.1.0) |
 | [`standards/`](standards/README.md) | User interface standards, wording rules, git and pull request conventions | Current |
 | [`decisions/`](decisions/README.md) | One short entry for each decision: what, why, when; the open decisions | Current |

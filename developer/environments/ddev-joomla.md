@@ -1,6 +1,6 @@
 # DDEV test site: Joomla 5
 
-Written from the existing setup, 2026-11-15; not yet followed from scratch.
+Written from the existing setup, 2026-11-15. The kit builds a new site of this kind from nothing (`create-site.sh <cms>`); that path was followed on 2026-11-15 and is described in [`../ddev-kit/README.md`](../ddev-kit/README.md). The rest of this page describes the maintainers' existing site and was written from it.
 
 The Joomla site (`elections2-joomla`) runs the Playwright suite on Joomla 5.4 with Joomla's default front end template. It is the most unusual of the three sites, because CiviCRM's command line tool cannot start Joomla itself.
 

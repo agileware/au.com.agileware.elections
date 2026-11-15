@@ -1,6 +1,6 @@
 # Playwright browser tests
 
-Written from the existing setup, 2026-11-15; not yet followed from scratch.
+Verified with: the suite run project by project on new WordPress, Drupal 11 and Joomla 5.4 sites built by the DDEV kit, CiviCRM 6.19.5, 2026-11-15. Results and known failures are in the notes below.
 
 The Playwright suite drives Chromium against a real site. It tests the back end as organisers, the front end as people on personal links, a complete mock council election, accessibility, layout at phone width, and attacks. The same specs run on WordPress, Drupal and Joomla. This page covers how it is built, how to set up a site for it, and how to run it. It reconciles and extends `tests/playwright/README.md`, which is shorter.
 
@@ -77,7 +77,11 @@ If the browser download fails with `ENOTFOUND cdn.playwright.dev`, it is a passi
 | Drupal | From the project root (`/var/www/html`): `bash <extension>/tests/playwright/fixtures/setup-accounts-drupal.sh` (needs `vendor/bin/drush`). The council seeds itself when the suite starts. |
 | Joomla | From the site root: `bash <extension>/tests/playwright/fixtures/setup-accounts-joomla.sh`. The council seeds itself when the suite starts. |
 
-Not verified: that a clean Drupal or Joomla site needs nothing more (for example the mail redirect that the WordPress script sets). The existing sites passed without a documented extra step.
+Clean Drupal 11 and Joomla 5.4 sites built by the kit needed nothing more than their account script (checked 2026-11-15). Not verified: whether the mail redirect that the WordPress script sets matters on either.
+
+**Do not seed the review data (`tests/seed/`) on a site you run the suite on.** The referendum spec counts every `ElectionOptionVote` row on the site and expects its own four, so the seeded ballots make it fail (`specs/council/referendum.spec.ts`, "voters answer, see their answer, and can change it"). Use one site for the suite and another for review data, or rebuild the site between them.
+
+**Known failures on Drupal 11 (Olivero front end, Claro admin theme), seen on a new kit site and on the older Drupal site:** `specs/backend/candidates.spec.ts` "the Add Candidate button is at the right end of the row" fails because the narrow Olivero content column wraps the button onto a second line (the button bar is 46 px lower than Back). A failure in the `chromium` project stops the projects that depend on it, so run the remaining projects one at a time with `--project=<name> --no-deps`.
 
 ## Run
 

@@ -41,6 +41,19 @@ Done since 2.1.0, on the branch `developer-docs` (they reach `master` with its p
 | 12 | **Reorganise the project notes into this developer guide** (guides, reference pages, decisions, history of 2.0 and 2.1, this roadmap) | [`../../README.md`](../../README.md) |
 | 13 | **Test data scripts in the repository**: one election of each kind at a chosen stage on any CMS, with the logins as a separate optional step | `tests/seed/`, described in [../../testing/seeding.md](../../testing/seeding.md) |
 
+## Small items found while writing and checking these guides
+
+Not yet in the table above; each is a small change. Ask the maintainer whether to include them in 2.2.
+
+| Item | Detail |
+|---|---|
+| **Add Candidate button wraps on Drupal** | On the candidates list, with Olivero as the front end theme and Claro as the admin theme, the Add Candidate button drops under Back (46 px lower), so `specs/backend/candidates.spec.ts` "the Add Candidate button is at the right end of the row" fails on Drupal 11. Fix the button bar CSS (`.election-list-actions`) so it keeps one row, or wrap it neatly and change the test. |
+| **Referendum spec depends on an empty site** | `specs/council/referendum.spec.ts` counts every `ElectionOptionVote` on the site (expects 4), so it fails on a site that also holds the seeded review data. Limit the query to the spec's own election. |
+| **Upgrade test gaps** | `UpgraderTest` `tearDown`, `setUpHeadless` and `tests/upgrade/verify-v2.php` do not cover steps 20100, 20110 and 20130. |
+| **Out-of-date notes** | `tests/playwright/README.md` repeats and contradicts [`../../testing/playwright.md`](../../testing/playwright.md): trim it to a pointer. `CONTRIBUTING.md` still explains how to create the `release` branch by hand before the first cut; the branch exists now, so shorten it. |
+| **Dark mode claim** | The user guide says dark mode is supported; check it against the CSS and the theme variants script before 2.2 says so again. |
+| **Election stage has three implementations** | Noted during the code review that the stage of an election is worked out in more than one place. Not rechecked: find the places and consider one source. |
+
 ## Decisions still open
 
 The full list and the decisions already made are in [../../decisions/README.md](../../decisions/README.md). Open for 2.2:

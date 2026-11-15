@@ -1,6 +1,6 @@
 # DDEV test site kit
 
-Written from the existing setup, 2026-11-15; not yet followed from scratch.
+Verified with: DDEV v1.25.4, PHP 8.3, MariaDB 11.8, CiviCRM 6.19.5, extension 2.1.0; a new site for each CMS was built from nothing with `create-site.sh` on 2026-11-15 (WordPress, Drupal 11.4, Joomla 5.4.10).
 
 The kit builds a DDEV test site for the Elections extension on WordPress, Drupal 11 or Joomla 5 with one command, using only public downloads. The site gets CiviCRM, a custom extensions folder, the extension deployed into it, `cv`, PHPUnit, the Playwright Chromium set-up and mail catching. It copies what the maintainers' existing test sites have, made generic. How those sites are described and used is in [`../environments/README.md`](../environments/README.md); how the suites run is in [`../testing/README.md`](../testing/README.md).
 
@@ -160,14 +160,24 @@ Stop a site you are not using with `ddev stop <site-name>`; its data is kept and
 - **Latest tools.** `cv.phar` is the current release and PHPUnit is the newest 9.6.x, so a rebuild months later may differ from the maintainers' sites (cv 0.3.72 and a PHPUnit 9.6 phar were in use).
 - **Browser tests need time.** A full run takes about 8 minutes on WordPress. Never run two test jobs on one site, and do not deploy while one runs.
 
-## Not verified
+## What was verified, and what was not
 
-This kit was written from the existing sites and the public documentation. `bash -n` passes on the scripts; `shellcheck` was not available. The script has not been run from scratch. Specifically not verified:
+On 2026-11-15 the script was run from nothing for each CMS (CiviCRM 6.19.5, extension 2.1.0, one site at a time). Each build finished, `cv ext:list` (`jcv` on Joomla) showed the extension installed, and the browser tests ran on it:
 
-- That `ddev config` accepts the options as given on DDEV 1.25.4, and that DDEV writes `wp-config.php` on start for an empty WordPress docroot (a fallback with `wp config create` is in the script).
-- Joomla: that the CiviCRM package installs through `cli/joomla.php extension:install --path` (the existing site's installation method was not recorded). If it fails, the script prints the steps for installing the zip in the Joomla administration, and running it again carries on.
-- Drupal: the Composer settings (`allow-plugins`, `extra.enable-patching`, `compile-mode`, asset path) copied from the existing site's `composer.json` and the CiviCRM guide; and PHPUnit on Drupal (the maintainers do not run it there).
-- That `civicrm-dev-settings` finds its anchor line (the commented `extensionsDir` example) in the file each CiviCRM release writes. It stops with a message if it does not.
+| CMS | Build | Browser tests (`CMS=... npx playwright test`) | Seed scripts |
+|---|---|---|---|
+| WordPress | Passed after fixes to the settings helper and the `localhost` address (see below) | 21 passed in the first subset run, 1 flaky | Passed, including a second run, `move-election` and `links` |
+| Drupal 11 | Passed after turning off Composer's insecure-package block (see below) | 11 of 13 projects pass; two failures, see [`../testing/playwright.md`](../testing/playwright.md) | Passed, including a second run |
+| Joomla 5.4 | Passed first time; CiviCRM installs through the Joomla command line | All 13 projects pass (a few specs are skipped by design) | Passed; `ELECTIONS_SEED_LINK_STYLE=joomla` links open |
+
+Not verified:
+
 - CiviCRM 6.16.x on Drupal 11 and Joomla 5.4, and CiviCRM 6.20 on any CMS.
-- That `ddev exec` interprets a single quoted string as a shell command the way the maintainers' existing commands assume (they do).
-- Mailpit through `localhost:1025` on Drupal and Joomla (checked by the maintainers on WordPress only).
+- PHPUnit on Drupal and Joomla (the maintainers do not run it there).
+- Mail reaching Mailpit through `localhost:1025` on Drupal and Joomla.
+- `shellcheck` on the scripts (not available); `bash -n` passes.
+- A second build of the same site name after `ddev delete` (done by hand for each rebuild during the check).
+
+## Known limits found when the kit was first run
+
+- **Drupal: Composer's security blocking is switched off.** Every PhpSpreadsheet 5.x release that CiviCRM 6.19.5 allows has published security advisories, so `composer require civicrm/civicrm-core` fails with Composer's default settings (`audit.block-insecure`). The script sets `audit.block-insecure false` in the test site's `composer.json` and prints a warning. This is acceptable for a throwaway local test site only. Never copy it to a real Drupal site: update CiviCRM to a release that requires a fixed PhpSpreadsheet instead.
