@@ -29,24 +29,24 @@ A repository ruleset named `master` (id 26294835, created 2026-11-01) is active 
 
 The three checks come from the workflows `phpunit-tests.yml`, `upgrade-tests.yml` and `frontend-tests.yml`. They run on every pull request and on every push to `master`. Their jobs are named `phpunit`, `upgrade` and `playwright`; renaming a job or its workflow would stop the required check from ever reporting, so change the ruleset first.
 
-**Bypass.** The ruleset's bypass list is not visible to a non-administrator token. The project record says only organisation administrators can bypass (the repository administrator role was removed from the list). **Not verified.**
+**Bypass.** The Actions bot is not on the ruleset's bypass list (confirmed by the maintainer, 2026-11-15), so it cannot push to `master`. Only organisation administrators can bypass the ruleset.
 
 ### The Actions bot and `master`
 
 The **Cut release** workflow pushes straight to `master` in one case only: when its documentation step changes `mkdocs.yml`, `docs/` or the `Documentation` URL in `info.xml`. 2.0.0 did this once (commit "Standardise extension docs structure"), before the ruleset existed. 2.1.0 had nothing to change, so it pushed nothing to `master`.
 
-So the record shows that the workflow can force push `release` (2.1.0 did), but **no run has shown that the Actions bot can push to `master` under the ruleset. Not verified.** Keep `master` in the standard shape so the step never needs to:
+The workflow can force push `release` (2.1.0 did), but **the Actions bot cannot push to `master`**: the ruleset blocks it and the bot is not on the bypass list. If the documentation step has anything to change, the push is rejected and the cut fails. Keep `master` in the standard shape so the step never has a change to push:
 
 - no `README.md` in the repository root (the user guide opening is `docs/README.md`),
 - links in `docs/README.md` written as absolute URLs (the workflow rewrites relative ones, which would be a change to push),
 - `mkdocs.yml` and `docs/logo/agileware-logo.png` present,
 - the `Documentation` URL in `info.xml` pointing at `docs/README.md` on the default branch.
 
-If a cut ever fails at the documentation step with a rejected push, the cause is this rule: make the documentation change in a pull request, merge it, and run the cut again. Do not widen the ruleset's bypass without the maintainer's decision.
+If a cut fails at the documentation step with a rejected push, make the documentation change in a pull request, merge it, and run the cut again. Do not widen the ruleset's bypass without the maintainer's decision.
 
 ## The `release` branch
 
-The GitHub API on 2026-11-15 listed only the `master` ruleset and reported `release` as not protected. The project record says a `release` ruleset was set up (no deletion, force push allowed for the workflow only) but it was never visible to the read-only token. **Not verified: whether a `release` rule exists.** If one is wanted, it should block deletion and block everyone except `github-actions[bot]` from force pushing, because every cut is a force push.
+There is no ruleset on `release` (confirmed by the maintainer and by the GitHub API on 2026-11-15, which listed only the `master` ruleset). Anyone with write access can push to it. If one is wanted, it should block deletion and block everyone except `github-actions[bot]` from force pushing, because every cut is a force push.
 
 ## Repository security settings
 

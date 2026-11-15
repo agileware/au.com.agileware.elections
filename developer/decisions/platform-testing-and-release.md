@@ -54,10 +54,10 @@ Each entry gives the decision, why, the date and where it shows.
 - **In the code.** `SECURITY.md` (supported versions: 2.x).
 
 ### REL2 – `master` is protected by a ruleset
-- **Decision.** A pull request with one approval (of the most recent push, conversations resolved) and the checks `phpunit / phpunit`, `upgrade / upgrade` and `playwright / playwright`; no deleting `master`, no force push; the Actions bot may push for Cut release. Merging is the maintainer's.
-- **Why.** Cut release needs to push its docs commit and reset `release`; the first and second cuts (2.0.0 and 2.1.0) proved the bot is not blocked.
+- **Decision.** A pull request with one approval (of the most recent push, conversations resolved) and the checks `phpunit / phpunit`, `upgrade / upgrade` and `playwright / playwright`; no deleting `master`, no force push; the Actions bot is not on the bypass list and cannot push to `master`. Merging is the maintainer's.
+- **Why.** Nothing reaches `master` without review and passing checks. Cut release resets `release` only, so it does not need `master`; its optional documentation commit to `master` is rejected, which is why `master` is kept in the standard shape (see [`../releases/branches-and-rules.md`](../releases/branches-and-rules.md)).
 - **Date.** 2026-11-01 (settled by 2.1.0 on 2026-11-03).
-- **In the code.** GitHub ruleset on the repository, described in [`../standards/git-and-pull-requests.md`](../standards/git-and-pull-requests.md). Not verified: the ruleset for the `release` branch (the account used to check had no admin access).
+- **In the code.** GitHub ruleset on the repository, described in [`../standards/git-and-pull-requests.md`](../standards/git-and-pull-requests.md). There is no ruleset on `release`.
 
 ### REL3 – Releases are cut by the workflow from `release`
 - **Decision.** The **Cut release** workflow builds the `release` branch from `master` minus `.github`, `tests`, `.gitignore`, `CONTRIBUTING.md`, `developer` and `AGENTS.md`, tags it and publishes the GitHub Release. `<version>` in `info.xml` must match what is run. The **Init release** workflow is not used (it refuses once `cut-release.yml` exists).

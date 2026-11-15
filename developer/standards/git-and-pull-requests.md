@@ -6,7 +6,7 @@ How changes get into the extension: branches, commits, pull requests, the requir
 
 | Branch | What it is | Who changes it |
 |---|---|---|
-| `master` | The next release. It holds the latest release plus anything merged since. Protected. | A pull request only. Nobody pushes to it. The Cut release workflow (the Actions bot) is allowed to push its docs commit |
+| `master` | The next release. It holds the latest release plus anything merged since. Protected. | A pull request only. Nobody pushes to it. The Cut release workflow (the Actions bot) cannot push its docs commit |
 | `release` | The released tree: `master` with the development files removed. It is what tags point at and what the CiviCRM extension directory installs | Only the Cut release workflow, which resets it to the filtered tree each time. Never edit it by hand |
 | Version branches, for example `version-2.1`, `version-2.2` | The work for one release, cut from `origin/master` | The developers of that release |
 | Topic branches, for example `developer-docs` | One piece of work (the developer guide), cut from `origin/master`, merged by pull request | The author |
