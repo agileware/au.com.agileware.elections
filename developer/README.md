@@ -18,21 +18,23 @@ When a guide and the code disagree, trust the code and fix the guide in the same
 
 ## Contents
 
-Sections are written in this order; the status says what exists today.
+The status says how far each section has been checked. Pages marked "not yet followed from scratch" were written from the existing setup: if a step is wrong, fix the page.
 
 | Section | Contents | Status |
 |---|---|---|
-| `environments/` | DDEV sites for WordPress, Drupal and Joomla; CiviCRM 6.16 and 6.19; the workspace layout; the Beekeepers review site | To write |
-| `ddev-kit/` | The files to copy into a DDEV site, and a script that builds a test site for each CMS | To write |
-| `testing/` | PHPUnit, Playwright on each CMS, the upgrade test, seeding test data, personas, CI, known CMS differences | To write |
-| `architecture/` | Code map, data model and upgrade steps, voting methods, security model | To write |
-| `standards/` | User interface standards, wording rules, commit and pull request conventions | To write |
-| `decisions/` | One short entry for each decision: what, why, when | To write |
-| `releases/` | How to cut a release, branch rules, what ships and what does not | To write |
-| `roadmap/` | The plan for the next version | To write |
-| `history/` | Summaries and archived plans of 2.0 and 2.1 | To write |
+| [`environments/`](environments/README.md) | DDEV sites for WordPress, Drupal and Joomla; CiviCRM 6.16 and 6.19; the workspace layout; browser testing set-up; the Beekeepers review site | Written from the existing sites; not yet followed from scratch |
+| [`ddev-kit/`](ddev-kit/README.md) | The files to copy into a DDEV site, and `create-site.sh`, which builds a test site for each CMS | Written; not yet run |
+| [`testing/`](testing/README.md) | PHPUnit, Playwright on each CMS, the upgrade test, seeding test data, personas, CI, known CMS differences, manual browser testing | Written from the existing setup; not yet followed from scratch |
+| [`architecture/`](architecture/README.md) | Code map, data model and upgrade steps, voting methods, security model, lists and the page frame | Written from the code (2.1.0) |
+| [`standards/`](standards/README.md) | User interface standards, wording rules, git and pull request conventions | Current |
+| [`decisions/`](decisions/README.md) | One short entry for each decision: what, why, when; the open decisions | Current |
+| [`releases/`](releases/README.md) | How to cut a release, branch rules, what ships and what does not | Written from the 2.0.0 and 2.1.0 releases |
+| [`roadmap/`](roadmap/README.md) | The plan for the next version (start with [2.2](roadmap/2.2/README.md)) | Current |
+| [`history/`](history/README.md) | Summaries and archived plans of 2.0 and 2.1 | Frozen |
 
-Test data scripts are code, so they live in `tests/seed/` (also left out of releases) and are described in `testing/`.
+Test data scripts are code, so they live in [`tests/seed/`](../tests/seed/README.md) (also left out of releases) and are described in [`testing/seeding.md`](testing/seeding.md).
+
+**Starting a new session or joining the project?** Read [`roadmap/2.2/README.md`](roadmap/2.2/README.md) first, then the page for the part you will change.
 
 ## Ground rules
 

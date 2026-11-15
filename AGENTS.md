@@ -10,7 +10,8 @@ Elections for CiviCRM (`au.com.agileware.elections`): nominations, ranked choice
 - **Database changes** need an upgrade step in `CRM_Elections_Upgrader` (the next free number is above the last `upgrade_2xxxx`) and a test in `UpgraderTest`, so existing installs upgrade.
 - **Test on both CiviCRM 6.16 and 6.19.** They behave differently (6.19 hides AJAX error messages unless a `CRM_Elections_Exception` is thrown, and needs `is_public` for front end pages).
 - **Test every screen as the people who use it,** on all three CMSs for anything that changes a screen. The front end is tested as personas through personal links, not only as an administrator.
-- **Templates are Smarty 5.** Back end screens follow the user interface standards in `developer/standards/`.
+- **Templates are Smarty 5.** Back end screens follow the user interface standards in [`developer/standards/ui-standards.md`](developer/standards/ui-standards.md); wording rules are in [`developer/standards/wording.md`](developer/standards/wording.md).
 - **Never** commit passwords, personal links or API tokens.
 - **Run long jobs in the background** with a log file and check the log; do not poll in a loop. Never run two test jobs on one site, and do not deploy while one runs.
 - **Anything outward-facing** (pushing, opening or merging pull requests, GitHub settings, posting comments) waits for the maintainer's go-ahead.
+- **Where to look.** Test sites and how to run every suite: `developer/environments/`, `developer/ddev-kit/` and `developer/testing/`. How the code fits together: `developer/architecture/`. What was decided and why: `developer/decisions/`. What is planned next: `developer/roadmap/`.

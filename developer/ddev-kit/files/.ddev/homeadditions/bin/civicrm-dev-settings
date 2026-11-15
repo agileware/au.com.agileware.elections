@@ -1,0 +1,87 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Prepares a civicrm.settings.php for a DDEV test site (run inside the web container by create-site.sh).
+ *
+ *   civicrm-dev-settings <civicrm.settings.php> <site url> <extensions dir> [base url suffix]
+ *
+ * It makes the same three changes the maintainers' test sites have:
+ *
+ *  1. Defines $elections_dev_base at the top: the site url, or http://localhost when the request is for
+ *     localhost. The Playwright tests run inside the container and use http://localhost.
+ *  2. Replaces the install-time site address in the file (resource and file urls, CIVICRM_UF_BASEURL)
+ *     with $elections_dev_base, so the site works on both addresses.
+ *  3. Sets the custom extensions directory and its url (CRM/extensions in the web root).
+ *
+ * The base url suffix is appended to CIVICRM_UF_BASEURL: empty for WordPress and Drupal, "/administrator/" for
+ * the Joomla back end file and "/" for the Joomla front end file.
+ *
+ * Safe to run twice: a file that carries the ELECTIONS-KIT marker is left alone.
+ */
+
+if ($argc < 4) {
+  fwrite(STDERR, "usage: civicrm-dev-settings <civicrm.settings.php> <site url> <extensions dir> [base url suffix]\n");
+  exit(2);
+}
+[, $file, $siteUrl, $extDir] = $argv;
+$suffix = $argv[4] ?? '';
+$siteUrl = rtrim($siteUrl, '/');
+
+$code = is_file($file) ? file_get_contents($file) : FALSE;
+if ($code === FALSE) {
+  fwrite(STDERR, "civicrm-dev-settings: cannot read $file\n");
+  exit(1);
+}
+if (strpos($code, 'ELECTIONS-KIT') !== FALSE) {
+  echo "$file: already prepared\n";
+  exit(0);
+}
+
+// 1. The address helper, straight after the opening tag.
+$head = "// ELECTIONS-KIT. Dev only: also serve the site on http://localhost inside the DDEV container (Playwright).\n"
+  . "\$elections_dev_base = ((\$_SERVER['HTTP_HOST'] ?? '') === 'localhost') ? 'http://localhost' : '" . addslashes($siteUrl) . "';\n";
+$code = preg_replace_callback('~\A<\?php\r?\n~', fn($m) => $m[0] . $head, $code, 1, $count);
+if ($count !== 1) {
+  fwrite(STDERR, "civicrm-dev-settings: $file does not start with <?php\n");
+  exit(1);
+}
+
+// 2. Install-time addresses become $elections_dev_base (a path after the host is kept).
+$code = preg_replace_callback(
+  "~'" . preg_quote($siteUrl, '~') . "(/[^']*)?'~",
+  fn($m) => '$elections_dev_base' . (($m[1] ?? '') !== '' ? " . '" . $m[1] . "'" : ''),
+  $code
+);
+// The define is rewritten whatever address the installer wrote (the Joomla command line installer
+// cannot know it). Lines inside the comment block start with an asterisk and are not touched.
+$code = preg_replace_callback(
+  "~^([ \t]*)define\(\s*'CIVICRM_UF_BASEURL'\s*,[^;]*\);~m",
+  fn($m) => $m[1] . "define('CIVICRM_UF_BASEURL', \$elections_dev_base" . ($suffix !== '' ? " . '" . addslashes($suffix) . "'" : '') . ');',
+  $code
+);
+
+// 3. The custom extensions directory, placed under the commented example the installer writes.
+if (preg_match("~^[ \t]*\\\$civicrm_setting\['domain'\]\['extensionsDir'\]~m", $code)) {
+  fwrite(STDERR, "civicrm-dev-settings: $file already sets extensionsDir; leaving it for you to check\n");
+}
+$example = "~^([ \t]*//[ \t]*\\\$civicrm_setting\['domain'\]\['extensionsDir'\][ \t]*=[ \t]*'/path/to/extensions-dir';[ \t]*\r?\n)~m";
+$lines = " \$civicrm_setting['domain']['extensionsDir'] = '" . addslashes($extDir) . "';\n"
+  . " \$civicrm_setting['domain']['extensionsURL'] = \$elections_dev_base . '/CRM/extensions';\n";
+$code = preg_replace_callback($example, fn($m) => $m[1] . $lines, $code, 1, $count);
+if ($count !== 1) {
+  fwrite(STDERR, "civicrm-dev-settings: could not find the extensionsDir example line in $file; add the two extensionsDir and extensionsURL settings by hand\n");
+  exit(1);
+}
+
+// Check the result is valid PHP before replacing the real file.
+$tmp = $file . '.kit-new';
+file_put_contents($tmp, $code);
+exec('php -l ' . escapeshellarg($tmp) . ' 2>&1', $out, $rc);
+if ($rc !== 0) {
+  unlink($tmp);
+  fwrite(STDERR, "civicrm-dev-settings: the changed file did not pass php -l, so $file was left as it was:\n" . implode("\n", $out) . "\n");
+  exit(1);
+}
+chmod($tmp, fileperms($file) & 0777);
+rename($tmp, $file);
+echo "$file: prepared\n";
