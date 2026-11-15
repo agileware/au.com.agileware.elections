@@ -47,7 +47,7 @@ Each entry gives the decision, why, the date, and where it shows. Dates of the 2
 ### D17 – Who can see published results
 - **Decision.** Keep the current behaviour: anyone logged in with `view Elections`, or anyone with a valid personal link when the election allows access without logging in, with no group check. Results pages show winners and how each was decided, never vote counts, and ties are shown as ties. No new setting.
 - **Why.** Confirmed by the maintainer; changing it would break existing sites.
-- **Date.** 2026-10-27.
+- **Date.** 2026-10-27; asked again and reconfirmed by the maintainer on 2026-11-15 (option "keep as is", with the rule stated in the user guide: [Who can see the results](../../docs/roles_and_permissions.md#who-can-see-the-results)). Open alternatives, if an organisation asks: a per-election setting (everyone who can open the election, only people eligible to take part, organisers only; needs a column and an upgrade step), or results that outlast the election's visibility window.
 - **In the code.** `CRM_Elections_Permission::check()`; `CRM_Elections_Page_ElectionSummary`; results page rules in [`../standards/ui-standards.md`](../standards/ui-standards.md#6-front-end).
 
 ## Groups, write-ins, questions (version 2.0)

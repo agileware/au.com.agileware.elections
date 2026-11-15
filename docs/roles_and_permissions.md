@@ -23,6 +23,14 @@ On the election form, **Voting groups**, **Nominating groups** and **Candidate g
 
 What you will see when it is missing: the election form shows a notice above the group fields ("You cannot see any groups.") and the group fields stay empty. The fix is to give the role **view all contacts** (or an ACL that allows the groups and their contacts to be viewed), then reload the page. The group lists are the same ones a site administrator sees.
 
+## Who can see the results
+
+Results are shown from **Results published on**, once the votes have been counted. From then on, anyone who can open the election can see them. That means people with the **View Elections** permission, and people on a personal link where the election allows personal links. The results are not limited to the people who voted or were eligible to vote.
+
+Until the results are published, organisers can preview them on the election page and in the back end; everyone else sees where the election is up to. After **Visible until** the election and its results are hidden from everyone except organisers.
+
+There is no setting to show the results to the people who took part only. To keep an election's results from people, do not give them the **View Elections** permission or a personal link.
+
 ## Setting the permissions
 
 ### WordPress
