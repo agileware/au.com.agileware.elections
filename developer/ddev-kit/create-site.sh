@@ -179,10 +179,10 @@ copy_kit_files() {
   cp "$FILES_DIR/.ddev/commands/host/deploy-elections" "$SITE/.ddev/commands/host/deploy-elections"
   chmod +x "$SITE/.ddev/commands/host/deploy-elections"
   local f
-  for f in cv phpunit civicrm-dev-settings .gitignore; do
+  for f in cv phpunit civicrm-dev-settings wp-config-localhost .gitignore; do
     cp "$FILES_DIR/.ddev/homeadditions/bin/$f" "$SITE/.ddev/homeadditions/bin/$f"
   done
-  chmod +x "$SITE/.ddev/homeadditions/bin/cv" "$SITE/.ddev/homeadditions/bin/phpunit" "$SITE/.ddev/homeadditions/bin/civicrm-dev-settings"
+  chmod +x "$SITE/.ddev/homeadditions/bin/cv" "$SITE/.ddev/homeadditions/bin/phpunit" "$SITE/.ddev/homeadditions/bin/civicrm-dev-settings" "$SITE/.ddev/homeadditions/bin/wp-config-localhost"
   if [ "$CMS" = "joomla" ]; then
     cp "$FILES_DIR/.ddev/homeadditions/bin/jcv" "$SITE/.ddev/homeadditions/bin/jcv"
     chmod +x "$SITE/.ddev/homeadditions/bin/jcv"
@@ -383,6 +383,7 @@ configure_civicrm_settings() {
   dexec "mkdir -p '$EXT_DIR_C'"
   case "$CMS" in
     wordpress)
+      dexec "wp-config-localhost '$WEBROOT_C/wp-config.php'"
       dexec "civicrm-dev-settings '$WEBROOT_C/wp-content/uploads/civicrm/civicrm.settings.php' '$SITE_URL' '$EXT_DIR_C'"
       ;;
     drupal)
@@ -459,7 +460,9 @@ fi
 
 say "Deploying the extension (ddev deploy-elections)"
 ddev deploy-elections
-if dexec "cd '$WEBROOT_C' && $CV_CMD ext:list -L" 2>/dev/null | grep -q "$EXT_KEY"; then
+# Capture the list first: "grep -q" ends the pipe at the first match and, under pipefail, that fails the test.
+EXT_LIST="$(dexec "cd '$WEBROOT_C' && $CV_CMD ext:list -L" 2>/dev/null || true)"
+if printf '%s\n' "$EXT_LIST" | grep -q "$EXT_KEY"; then
   note "$EXT_KEY is installed from $EXT_C"
 else
   warn "$EXT_KEY was not found in 'ext:list'. Check: ddev exec 'cd $WEBROOT_C && $CV_CMD ext:list -L'"
@@ -482,9 +485,9 @@ echo "Next, create the test accounts and data the browser tests need (from $SITE
 case "$CMS" in
   wordpress)
     echo "  ddev exec 'cd $EXT_C/tests/playwright && bash fixtures/setup-environment.sh'"
-    echo "  Run the tests as the administrator you just created (read the password from the credentials file):"
-    echo "    set -a; . .ddev/.site-credentials; set +a"
-    echo "    ddev exec \"cd $EXT_C/tests/playwright && WP_ADMIN_USER=\$ADMIN_USER WP_ADMIN_PASS=\$ADMIN_PASSWORD BASE_URL=http://localhost npx playwright test\""
+    echo "  Run the tests as the administrator you just created (the password is read inside the container from the"
+    echo "  credentials file, so it never appears on a command line):"
+    echo "    ddev exec 'cd $EXT_C/tests/playwright && set -a && . /var/www/html/.ddev/.site-credentials && set +a && WP_ADMIN_USER=\$ADMIN_USER WP_ADMIN_PASS=\$ADMIN_PASSWORD BASE_URL=http://localhost npx playwright test'"
     ;;
   drupal)
     echo "  ddev exec 'cd /var/www/html && bash $EXT_C/tests/playwright/fixtures/setup-accounts-drupal.sh'"
