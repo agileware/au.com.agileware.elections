@@ -81,6 +81,17 @@ Each entry gives the decision, why, the date and where it shows.
 - **Date.** 2026-11-15.
 - **In the code.** `developer/`, `AGENTS.md`; `developer/` and `AGENTS.md` are left out of releases by `cut-release.yml`.
 
+### D31 – Test account passwords are generated, never committed
+- **Decision.** The test accounts' passwords are made at setup by `tests/playwright/fixtures/generate-passwords.php` and kept in the git-ignored `fixtures/.generated/test-passwords.json`. `test-users.json` holds names, e-mail addresses and roles only.
+- **Why.** The file had held fixed throwaway passwords since 2.0.0, in a public repository. They only opened local and CI test sites, but a committed password invites reuse and a scanner flags it. The values already published stay in the git history: never use them anywhere.
+- **Decided.** 2026-11-15, by the maintainer.
+
+### D32 – The test suite is cleaned up: no project chain, low-value tests removed
+- **Decision.** (1) The Playwright projects that move the one seeded election are no longer chained with `dependencies`: one worker always runs them in the order listed, and each spec reseeds the election, so a failure never skips the projects after it (decided 2026-11-16). (2) The tests that add little were removed (decided 2026-11-17): 29 PHPUnit tests and `Helper/TimeZoneTest`; 7 browser tests; the `admin-managed` project, whose one unique check (the page says the organisers choose and there is no nomination form) is now the last test of `groups.spec.ts`; the screenshot walk, which asserts nothing, is a tool run with `npm run screens` and not a test. Two assertions were moved into PHPUnit first (adding a position to a started election is refused; an organiser cannot add an outsider as a candidate when no candidate group is set). A test is removed only when something else fails for the same regression or it asserts nothing meaningful. Further removals, retries on the council and security files, merged page walks and a coverage report are not decided; see the 2.2 roadmap.
+- **Why.** The chain skipped every later project after one failure (on Drupal one failing layout test left 53 tests not run), and a number of tests only repeated a stronger neighbour or checked a constant, so they cost time and noise without catching anything.
+- **Date.** 2026-11-16 and 2026-11-17, by the maintainer.
+- **In the code.** `tests/playwright/playwright.config.ts`, `tests/playwright/playwright.screens.config.ts`, `tests/playwright/tools/screens.spec.ts`; [`../testing/playwright.md`](../testing/playwright.md), [`../testing/phpunit.md`](../testing/phpunit.md).
+
 ## Open decisions
 
 ### Test data scripts in the repository
@@ -89,7 +100,7 @@ Each entry gives the decision, why, the date and where it shows.
 
 ### Version 2.2 branch name and push rule
 - **Question.** What is the 2.2 branch called (suggested `version-2.2`, cut from `origin/master`) and is it pushed as it goes? The 2.1 rule (kept local until finished, one release pull request) applied to 2.1 only.
-- **Status.** Ask the maintainer at the start of 2.2.
+- **Status.** The branch `version-2.2` was cut from `origin/master` on 2026-11-17 and the maintainer said to work on it. Whether it is pushed as it goes, or kept local until the release pull request, has not been decided.
 
 ### D19, D13, D14, U14
 D19 is above (decided, not built). D13 and D14 are in [`voting-and-elections.md`](voting-and-elections.md#open-decisions); U14 is in [`interface-and-wording.md`](interface-and-wording.md#open-decisions).

@@ -68,7 +68,7 @@ Joomla's mailer is `mail` (PHP's mail function), which DDEV routes to Mailpit. N
 ddev exec 'bash CRM/extensions/au.com.agileware.elections/tests/playwright/fixtures/setup-accounts-joomla.sh'
 ```
 
-The script reads the name, e-mail address and test password from `fixtures/test-users.json` (test values for local sites only).
+The script reads the name and e-mail address from `fixtures/test-users.json` and makes a random password, kept in the git-ignored `fixtures/.generated/test-passwords.json` (see [Playwright](../testing/playwright.md)).
 
 **There are no manager or participant sessions on Joomla.** CiviCRM permissions on Joomla are set through Joomla's access levels, not roles the script can create, so the global setup of the suite signs in only the administrator and six specs skip by design (election form, overview, permissions twice, smoke twice). Giving Joomla manager and participant sessions is planned for 2.2: see [`../roadmap/README.md`](../roadmap/README.md).
 

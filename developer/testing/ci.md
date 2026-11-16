@@ -41,4 +41,4 @@ A re-run of an earlier run does not pick up changes merged to `ci-workflows`: Gi
 - **Drupal and Joomla browser tests.** The shared workflows build WordPress only. The Playwright suite and the upgrade test run on the Drupal and Joomla DDEV sites before each release. Adding Drupal and Joomla workflows to `ci-workflows` is planned work ([../roadmap/2.2/README.md](../roadmap/2.2/README.md)).
 - **CiviCRM 6.16.** CI runs the newest stable CiviCRM only; 6.16 is covered on the DDEV WordPress site.
 - **Joomla sessions** for the back end specs that need a manager or member ([playwright.md](playwright.md)).
-- **Theme variations and screenshots** (`THEME_VARIANT`, `SCREENS=1`): run by hand.
+- **Theme variations and screenshots** (`THEME_VARIANT`, `npm run screens`): run by hand.

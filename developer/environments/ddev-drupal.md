@@ -54,7 +54,7 @@ Drupal sends through PHP's mail function, which DDEV routes to Mailpit; nothing 
 
 ## Roles, accounts and permissions the tests need
 
-`tests/playwright/fixtures/setup-accounts-drupal.sh` makes the roles and accounts with Drush. It reads the user names, e-mail addresses and passwords from `fixtures/test-users.json` (test values for local sites only) and is safe to run again. Run it from the project root, where `vendor/bin/drush` exists:
+`tests/playwright/fixtures/setup-accounts-drupal.sh` makes the roles and accounts with Drush. It reads the user names and e-mail addresses from `fixtures/test-users.json`, makes random passwords (kept in the git-ignored `fixtures/.generated/test-passwords.json`), and is safe to run again. Run it from the project root, where `vendor/bin/drush` exists:
 
 ```bash
 ddev exec 'bash /var/www/html/web/CRM/extensions/au.com.agileware.elections/tests/playwright/fixtures/setup-accounts-drupal.sh'

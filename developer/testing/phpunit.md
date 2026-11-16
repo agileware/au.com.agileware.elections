@@ -52,7 +52,7 @@ All classes are under `tests/phpunit/`. Test classes in `CRM/Elections/` are nam
 
 | Area | Classes |
 |---|---|
-| Stages, dates and status | `DateRulesTest`, `ScheduleTest`, `ElectionStatusTest`, `Helper/TimeZoneTest` |
+| Stages, dates and status | `DateRulesTest`, `ScheduleTest`, `ElectionStatusTest` |
 | Who may do what | `Helper/EligibilityTest`, `SeparateGroupsTest`, `AdminRulesTest`, `AdminManagedTest`, `VisibilityTest` |
 | Voting methods and counting | `VotingMethodTest`, `ReferendumTest`, `WriteInTest`, `BAO/ElectionResultTest` |
 | A whole election as people | `CouncilPersonaTest` (all 41 personas at every stage; see [personas.md](personas.md)) |

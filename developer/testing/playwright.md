@@ -19,15 +19,16 @@ The Playwright suite drives Chromium against a real site. It tests the back end 
 | `fixtures/setup-accounts-drupal.sh`, `setup-accounts-joomla.sh` | Test accounts on Drupal and Joomla. |
 | `fixtures/seed-council.php`, `advance-council.php` | The council election and its stage steps ([seeding.md](seeding.md)). |
 | `fixtures/theme-variants.sh` | Switches a site's default theme to a colour variation, for accessibility checks. |
-| `fixtures/test-users.json` | Names, roles and test passwords of the local test accounts (values for local test sites only; never reuse them). |
+| `fixtures/test-users.json` | Names, e-mail addresses and roles of the test accounts. It holds no passwords. |
+| `fixtures/generate-passwords.php` | Called by the three setup scripts. Makes a random password for each account in `test-users.json` and saves them in `fixtures/.generated/test-passwords.json` (git-ignored, never committed). Existing passwords are kept, so running a script again changes nothing; delete the file and run the script again to make new ones. `global-setup.ts` reads the file and stops with a message that names the setup script if it is missing. |
 | `specs/backend/` | Organisers: Manage Elections, the election form, positions (drag, edit in place, duplicate, delete, locking), candidates, overview, permissions, the page frame. |
-| `specs/frontend/` | People on personal links: smoke, election page by stage, layout, accessibility, screenshots. |
+| `specs/frontend/` | People on personal links: smoke, election page by stage, layout, accessibility. |
 | `specs/council/` | A complete council election and variations on it: ranked choice, most votes, groups, write-ins, referendum, organiser-chosen candidates, results page. |
 | `specs/security/` | `xss` (script in every field people can fill) and `tampering` (links, requests and forms that should be refused). |
 
 ## Projects and their order
 
-The config has a `chromium` project (everything not named below), then projects chained by `dependencies`, each of which moves the one seeded election through its stages and puts it back at the nominations stage: `layout`, `election-page`, `accessibility`, `security` (the `xss` spec), `tampering`, `council`, `plurality`, `groups`, `writein`, `referendum`, `admin-managed`, `results-display`, and `screens` (only with `SCREENS=1`). A failure in `chromium` skips all the later projects, so a large "did not run" count means look at the first project.
+The config has a `chromium` project (everything not named below), then projects that each move the one seeded election through its stages and put it back at the nominations stage, one after the other in the order listed: `layout`, `election-page`, `accessibility`, `security` (the `xss` spec), `tampering`, `council`, `plurality`, `groups`, `writein`, `referendum` and `results-display`. The projects are **not** chained with `dependencies` (they were until 2.1): the suite always runs with one worker, which runs the projects in this order, so no two of them touch the election at once, and a failure in one project never stops the later ones. Each of these specs reseeds the election before it starts, so a failed run leaves nothing for the next to trip over. Never raise the worker count for a full run; `PW_WORKERS=2` is safe only for the `chromium` project on its own, whose specs make their own elections.
 
 ## How it runs on each CMS
 
@@ -40,7 +41,7 @@ The config has a `chromium` project (everything not named below), then projects 
 | `COMPONENT_DIR` | Where the extension is mounted inside the container; script paths are mapped to it when `CIVI_EXEC_PREFIX` is set (CI sets it). |
 | `WP_ADMIN_USER`, `WP_ADMIN_PASS` | The WordPress administrator the suite logs in as (it defaults to the CI account). Set them to match your site's administrator. |
 | `WP_CLEAN_URLS=0` | WordPress without pretty permalinks: use the `?page=CiviCRM&q=` address form. |
-| `SCREENS=1` | Take screenshots of every page (`test-results/screens/<cms>/`). |
+| `npm run screens` | Not a test: takes screenshots of every page (`tools/screens.spec.ts`, its own config `playwright.screens.config.ts`, pictures in `test-results/screens/<cms>/`). |
 | `A11Y_WIDTHS`, `THEME_VARIANT` | Widths for the axe scan (default 1280) and the theme variation in use (see `theme-variants.sh`). |
 
 Sessions saved by `global-setup.ts` under `fixtures/.generated/auth/<name>.json`:
@@ -73,7 +74,7 @@ If the browser download fails with `ENOTFOUND cdn.playwright.dev`, it is a passi
 
 | CMS | Then |
 |---|---|
-| WordPress | `bash fixtures/setup-environment.sh` from `tests/playwright`. It makes the roles and users in `test-users.json`, the election pages from `docs/setup.md`, redirects outgoing mail to the database and seeds the council. Safe to run again. |
+| WordPress | `bash fixtures/setup-environment.sh` from `tests/playwright`. It makes the roles and users in `test-users.json` (with generated passwords), the election pages from `docs/setup.md`, redirects outgoing mail to the database and seeds the council. Safe to run again. |
 | Drupal | From the project root (`/var/www/html`): `bash <extension>/tests/playwright/fixtures/setup-accounts-drupal.sh` (needs `vendor/bin/drush`). The council seeds itself when the suite starts. |
 | Joomla | From the site root: `bash <extension>/tests/playwright/fixtures/setup-accounts-joomla.sh`. The council seeds itself when the suite starts. |
 
@@ -81,7 +82,7 @@ Clean Drupal 11 and Joomla 5.4 sites built by the kit needed nothing more than t
 
 **Do not seed the review data (`tests/seed/`) on a site you run the suite on.** The referendum spec counts every `ElectionOptionVote` row on the site and expects its own four, so the seeded ballots make it fail (`specs/council/referendum.spec.ts`, "voters answer, see their answer, and can change it"). Use one site for the suite and another for review data, or rebuild the site between them.
 
-**Known failures on Drupal 11 (Olivero front end, Claro admin theme), seen on a new kit site and on the older Drupal site:** `specs/backend/candidates.spec.ts` "the Add Candidate button is at the right end of the row" fails because the narrow Olivero content column wraps the button onto a second line (the button bar is 46 px lower than Back). A failure in the `chromium` project stops the projects that depend on it, so run the remaining projects one at a time with `--project=<name> --no-deps`.
+**Known failure on Drupal 11:** none now. The "Add Candidate button is at the right end of the row" test, which failed on Drupal because the narrow Olivero column wraps the button, was removed in 2.2 (the button order is asserted by `frame.spec.ts`; the wrapping itself is in the [2.2 roadmap](../roadmap/2.2/README.md)).
 
 ## Run
 
@@ -95,14 +96,14 @@ BASE_URL=http://localhost npx playwright test --reporter=list
 
 Drupal: `CMS=drupal BASE_URL=http://localhost npx playwright test`. Joomla: `CMS=joomla CIVI_CV=jcv BASE_URL=http://localhost npx playwright test`.
 
-Run one project or one spec. Without `--no-deps` Playwright first runs every project it depends on, and the projects share one election, so use `--no-deps`, and `--workers=1` for the council-family projects:
+Run one project or one spec with `--project=<name>` or the spec's path. The projects share one election, so run one at a time (the default is one worker):
 
 ```bash
 BASE_URL=http://localhost npx playwright test specs/backend/frame.spec.ts --reporter=list
 ```
 
 ```bash
-CMS=drupal BASE_URL=http://localhost npx playwright test --project=council --no-deps --workers=1
+CMS=drupal BASE_URL=http://localhost npx playwright test --project=council
 ```
 
 A full run takes roughly 7 to 10 minutes on WordPress with one site running. Run it as a background job with a log, then read the log; never write a separate waiter that searches for the process by name (it matches itself and never ends):
@@ -128,4 +129,4 @@ In GitHub Actions the suite runs on WordPress only, with `CI` set: one worker, a
 
 ## Add a spec
 
-Put it in `specs/backend`, `frontend`, `council` or `security`. Import `test` and `expect` from `../../fixtures/base` so it gets the checks above. A spec that moves the council election through its stages must be its own project in `playwright.config.ts`, chained after the previous one, and must reseed the council in `beforeAll` and `afterAll`. Test the front end through personas ([personas.md](personas.md)); use the CMS-specific address helpers, never a hard-coded path.
+Put it in `specs/backend`, `frontend`, `council` or `security`. Import `test` and `expect` from `../../fixtures/base` so it gets the checks above. A spec that moves the council election through its stages must be its own project in `playwright.config.ts`, listed after the others (the single worker runs the projects in the order listed; do not add `dependencies`), and must reseed the council in `beforeAll` and `afterAll`. Test the front end through personas ([personas.md](personas.md)); use the CMS-specific address helpers, never a hard-coded path.

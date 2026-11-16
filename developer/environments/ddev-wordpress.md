@@ -81,7 +81,7 @@ It makes:
 | Role `elections_manager` | Runs elections: `access_civicrm`, `administer_elections`, `view_elections`, `access_ajax_api`, `view_all_contacts` |
 | Role `elections_limited` | An organiser without View All Contacts: the same but no `view_all_contacts` |
 | Role `elections_member` | Takes part while signed in: `view_elections`, `access_ajax_api`, `access_uploaded_files`, `profile_view`, `profile_edit` |
-| Users | One user for each role, plus the WordPress administrator `admin`; names, e-mail addresses and the test passwords are in `tests/playwright/fixtures/test-users.json` and are for local test sites only |
+| Users | One user for each role, plus the WordPress administrator `admin`; names and e-mail addresses are in `tests/playwright/fixtures/test-users.json`; the passwords are generated when `setup-environment.sh` runs and kept in the git-ignored `tests/playwright/fixtures/.generated/test-passwords.json` |
 | Page `election` | Shortcode `[civicrm component="electioninfo" hijack="0"]` |
 | Page `elections` | Shortcode `[civicrm component="elections" hijack="0" action="visible" viewpageid="<election page id>"]` |
 | Council election | Seeded with `fixtures/seed-council.php`: see [`../testing/seeding.md`](../testing/seeding.md) |

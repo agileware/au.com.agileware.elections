@@ -14,7 +14,7 @@ The plan's IDs are kept, so the archived plan still matches. Renumbering is not 
 
 | Prefix | Source | Date |
 |---|---|---|
-| `D1` to `D30` | The plan's decisions log | October to 15 November 2026 |
+| `D1` to `D32` | The plan's decisions log | October to 17 November 2026 |
 | `R2.0-1` to `R2.0-10` | The review of 31 October 2026 (version 2.0). Also logged as `D20` to `D29`, which stay the main ID (`R2.0-1` is `D20` and so on) | 2026-10-31 |
 | `R2.1-1` to `R2.1-20` | The screen review against the interface standards (version 2.1) | 2026-11-01 |
 | `U1` to `U17` | The interface standard decisions | 2026-11-01 |
@@ -116,6 +116,8 @@ Status is **Decided** (and in force), **Applied** (decided on a default and buil
 | REL2 | `master` ruleset | Pull request, one approval, three checks | Decided |
 | REL3 | Cutting a release | Cut release workflow builds `release`; development files stay out | Decided |
 | D30 | Developer guide | Move plans, environments and tests into `developer/` | Decided |
+| D31 | Test account passwords | Generated at setup, never committed | Decided |
+| D32 | Test suite clean-up | No Playwright project chain; low-value tests removed; screenshot walk is a tool | Decided |
 
 ## Open decisions
 
@@ -133,12 +135,12 @@ These are asked of the maintainer; do not assume an answer.
 | S6 | Whether to run the STV engine's tests and stress checks | Yes, in an empty directory outside the project |
 | U14 | Whether the standards also go into `docs/` and a pull request template | Decide in 2.2 |
 | (none) | Test data scripts in the repository (`tests/seed/`) | Being added with this guide; confirm |
-| (none) | The 2.2 branch name and whether it is pushed as it goes | Ask at the start of 2.2 |
+| (none) | The 2.2 branch name and whether it is pushed as it goes | Branch `version-2.2` made 2026-11-17; push rule still to confirm |
 
 ## How to add a decision
 
 1. Pick the page by topic. Add one entry with **Decision**, **Why**, **Date** and **In the code** (class, file or document that shows it). Keep it to a few lines.
-2. Give it an ID. Use the next free `D` number for a decision on how the extension behaves or is run (the last is `D30`). Use a topic prefix as above for decisions from a review. Never reuse or renumber an ID.
+2. Give it an ID. Use the next free `D` number for a decision on how the extension behaves or is run (the last is `D32`). Use a topic prefix as above for decisions from a review. Never reuse or renumber an ID.
 3. Add a row to the index above with its status. Move it out of **Open decisions** when it is answered, and record the date of the answer.
 4. Say "the maintainer decided" and give the date. Do not name people.
 5. If a new decision replaces an old one, mark the old one **Replaced by** the new ID and keep it.
