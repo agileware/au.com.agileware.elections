@@ -1,0 +1,19 @@
+#!/bin/bash
+# PHPUnit 9.6 for the Elections headless tests. create-site.sh downloads the phar to ~/bin/phpunit.phar
+# (it is not committed). Run it from the deployed extension folder:
+#   ddev exec 'cd /var/www/html/httpdocs/CRM/extensions/au.com.agileware.elections && phpunit'
+if [ ! -f "$HOME/bin/phpunit.phar" ]; then
+  echo "phpunit: $HOME/bin/phpunit.phar is missing. Download https://phar.phpunit.de/phpunit-9.6.phar into .ddev/homeadditions/bin and run ddev restart." >&2
+  exit 1
+fi
+if [ ! -f "$HOME/.cv.json" ]; then
+  echo "phpunit: ~/.cv.json is missing. It names the separate test database (TEST_DB_DSN) the headless tests use." >&2
+  exit 1
+fi
+# On Joomla, ~/.cv.json points jcv at the site's own database, and the headless tests rebuild the database
+# they are given. Refuse, so a test run cannot wipe the site.
+if [ -f /var/www/html/administrator/components/com_civicrm/civicrm.settings.php ] && [ -z "${ELECTIONS_PHPUNIT_ON_JOOMLA:-}" ]; then
+  echo "phpunit: not run on a Joomla site: the headless tests would rebuild the site database. Run PHPUnit on a WordPress site. Set ELECTIONS_PHPUNIT_ON_JOOMLA=1 only after pointing TEST_DB_DSN at a separate database." >&2
+  exit 1
+fi
+CIVICRM_UF=UnitTests exec php "$HOME/bin/phpunit.phar" "$@"
