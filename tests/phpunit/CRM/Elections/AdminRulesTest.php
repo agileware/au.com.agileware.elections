@@ -165,6 +165,13 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
     catch (CRM_Core_Exception $e) {
       $this->assertStringContainsString('This election is active', $e->getMessage());
     }
+    try {
+      \Civi\Api4\ElectionPosition::create(FALSE)->setValues(['election_id' => $election['id'], 'name' => 'Late', 'quantity' => 1, 'sortorder' => 2])->execute();
+      $this->fail('Adding a position to a started election must be refused.');
+    }
+    catch (CRM_Core_Exception $e) {
+      $this->assertStringContainsString('This election is active', $e->getMessage());
+    }
     $this->assertSame([$position['name']], $this->positionsInOrder($election['id']));
   }
 

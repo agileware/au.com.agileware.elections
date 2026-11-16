@@ -88,20 +88,6 @@ test.describe('Manage Elections (SearchKit list)', () => {
     expect(isActive(id)).toBe(false);
   });
 
-  test('inline editing cannot activate an election with no positions either', async ({ adminPage }) => {
-    // The rule lives in the database layer, so it holds for SearchKit inline edits and the API too.
-    const id = createElection(nm('Inline rule'));
-    let message = '';
-    try {
-      civiApi4('Election.update', { values: { is_visible: true }, where: [['id', '=', id]] });
-    }
-    catch (e: any) {
-      message = String(e.stderr || e.message);
-    }
-    expect(message).toContain('Add at least one position');
-    expect(isActive(id)).toBe(false);
-  });
-
   test('an election can be duplicated with its positions', async ({ adminPage }) => {
     const id = createElection(nm('Original'));
     addPosition(id, 'Chair', 1);

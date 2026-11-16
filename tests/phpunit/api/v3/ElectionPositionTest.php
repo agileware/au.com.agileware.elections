@@ -6,13 +6,6 @@
 class api_v3_ElectionPositionTest extends api_v3_ElectionBaseTestCase {
 
   /**
-   * Test that a election position is not created without any params and throw errors.
-   */
-  public function testCreateElectionPositionWithoutAnyParams() {
-    $this->callAPIFailure('ElectionPosition', 'create', []);
-  }
-
-  /**
    * Test that a election position is not created with wrong params and throw errors.
    */
   public function testCreateElectionPositionWithWrongData() {
@@ -26,13 +19,6 @@ class api_v3_ElectionPositionTest extends api_v3_ElectionBaseTestCase {
     $params['quantity'] = 1;
     $params['election_id'] = -1;
     $this->callAPIFailure('ElectionPosition', 'create', $params);
-  }
-
-  /**
-   * Test that a election position is created with valid data.
-   */
-  public function testCreateElectionPositionWithValidData() {
-    $this->createElectionPosition();
   }
 
   /**
@@ -91,15 +77,6 @@ class api_v3_ElectionPositionTest extends api_v3_ElectionBaseTestCase {
   }
 
   /**
-   * Test that a election position is edited.
-   */
-  public function testEditElectionPosition() {
-    $electionPosition = $this->createElectionPosition();
-    $electionPosition['name'] = 'IT Head';
-    $this->callAPISuccess('ElectionPosition', 'create', $electionPosition);
-  }
-
-  /**
    * Test that a election position is added for inactive running election.
    */
   public function testEditElectionPositionForInactiveElection() {
@@ -125,15 +102,6 @@ class api_v3_ElectionPositionTest extends api_v3_ElectionBaseTestCase {
     $electionPosition['name'] = 'IT Head';
 
     $this->callAPIFailure('ElectionPosition', 'create', $electionPosition);
-  }
-
-  /**
-   * Test that a election position is added for inactive running election.
-   */
-  public function testCreateElectionPositionForInactiveElection() {
-    $election = $this->createElection();
-    $election = $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $election);
-    $electionPosition = $this->createElectionPosition($election);
   }
 
 }

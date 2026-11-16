@@ -27,7 +27,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: /council\/|security\/|frontend\/(layout|election-page|accessibility|screens)/,
+      testIgnore: /council\/|security\/|frontend\/(layout|election-page|accessibility)/,
       use: { ...devices['Desktop Chrome'] },
     },
     // The specs below move the one shared election through its stages (nominations, advertise, voting,
@@ -98,24 +98,10 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      // An election whose organisers choose the candidates.
-      name: 'admin-managed',
-      testMatch: /council\/admin-managed/,
-      dependencies: ['referendum'],
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
       // The look of the results page: logo, header, footer and the celebration, on the same election again.
       name: 'results-display',
       testMatch: /council\/results-display/,
-      dependencies: ['admin-managed'],
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      // Pictures of every page (SCREENS=1 only).
-      name: 'screens',
-      testMatch: /frontend\/screens/,
-      dependencies: ['results-display'],
+      dependencies: ['referendum'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],

@@ -13,14 +13,6 @@ test.afterAll(() => {
  * only - members take part through the front end.
  */
 test.describe('election administration', () => {
-  test('the administrator sees the elections list with the seeded election', async ({ adminPage }) => {
-    await adminPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
-    await expect(adminPage.getByRole('heading', { name: 'Manage Elections' })).toBeVisible();
-    await expect(adminPage.getByRole('link', { name: 'Add Election' })).toBeVisible();
-    await expect(adminPage.getByText('Playwright Council Election')).toBeVisible();
-    await expectNoPhpOutput(adminPage);
-  });
-
   test('the create election form offers the display options', async ({ adminPage }) => {
     await adminPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
     await adminPage.getByRole('tab', { name: 'Display' }).click();

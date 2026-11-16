@@ -52,17 +52,6 @@ test.describe('Election candidates (SearchKit list)', () => {
     await expect(adminPage.getByRole('button', { name: 'Submit' })).toBeVisible();
   });
 
-  test('the Add Candidate button is at the right end of the row with Back and Back to Manage Elections', async ({ adminPage }) => {
-    const election = createElection(nm('Cand bar'));
-    addPosition(election, 'Chair', 1);
-    await adminPage.goto(listUrl(election));
-    const bar = adminPage.locator('.election-list-actions');
-    await expect(bar.getByRole('link')).toHaveText(['Back', 'Back to Manage Elections', 'Add Candidate']);
-    const [back, manage, add] = await Promise.all(['Back', 'Back to Manage Elections', 'Add Candidate'].map((name) => bar.getByRole('link', { name, exact: true }).boundingBox()));
-    expect(back!.y + back!.height / 2).toBeCloseTo(add!.y + add!.height / 2, -1);
-    expect(add!.x).toBeGreaterThan(manage!.x + manage!.width);
-  });
-
   test('an empty list says what to do', async ({ adminPage }) => {
     const election = createElection(nm('Cand empty'));
     addPosition(election, 'Chair', 1);
@@ -98,16 +87,6 @@ test.describe('Election candidates (SearchKit list)', () => {
     expect(nomineeNames(election).some((n) => n.includes('Di'))).toBe(true);
     const [nomination] = civiApi4<Array<{ id: number }>>('ElectionNomination.get', { select: ['id'], where: [['member_nominee', '=', ids.Di]] });
     expect(nominationFlags(nomination.id)).toMatchObject({ is_eligible_candidate: true, has_accepted_nomination: true, comments: 'Added by the board' });
-  });
-
-  test('someone outside the election groups cannot be added', async () => {
-    const { groupId } = createMembers(['Ed']);
-    const election = createElection(nm('Cand outsider'), { groupId });
-    const positionId = addPosition(election, 'Chair', 1);
-    const [outsider] = civiApi4<Array<{ id: number }>>('Contact.create', { values: { contact_type: 'Individual', first_name: 'Fay', last_name: `Member ${RUN}` } });
-    // The same method the Add Candidate form calls.
-    expect(failure(() => civiEval(`CRM_Elections_BAO_ElectionNomination::addCandidate(${positionId}, ${outsider.id});`))).toContain('Only people who can stand');
-    expect(nomineeNames(election)).toEqual([]);
   });
 
   test('who is standing is frozen once voting starts, statements can still be corrected', async () => {

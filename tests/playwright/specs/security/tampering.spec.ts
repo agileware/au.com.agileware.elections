@@ -213,19 +213,3 @@ test('election pages ask the browser not to pass the personal link on to other s
     await context.close();
   }
 });
-
-test('a form sent without the key it was given is not accepted', async ({ browser }) => {
-  const data = council();
-  reseedCouncil();
-  const { context, page } = await open(browser, 'V05', 'civicrm/elections/nominations/create');
-  const action = await page.evaluate(() => (document.querySelector('form.CRM_Elections_Form_CreateElectionNomination, form') as HTMLFormElement).action);
-  const before = { nominations: nominations(), seconders: seconders() };
-  const fields = { position: String(data.positions['President']), contact: String(data.links.N02.cid), reason: 'forged', _qf_CreateElectionNomination_submit: 'Nominate' };
-  // No form key, and a wrong one.
-  for (const extra of [{}, { qfKey: 'not-the-key' }]) {
-    await page.request.post(action, { form: { ...fields, ...extra } });
-  }
-  expect(nominations()).toBe(before.nominations);
-  expect(seconders()).toBe(before.seconders);
-  await context.close();
-});

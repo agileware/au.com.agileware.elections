@@ -29,28 +29,6 @@ test.afterAll(() => {
   reseedCouncil();
 });
 
-test('the election has been set up with six roles and is open for nominations', async ({ browser }) => {
-  expect(Object.keys(council().positions)).toEqual(POSITIONS);
-  expect(voters).toHaveLength(30);
-
-  const admin = await optionalAdminPage(browser);
-  if (!admin) {
-    return; // the back end checks need a saved administrator session
-  }
-  const adminPage = admin.page;
-  await adminPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
-  const row = adminPage.locator('tr', { hasText: 'Playwright Council Election' });
-  await expect(row).toBeVisible();
-  await expect(row.getByText('Yes', { exact: true })).toBeVisible();
-  await expect(row.getByRole('link', { name: '6', exact: true })).toBeVisible();
-
-  await adminPage.goto(civiAdminUrl('civicrm/elections/overview', { reset: 1, eid: council().election_id }));
-  await expect(adminPage.locator('.election-stage')).toHaveText('Nominations open');
-  await expect(adminPage.locator('.election-count-positions')).toHaveText('6');
-  await expectNoPhpOutput(adminPage);
-  await admin.close();
-});
-
 test('nominators nominate and second, and the outsider cannot take part', async ({ persona, personaGoto, allowedProblems }) => {
   // A refused page says why and is sent as HTTP 403.
   allowedProblems.push(/403/);

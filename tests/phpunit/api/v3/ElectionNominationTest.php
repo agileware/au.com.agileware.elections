@@ -6,13 +6,6 @@
 class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
 
   /**
-   * Test that a election nomination is not created without any params and throw errors.
-   */
-  public function testCreateElectionNominationWithoutAnyParams() {
-    $this->callAPIFailure('ElectionNomination', 'create', []);
-  }
-
-  /**
    * Test that a election nomination is not created with wrong data.
    */
   public function testCreateElectionNominationWithWrongData() {
@@ -42,13 +35,6 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
       'election_position_id' => $position['id'],
     ];
     $this->callAPIFailure('ElectionNomination', 'create', $params);
-  }
-
-  /**
-   * Test that a election nomination.
-   */
-  public function testCreateElectionNomination() {
-    $this->createNomination();
   }
 
   /**

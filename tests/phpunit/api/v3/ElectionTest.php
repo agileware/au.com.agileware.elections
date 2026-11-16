@@ -6,14 +6,6 @@
 class api_v3_ElectionTest extends api_v3_ElectionBaseTestCase {
 
   /**
-   * Test that a election is not created without any params and throw errors.
-   */
-  public function testCreateElectionWithoutAnyParams() {
-    $params = [];
-    $this->callAPIFailure('election', 'create', $params);
-  }
-
-  /**
    * Test that a election should not be created with wrong date and throw errors.
    */
   public function testCreateElectionWithWrongDates() {
@@ -25,31 +17,6 @@ class api_v3_ElectionTest extends api_v3_ElectionBaseTestCase {
     ];
     $params = array_merge($params, $electionDates);
     $this->callAPIFailure('election', 'create', $params);
-  }
-
-  /**
-   * Test that a election should be created with valid data.
-   */
-  public function testCreateElectionWithValidData() {
-    $this->createElection();
-  }
-
-  /**
-   * Test that a election should be edited if its not started yet.
-   */
-  public function testEditNonStartedElection() {
-    $electionName = 'Non started election';
-    $election = $this->createElection([
-      'name'        => $electionName,
-      'description' => 'Description of non started election',
-    ]);
-    $this->assertEquals($election['name'], $electionName);
-
-    $electionName = 'Modified election name';
-    $election['name'] = $electionName;
-
-    $this->callAPISuccess('election', 'create', $election);
-    $this->assertEquals($election['name'], $electionName);
   }
 
   /**

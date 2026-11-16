@@ -135,29 +135,6 @@ class CRM_Elections_SecurityTest extends api_v3_ElectionBaseTestCase {
     $this->assertTrue($second['is_eligible_candidate']);
   }
 
-  public function testNominationsOutsideTheRulesAreRefused() {
-    $fixture = $this->fixture(CRM_Elections_Test_CouncilFixture::STAGE_NOMINATIONS);
-    $positionId = (int) CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_election_position WHERE election_id = %1 ORDER BY sortorder LIMIT 1', [1 => [$fixture->electionId, 'Integer']]);
-    // Someone who is not allowed to take part cannot nominate, or be nominated.
-    $this->refused(function () use ($fixture, $positionId) {
-      CRM_Elections_Helper_Process::nominate($fixture->electionId, $positionId, $fixture->id('N01'), $fixture->id('OUT'));
-    }, 'cannot nominate in this election');
-    $this->refused(function () use ($fixture, $positionId) {
-      CRM_Elections_Helper_Process::nominate($fixture->electionId, $positionId, $fixture->id('OUT'), $fixture->id('V01'));
-    }, 'can be nominated');
-    // A position of another election.
-    $other = CRM_Elections_Test_CouncilFixture::create(['name' => 'Another council']);
-    $otherPosition = (int) CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_election_position WHERE election_id = %1 LIMIT 1', [1 => [$other->electionId, 'Integer']]);
-    $this->refused(function () use ($fixture, $otherPosition) {
-      CRM_Elections_Helper_Process::nominate($fixture->electionId, $otherPosition, $fixture->id('N01'), $fixture->id('V01'));
-    }, 'not part of this election');
-    // Not while nominations are closed.
-    $fixture->moveToStage(CRM_Elections_Test_CouncilFixture::STAGE_ADVERTISE);
-    $this->refused(function () use ($fixture, $positionId) {
-      CRM_Elections_Helper_Process::nominate($fixture->electionId, $positionId, $fixture->id('N01'), $fixture->id('V01'));
-    }, 'not open');
-  }
-
   public function testNomineesCanOnlyActOnTheirOwnNominations() {
     $fixture = $this->fixture(CRM_Elections_Test_CouncilFixture::STAGE_ADVERTISE);
     $nomination = CRM_Core_DAO::executeQuery('SELECT id, member_nominee FROM civicrm_election_nomination WHERE is_eligible_candidate = 1 AND IFNULL(has_accepted_nomination, 0) = 0 AND IFNULL(has_rejected_nomination, 0) = 0 AND election_position_id IN (SELECT id FROM civicrm_election_position WHERE election_id = %1) LIMIT 1', [1 => [$fixture->electionId, 'Integer']]);

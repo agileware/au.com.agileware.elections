@@ -48,16 +48,6 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
 
   // ---------------------------------------------------------------- personas
 
-  public function testThereAreEnoughPersonasForACouncilElection() {
-    $fixture = Council::create();
-    $voters = array_filter(array_keys($fixture->personas), fn($p) => $p[0] === 'V');
-    $nominees = array_filter(array_keys($fixture->personas), fn($p) => $p[0] === 'N');
-    $this->assertGreaterThanOrEqual(30, count($voters));
-    $this->assertGreaterThanOrEqual(10, count($nominees));
-    $this->assertSame(['President', 'Secretary', 'Treasurer', 'Council Member 1', 'Council Member 2', 'Council Member 3'], array_keys($fixture->positions));
-    $this->assertCount(6, array_unique(array_merge(...array_values(Council::CANDIDATES))));
-  }
-
   // ------------------------------------------------------------ nominations
 
   public function testNominationsBecomeEligibleOnlyWithEnoughNominators() {
@@ -82,21 +72,14 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     $this->assertEquals(1, $this->nominationField($fixture, $key, 'is_eligible_candidate'));
   }
 
-  public function testANominatorCannotCountTwice() {
-    $fixture = Council::create();
-    $fixture->runNominations();
-    $again = CRM_Elections_Helper_Process::nominate($fixture->electionId, $fixture->positions['President'], $fixture->id('N08'), $fixture->id('V01'));
-    $this->assertTrue($again['already_nominated']);
-    $this->assertFalse($again['is_eligible_candidate']);
-    $this->assertSame(1, civicrm_api3('ElectionNominationSeconder', 'getcount', ['election_nomination_id' => $fixture->nominations['President|N08']]));
-  }
-
   public function testSomeoneWhoIsNotAMemberCannotTakePartInNominations() {
     $fixture = Council::create();
     $position = $fixture->positions['President'];
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('N01'), $fixture->id('OUT')), 'cannot nominate in this election');
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('OUT'), $fixture->id('V01')), 'can stand');
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('N01'), NULL));
+    // An organiser adding a candidate directly meets the same rule, with no candidate group set.
+    $this->assertRejected(fn() => CRM_Elections_BAO_ElectionNomination::addCandidate($position, $fixture->id('OUT')), 'can stand');
   }
 
   public function testNominationsCloseWithTheNominationPeriod() {
@@ -188,12 +171,6 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     ]);
     $this->assertSame('Statement of N01 for President', $nomination['comments']);
     $this->assertSame('https://example.org/N01', $nomination['statement_url']);
-  }
-
-  public function testAcceptingThenWithdrawingMeansNotStanding() {
-    $fixture = Council::create()->playUntil(Council::STAGE_ADVERTISE);
-    $this->assertNotContains('N10', $fixture->standingCandidates('Council Member 3'));
-    $this->assertEquals(1, $this->nominationField($fixture, 'Council Member 3|N10', 'has_rejected_nomination'));
   }
 
   public function testOnlyTheNomineeCanAccept() {

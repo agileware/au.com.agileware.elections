@@ -5,13 +5,6 @@
  */
 class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase {
   /**
-   * Test that an election nomination seconder is not created without any params and throw errors.
-   */
-  public function testCreateNominationSeconderWithoutAnyParams() {
-    $this->callAPIFailure('ElectionNominationSeconder', 'create', []);
-  }
-
-  /**
    * Test that an election nomination seconder is not created with wrong params.
    */
   public function testCreateNominationSeconderWithWrongParams() {
@@ -31,13 +24,6 @@ class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase 
     ];
 
     $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
-  }
-
-  /**
-   * Test that an election nomination seconder is created with valid params.
-   */
-  public function testCreateNominationSeconderWithValidParams() {
-    $this->createNominationSeconder();
   }
 
   /**

@@ -8,6 +8,7 @@
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
     "report": "playwright show-report",
+    "screens": "playwright test --config playwright.screens.config.ts",
     "seed": "bash fixtures/setup-environment.sh"
   },
   "devDependencies": {

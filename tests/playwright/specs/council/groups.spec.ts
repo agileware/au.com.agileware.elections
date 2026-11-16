@@ -76,3 +76,15 @@ test('the overview shows who is in each role', async ({ browser }) => {
   await expect(admin.page.locator('.election-overview-roles')).toContainText('2 people may stand as candidates');
   await admin.close();
 });
+
+test('when the organisers choose the candidates there is no nomination form and the page says so', async ({ personaGoto, allowedProblems }) => {
+  // Last in this file, as it turns online nominations off for the election; `afterAll` reseeds it.
+  civiEval(`civicrm_api3('Election', 'create', ['allow_online_nominations' => 0] + civicrm_api3('Election', 'getsingle', ['id' => ${council().election_id}]));`);
+  // A refused page says why and is sent as HTTP 403.
+  allowedProblems.push(/403/);
+  const page = await personaGoto('V01', 'civicrm/elections/view');
+  await expect(page.getByText('chosen by the organisers').first()).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Nominate', exact: true })).toHaveCount(0);
+  const form = await personaGoto('V01', 'civicrm/elections/nominations/create');
+  await expect(form.getByText('there are no online nominations')).toBeVisible();
+});

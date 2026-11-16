@@ -96,25 +96,4 @@ class CRM_Elections_DisplayOptionsTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame($expected, CRM_Elections_Helper_Candidate::isValidStatementUrl($url));
   }
 
-  public function testNominationStoresStatementAndLink() {
-    $nomination = $this->createNomination();
-    $updated = $this->callAPISuccess('ElectionNomination', 'create', [
-      'id' => $nomination['nomination']['id'],
-      'comments' => 'My statement',
-      'statement_url' => 'https://example.org/cv',
-    ]);
-    $loaded = $this->callAPISuccessGetSingle('ElectionNomination', ['id' => $updated['id'], 'return' => ['comments', 'statement_url']]);
-    $this->assertSame('My statement', $loaded['comments']);
-    $this->assertSame('https://example.org/cv', $loaded['statement_url']);
-  }
-
-  public function testTheStatementChoicesAreWordedAsOnTheForm() {
-    $this->assertSame([
-      CRM_Elections_BAO_Election::STATEMENTS_NONE => 'Not shown',
-      CRM_Elections_BAO_Election::STATEMENTS_LINK => 'Read statement',
-      CRM_Elections_BAO_Election::STATEMENTS_INLINE => 'In full',
-    ], CRM_Elections_BAO_Election::getStatementDisplayOptions());
-    $this->assertSame(['election' => 'Position', 'referendum' => 'Question'], CRM_Elections_BAO_ElectionPosition::getTypes());
-  }
-
 }

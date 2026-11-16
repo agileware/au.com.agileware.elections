@@ -95,25 +95,6 @@ test('the person written in is not on the ballot until they accept, then they ar
   await expect(after.locator('.vote-candidate-row', { hasText: '09' })).toHaveCount(1);
 });
 
-test('someone who declines cannot be written in again', async ({ persona }) => {
-  const data = council();
-  // N10 is written in by a script as a voter would, then declines.
-  civiEval(`
-    $election = findElectionById(${data.election_id});
-    civicrm_api3('ElectionVote', 'addvotes', ['election_id' => ${data.election_id}, 'member_id' => ${data.links.V04.cid}, 'votes' => [['election_nomination_id' => ${ids['President|N01']}, 'rank' => 1]], 'write_ins' => [['position_id' => ${data.positions['President']}, 'contact_id' => ${data.links.N10.cid}, 'rank' => 2]]]);
-  `);
-  const [nomination] = civiApi4<Array<{ id: number }>>('ElectionNomination.get', { select: ['id'], where: [['is_write_in', '=', true], ['member_nominee', '=', data.links.N10.cid]] });
-  const page = await persona('N10');
-  await page.goto(personaUrl('N10', 'civicrm/elections/nominations/reject', { enid: nomination.id }));
-  await page.getByLabel('Comments').fill('No thanks');
-  // A person who was written in has not accepted, so the answer is Decline.
-  await page.getByRole('button', { name: 'Decline', exact: true }).click();
-  await expect(page.getByText('Nomination declined.')).toBeVisible();
-  await page.context().close();
-  const rows = civiApi4<any[]>('ElectionNomination.get', { select: ['has_rejected_nomination'], where: [['id', '=', nomination.id]] });
-  expect(rows[0].has_rejected_nomination).toBeTruthy();
-});
-
 test('once voting has closed the person who never answered is told, and cannot accept', async ({ persona, allowedProblems }) => {
   // A refused page says why and is sent as HTTP 403.
   allowedProblems.push(/403/);

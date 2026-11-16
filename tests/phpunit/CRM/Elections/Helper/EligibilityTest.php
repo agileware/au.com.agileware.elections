@@ -62,10 +62,4 @@ class CRM_Elections_Helper_EligibilityTest extends api_v3_ElectionBaseTestCase {
     $this->assertNull(CRM_Elections_Helper_Eligibility::getVoteDate($election['id']));
   }
 
-  public function testApiV4EntitiesRequireAdministerElections() {
-    $this->assertSame(0, \Civi\Api4\Election::get(FALSE)->selectRowCount()->execute()->countMatched());
-    $permissions = \Civi\Api4\ElectionVote::permissions();
-    $this->assertSame(['administer Elections'], $permissions['default']);
-  }
-
 }

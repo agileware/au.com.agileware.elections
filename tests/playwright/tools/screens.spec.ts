@@ -1,24 +1,24 @@
-import { test } from '../../fixtures/base';
-import { advanceCouncil, councilNominationIds, moveToStage, reseedCouncil } from '../../fixtures/civi';
-import { council } from '../../fixtures/personas';
-import { CMS } from '../../fixtures/cms';
+import { test } from '../fixtures/base';
+import { advanceCouncil, councilNominationIds, moveToStage, reseedCouncil } from '../fixtures/civi';
+import { council } from '../fixtures/personas';
+import { CMS } from '../fixtures/cms';
 import fs from 'node:fs';
 import path from 'node:path';
 
 /**
  * Screenshots of every page of the election process, stage by stage, at desktop, tablet and phone
  * width, for the CMS under test (CMS=wordpress|drupal|joomla). Used to check the front end on each
- * CMS's default theme. Only runs when SCREENS is set, for example:
+ * CMS's default theme. This is a tool, not a test: it asserts nothing and is not part of the suite (it is not in
+ * `specs/`, and the main config never runs it). Run it on purpose, for example:
  *
- *   SCREENS=1 CMS=drupal BASE_URL=http://localhost npx playwright test screens
+ *   CMS=drupal BASE_URL=http://localhost npm run screens
  *
  * Pictures go to test-results/screens/<cms>/.
  */
-test.skip(!process.env.SCREENS, 'Set SCREENS=1 to take screenshots of the election pages');
 test.describe.configure({ mode: 'serial', retries: 0 });
 
 const WIDTHS = [{ name: 'desktop', width: 1280, height: 900 }, { name: 'tablet', width: 768, height: 1000 }, { name: 'phone', width: 375, height: 800 }];
-const OUT = path.resolve(__dirname, '../../test-results/screens', CMS);
+const OUT = path.resolve(__dirname, '../test-results/screens', CMS);
 
 test.beforeAll(() => {
   fs.mkdirSync(OUT, { recursive: true });
@@ -27,7 +27,7 @@ test.beforeAll(() => {
 
 test('walk the whole election and take pictures', async ({ browser }) => {
   test.setTimeout(20 * 60 * 1000);
-  const { personaUrl } = await import('../../fixtures/personas');
+  const { personaUrl } = await import('../fixtures/personas');
 
   async function shoot(stage: string, label: string, persona: string, civiPath: string, params: Record<string, string | number> = {}) {
     for (const size of WIDTHS) {

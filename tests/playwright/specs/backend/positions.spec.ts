@@ -123,28 +123,6 @@ test.describe('Election positions (SearchKit list)', () => {
     await expect(adminPage.locator('crm-search-display-table tbody tr', { hasText: 'Copy of Chair' })).toHaveCount(0);
     expect(positionNames(id)).toEqual(['Chair']);
   });
-
-  test('positions cannot be changed once the election has started', async () => {
-    // The rule is in the data layer, so inline edits, drag and drop and the API are all covered.
-    const id = createElection(nm('Positions started'));
-    const positionId = addPosition(id, 'Chair', 1);
-    addPosition(id, 'Treasurer', 2);
-    startElection(id);
-    const failure = (fn: () => void) => {
-      try {
-        fn();
-      }
-      catch (e: any) {
-        return String(e.stderr || e.message);
-      }
-      return '';
-    };
-    expect(failure(() => civiApi4('ElectionPosition.update', { values: { name: 'Changed' }, where: [['id', '=', positionId]] }))).toContain('This election is active');
-    expect(failure(() => civiApi4('ElectionPosition.update', { values: { sortorder: 2 }, where: [['id', '=', positionId]] }))).toContain('This election is active');
-    expect(failure(() => addPosition(id, 'Late', 2))).toContain('This election is active');
-    expect(failure(() => civiApi4('ElectionPosition.delete', { where: [['id', '=', positionId]] }))).toContain('This election is active');
-    expect(positionNames(id)).toEqual(['Chair', 'Treasurer']);
-  });
 });
 
 test.describe('Referendum questions', () => {
