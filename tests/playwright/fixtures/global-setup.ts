@@ -14,15 +14,34 @@ import { civiApi4, reseedCouncil } from './civi';
  */
 export const AUTH_DIR = path.resolve(__dirname, '.generated', 'auth');
 
+/**
+ * Passwords of the test accounts are made by the setup scripts (generate-passwords.php) when they create the
+ * accounts, and kept in the git-ignored .generated/test-passwords.json. They are never committed.
+ */
+const PASSWORDS_FILE = path.resolve(__dirname, '.generated', 'test-passwords.json');
+let generatedPasswords: Record<string, string> = {};
+try {
+  generatedPasswords = JSON.parse(fs.readFileSync(PASSWORDS_FILE, 'utf8'));
+} catch {
+  // Reported below, only when a login that needs one is used.
+}
+function testPassword(key: string): string {
+  const password = generatedPasswords[key];
+  if (!password) {
+    throw new Error(`No password for the test account "${key}". Run the setup script for this CMS first (fixtures/setup-environment.sh, setup-accounts-drupal.sh or setup-accounts-joomla.sh): it makes ${PASSWORDS_FILE}.`);
+  }
+  return password;
+}
+
 export const logins: Record<string, { username: string; password: string }> = {
   admin: { username: process.env.WP_ADMIN_USER || 'admin', password: process.env.WP_ADMIN_PASS || 'admin' },
-  manager: { username: users.manager.username, password: users.manager.password },
-  limited: { username: users.limited.username, password: users.limited.password },
-  member: { username: users.member.username, password: users.member.password },
+  manager: { username: users.manager.username, get password() { return testPassword('manager'); } },
+  limited: { username: users.limited.username, get password() { return testPassword('limited'); } },
+  member: { username: users.member.username, get password() { return testPassword('member'); } },
 };
 
 /** Drupal and Joomla use test accounts created by fixtures/setup-accounts-<cms>.sh. */
-const testAdmin = { username: users.admin.username, password: users.admin.password };
+const testAdmin = { username: users.admin.username, get password() { return testPassword('admin'); } };
 
 const WARM_UP = ['civicrm/elections/manage', 'civicrm/elections/position-list', 'civicrm/elections/candidate-list', 'civicrm/elections/create', 'civicrm/elections/result-list', 'civicrm/elections/audit-log'];
 

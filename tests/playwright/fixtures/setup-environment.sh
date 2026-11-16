@@ -21,6 +21,12 @@ json_get() {
 }
 
 USERS_JSON="$SCRIPT_DIR/test-users.json"
+# Passwords are made here, at setup, and kept in a git-ignored file (never committed).
+PASSWORDS_JSON="$SCRIPT_DIR/.generated/test-passwords.json"
+run php "$SCRIPT_DIR/generate-passwords.php" "$USERS_JSON" "$PASSWORDS_JSON"
+password_get() {
+  run php -r 'echo json_decode(file_get_contents($argv[1]), true)[$argv[2]];' "$PASSWORDS_JSON" "$1"
+}
 
 echo "Creating WordPress roles..."
 # CiviCRM's WordPress permission check lowercases the permission and replaces runs of
@@ -41,7 +47,7 @@ run wp cap add elections_member view_elections access_ajax_api access_uploaded_f
 echo "Creating WordPress users..."
 for key in manager limited member; do
   USERNAME=$(json_get "$USERS_JSON" "$key" username)
-  PASSWORD=$(json_get "$USERS_JSON" "$key" password)
+  PASSWORD=$(password_get "$key")
   EMAIL=$(json_get "$USERS_JSON" "$key" email)
   ROLE=$(json_get "$USERS_JSON" "$key" role)
   if run wp user get "$USERNAME" >/dev/null 2>&1; then

@@ -11,7 +11,7 @@ voters.
   `agileware/ci-workflows` → `playwright-tests.yml`. It builds a throwaway WordPress + CiviCRM in
   Docker, enables this extension, runs [`fixtures/setup-environment.sh`](fixtures/setup-environment.sh)
   and then this suite.
-- **Setup**: `setup-environment.sh` creates the WordPress roles/users (`fixtures/test-users.json`),
+- **Setup**: `setup-environment.sh` creates the WordPress roles/users (`fixtures/test-users.json`; passwords are generated at setup into the git-ignored `fixtures/.generated/test-passwords.json`),
   the election pages with the shortcodes from `docs/setup.md`, and seeds the council election with
   `fixtures/seed-council.php`. The seed uses the same persona fixture as the PHPUnit tests
   (`tests/phpunit/CRM/Elections/Test/CouncilFixture.php`) and writes a personal link

@@ -2,11 +2,14 @@
 # Creates the test accounts the back end specs log in with on a Drupal 11 site (run inside the
 # DDEV web container from the project root): an administrator, an Elections manager, an organiser without
 # View All Contacts (to check the notice about hidden groups) and a member.
-# Safe to re-run. Passwords come from test-users.json (test values for the local test site only).
+# Safe to re-run. Passwords are generated here, at setup, into .generated/test-passwords.json (git-ignored; never committed).
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 USERS_JSON="$SCRIPT_DIR/test-users.json"
+PASSWORDS_JSON="$SCRIPT_DIR/.generated/test-passwords.json"
+php "$SCRIPT_DIR/generate-passwords.php" "$USERS_JSON" "$PASSWORDS_JSON"
 DRUSH=${DRUSH:-vendor/bin/drush}
+password() { php -r 'echo json_decode(file_get_contents($argv[1]), true)[$argv[2]];' "$PASSWORDS_JSON" "$1"; }
 get() { php -r 'echo json_decode(file_get_contents($argv[1]), true)[$argv[2]][$argv[3]];' "$USERS_JSON" "$1" "$2"; }
 
 role() {
@@ -20,9 +23,9 @@ account() {
   local key=$1 role=$2
   local name; name=$(get "$key" username)
   if $DRUSH user:information "$name" >/dev/null 2>&1; then
-    $DRUSH user:password "$name" "$(get "$key" password)" >/dev/null
+    $DRUSH user:password "$name" "$(password "$key")" >/dev/null
   else
-    $DRUSH user:create "$name" --mail="$(get "$key" email)" --password="$(get "$key" password)" >/dev/null
+    $DRUSH user:create "$name" --mail="$(get "$key" email)" --password="$(password "$key")" >/dev/null
   fi
   $DRUSH user:role:add "$role" "$name" >/dev/null
 }
