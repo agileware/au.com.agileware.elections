@@ -34,6 +34,7 @@ class CRM_Elections_UpgraderTest extends \PHPUnit\Framework\TestCase implements 
     $this->upgrader()->upgrade_20100();
     $this->upgrader()->upgrade_20110();
     $this->upgrader()->upgrade_20120();
+    $this->upgrader()->upgrade_20130();
     parent::tearDown();
   }
 
@@ -250,6 +251,54 @@ class CRM_Elections_UpgraderTest extends \PHPUnit\Framework\TestCase implements 
     finally {
       CRM_Core_DAO::executeQuery("UPDATE civicrm_msg_template SET msg_title = 'Election - Remind written-in person' WHERE workflow_name = 'elections_write_in_reminder'");
       $this->upgrader()->upgrade_20100();
+    }
+  }
+
+  /**
+   * The default a column has in the database, as MySQL and MariaDB report it (MariaDB may quote it).
+   */
+  private function columnDefault($table, $column) {
+    $default = CRM_Core_DAO::singleValueQuery('SELECT COLUMN_DEFAULT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %1 AND COLUMN_NAME = %2', [1 => [$table, 'String'], 2 => [$column, 'String']]);
+    return $default === NULL ? NULL : trim($default, "'");
+  }
+
+  public function testUpgrade20110AddsTheResultsPageAndCelebrationColumnsWithTheCelebrationOff() {
+    $columns = ['results_header_text', 'results_footer_text', 'results_logo_file_id', 'results_logo_alt', 'celebration_enabled', 'celebration_effect', 'celebration_days'];
+    $foreignKey = "SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'civicrm_election' AND CONSTRAINT_NAME = 'FK_civicrm_election_results_logo_file_id'";
+    // As a site that upgraded to an early 2.0 build: none of the results page columns yet.
+    CRM_Core_DAO::executeQuery('ALTER TABLE civicrm_election DROP FOREIGN KEY FK_civicrm_election_results_logo_file_id');
+    foreach ($columns as $column) {
+      CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_election DROP COLUMN `$column`");
+    }
+    try {
+      $this->assertTrue($this->upgrader()->upgrade_20110());
+      foreach ($columns as $column) {
+        $this->assertTrue(CRM_Core_BAO_SchemaHandler::checkIfFieldExists('civicrm_election', $column), "$column is added");
+      }
+      $this->assertEquals(1, CRM_Core_DAO::singleValueQuery($foreignKey), 'The logo is tied to its file');
+      // An election made before this step keeps behaving as before: no celebration, and five days if one is turned on.
+      $this->assertEquals('0', $this->columnDefault('civicrm_election', 'celebration_enabled'));
+      $this->assertEquals('5', $this->columnDefault('civicrm_election', 'celebration_days'));
+      $this->assertTrue($this->upgrader()->upgrade_20110(), 'It can run again');
+      $this->assertEquals(1, CRM_Core_DAO::singleValueQuery($foreignKey), 'Running again does not add the key twice');
+    }
+    finally {
+      $this->upgrader()->upgrade_20110();
+    }
+  }
+
+  public function testUpgrade20130AddsWithdrawnSoEarlierRefusalsAreShownAsDeclined() {
+    CRM_Core_DAO::executeQuery('ALTER TABLE civicrm_election_nomination DROP COLUMN has_withdrawn_nomination');
+    try {
+      $this->assertTrue($this->upgrader()->upgrade_20130());
+      $this->assertTrue(CRM_Core_BAO_SchemaHandler::checkIfFieldExists('civicrm_election_nomination', 'has_withdrawn_nomination'));
+      // Nothing recorded before this step says which refusals were withdrawals, so every earlier one is declined (0).
+      $this->assertEquals('0', $this->columnDefault('civicrm_election_nomination', 'has_withdrawn_nomination'));
+      $this->assertEquals(0, CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_nomination WHERE IFNULL(has_withdrawn_nomination, 1) <> 0'));
+      $this->assertTrue($this->upgrader()->upgrade_20130(), 'It can run again');
+    }
+    finally {
+      $this->upgrader()->upgrade_20130();
     }
   }
 

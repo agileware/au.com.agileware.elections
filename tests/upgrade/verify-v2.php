@@ -22,7 +22,7 @@ function q($sql, $params = []) {
 $like = "WHERE e.name LIKE 'Upgrade %'";
 
 // --- the schema
-foreach (['civicrm_election' => ['voting_method', 'nomination_groups', 'candidate_groups', 'send_emails', 'allow_online_nominations', 'show_photos', 'show_statements', 'name_format', 'nomination_message_template_id', 'results_header_text', 'results_footer_text', 'results_logo_file_id', 'results_logo_alt', 'celebration_enabled', 'celebration_effect', 'celebration_days'], 'civicrm_election_position' => ['write_ins_per_seat', 'position_type', 'pass_threshold', 'quorum_percent', 'resolution_text'], 'civicrm_election_nomination' => ['is_write_in', 'write_in_notified_date', 'write_in_reminded_date', 'write_in_closed_notified_date', 'statement_url']] as $table => $columns) {
+foreach (['civicrm_election' => ['voting_method', 'nomination_groups', 'candidate_groups', 'send_emails', 'allow_online_nominations', 'show_photos', 'show_statements', 'name_format', 'nomination_message_template_id', 'results_header_text', 'results_footer_text', 'results_logo_file_id', 'results_logo_alt', 'celebration_enabled', 'celebration_effect', 'celebration_days'], 'civicrm_election_position' => ['write_ins_per_seat', 'position_type', 'pass_threshold', 'quorum_percent', 'resolution_text'], 'civicrm_election_nomination' => ['is_write_in', 'write_in_notified_date', 'write_in_reminded_date', 'write_in_closed_notified_date', 'statement_url', 'has_withdrawn_nomination']] as $table => $columns) {
   foreach ($columns as $column) {
     check("column $table.$column exists", CRM_Core_BAO_SchemaHandler::checkIfFieldExists($table, $column));
   }
@@ -38,6 +38,7 @@ check('every old election is ranked choice', (int) q("SELECT COUNT(*) FROM civic
 check('no old election has groups of its own for nominating or standing', (int) q("SELECT COUNT(*) FROM civicrm_election e $like AND (IFNULL(e.nomination_groups, '') <> '' OR IFNULL(e.candidate_groups, '') <> '')") === 0);
 check('no old election sends emails', (int) q("SELECT COUNT(*) FROM civicrm_election e $like AND IFNULL(e.send_emails, 0) <> 0") === 0);
 check('online nominating stays on', (int) q("SELECT COUNT(*) FROM civicrm_election e $like AND IFNULL(e.allow_online_nominations, 1) = 0") === 0);
+check('no old nomination is marked withdrawn (a refusal made before 2.1 is shown as declined)', (int) q("SELECT COUNT(*) FROM civicrm_election_nomination n INNER JOIN civicrm_election_position p ON p.id = n.election_position_id INNER JOIN civicrm_election e ON e.id = p.election_id $like AND IFNULL(n.has_withdrawn_nomination, 0) <> 0") === 0);
 check('write-ins stay off and positions stay positions', (int) q("SELECT COUNT(*) FROM civicrm_election_position p INNER JOIN civicrm_election e ON e.id = p.election_id $like AND (IFNULL(p.write_ins_per_seat, 0) <> 0 OR IFNULL(p.position_type, 'election') <> 'election')") === 0);
 
 // --- nothing was lost or changed
@@ -111,7 +112,7 @@ catch (\Throwable $e) {
 $upgrader = new CRM_Elections_Upgrader();
 $upgrader->init(['key' => 'au.com.agileware.elections']);
 $again = TRUE;
-foreach ([20000, 20010, 20020, 20030, 20040, 20050, 20060, 20070, 20080, 20090, 20100, 20110] as $step) {
+foreach ([20000, 20010, 20020, 20030, 20040, 20050, 20060, 20070, 20080, 20090, 20100, 20110, 20120, 20130] as $step) {
   $again = $again && $upgrader->{'upgrade_' . $step}();
 }
 check('every upgrade step can be run again', $again === TRUE);

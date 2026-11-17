@@ -28,7 +28,7 @@ The upgrade test proves that a site running the last 1.x release (1.3.2) can mov
 
 ## Run it locally
 
-Use a DDEV site with a `deploy-elections` command and a spare database state: the script saves the site database first and restores it at the end, so the site is as it was. It needs the `1.3.2` tag in the extension repository.
+Use a DDEV site with a `deploy-elections` command and a spare database state: the script saves the site database first and restores it at the end, so the site's data is as it was. The deployed extension folder is not: the script deletes it to install 1.3.2, so `tests/playwright/node_modules` and the generated test passwords (`fixtures/.generated/`) are gone afterwards. Before the next browser test run on that site, run `npm ci` and the setup script again ([playwright.md](playwright.md)). It needs the `1.3.2` tag in the extension repository.
 
 ```bash
 tests/upgrade/upgrade-from-v1.sh <ddev project dir> <docroot> <cv command>
@@ -54,7 +54,7 @@ An upgrade step (`upgrade_2xxxx` in `CRM/Elections/Upgrader.php`) needs its own 
 
 1. **Schema check.** In `verify-v2.php`, add the new column or table to the schema lists at the top.
 2. **Behaviour check.** If the step changes what an existing election does or looks like, add a `check()` that says what must be true for the seeded old elections afterwards (like the "old behaviour kept" group). If it should leave data untouched, the existing count checks already cover it.
-3. **Repeatable.** Add the step number to the list near the end of `verify-v2.php` ("every upgrade step can be run again"). That list stops at `20110` today, so steps `20120` and `20130` are not re-run by it: add them.
+3. **Repeatable.** Add the step number to the list near the end of `verify-v2.php` ("every upgrade step can be run again"). It runs every step up to `20130` today.
 4. **Seed data.** Only if the step needs old data the seed does not hold, extend `seed-v1.php` using what 1.3.2's code could write (the seed runs on 1.3.2, so it may only use 1.3.2's API).
 5. Run the test on WordPress, then the others.
 
