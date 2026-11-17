@@ -34,7 +34,7 @@ The order below is a recommendation. Ask the maintainer which to start with.
 | 10 | **Joomla manager and limited organiser sessions in the specs** | Some specs skip on Joomla because no manager or limited session exists there (the skip is in `tests/playwright/fixtures/base.ts` and `specs/backend/permissions.spec.ts`). Create the sessions from the Joomla account setup script `tests/playwright/fixtures/setup-accounts-joomla.sh`. |
 | 11 | **Release 2.2** | Follow [../../releases/README.md](../../releases/README.md). |
 
-Done since 2.1.0. Items 12 and 13 reached `master` with the developer guide pull request (#51, 2026-11-17); items 14 to 17 are on the branch `version-2.2` (not pushed):
+Done since 2.1.0. Items 12 and 13 reached `master` with the developer guide pull request (#51, 2026-11-17); items 14 to 18 are on the branch `version-2.2` (not pushed):
 
 | # | Item | Where |
 |---|---|---|
@@ -44,6 +44,7 @@ Done since 2.1.0. Items 12 and 13 reached `master` with the developer guide pull
 | 15 | **Playwright project chain removed**: one worker runs the projects in order, so one failure no longer skips the rest (D32) | `tests/playwright/playwright.config.ts` |
 | 16 | **Tier 1 test clean-up**: 29 PHPUnit and 7 browser tests removed, `admin-managed` folded into `groups.spec.ts`, the screenshot walk made a tool (`npm run screens`) (D32) | [../../decisions/platform-testing-and-release.md](../../decisions/platform-testing-and-release.md) |
 | 17 | **Referendum spec counts only its own election's answers**, so the suite passes on a site that holds seeded review data | `tests/playwright/specs/council/referendum.spec.ts` |
+| 18 | **`xss` spec writes its test text only into the council election**, not into every election on the site | `tests/playwright/specs/security/xss.spec.ts` |
 
 ## Small items found while writing and checking these guides
 
@@ -53,7 +54,6 @@ Not yet in the table above; each is a small change. Ask the maintainer whether t
 |---|---|
 | **Add Candidate button wraps on Drupal** | On the candidates list, with Olivero as the front end theme and Claro as the admin theme, the Add Candidate button drops under Back (46 px lower), so it looks wrong on Drupal 11. (The geometry test that caught it was removed in the test clean-up; `frame.spec.ts` still asserts the button order.) Fix the button bar CSS (`.election-list-actions`) so it keeps one row, or wrap it neatly. |
 | **Rest of the test clean-up** | Not decided. The review's second tier (about 23 PHPUnit and 11 browser tests, mostly by moving one assertion to a stronger neighbour first); one retry for the council and security files; merging the `layout`, `accessibility` and `election-page` page walks; trimming the council spec to about five nominators and six voters; a PHPUnit coverage report (pcov or xdebug) in CI; tightening weak assertions (for example the `callAPIFailure()` calls with no message). Remove a test only when a neighbour fails for the same regression. |
-| **The `xss` spec changes every election on the site** | `specs/security/xss.spec.ts` sets `comments`, `rejection_comments` and `statement_url` on every nomination, `description` on every seconder and on every position, with no election filter, and only the council election is reseeded afterwards. On a site that holds seeded review data the review text is replaced by the test text. Limit the three updates to the council election. |
 | **Upgrade test gaps** | `UpgraderTest` `tearDown`, `setUpHeadless` and `tests/upgrade/verify-v2.php` do not cover steps 20100, 20110 and 20130. |
 | **Out-of-date notes** | `tests/playwright/README.md` repeats and contradicts [`../../testing/playwright.md`](../../testing/playwright.md): trim it to a pointer. `CONTRIBUTING.md` still explains how to create the `release` branch by hand before the first cut; the branch exists now, so shorten it. |
 | **Dark mode claim** | The user guide says dark mode is supported; check it against the CSS and the theme variants script before 2.2 says so again. |

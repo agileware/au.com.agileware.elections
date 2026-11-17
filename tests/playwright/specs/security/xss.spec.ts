@@ -37,11 +37,12 @@ test('script and markup in any field are shown as text, never run', async ({ bro
       1: first, 2: PAYLOADS[(i + 1) % PAYLOADS.length], 3: `${first} Payload ${persona}`, 4: `x" onerror="window.__xss='photo'`, 5: cid,
     });
   }
-  // Statements, reasons and the election's and positions' own text.
-  civiSql('UPDATE civicrm_election_nomination SET comments = %1, rejection_comments = %1, statement_url = %2', { 1: PAYLOADS[0], 2: `javascript:window.__xss='url'` });
-  civiSql('UPDATE civicrm_election_nomination_seconder SET description = %1', { 1: PAYLOADS[1] });
+  // Statements, reasons and the election's and positions' own text. Only this election's rows: the site may
+  // hold other elections, whose text must stay as it is.
+  civiSql('UPDATE civicrm_election_nomination n INNER JOIN civicrm_election_position p ON p.id = n.election_position_id SET n.comments = %1, n.rejection_comments = %1, n.statement_url = %2 WHERE p.election_id = %3', { 1: PAYLOADS[0], 2: `javascript:window.__xss='url'`, 3: data.election_id });
+  civiSql('UPDATE civicrm_election_nomination_seconder s INNER JOIN civicrm_election_nomination n ON n.id = s.election_nomination_id INNER JOIN civicrm_election_position p ON p.id = n.election_position_id SET s.description = %1 WHERE p.election_id = %2', { 1: PAYLOADS[1], 2: data.election_id });
   civiSql('UPDATE civicrm_election SET name = %1, description = %2 WHERE id = %3', { 1: `Council ${PAYLOADS[2]}`, 2: PAYLOADS[0], 3: data.election_id });
-  civiSql('UPDATE civicrm_election_position SET description = %1', { 1: PAYLOADS[1] });
+  civiSql('UPDATE civicrm_election_position SET description = %1 WHERE election_id = %2', { 1: PAYLOADS[1], 2: data.election_id });
   civiEval(`Civi::settings()->set('elections_name_format', 'first_nick_last');`);
 
   const problems: string[] = [];
