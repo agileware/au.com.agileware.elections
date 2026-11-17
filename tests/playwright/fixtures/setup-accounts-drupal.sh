@@ -34,7 +34,7 @@ role elections_manager "Elections Manager (test)"
 perms elections_manager "access CiviCRM" "administer Elections" "view Elections" "access AJAX API" "view all contacts"
 role elections_limited "Elections Organiser without contacts (test)"
 perms elections_limited "access CiviCRM" "administer Elections" "view Elections" "access AJAX API"
-role elections_member "Elections Member (test)"
+role elections_member "Elections Voter (test)"
 perms elections_member "view Elections" "access AJAX API" "access uploaded files" "profile view" "profile edit"
 
 account admin administrator

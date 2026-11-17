@@ -85,7 +85,7 @@ foreach ($logins as $login => [$n, $role]) {
   }
   $wpUser = get_user_by('id', $userId);
   CRM_Core_BAO_UFMatch::synchronize($wpUser, TRUE, 'WordPress', 'Individual');
-  $credentials .= sprintf("| %s %s | %s | %s | %s |\n", $contact['first_name'], $contact['last_name'], $role === 'elections_manager' ? 'Elections Manager (administer Elections)' : 'Elections Member', $login, $password);
+  $credentials .= sprintf("| %s %s | %s | %s | %s |\n", $contact['first_name'], $contact['last_name'], $role === 'elections_manager' ? 'Elections Manager (administer Elections)' : 'Elections Voter', $login, $password);
 }
 $existingFile = is_file($credentialsFile) ? file_get_contents($credentialsFile) : "# Test site credentials (local test site only; never commit)\n";
 // Keep any other table (such as the administrator's), replace an earlier table of Beekeeper logins.

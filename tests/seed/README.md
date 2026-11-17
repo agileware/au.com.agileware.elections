@@ -112,4 +112,4 @@ The credentials file is the first argument, else `ELECTIONS_SEED_CREDENTIALS_FIL
 
 Everything the scripts generate goes under `tests/seed/.generated/` (git-ignored) unless a variable points elsewhere: `seeded.json`, `PERSONAL-LINKS.md` and `CREDENTIALS.md`. The DDEV `deploy-elections` commands keep `.generated` folders when they copy the extension to a site.
 
-Invented content: the seed text still calls the Beekeepers "members" in election descriptions and group titles, as the maintainer's review site does. These scripts are not covered by the wording test, which scans the extension's screens, docs and code only.
+Invented content: the seed text calls the people who take part "people", "voters" or "Beekeepers", as the wording standard asks. Three uses of the word are left on purpose, because they are the invented Association's own subject matter and not a description of who takes part: role titles such as "Committee Member 1", the "Life Membership Award Panel", and the two referendum questions (the membership fee and voting by proxy). These scripts are not covered by the wording test, which scans the extension's screens, docs and code only.
