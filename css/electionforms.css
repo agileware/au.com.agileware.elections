@@ -1358,14 +1358,17 @@ ul#errorList {
     cursor: not-allowed;
 }
 /* Back end lists (the SearchKit pages): the action bar, the filters, the table and its card layout on a phone. */
-.election-list-actions .election-action-end {
-    margin-left: auto;
-}
 .crm-container .election-list-actions .btn {
     display: inline-flex;
     align-items: center;
     gap: 0.4em;
     margin: 0;
+}
+/* The Add button sits at the right end of the row. In a narrow column (Drupal's Olivero) it wraps to a row of its
+   own and stays at the right end. !important: CiviCRM sets the margin of its buttons with an ID selector
+   (#bootstrap-theme .btn), which no class selector here can outrank. */
+.crm-container .election-list-actions .btn.election-action-end {
+    margin-left: auto !important;
 }
 .crm-container .election-list-actions a.btn.election-action-quiet,
 .crm-container .election-list-actions a.btn.election-action-quiet:visited {
@@ -1451,8 +1454,8 @@ ul#errorList {
         flex-wrap: wrap;
         gap: 0.5em;
     }
-    .crm-container .election-list-actions .election-action-end {
-        margin-left: 0;
+    .crm-container .election-list-actions .btn.election-action-end {
+        margin-left: 0 !important;
     }
 }
 .election-fingerprint {

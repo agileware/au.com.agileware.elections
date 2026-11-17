@@ -2,7 +2,7 @@
 
 Verified with: the suite run project by project on new WordPress, Drupal 11 and Joomla 5.4 sites built by the DDEV kit, CiviCRM 6.19.5, 2026-11-15. Results and known failures are in the notes below.
 
-The Playwright suite drives Chromium against a real site. It tests the back end as organisers, the front end as people on personal links, a complete mock council election, accessibility, layout at phone width, and attacks. The same specs run on WordPress, Drupal and Joomla. This page covers how it is built, how to set up a site for it, and how to run it. It reconciles and extends `tests/playwright/README.md`, which is shorter.
+The Playwright suite drives Chromium against a real site. It tests the back end as organisers, the front end as people on personal links, a complete mock council election, accessibility, layout at phone width, and attacks. The same specs run on WordPress, Drupal and Joomla. This page covers how it is built, how to set up a site for it, and how to run it. `tests/playwright/README.md` only points here.
 
 ## Layout of `tests/playwright/`
 
@@ -82,7 +82,7 @@ Clean Drupal 11 and Joomla 5.4 sites built by the kit needed nothing more than t
 
 **Review data (`tests/seed/`) and the suite can share a site since 2.2.** The referendum spec counts only its own election's answers, and the `xss` spec writes its test text only into the council election; before 2.2 the first failed on a site with seeded answers and the second overwrote the statements and descriptions of every election. The suite still creates and deletes its own elections, people and settings, so a separate site for review stays the tidier choice.
 
-**Known failure on Drupal 11:** none now. The "Add Candidate button is at the right end of the row" test, which failed on Drupal because the narrow Olivero column wraps the button, was removed in 2.2 (the button order is asserted by `frame.spec.ts`; the wrapping itself is in the [2.2 roadmap](../roadmap/2.2/README.md)).
+**Known failure on Drupal 11:** none. In Olivero's narrow column the three buttons above the candidates and positions lists do not fit on one row, so the Add button wraps to a row of its own; it stays at the right end, which `candidates.spec.ts` asserts on every CMS.
 
 ## Run
 

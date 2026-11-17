@@ -52,6 +52,18 @@ test.describe('Election candidates (SearchKit list)', () => {
     await expect(adminPage.getByRole('button', { name: 'Submit' })).toBeVisible();
   });
 
+  test('the Add Candidate button is at the right end of the action bar', async ({ adminPage }) => {
+    const election = createElection(nm('Cand bar'));
+    addPosition(election, 'Chair', 1);
+    await adminPage.goto(listUrl(election));
+    const bar = adminPage.locator('.election-list-actions');
+    const add = bar.getByRole('link', { name: 'Add Candidate', exact: true });
+    await expect(add).toBeVisible();
+    // The right end of the bar, on the first row or (in a narrow column, as on Drupal) on a row of its own.
+    const [barBox, addBox] = [await bar.boundingBox(), await add.boundingBox()];
+    expect(Math.abs((barBox!.x + barBox!.width) - (addBox!.x + addBox!.width))).toBeLessThanOrEqual(2);
+  });
+
   test('an empty list says what to do', async ({ adminPage }) => {
     const election = createElection(nm('Cand empty'));
     addPosition(election, 'Chair', 1);
