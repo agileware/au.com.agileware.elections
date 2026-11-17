@@ -34,7 +34,7 @@ The order below is a recommendation. Ask the maintainer which to start with.
 | 10 | **Joomla manager and limited organiser sessions in the specs** | Some specs skip on Joomla because no manager or limited session exists there (the skip is in `tests/playwright/fixtures/base.ts` and `specs/backend/permissions.spec.ts`). Create the sessions from the Joomla account setup script `tests/playwright/fixtures/setup-accounts-joomla.sh`. |
 | 11 | **Release 2.2** | Follow [../../releases/README.md](../../releases/README.md). |
 
-Done since 2.1.0. Items 12 and 13 reached `master` with the developer guide pull request (#51, 2026-11-17); items 14 to 18 are on the branch `version-2.2` (not pushed):
+Done since 2.1.0. Items 12 and 13 reached `master` with the developer guide pull request (#51, 2026-11-17); items 14 to 22 are on the branch `version-2.2` (not pushed):
 
 | # | Item | Where |
 |---|---|---|
@@ -45,6 +45,10 @@ Done since 2.1.0. Items 12 and 13 reached `master` with the developer guide pull
 | 16 | **Tier 1 test clean-up**: 29 PHPUnit and 7 browser tests removed, `admin-managed` folded into `groups.spec.ts`, the screenshot walk made a tool (`npm run screens`) (D32) | [../../decisions/platform-testing-and-release.md](../../decisions/platform-testing-and-release.md) |
 | 17 | **Referendum spec counts only its own election's answers**, so the suite passes on a site that holds seeded review data | `tests/playwright/specs/council/referendum.spec.ts` |
 | 18 | **`xss` spec writes its test text only into the council election**, not into every election on the site | `tests/playwright/specs/security/xss.spec.ts` |
+| 19 | **Add buttons at the right end of the list action bar**, as the standards say. CiviCRM's own button rule (`#bootstrap-theme .btn`) had cancelled the margin on every CMS; where the row is too narrow (Drupal's Olivero) the Add button wraps to its own row and stays at the right end | `css/electionforms.css`, `tests/playwright/specs/backend/candidates.spec.ts` |
+| 20 | **`xss` spec proves its text reached the pages**: it fails if the test text was not shown as plain text on the election page, ballot, candidate page, candidates list and results | `tests/playwright/specs/security/xss.spec.ts` |
+| 21 | **Upgrade tests cover steps 20110 and 20130**, and the upgrade-from-1.3.2 check covers `has_withdrawn_nomination` and re-runs steps 20120 and 20130 | `tests/phpunit/CRM/Elections/UpgraderTest.php`, `tests/upgrade/verify-v2.php` |
+| 22 | **Out-of-date notes trimmed**: `tests/playwright/README.md` points to the guide; `CONTRIBUTING.md` no longer explains creating the `release` branch | |
 
 ## Small items found while writing and checking these guides
 
@@ -52,10 +56,7 @@ Not yet in the table above; each is a small change. Ask the maintainer whether t
 
 | Item | Detail |
 |---|---|
-| **Add Candidate button wraps on Drupal** | On the candidates list, with Olivero as the front end theme and Claro as the admin theme, the Add Candidate button drops under Back (46 px lower), so it looks wrong on Drupal 11. (The geometry test that caught it was removed in the test clean-up; `frame.spec.ts` still asserts the button order.) Fix the button bar CSS (`.election-list-actions`) so it keeps one row, or wrap it neatly. |
 | **Rest of the test clean-up** | Not decided. The review's second tier (about 23 PHPUnit and 11 browser tests, mostly by moving one assertion to a stronger neighbour first); one retry for the council and security files; merging the `layout`, `accessibility` and `election-page` page walks; trimming the council spec to about five nominators and six voters; a PHPUnit coverage report (pcov or xdebug) in CI; tightening weak assertions (for example the `callAPIFailure()` calls with no message). Remove a test only when a neighbour fails for the same regression. |
-| **Upgrade test gaps** | `UpgraderTest` `tearDown`, `setUpHeadless` and `tests/upgrade/verify-v2.php` do not cover steps 20100, 20110 and 20130. |
-| **Out-of-date notes** | `tests/playwright/README.md` repeats and contradicts [`../../testing/playwright.md`](../../testing/playwright.md): trim it to a pointer. `CONTRIBUTING.md` still explains how to create the `release` branch by hand before the first cut; the branch exists now, so shorten it. |
 | **Dark mode claim** | The user guide says dark mode is supported; check it against the CSS and the theme variants script before 2.2 says so again. |
 | **Election stage has three implementations** | Noted during the code review that the stage of an election is worked out in more than one place. Not rechecked: find the places and consider one source. |
 
