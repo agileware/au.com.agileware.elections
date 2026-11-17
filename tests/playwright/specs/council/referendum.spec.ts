@@ -79,7 +79,8 @@ test('voters answer, see their answer, and can change it', async ({ persona }) =
   const page = await persona('V03');
   await answer(page, 'V03', 'For');
   await page.context().close();
-  const rows = civiApi4<any[]>('ElectionOptionVote.get', { select: ['id'], limit: 0 });
+  // Only this election's answers: the site may hold other elections with answers of their own.
+  const rows = civiApi4<any[]>('ElectionOptionVote.get', { select: ['id'], where: [['election_position_id.election_id', '=', council().election_id]], limit: 0 });
   expect(rows).toHaveLength(4);
 });
 

@@ -80,7 +80,7 @@ If the browser download fails with `ENOTFOUND cdn.playwright.dev`, it is a passi
 
 Clean Drupal 11 and Joomla 5.4 sites built by the kit needed nothing more than their account script (checked 2026-11-15). Not verified: whether the mail redirect that the WordPress script sets matters on either.
 
-**Do not seed the review data (`tests/seed/`) on a site you run the suite on.** The referendum spec counts every `ElectionOptionVote` row on the site and expects its own four, so the seeded ballots make it fail (`specs/council/referendum.spec.ts`, "voters answer, see their answer, and can change it"). Use one site for the suite and another for review data, or rebuild the site between them.
+**Keep review data (`tests/seed/`) on a different site from the one you run the suite on.** The suite passes on a site that holds the seeded elections (the referendum spec counts only its own election's answers since 2.2; before that the seeded answers made it fail). But the `xss` spec writes its test text into the statements, seconder descriptions and position descriptions of every election on the site, not only the council election, and nothing puts the seeded text back. Seed again after a run, or use one site for the suite and another for review.
 
 **Known failure on Drupal 11:** none now. The "Add Candidate button is at the right end of the row" test, which failed on Drupal because the narrow Olivero column wraps the button, was removed in 2.2 (the button order is asserted by `frame.spec.ts`; the wrapping itself is in the [2.2 roadmap](../roadmap/2.2/README.md)).
 
