@@ -46,6 +46,8 @@ test('script and markup in any field are shown as text, never run', async ({ bro
   civiEval(`Civi::settings()->set('elections_name_format', 'first_nick_last');`);
 
   const problems: string[] = [];
+  // The pages on which the test text was seen as plain text: proof that it reached the page at all.
+  const shown: string[] = [];
   async function visit(label: string, persona: string, civiPath: string, params: Record<string, string | number> = {}, interact?: (page: import('@playwright/test').Page) => Promise<void>) {
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -68,6 +70,7 @@ test('script and markup in any field are shown as text, never run', async ({ bro
       return out;
     });
     for (const f of found) problems.push(`${label}: ${f}`);
+    if ((await page.locator('body').innerText()).includes('__xss')) shown.push(label);
     await context.close();
   }
 
@@ -115,4 +118,6 @@ test('script and markup in any field are shown as text, never run', async ({ bro
   civiEval(`Civi::settings()->revert('elections_name_format');`);
   reseedCouncil();
   expect(problems, 'script or markup from a field reached a page').toEqual([]);
+  // A run in which the text never reached a page would prove nothing: these pages must have shown it as text.
+  expect(shown, 'the test text was shown as plain text').toEqual(expect.arrayContaining(['election page (voting)', 'ballot', 'candidate page', 'candidates list', 'results']));
 });
