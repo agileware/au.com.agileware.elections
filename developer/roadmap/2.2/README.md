@@ -32,6 +32,7 @@ The order below is a recommendation. Ask the maintainer which to start with.
 | 8 | **Drupal 11 and Joomla workflows on GitHub Actions** | Today `agileware/ci-workflows` runs WordPress only, so the other two CMSs are tested on DDEV before each release. Contribute workflow variants to that repository; DDEV in Actions is the recommended way. The theme input (`WP_THEME`) already exists. See [../../testing/ci.md](../../testing/ci.md). |
 | 9 | **Re-record the user guide pictures and GIFs** in Google Chrome | The docs text already matches the 2.1 screens; these images still show older ones: `docs/images/admin_election`, `admin_edit`, `admin_add`, `admin_delete`, `user_nominate`, `user_vote`, `user_view_results`, and `docs/images/setup/election-listing-page.png` and `election-page.png`. The extension README still shows an old results GIF. |
 | 10 | **Joomla manager and limited organiser sessions in the specs** | Some specs skip on Joomla because no manager or limited session exists there (the skip is in `tests/playwright/fixtures/base.ts` and `specs/backend/permissions.spec.ts`). Create the sessions from the Joomla account setup script `tests/playwright/fixtures/setup-accounts-joomla.sh`. |
+| 24 | **Rest of the test clean-up** (all test work is done in 2.2, the maintainer's decision of 2026-11-21) | Not decided. One retry for the council and security files; merging the `layout`, `accessibility` and `election-page` page walks; trimming the council spec to about five nominators and six voters; tightening weak assertions (for example the `callAPIFailure()` calls with no message). Tier 2 and the coverage report are done (row 23). Remove a test only when a neighbour fails for the same regression. |
 | 11 | **Release 2.2** | Follow [../../releases/README.md](../../releases/README.md). |
 
 Done since 2.1.0. Items 12 and 13 reached `master` with the developer guide pull request (#51, 2026-11-17); items 14 to 22 are on the branch `version-2.2` (not pushed):
@@ -53,7 +54,7 @@ Done since 2.1.0. Items 12 and 13 reached `master` with the developer guide pull
 
 ## Small items found while writing and checking these guides
 
-Moved to 2.3 by the maintainer on 2026-11-21: the 38 px action bar buttons, the Joomla page width, the rest of the test clean-up, and the three stage implementations ([../2.3/README.md](../2.3/README.md), items 3 to 6). The dark mode claim is now part of item 4.
+Moved to 2.3 by the maintainer on 2026-11-21: the 38 px action bar buttons, the Joomla page width and the three stage implementations ([../2.3/README.md](../2.3/README.md), items 3 to 5). The dark mode claim is now part of item 4, and the rest of the test clean-up is item 24, because all the test work is done in 2.2.
 
 ## Decisions still open
 
