@@ -152,7 +152,6 @@ Stop a site you are not using with `ddev stop <site-name>`; its data is kept and
 ## Known limits
 
 - **Joomla and PHPUnit.** `~/.cv.json` points `jcv` at the site database, and the headless tests rebuild the database they are given, so the `phpunit` wrapper refuses on Joomla. Run PHPUnit on WordPress (the maintainers' only PHPUnit site).
-- **Joomla sessions.** The browser suite has only an administrator session on Joomla: six specs skip by design.
 - **Joomla 6** is not supported (see above). **Drupal 12** is not covered: the constraint is `^11`.
 - **The script is for one site per run**, on macOS or Linux with DDEV. It does not set up Windows.
 - **No Agileware ESR patches** are included (see the version section).

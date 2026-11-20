@@ -1,5 +1,6 @@
 import { test, expect, civiAdminUrl, expectNoPhpOutput } from '../../fixtures/base';
 import { civiApi4, civiEval } from '../../fixtures/civi';
+import { memberAdminUrl } from '../../fixtures/cms';
 import { addNomination, addPosition, createElection, createMembers, nm, removeRunData, removeRunMembers, startElection } from '../../fixtures/data';
 
 test.afterAll(() => {
@@ -133,7 +134,7 @@ test.describe('Election overview', () => {
     const name = nm('Overview refused');
     const id = createElection(name);
     allowedProblems.push(/403/);
-    await memberPage.goto(overviewUrl(id));
+    await memberPage.goto(memberAdminUrl('civicrm/elections/overview', { reset: 1, eid: id }));
     // Each CMS words the refusal its own way (WordPress: "Sorry, you are not allowed to access this page.").
     await expect(memberPage.locator('body')).toContainText(/do not have permission|not allowed to access|not authori[sz]ed|access denied/i);
     await expect(memberPage.locator('.election-stage')).toHaveCount(0);

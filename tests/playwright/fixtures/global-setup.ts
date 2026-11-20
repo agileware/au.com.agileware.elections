@@ -71,12 +71,12 @@ export default async function globalSetup(config: FullConfig) {
   fs.mkdirSync(AUTH_DIR, { recursive: true });
   const browser = await chromium.launch();
 
-  // Which sessions each CMS gets. Joomla has no manager or member session: CiviCRM permissions are
-  // set through Joomla's access levels there, so those specs are skipped on Joomla.
+  // Every CMS gets the four sessions. Drupal and Joomla use the accounts their setup script made; on Joomla
+  // the organisers log in to the administrator and the member to the site, because a Joomla member may not
+  // use the administrator at all.
   const sessions: Array<[string, { username: string; password: string }]> =
     CMS === 'wordpress' ? Object.entries(logins)
-      : CMS === 'drupal' ? [['admin', testAdmin], ['manager', logins.manager], ['limited', logins.limited], ['member', logins.member]]
-        : [['admin', testAdmin]];
+      : [['admin', testAdmin], ['manager', logins.manager], ['limited', logins.limited], ['member', logins.member]];
 
   for (const [name, { username, password }] of sessions) {
     const context = await browser.newContext({ baseURL });
@@ -95,6 +95,13 @@ export default async function globalSetup(config: FullConfig) {
       await page.locator('#edit-pass').fill(password);
       await page.locator('#edit-submit').click();
       await page.waitForURL((u) => !u.pathname.startsWith('/user/login'));
+    }
+    else if (name === 'member') {
+      await page.goto('/index.php?option=com_users&view=login');
+      await page.locator('#username').fill(username);
+      await page.locator('#password').fill(password);
+      await page.locator('form.com-users-login__form button[type="submit"]').click();
+      await page.waitForURL((u) => !u.search.includes('view=login'), { timeout: 30000 });
     }
     else {
       await page.goto('/administrator/index.php');

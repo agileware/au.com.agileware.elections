@@ -1,5 +1,6 @@
 import { test, expect, civiAdminUrl, expectNoPhpOutput } from '../../fixtures/base';
 import { createElection, nm, positionNames, removeRunData } from '../../fixtures/data';
+import { memberAdminUrl } from '../../fixtures/cms';
 
 // A required field's name ends with its separate * marker, so an exact name is matched as a pattern.
 const exactLabel = (label: string) => new RegExp(`^\\s*${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\*?\\s*$`);
@@ -31,7 +32,7 @@ test.describe('election administration', () => {
 
   test('a member cannot reach the administration screens', async ({ memberPage, allowedProblems }) => {
     allowedProblems.push(/403/);
-    await memberPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
+    await memberPage.goto(memberAdminUrl('civicrm/elections/create', { reset: 1 }));
     await expect(memberPage.getByRole('button', { name: 'Submit' })).toHaveCount(0);
   });
 

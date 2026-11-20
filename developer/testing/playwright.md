@@ -50,9 +50,9 @@ Sessions saved by `global-setup.ts` under `fixtures/.generated/auth/<name>.json`
 |---|---|---|
 | WordPress | administrator, manager, limited organiser, member | All specs run. |
 | Drupal | the same four (accounts from `setup-accounts-drupal.sh`) | All specs run. |
-| Joomla | administrator only (`setup-accounts-joomla.sh`) | Specs that need the other sessions skip by design (Joomla sets CiviCRM permissions through its access levels). |
+| Joomla | the same four (accounts and groups from `setup-accounts-joomla.sh`); the member signs in to the site, not the administrator | All specs run (since 2.2). |
 
-The six specs that skip on Joomla for lack of a manager, limited or member session are: `overview.spec.ts` (a member cannot open the overview), `smoke.spec.ts` (an organiser can open the list; a member cannot reach the administration screens), `election-form.spec.ts` (the nomination email choice, which needs the manager), and `permissions.spec.ts` (both specs). The front end persona specs are not affected: personas use personal links, so they run on Joomla in full ([personas.md](personas.md)). Creating those sessions on Joomla is planned work ([../roadmap/2.2/README.md](../roadmap/2.2/README.md)).
+Until 2.2 six specs skipped on Joomla for lack of a manager, limited or member session. The Joomla script now makes those accounts, with a Joomla group for each role ([../environments/ddev-joomla.md](../environments/ddev-joomla.md)). On Joomla a member may not use the administrator, so the specs that check a member is refused a back office page open it through the site with `memberAdminUrl()` (`fixtures/cms.ts`), where CiviCRM's own permission check refuses it. The front end persona specs use personal links, not logins ([personas.md](personas.md)).
 
 Other generated files: `fixtures/.generated/council.json` (every persona's personal link and the plan) and `council-personas.json`. They are git-ignored. `global-setup.ts` reseeds the council election each run, so a run starts at the nominations stage whatever the site was left at.
 

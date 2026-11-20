@@ -23,7 +23,7 @@ CiviCRM versions: the main WordPress site runs 6.16 (an ESR build), the others 6
 | WordPress, CiviCRM 6.16 (DDEV site `elections2`) | Yes (the only DDEV site with a test database) | Yes | Yes, all projects | The main development site. |
 | WordPress, CiviCRM 6.19 (the Beekeepers review site) | Not set up | Not run there: it swaps the review data out for the length of the run | Possible; ask the maintainer first | The maintainer's review site: reviewed by hand, never reset without asking. |
 | Drupal 11, CiviCRM 6.19 (DDEV site `elections2-drupal`) | No | Yes | Yes (`CMS=drupal`), administrator, manager, limited and member sessions | |
-| Joomla 5.4, CiviCRM 6.19 (DDEV site `elections2-joomla`) | No: never run it there | Yes | Yes (`CMS=joomla`, `CIVI_CV=jcv`), administrator session only | Specs that need other sessions skip by design. |
+| Joomla 5.4, CiviCRM 6.19 (DDEV site `elections2-joomla`) | No: never run it there | Yes | Yes (`CMS=joomla`, `CIVI_CV=jcv`), all four sessions | All specs run (since 2.2). |
 | GitHub Actions (WordPress in Docker, the newest stable CiviCRM the pipeline image installs) | Yes | Yes | Yes | The only suites that gate a pull request. No Drupal or Joomla. |
 
 The DDEV sites are described in [../environments/README.md](../environments/README.md).

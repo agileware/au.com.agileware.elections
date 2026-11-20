@@ -11,7 +11,7 @@ An election is mostly used by people who are not administrators: voters, nominat
 - **A CMS session wins over a personal link.** Someone logged in as an administrator in the same browser acts as the administrator whatever link they open, so the administrator must be signed out when you look at the front end as a voter ([manual-browser-testing.md](manual-browser-testing.md)).
 - **Every defect found by hand gets a persona test.**
 
-Joomla note: the persona specs run in full on Joomla because they use links, not logins. Only the back end specs that need a manager, limited or member session skip there ([playwright.md](playwright.md)).
+Joomla note: the persona specs run in full on Joomla because they use links, not logins. Since 2.2 the back end specs that need a manager, limited or member session run there too ([playwright.md](playwright.md)).
 
 ## The model
 

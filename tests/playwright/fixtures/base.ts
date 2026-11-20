@@ -41,7 +41,7 @@ export async function expectNoPhpOutput(page: Page) {
   expect(match, `PHP output on the page ${page.url()}: ${match ? text.slice(Math.max(0, match.index! - 60), match.index! + 200) : ''}`).toBeNull();
 }
 
-/** A page for a WordPress user, using the session saved by global-setup.ts. */
+/** A page for a test user, using the session saved by global-setup.ts. */
 async function loggedInPage(browser: Browser, name: 'admin' | 'manager' | 'limited' | 'member') {
   const state = path.join(AUTH_DIR, `${name}.json`);
   if (!fs.existsSync(state)) {
@@ -56,7 +56,7 @@ type Fixtures = {
   adminPage: Page;
   /** A page for an organiser with the permissions documented in docs/roles_and_permissions.md. */
   managerPage: Page;
-  /** A page for an organiser who lacks "view all contacts" (WordPress only). */
+  /** A page for an organiser who lacks "view all contacts". */
   limitedPage: Page;
   /** A page for a logged in member with "view Elections". */
   memberPage: Page;
