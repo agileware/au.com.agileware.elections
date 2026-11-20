@@ -62,6 +62,11 @@ test.describe('Election candidates (SearchKit list)', () => {
     // The right end of the bar, on the first row or (in a narrow column, as on Drupal) on a row of its own.
     const [barBox, addBox] = [await bar.boundingBox(), await add.boundingBox()];
     expect(Math.abs((barBox!.x + barBox!.width) - (addBox!.x + addBox!.width))).toBeLessThanOrEqual(2);
+    // At a laptop width the list must not widen the page past the window and push the button out of view
+    // (Joomla, whose admin sidebar stays open, did until 2.2).
+    await adminPage.setViewportSize({ width: 1024, height: 800 });
+    const inView = await add.evaluate((el) => el.getBoundingClientRect().right <= window.innerWidth);
+    expect(inView).toBe(true);
   });
 
   test('an empty list says what to do', async ({ adminPage }) => {

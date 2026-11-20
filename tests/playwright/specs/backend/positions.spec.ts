@@ -174,6 +174,9 @@ test.describe('Referendum questions', () => {
     // Add Position keeps its place, switched off, with the reason.
     await expect(adminPage.getByRole('link', { name: 'Add Position' })).toHaveCount(0);
     await expect(adminPage.locator('.election-action-disabled', { hasText: 'Add Position' })).toContainText('Positions cannot be changed while the election is locked.');
+    // Switched off, it is still the same size as the buttons beside it.
+    const [backBox, offBox] = [await adminPage.getByRole('link', { name: 'Back', exact: true }).boundingBox(), await adminPage.locator('.election-action-disabled').boundingBox()];
+    expect(Math.abs(backBox!.height - offBox!.height)).toBeLessThanOrEqual(1);
     await expect(adminPage.getByRole('link', { name: 'Duplicate' })).toHaveCount(0);
     await expect(adminPage.getByRole('link', { name: 'Delete' })).toHaveCount(0);
     await expect(adminPage.getByText('Drag a row to change the order')).toHaveCount(0);

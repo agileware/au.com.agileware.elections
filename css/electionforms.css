@@ -1390,6 +1390,15 @@ ul#errorList {
 .election-list-table table {
     width: 100%;
 }
+/* A wide table scrolls inside its own box instead of widening the page. Without this, the table's width stretches
+   Joomla's admin column past the window (its sidebar stays open down to 768px), and the Add button at the right end
+   of the action bar is pushed off screen. contain: inline-size stops the table's width counting towards the page's. */
+.election-list-table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    contain: inline-size;
+}
 .election-list-table td[data-field-name="lock_reason"] {
     font-size: 0.9em;
 }
@@ -1618,6 +1627,7 @@ ul#errorList {
 .crm-container .election-action-bar a.button,
 .crm-container .election-action-bar span.button,
 .crm-container .election-action-bar a.btn,
+.crm-container .election-action-bar span.btn,
 .crm-container .election-action-bar button.button {
     display: inline-flex;
     align-items: center;
