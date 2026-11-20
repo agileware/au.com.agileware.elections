@@ -42,6 +42,22 @@ One class or one test: add the file path, or `--filter`:
 ddev exec 'cd /var/www/html/httpdocs/CRM/extensions/au.com.agileware.elections && CIVICRM_UF=UnitTests phpunit tests/phpunit/CRM/Elections/WriteInTest.php'
 ```
 
+**Coverage.** The DDEV image has Xdebug, not pcov. Switch it on, run with Xdebug's coverage mode and write the reports inside the container, then switch it off again (Xdebug slows every page):
+
+```bash
+ddev xdebug on
+```
+
+```bash
+ddev exec 'cd /var/www/html/httpdocs/CRM/extensions/au.com.agileware.elections && XDEBUG_MODE=coverage CIVICRM_UF=UnitTests phpunit --coverage-text=/tmp/coverage.txt --coverage-html=/tmp/coverage-html'
+```
+
+```bash
+ddev xdebug off
+```
+
+The files measured are those in the `<coverage>` element of `phpunit.xml.dist`: `CRM/`, `Civi/`, `api/` and `elections.php` (not the tests, templates, managed records or the civix files, nor the Action Provider and Form Processor classes, which cannot load unless those extensions are installed). A run with coverage takes about twice as long. In GitHub Actions every run measures coverage with pcov and puts the totals on the job page ([ci.md](ci.md)).
+
 Two warnings about `sql/test_data.mysql` files are harmless: CiviCRM's test harness reads them and the packaged release does not ship them. In GitHub Actions the shared workflow does the same steps with `phpunit9` and the database `civicrm_test` ([ci.md](ci.md)).
 
 **After a schema change** the test database does not follow on its own. Either copy the site database again (the two commands above) or make sure the new upgrade step runs in `setUpHeadless()` (see "Gotchas"). CI builds the database new each time.
