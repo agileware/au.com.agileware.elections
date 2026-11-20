@@ -20,9 +20,10 @@
     {elseif $position.candidates|@count > 0 or $position.writeInPlaces > 0}
       <div class="crm-vote-election-form-block" data-position="{$position.name|escape}" data-seats="{$position.seats|escape}">
           <h2 class="election-position-prompt">{$position.prompt|escape}</h2>
+          <div class="election-rank-list">
             {foreach from=$position.candidates item=candidate}
               {assign var="cKey" value="candidate_`$candidate.id`"}
-                <div class="vote-candidate-row{if !$election->showPhotos} no-photo{/if}">
+                <div class="vote-candidate-row{if !$election->showPhotos} no-photo{/if}" data-candidate="{$candidate.id|escape}">
                   {if $election->showPhotos}
                   <div class="left-profile-block">
                     {assign var='profilePicUrl' value=$candidate.$imgKey}
@@ -38,9 +39,9 @@
                       {include file="CRM/Elections/Page/CandidateStatement.tpl" statementText=$candidate.comments|default:'' statementUrl=$candidate.statement_url|default:'' statementDisplay=$election->statementDisplay}
                     {/if}
                   </div>
-                </div><!-- ending of vote-candidate-row --> <div class="clearfix"></div>
-
+                </div><!-- ending of vote-candidate-row -->
             {/foreach}
+          </div>
             {if $position.writeInPlaces > 0}
               <fieldset class="election-writein" data-places="{$position.writeInPlaces|escape}">
                 <legend>{$position.name|escape}</legend>

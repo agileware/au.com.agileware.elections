@@ -121,6 +121,17 @@ class CRM_Elections_Form_VoteCandidates extends CRM_Elections_Form_Base {
         'rankedRow' => E::ts('%1, rank %2'),
         'back' => E::ts('Go Back and Change'),
         'confirm' => E::ts('Submit Vote'),
+        'dragHint' => E::ts('Put the candidates in your order: drag them, or use Move Up and Move Down. The rank drop-downs still work.'),
+        'notRanked' => E::ts('Not ranked yet'),
+        'rankBadge' => E::ts('Rank %1'),
+        'unranked' => E::ts('Not ranked'),
+        'dragHandle' => E::ts('Drag %1 to change their rank'),
+        'moveUp' => E::ts('Move Up'),
+        'moveDown' => E::ts('Move Down'),
+        'addRank' => E::ts('Add to Ranking'),
+        'removeRank' => E::ts('Remove from Ranking'),
+        'nowRank' => E::ts('%1 is now rank %2.'),
+        'nowUnranked' => E::ts('%1 is no longer ranked.'),
       ])
       ->addScriptFile(E::LONG_NAME, 'js/election-ballot.js', 100, 'page-footer');
 

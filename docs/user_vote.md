@@ -11,7 +11,10 @@ To vote in an election, you must be a permitted contact in CiviCRM (as defined i
 4. On the election page, select **Vote** in the panel that says what you can do now
 ![Click vote now](images/user_vote/02.gif)     
 5. Read about the candidates. Depending on the election's [display options](admin_create_election.md), each candidate may have a **Read statement** link under their name, and candidate photos may be hidden. Select a name to see the candidate's full page.
-6. Rank each candidate in order of preference for each position. You do not have to rank every candidate, or vote for every position, but if you rank any candidate for a position you must give one candidate the rank of 1, and each candidate for that position must be given a different rank.
+6. Rank each candidate in order of preference for each position. You do not have to rank every candidate, or vote for every position, but if you rank any candidate for a position you must give one candidate the rank of 1, and each candidate for that position must be given a different rank. There are three ways to do it, and you can mix them:
+    - **Drag** a candidate by the handle (six dots) to their place. The candidates you have ranked are listed first, in your order, then a line saying **Not ranked yet**. Drop a candidate below that line to take them out of your ranking. This works with a mouse, a pen or a finger.
+    - Use the buttons: **Add to Ranking** puts a candidate next in your order, **Move Up** and **Move Down** change their place, and **Remove from Ranking** takes them out. These work with the keyboard, and a screen reader says each candidate's new rank.
+    - Choose a rank from the candidate's **Select a rank** drop-down. The candidate moves to their place in the list.
 ![Process vote](images/user_vote/03.gif)     
 As you choose ranks, a message under each position tells you how many candidates you have ranked and warns you at once if two candidates have the same rank or if no candidate is ranked 1.
 7. Select **Review Your Vote**. A window titled **Review Your Vote** shows your choices for each position in order. Nothing is saved yet: select **Go Back and Change** to make changes, or **Submit Vote** to record it. (If JavaScript is switched off in your browser, the button on the ballot is **Submit Vote** and records the vote straight away.)    

@@ -176,6 +176,92 @@ test('voting: vote now, change your vote, or not allowed to vote', async ({ brow
   await outsider.close();
 });
 
+test('ballot: candidates are put in order by dragging, by the buttons or by the drop-downs, which stay the record', async ({ browser }) => {
+  const { page, close } = await view(browser, 'V28');
+  await page.goto(personaUrl('V28', 'civicrm/elections/vote'));
+  await page.waitForLoadState('networkidle');
+  const block = page.locator('.crm-vote-election-form-block.election-rank-enhanced').first();
+  await expect(block.locator('.election-rank-hint')).toContainText('drag them, or use Move Up and Move Down');
+  const rows = block.locator('.election-rank-list > .vote-candidate-row');
+  const names = await rows.evaluateAll((els) => els.map((e) => (e.querySelector('label')?.textContent || '').trim()));
+  expect(names.length).toBeGreaterThanOrEqual(2);
+  const [a, b] = names;
+  const row = (name: string) => rows.filter({ has: page.locator('label', { hasText: name }) });
+  const rankOf = (name: string) => row(name).locator('input[name^="candidate_"]').inputValue();
+  const ranks = async () => [await rankOf(a), await rankOf(b)];
+  /** A ranking button's spoken name: its visible words, then ": " and the candidate (Chrome may put a space before the colon). */
+  const named = (label: string, name: string) => new RegExp(`^${label}\\s*:\\s*${name}$`);
+  const order = async () => (await rows.evaluateAll((els) => els.map((e) => (e.querySelector('label')?.textContent || '').trim()))).slice(0, 2);
+  /** Drags a candidate by its handle to a point on the page. */
+  const drag = async (name: string, to: { x: number; y: number }) => {
+    const from = (await row(name).locator('.election-rank-handle').boundingBox())!;
+    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(to.x, to.y, { steps: 10 });
+    await page.mouse.up();
+  };
+
+  // Nothing is ranked yet: every row says so, under the "Not ranked yet" line.
+  await expect(block.locator('.election-rank-divider')).toHaveText('Not ranked yet');
+  await expect(row(a).locator('.election-rank-badge')).toHaveText('Not ranked');
+
+  // The buttons: their spoken names start with the words shown and end with the candidate.
+  await block.getByRole('button', { name: named('Add to Ranking', b) }).click();
+  await expect(row(b).locator('.election-rank-badge')).toHaveText('Rank 1');
+  await expect(block.locator('.election-rank-announce')).toHaveText(`${b} is now rank 1.`);
+  await block.getByRole('button', { name: named('Add to Ranking', a) }).click();
+  expect(await ranks()).toEqual(['2', '1']);
+  expect(await order()).toEqual([b, a]);
+  // The line stays when everyone is ranked, so a candidate can still be dropped below it.
+  await expect(block.locator('.election-rank-list > :last-child')).toHaveClass(/election-rank-divider/);
+  await block.getByRole('button', { name: named('Move Up', a) }).click();
+  expect(await ranks()).toEqual(['1', '2']);
+  expect(await order()).toEqual([a, b]);
+  // The first has no Move Up and the last no Move Down.
+  await expect(row(a).getByRole('button', { name: /^Move Up/ })).toHaveCount(0);
+  await expect(row(b).getByRole('button', { name: /^Move Down/ })).toHaveCount(0);
+  // Keyboard: focus stays on the row that moved, so it can be moved again.
+  await row(a).getByRole('button', { name: /^Move Down/ }).focus();
+  await page.keyboard.press('Enter');
+  expect(await ranks()).toEqual(['2', '1']);
+  await expect(row(a).getByRole('button', { name: /^Move Up/ })).toBeFocused();
+
+  // Dragging: the second, dropped above the first, becomes rank 1.
+  const top = (await rows.first().boundingBox())!;
+  await drag(a, { x: top.x + 20, y: top.y + 5 });
+  expect(await ranks()).toEqual(['1', '2']);
+  expect(await order()).toEqual([a, b]);
+
+  // Removing one: it goes below the "Not ranked yet" line. Dragged back above it, it is ranked again.
+  await block.getByRole('button', { name: named('Remove from Ranking', a) }).click();
+  expect(await ranks()).toEqual(['', '1']);
+  await expect(block.locator('.election-rank-announce')).toHaveText(`${a} is no longer ranked.`);
+  expect(await order()).toEqual([b, a]);
+  const first = (await rows.first().boundingBox())!;
+  await drag(a, { x: first.x + 20, y: first.y + 5 });
+  expect(await ranks()).toEqual(['1', '2']);
+  // Dragged below the last row, a candidate is no longer ranked.
+  const line = (await block.locator('.election-rank-divider').boundingBox())!;
+  // (The drop box, about 3rem, pushes the line down while dragging, so drop well below where it was.)
+  await drag(a, { x: line.x + 20, y: line.y + line.height + 120 });
+  expect(await ranks()).toEqual(['', '1']);
+
+  // A rank chosen in a drop-down moves the row to its place.
+  await page.evaluate((name) => {
+    // @ts-ignore CRM is CiviCRM's global
+    const $row = CRM.$('.crm-vote-election-form-block.election-rank-enhanced').first().find('.election-rank-list > .vote-candidate-row').filter((i: number, e: Element) => (e.querySelector('label')?.textContent || '').trim() === name);
+    $row.find('input[name^="candidate_"]').val('1').trigger('change');
+  }, a);
+  await page.evaluate((name) => {
+    // @ts-ignore CRM is CiviCRM's global
+    const $row = CRM.$('.crm-vote-election-form-block.election-rank-enhanced').first().find('.election-rank-list > .vote-candidate-row').filter((i: number, e: Element) => (e.querySelector('label')?.textContent || '').trim() === name);
+    $row.find('input[name^="candidate_"]').val('2').trigger('change');
+  }, b);
+  expect(await order()).toEqual([a, b]);
+  await expect(page.locator('.election-rank-problem')).toHaveCount(0);
+  await close();
+});
+
 test('ballot: ranks are checked as they are chosen and the vote is reviewed before it is saved', async ({ browser }) => {
   const data = council();
   const ids = councilNominationIds(data.election_id);

@@ -176,7 +176,7 @@ A label that is not in this table is added here before it is used. Title Case, v
 | Election page (front end) | The panel's action, **Change Vote**; nominee cards **Second Nomination**, **Nominate** |
 | Nominate | **Nominate**; link **Back to the election** |
 | Accept or decline | **Accept**, **Decline** (before accepting) or **Withdraw** (after); link **Back to the election** |
-| Ballot | **Review Your Vote**, then **Go Back and Change** or **Submit Vote**; **Add Another Write-in**; after voting **Change Vote** (if allowed) |
+| Ballot | **Review Your Vote**, then **Go Back and Change** or **Submit Vote**; **Add Another Write-in**; on a ranked ballot each candidate has a drag handle and **Add to Ranking**, or **Move Up**, **Move Down** and **Remove from Ranking** (their spoken names end with the candidate: "Move Up: *name*"); after voting **Change Vote** (if allowed) |
 | Candidate page | **Edit Statement** (the candidate or an administrator); **Back to the election** |
 | Results (front end) | Links **View Election Summary** and **Back to the election** |
 
