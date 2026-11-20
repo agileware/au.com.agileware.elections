@@ -426,7 +426,7 @@ function throwUnauthorizedMessageIfRequired($formOrPage) {
  *   What the person cannot do and how to get access, already translated.
  * @param array $pageOptions
  *   - return_button_text, return_button_action: the link, both already translated and ready to print. Without
- *     them the link is "View Elections". An older call passes [''] for no link at all.
+ *     them the link is "View Elections".
  *   - status: the HTTP status to send, 403 unless the page says otherwise.
  *   - kind: error (the default), or status for a page that tells the person where things stand and is not a
  *     refusal.
@@ -437,15 +437,14 @@ function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions
   $formOrPage->throwError = TRUE;
   $formOrPage->assign('errormessage', $exceptionMessage);
 
-  $noLink = array_key_exists(0, $pageOptions);
   $text = $pageOptions['return_button_text'] ?? '';
   $action = $pageOptions['return_button_action'] ?? '';
-  if (!$noLink && ($text === '' || $action === '')) {
+  if ($text === '' || $action === '') {
     $text = E::ts('View Elections');
     $action = electionsListUrl();
   }
-  $formOrPage->assign('return_button_text', $noLink ? '' : $text);
-  $formOrPage->assign('return_button_action', $noLink ? '' : (string) $action);
+  $formOrPage->assign('return_button_text', $text);
+  $formOrPage->assign('return_button_action', (string) $action);
   $formOrPage->assign('errorKind', ($pageOptions['kind'] ?? 'error') === 'status' ? 'status' : 'error');
 
   if (!empty($pageOptions['title'])) {

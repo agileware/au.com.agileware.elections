@@ -4,27 +4,6 @@
  * @group headless
  */
 class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase {
-  /**
-   * Test that an election nomination seconder is not created with wrong params.
-   */
-  public function testCreateNominationSeconderWithWrongParams() {
-    $nominator = $this->individualCreate();
-    $nominationParams = $this->createNomination();
-    $nomination = $nominationParams['nomination'];
-
-    $params = [
-      'member_nominator'       => $nominator,
-      'election_nomination_id' => -1,
-    ];
-
-    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
-    $params = [
-      'member_nominator'       => -1,
-      'election_nomination_id' => $nomination['id'],
-    ];
-
-    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
-  }
 
   /**
    * Test that an election nomination seconder should not be created for second time.

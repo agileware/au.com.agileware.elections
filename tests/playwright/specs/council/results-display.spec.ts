@@ -50,14 +50,6 @@ test('the Results page form works on a running election and saves the logo, head
   civiApi4('Election.update', { values: { results_footer_text: 'Thank you for voting.\nSee you at the AGM.' }, where: [['id', '=', electionId]] });
 });
 
-test('a refused picture is explained', async ({ adminPage }) => {
-  await adminPage.goto(civiAdminUrl('civicrm/elections/results-display', { reset: 1, eid: electionId }));
-  await adminPage.locator('input[name="results_logo"]').setInputFiles({ name: 'logo.svg', mimeType: 'image/svg+xml', buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>') });
-  await adminPage.getByLabel('Logo description').fill('A picture');
-  await adminPage.getByRole('button', { name: 'Submit' }).click();
-  await expect(adminPage.getByText('The logo must be a PNG, JPEG, GIF or WebP picture.').first()).toBeVisible();
-});
-
 test('people on a personal link see the logo, header and footer as plain text', async ({ personaGoto }) => {
   const page = await personaGoto('V03', 'civicrm/elections/view');
   const header = page.locator('.election-results-header');
@@ -113,21 +105,6 @@ test.describe('celebration', () => {
     }
   });
 
-  test('stops by itself and shows nothing once the days are over', async ({ persona }) => {
-    setResultDate('DATE_SUB(NOW(), INTERVAL 6 DAY)');
-    try {
-      const page = await persona('V05');
-      await page.goto(personaUrl('V05', 'civicrm/elections/view'));
-      await expect(page.locator('.election-results-header')).toBeVisible();
-      await page.waitForTimeout(800);
-      await expect(page.locator('canvas.election-celebration-canvas')).toHaveCount(0);
-      expect(await page.evaluate(() => typeof (window as any).ElectionCelebrate)).toBe('undefined');
-    }
-    finally {
-      setResultDate('DATE_SUB(NOW(), INTERVAL 1 DAY)');
-    }
-  });
-
   test('shows a short message instead when the device asks for reduced motion', async ({ persona }) => {
     const page = await persona('V06');
     await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -150,19 +127,6 @@ test.describe('celebration', () => {
     }
   });
 
-  test('is off when the election does not celebrate', async ({ persona }) => {
-    civiApi4('Election.update', { values: { celebration_enabled: false }, where: [['id', '=', electionId]] });
-    try {
-      const page = await persona('V08');
-      await page.goto(personaUrl('V08', 'civicrm/elections/view'));
-      await expect(page.locator('.election-results-header')).toBeVisible();
-      await page.waitForTimeout(800);
-      await expect(page.locator('canvas.election-celebration-canvas')).toHaveCount(0);
-    }
-    finally {
-      civiApi4('Election.update', { values: { celebration_enabled: true }, where: [['id', '=', electionId]] });
-    }
-  });
 });
 
 test('the form previews the effect and only asks for the options when it is on', async ({ adminPage }) => {

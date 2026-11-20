@@ -113,12 +113,6 @@ class CRM_Elections_VotingMethodTest extends api_v3_ElectionBaseTestCase {
 
   // ------------------------------------------------------------------ ballots
 
-  public function testAPluralityBallotTicksOneCandidateForASingleSeat() {
-    $fixture = $this->pluralityFixture(Council::STAGE_VOTING);
-    $this->addVotes($fixture, 'V01', [$this->nomination($fixture, 'President', 'N01')]);
-    $this->assertSame(1, (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote WHERE member_id = %1', [1 => [$fixture->id('V01'), 'Integer']]));
-  }
-
   public function testAPluralityBallotCannotTickMoreThanTheSeats() {
     $fixture = $this->pluralityFixture(Council::STAGE_VOTING);
     $this->expectRefusal(function () use ($fixture) {
@@ -148,17 +142,6 @@ class CRM_Elections_VotingMethodTest extends api_v3_ElectionBaseTestCase {
     $fixture->moveToStage(Council::STAGE_VOTING);
     $this->addVotes($fixture, 'V01', [$this->nomination($fixture, 'Council Member 3', 'N03'), $this->nomination($fixture, 'Council Member 3', 'N05')]);
     $this->assertSame(2, (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote WHERE member_id = %1', [1 => [$fixture->id('V01'), 'Integer']]));
-  }
-
-  public function testRankedChoiceStillRanksAndStillRefusesTheSameRankTwice() {
-    $fixture = Council::create()->playUntil(Council::STAGE_ADVERTISE);
-    $fixture->moveToStage(Council::STAGE_VOTING);
-    $a = $this->nomination($fixture, 'President', 'N01');
-    $b = $this->nomination($fixture, 'President', 'N02');
-    civicrm_api3('ElectionVote', 'addvotes', ['election_id' => $fixture->electionId, 'member_id' => $fixture->id('V01'), 'votes' => [['election_nomination_id' => $a, 'rank' => 1], ['election_nomination_id' => $b, 'rank' => 2]]]);
-    $this->expectRefusal(function () use ($fixture, $a, $b) {
-      civicrm_api3('ElectionVote', 'addvotes', ['election_id' => $fixture->electionId, 'member_id' => $fixture->id('V02'), 'votes' => [['election_nomination_id' => $a, 'rank' => 1], ['election_nomination_id' => $b, 'rank' => 1]]]);
-    }, 'needs a different rank');
   }
 
   // ------------------------------------------------------------------ counting

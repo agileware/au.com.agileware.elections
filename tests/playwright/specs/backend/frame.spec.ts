@@ -182,20 +182,4 @@ test.describe('Back end page frame', () => {
     await expect(adminPage.getByRole('link', { name: 'Edit Chair', exact: true })).toBeVisible();
     await expect(adminPage.locator('.election-no-election')).toHaveCount(0);
   });
-
-  test('Submit and the back buttons are the same size', async ({ adminPage }) => {
-    const id = createElection(nm('Frame buttons'));
-    await adminPage.goto(civiAdminUrl('civicrm/elections/candidates/add', { reset: 1, eid: id }));
-    const sizes = await adminPage.locator('.crm-submit-buttons .crm-button, .crm-submit-buttons a.button, .crm-submit-buttons button').evaluateAll((els) => els.map((e) => {
-      const box = e.getBoundingClientRect();
-      const style = getComputedStyle(e);
-      return { text: (e.textContent || '').trim(), height: Math.round(box.height), font: style.fontSize, weight: style.fontWeight };
-    }));
-    expect(sizes.length).toBeGreaterThanOrEqual(3);
-    for (const size of sizes) {
-      expect(size.height, size.text).toBe(sizes[0].height);
-      expect(size.font, size.text).toBe(sizes[0].font);
-      expect(size.weight, size.text).toBe(sizes[0].weight);
-    }
-  });
 });

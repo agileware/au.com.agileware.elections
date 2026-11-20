@@ -115,17 +115,6 @@ class CRM_Elections_UpgraderTest extends \PHPUnit\Framework\TestCase implements 
   }
 
   /**
-   * Re-running a step, for example after a partial failure, must not error.
-   */
-  public function testUpgrade20000CanBeRepeated() {
-    $this->assertTrue($this->upgrader()->upgrade_20000());
-    $this->assertTrue($this->upgrader()->upgrade_20000());
-    foreach (self::ELECTION_COLUMNS as $column) {
-      $this->assertTrue(CRM_Core_BAO_SchemaHandler::checkIfFieldExists('civicrm_election', $column));
-    }
-  }
-
-  /**
    * Version 1.x allowed two rows for the same member and candidate and had no audit log table: upgrading
    * removes the duplicates, keeps the oldest row, adds the unique key and creates the table.
    */

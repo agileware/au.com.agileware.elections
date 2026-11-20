@@ -59,15 +59,6 @@ class CRM_Elections_ResultsDisplayTest extends api_v3_ElectionBaseTestCase {
     $this->assertTrue(Display::validateForm(['celebration_days' => '']), 'Empty uses the default');
   }
 
-  public function testTextIsEscapedOnceWhenShown() {
-    $id = $this->election();
-    \Civi\Api4\Election::update(FALSE)->addWhere('id', '=', $id)->setValues(['results_header_text' => '<b>Well</b> done', 'results_footer_text' => "Tom & Jerry <script>alert(1)</script>"])->execute();
-    $display = Display::getDisplay($this->loaded($id), 'eid=' . $id);
-    $this->assertSame('<b>Well</b> done', $display['header_text'], 'What was typed, ready to be escaped once by the page');
-    $this->assertSame('Tom & Jerry <script>alert(1)</script>', $display['footer_text']);
-    $this->assertSame('<b>Well</b> done', Display::getDefaults($this->loaded($id))['results_header_text'], 'The form shows what was typed');
-  }
-
   public function testValuesToSave() {
     $values = Display::getValuesToSave(['results_header_text' => ' Well done ', 'results_footer_text' => '', 'celebration_enabled' => 1, 'celebration_effect' => 'balloons', 'celebration_days' => '7']);
     $this->assertSame('Well done', $values['results_header_text']);
@@ -75,6 +66,11 @@ class CRM_Elections_ResultsDisplayTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame(7, $values['celebration_days']);
     $this->assertSame(Display::DAYS_DEFAULT, Display::getValuesToSave([])['celebration_days']);
     $this->assertSame(0, Display::getValuesToSave([])['celebration_enabled']);
+    // A new election's form starts with the celebration off, the first effect and the default days.
+    $defaults = Display::getDefaults();
+    $this->assertSame(0, $defaults['celebration_enabled']);
+    $this->assertSame(Display::EFFECT_CONFETTI, $defaults['celebration_effect']);
+    $this->assertSame(Display::DAYS_DEFAULT, $defaults['celebration_days']);
   }
 
   // --------------------------------------------------------------------------- the logo

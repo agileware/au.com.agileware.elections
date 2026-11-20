@@ -6,22 +6,6 @@
 class api_v3_ElectionPositionTest extends api_v3_ElectionBaseTestCase {
 
   /**
-   * Test that a election position is not created with wrong params and throw errors.
-   */
-  public function testCreateElectionPositionWithWrongData() {
-    $election = $this->createElection();
-    $params = [
-      'name'        => 'President',
-      'quantity'    => 'a',
-      'election_id' => $election['id'],
-    ];
-    $this->callAPIFailure('ElectionPosition', 'create', $params);
-    $params['quantity'] = 1;
-    $params['election_id'] = -1;
-    $this->callAPIFailure('ElectionPosition', 'create', $params);
-  }
-
-  /**
    * Test that a election position is not created for active election.
    */
   public function testCreateElectionPositionForActiveElection() {

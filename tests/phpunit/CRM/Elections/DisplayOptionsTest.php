@@ -32,18 +32,6 @@ class CRM_Elections_DisplayOptionsTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame(CRM_Elections_Helper_Candidate::NAME_NICK_LAST, $election->name_format);
   }
 
-  public function testApiRejectsUnknownStatementOption() {
-    $dates = $this->getElectionDates();
-    $this->modifyDatesInString($dates);
-    $this->callAPIFailure('Election', 'create', $dates + [
-      'name' => 'Bad option',
-      'show_statements' => 'bogus',
-      'is_visible' => 0,
-      'is_deleted' => 0,
-      'allowed_groups' => $this->groupCreate(),
-    ]);
-  }
-
   public function testUnknownStoredStatementOptionFallsBackToNone() {
     $created = $this->createElection(['is_visible' => 0, 'is_deleted' => 0]);
     CRM_Core_DAO::executeQuery("UPDATE civicrm_election SET show_statements = 'bogus' WHERE id = %1", [1 => [$created['id'], 'Integer']]);

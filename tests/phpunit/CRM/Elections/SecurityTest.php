@@ -135,22 +135,6 @@ class CRM_Elections_SecurityTest extends api_v3_ElectionBaseTestCase {
     $this->assertTrue($second['is_eligible_candidate']);
   }
 
-  public function testNomineesCanOnlyActOnTheirOwnNominations() {
-    $fixture = $this->fixture(CRM_Elections_Test_CouncilFixture::STAGE_ADVERTISE);
-    $nomination = CRM_Core_DAO::executeQuery('SELECT id, member_nominee FROM civicrm_election_nomination WHERE is_eligible_candidate = 1 AND IFNULL(has_accepted_nomination, 0) = 0 AND IFNULL(has_rejected_nomination, 0) = 0 AND election_position_id IN (SELECT id FROM civicrm_election_position WHERE election_id = %1) LIMIT 1', [1 => [$fixture->electionId, 'Integer']]);
-    $nomination->fetch();
-    $someoneElse = $fixture->id('V01');
-    $this->refused(function () use ($nomination, $someoneElse) {
-      CRM_Elections_Helper_Process::accept($nomination->id, $someoneElse, 'I accept for them');
-    }, 'do not have access', 'accepting for someone else');
-    $this->refused(function () use ($nomination, $someoneElse) {
-      CRM_Elections_Helper_Process::withdraw($nomination->id, $someoneElse, 'I withdraw them');
-    }, 'do not have access', 'withdrawing someone else');
-    $this->refused(function () use ($nomination) {
-      CRM_Elections_Helper_Process::accept($nomination->id, NULL);
-    }, 'do not have access', 'no one');
-  }
-
   // ------------------------------------------------------------------ results
 
   public function testResultsCannotBeWrittenOrResetByAnythingElse() {

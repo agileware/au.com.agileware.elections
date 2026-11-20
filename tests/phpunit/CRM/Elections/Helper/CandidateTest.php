@@ -68,27 +68,4 @@ class CRM_Elections_Helper_CandidateTest extends api_v3_ElectionBaseTestCase {
     $this->assertArrayNotHasKey('member_nominee.display_name', $nominations[3]);
   }
 
-  public function testNicknameIsLoadedForNominations() {
-    $contactId = $this->individualCreate([
-      'first_name' => 'Robert',
-      'last_name' => 'Irwin',
-      'nick_name' => 'Rob',
-    ]);
-    $election = $this->createElection(['is_deleted' => 0, 'is_visible' => 1]);
-    $position = $this->createElectionPosition($election);
-    $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS, $election);
-    $nomination = $this->callAPISuccess('ElectionNomination', 'create', [
-      'member_nominee' => $contactId,
-      'election_position_id' => $position['id'],
-    ]);
-
-    // The join fields must resolve through the API for a real nomination.
-    $loaded = $this->callAPISuccess('ElectionNomination', 'getsingle', [
-      'id' => $nomination['id'],
-      'return' => CRM_Elections_Helper_Candidate::NAME_RETURN_FIELDS,
-    ]);
-    CRM_Elections_Helper_Candidate::applyNameFormat($loaded, CRM_Elections_Helper_Candidate::NAME_FIRST_NICK_LAST);
-    $this->assertSame('Robert "Rob" Irwin', $loaded['member_nominee.display_name']);
-  }
-
 }

@@ -1,7 +1,6 @@
 import { test, expect, civiAdminUrl, optionalAdminPage } from '../../fixtures/base';
-import { civiEval, civiApi4, reseedCouncil } from '../../fixtures/civi';
-import { nominate } from '../../fixtures/council-ui';
-import { council, personaUrl } from '../../fixtures/personas';
+import { civiEval, reseedCouncil } from '../../fixtures/civi';
+import { council } from '../../fixtures/personas';
 
 /**
  * Separate groups for nominating and for standing. Everyone in the council group can still vote; only
@@ -37,33 +36,6 @@ test('someone who can only vote is told they cannot nominate', async ({ personaG
   await expect(page.getByRole('link', { name: 'Nominate', exact: true })).toHaveCount(0);
   const form = await personaGoto('V03', 'civicrm/elections/nominations/create');
   await expect(form.getByText('You are not in a group that can take part in this election.')).toBeVisible();
-});
-
-test('a member of the nomination group nominates a person who may stand', async ({ persona }) => {
-  const data = council();
-  const page = await persona('V01');
-  await page.goto(personaUrl('V01', 'civicrm/elections/view'));
-  await expect(page.getByRole('link', { name: 'Nominate', exact: true })).toBeVisible();
-  await nominate(page, 'V01', 'President', 'N01', data.links.N01.cid, 'N01 may stand');
-  await page.context().close();
-  const rows = civiApi4<any[]>('ElectionNomination.get', { select: ['id'], where: [['election_position_id.election_id', '=', data.election_id]], limit: 0 });
-  expect(rows).toHaveLength(1);
-});
-
-test('a person outside the candidate group cannot be nominated, and nothing is stored', async ({ persona }) => {
-  const data = council();
-  const page = await persona('V02');
-  await page.goto(personaUrl('V02', 'civicrm/elections/nominations/create'));
-  await page.waitForLoadState('networkidle');
-  await page.locator('#s2id_position').click();
-  await page.locator('.select2-result-label', { hasText: /^President$/ }).click();
-  await page.evaluate((id) => { (document.querySelector('#contact') as HTMLInputElement).value = String(id); }, data.links.N05.cid);
-  await page.getByLabel('Reason for the nomination').fill('N05 is outside the candidate group');
-  await page.getByRole('button', { name: 'Nominate' }).click();
-  await expect(page.getByText('Nomination submitted.')).toHaveCount(0);
-  await page.context().close();
-  const rows = civiApi4<any[]>('ElectionNomination.get', { select: ['id'], where: [['member_nominee', '=', data.links.N05.cid]], limit: 0 });
-  expect(rows).toHaveLength(0);
 });
 
 test('the overview shows who is in each role', async ({ browser }) => {

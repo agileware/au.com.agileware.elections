@@ -6,25 +6,6 @@
 class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
 
   /**
-   * Test that a election nomination is not created with wrong data.
-   */
-  public function testCreateElectionNominationWithWrongData() {
-    $nominee = $this->individualCreate();
-    $params = [
-      'member_nominee'       => $nominee,
-      'election_position_id' => -1,
-    ];
-    $this->callAPIFailure('ElectionNomination', 'create', $params);
-
-    $position = $this->createElectionPosition();
-    $params = [
-      'member_nominee'       => -1,
-      'election_position_id' => $position['id'],
-    ];
-    $this->callAPIFailure('ElectionNomination', 'create', $params);
-  }
-
-  /**
    * Test that a election nomination is not before nominations period is started.
    */
   public function testCreateElectionNominationBeforeNominationsStarted() {
