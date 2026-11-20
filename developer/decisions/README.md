@@ -20,7 +20,7 @@ The plan's IDs are kept, so the archived plan still matches. Renumbering is not 
 | `U1` to `U17` | The interface standard decisions | 2026-11-01 |
 | `F1` to `F7` | Choices made while building from the maintainer's feedback on the election overview | 2026-11-01 |
 | `SD1` to `SD8` | The eight small decisions made after the 2.1 build | 2026-11-02 |
-| `S1` to `S6` | Questions about the Senate count (STV) pull request, still open | |
+| `S1` to `S6` | Questions about the Senate count (STV) pull request; S4 answered, the rest open | 2026-11-21 (S4) |
 | `G2`, `G5`, `PLAT1`, `ENV1`, `REL1` to `REL3` | Platform and release decisions that were not numbered in the plan, or are from the CI review | 2026-10-28 to 2026-11-03 |
 
 ## Index
@@ -54,13 +54,13 @@ Status is **Decided** (and in force), **Applied** (decided on a default and buil
 | R2.1-3 | "Your vote" block | Kept, shown to the voter alone and never when votes are anonymised | Decided |
 | R2.1-20 | Election list on a personal link | Add the access callback to the list route | Decided |
 | SD7 | Rules stay locked | Who votes and how votes count stay locked once ballots exist, even when inactive | Decided |
-| SD8 | STV upgrade steps | Start at `20140` | Decided |
+| SD8 | STV upgrade steps | Start at `20140` (or the next free number if 2.2 uses it) | Decided |
 | D13 | Granular permission | A permission between `administer` and `view` | **Deferred to 2.2** |
-| D14 | More voting methods | Approval and STV later; drop approval | **Open** |
+| D14 | More voting methods | STV in 2.3; drop approval | **Open** (STV part decided) |
 | S1 | STV ties | Report ties; do not draw automatically | **Open** |
 | S2 | STV setting | Per position or per election | **Open** |
 | S3 | STV formal ballot | Optional preferential | **Open** |
-| S4 | STV timing | 2.2 | **Open** |
+| S4 | STV timing | Version 2.3 | Decided |
 | S5 | Speaking to the fork | Whether to comment on or contact the pull request's author | **Open** |
 | S6 | Running the STV engine | Run its tests in an empty directory outside the project | **Open** |
 
@@ -126,11 +126,10 @@ These are asked of the maintainer; do not assume an answer.
 | ID | Question | Recommended or default |
 |---|---|---|
 | D13 | A granular permission such as `manage Election candidates` | Build only if an organisation needs it (deferred to 2.2) |
-| D14 | Voting methods beyond ranked choice and most votes | STV in 2.2; drop approval voting (unconfirmed) |
+| D14 | Voting methods beyond ranked choice and most votes | STV in 2.3 (decided 2026-11-21); drop approval voting (unconfirmed) |
 | S1 | Ties in an STV count | Report the tie |
 | S2 | Per position or per election setting for STV | Per position if mixing is wanted |
 | S3 | What counts as a formal STV ballot | Optional preferential |
-| S4 | When to build STV | 2.2 |
 | S5 | Whether to comment on or contact the author of the STV pull request | Not yet decided; nothing has been posted |
 | S6 | Whether to run the STV engine's tests and stress checks | Yes, in an empty directory outside the project |
 | U14 | Whether the standards also go into `docs/` and a pull request template | Decide in 2.2 |

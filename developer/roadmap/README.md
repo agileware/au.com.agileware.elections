@@ -6,12 +6,13 @@ How planning works in this repository. Each version that is being planned has it
 |---|---|---|
 | 2.0 | Released 2026-11-01 | [History](../history/2.0/README.md) |
 | 2.1 | Released 2026-11-03 | [History](../history/2.1/README.md) |
-| **2.2** | **Being planned** | [roadmap/2.2/README.md](2.2/README.md) |
+| **2.2** | **Being built** | [roadmap/2.2/README.md](2.2/README.md) |
+| 2.3 | Holds the Senate count (STV), moved from 2.2 | [roadmap/2.3/README.md](2.3/README.md) |
 
 ## What a version folder holds
 
 - **`README.md`**: where things stand, the items in recommended order with what each needs, open decisions, traps, and a start-up checklist for the first session. Keep it current while the version is built: tick items off, move answered decisions to [`../decisions/`](../decisions/README.md) with their date.
-- **One page per large item** (for example `stv.md` in 2.2): what is proposed, the problems to solve, the options, and the questions with a recommendation for each.
+- **One page per large item** (for example `stv.md` in 2.3): what is proposed, the problems to solve, the options, and the questions with a recommendation for each.
 
 ## Rules for planning
 

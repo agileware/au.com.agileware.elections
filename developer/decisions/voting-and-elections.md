@@ -170,7 +170,7 @@ Each entry gives the decision, why, the date, and where it shows. Dates of the 2
 
 ### D14 – More voting methods
 - **Question.** Add counting methods beyond ranked choice and most votes (approval, Senate count for several seats)?
-- **Status.** Open. 2.0 shipped ranked choice and most votes. Recommended: keep STV for 2.2 and drop approval voting, which has no request behind it (the second part is unconfirmed). See [`../roadmap/2.2/stv.md`](../roadmap/2.2/stv.md).
+- **Status.** Open. 2.0 shipped ranked choice and most votes. STV is planned for 2.3 (the maintainer moved it from 2.2 on 2026-11-21). Recommended: drop approval voting, which has no request behind it (unconfirmed). See [`../roadmap/2.3/stv.md`](../roadmap/2.3/stv.md).
 
 ### S1 to S6 – The Senate count (STV) pull request
 A pull request on the Linux Australia fork (against the 1.x code) adds a Senate count, STV, as a per-position option. A review found it cannot be merged as it is: it uses an upgrade step number from the 1.x series, picks winners of ties by a random draw (version 2 never picks a winner of a tie), stops reading a voter's numbers at the first gap (version 2 closes gaps), does not fit the version 2 position and election settings, and shows no count sheet. The review was done by reading the code; none of its code has been run.
@@ -180,8 +180,8 @@ A pull request on the Linux Australia fork (against the 1.x code) adds a Senate 
 | S1 | Ties in an STV count | Report the tie and let the organisation decide (matches the rest of version 2); alternatives are a documented draw run by the organiser with a button, or the pull request's automatic draw | Open |
 | S2 | Where the setting lives | Per position (`irv` or `stv`, ranked elections only), if mixing in one election is wanted; or per election as a third voting method | Open |
 | S3 | What is a formal ballot | Optional preferential: any valid first preference counts | Open |
-| S4 | Timing | Build in 2.2, after the points above are decided | Open |
+| S4 | Timing | Version 2.3 (moved from 2.2 by the maintainer, 2026-11-21) | Decided |
 | S5 | Speaking to the fork | Whether to comment on the pull request or contact the author about retargeting it. Nothing has been posted | Open |
 | S6 | Running the engine | Run its tests and stress checks (overflow, ties, gaps) in an empty directory outside the project, since it is third-party code | Open |
 
-Related decision `SD8` (2026-11-02): the STV upgrade steps start at `20140`. If the code is adopted, keep the author's commits and give a contributor credit.
+Related decision `SD8` (2026-11-02): the STV upgrade steps start at `20140`, or the next free number if 2.2 uses it. If the code is adopted, keep the author's commits and give a contributor credit.

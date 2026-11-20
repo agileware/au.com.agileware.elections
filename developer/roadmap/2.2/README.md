@@ -22,8 +22,8 @@ The order below is a recommendation. Ask the maintainer which to start with.
 
 | # | Item | State and what it needs |
 |---|---|---|
-| 1 | **Senate count (STV): decisions S1 to S6** | Not answered. Read [stv.md](stv.md). The maintainer answers; a comment on the external pull request is then drafted for the maintainer to post. Nothing has been posted. |
-| 2 | **Senate count (STV) built on version 2**, not merged as the external pull request stands | Six blocking problems are listed in [stv.md](stv.md). Needs a schema step from `20140`, its own attack tests, an independent check against a published count, a large-electorate overflow test, a security re-review, and a contributor credit. |
+| 1 | ~~Senate count (STV): decisions S1 to S6~~ | **Moved to 2.3** on 2026-11-21 by the maintainer ([../2.3/README.md](../2.3/README.md)). |
+| 2 | ~~Senate count (STV) built on version 2~~ | **Moved to 2.3** on 2026-11-21 ([../2.3/stv.md](../2.3/stv.md)). |
 | 3 | **Drag to rank on the ballot** (the remainder of the 2.0 front end work) | Not started. The ballot ranks with numbers in drop-downs today. Touches the ballot, so it needs a security re-review ([../../architecture/security.md](../../architecture/security.md)). Keep the keyboard way (Move up and Move down) and the screen reader behaviour. |
 | 4 | **Dark mode and high contrast re-check** | Not started; do it with item 3. Theme variants script: `tests/playwright/fixtures/theme-variants.sh` (see [../../testing/cms-and-civicrm-differences.md](../../testing/cms-and-civicrm-differences.md)). |
 | 5 | **Mobile voting web app: discovery only** | A written plan, no code: API or mobile mode, ballot secrecy, how the personal link stays safe, offline behaviour, accessibility, and whether it works the same on the three CMSs. Building it is a later release. |
@@ -61,7 +61,7 @@ Not yet in the table above; each is a small change. Ask the maintainer whether t
 | **Manage Elections still a little wider than the window on Joomla below about 900 px** | With the table fix the page is at most about 140 px too wide (the Add button stays in view); something else on Manage Elections, probably the filter row, has a minimum width. Not looked into. |
 | **Rest of the test clean-up** | Not decided. One retry for the council and security files; merging the `layout`, `accessibility` and `election-page` page walks; trimming the council spec to about five nominators and six voters; tightening weak assertions (for example the `callAPIFailure()` calls with no message). Tier 2 and the coverage report are done (row 23). Remove a test only when a neighbour fails for the same regression. |
 | **Dark mode claim** | The user guide says dark mode is supported; check it against the CSS and the theme variants script before 2.2 says so again. |
-| **Election stage has three implementations** | Checked 2026-11-17 and confirmed. The stage is worked out in `CRM_Elections_BAO_Election::getStage()` (overview and stepper), `ElectionSpecProvider::renderStage()` (an SQL `CASE` for the Stage column of Manage Elections) and `CRM_Elections_Helper_ElectionStatus::card()` (the cards on the front end list); `ElectionStatus::nextAction()` walks the same ladder a fourth time, and `CRM_Elections_Page_Elections::modifyElectionValues()` works out the card's date flags a second time. They agree today: same order of checks, same boundaries, same clock, same rule for results, and the same words on screen. `AdminRulesTest::testTheThreeWaysOfWorkingOutTheStageAgree` now holds them together in ten states. They differ in three ways that do not show: the keys (`advertise` and `closed` against `candidates`, `nominations_closed` and `voting_closed`), a `deleted` stage only in `getStage()`, and `nextAction()` checking nominations open before candidates advertised (it matters only if the advertise date is before nominations close, which the date rules refuse). Still open: one source for the stage (a refactor that touches the front end election page and needs the three-CMS run). A new stage or rule, for example from the STV work, must be made in all of these places and added to the test. |
+| **Election stage has three implementations** | Checked 2026-11-17 and confirmed. The stage is worked out in `CRM_Elections_BAO_Election::getStage()` (overview and stepper), `ElectionSpecProvider::renderStage()` (an SQL `CASE` for the Stage column of Manage Elections) and `CRM_Elections_Helper_ElectionStatus::card()` (the cards on the front end list); `ElectionStatus::nextAction()` walks the same ladder a fourth time, and `CRM_Elections_Page_Elections::modifyElectionValues()` works out the card's date flags a second time. They agree today: same order of checks, same boundaries, same clock, same rule for results, and the same words on screen. `AdminRulesTest::testTheThreeWaysOfWorkingOutTheStageAgree` now holds them together in ten states. They differ in three ways that do not show: the keys (`advertise` and `closed` against `candidates`, `nominations_closed` and `voting_closed`), a `deleted` stage only in `getStage()`, and `nextAction()` checking nominations open before candidates advertised (it matters only if the advertise date is before nominations close, which the date rules refuse). Still open: one source for the stage (a refactor that touches the front end election page and needs the three-CMS run). A new stage or rule, for example from the STV work in 2.3, must be made in all of these places and added to the test. |
 
 ## Decisions still open
 
@@ -69,7 +69,7 @@ The full list and the decisions already made are in [../../decisions/README.md](
 
 | Decision | State |
 |---|---|
-| Additional voting methods (STV, approval voting) | Open. The STV questions S1 to S6 are in [stv.md](stv.md). Approval voting has no request behind it; the recommendation is to drop it, not yet confirmed. |
+| Additional voting methods (STV, approval voting) | STV moved to 2.3 on 2026-11-21 (S4); its other questions are in [../2.3/stv.md](../2.3/stv.md). Approval voting: the recommendation is to drop it, not yet confirmed. |
 | Granular permission (item 7) | Deferred to 2.2; default build only if needed. |
 | Publishing the standards more widely (item 6) | Open. |
 | Branch name for 2.2 and whether to push as work goes | Ask at the start. The 2.1 rule (kept local until finished, one release pull request) was for 2.1 only. Suggested name: `version-2.2`, cut from `origin/master`. |
@@ -102,7 +102,7 @@ Behaviours that are decided and easy to break: a running election is **locked** 
 
 ## Start-up checklist for the first 2.2 session
 
-1. Read this page, [stv.md](stv.md), [../../decisions/README.md](../../decisions/README.md), [../../standards/ui-standards.md](../../standards/ui-standards.md) and [../../environments/README.md](../../environments/README.md).
+1. Read this page, [../../decisions/README.md](../../decisions/README.md), [../../standards/ui-standards.md](../../standards/ui-standards.md) and [../../environments/README.md](../../environments/README.md).
 2. In the extension repository run `git fetch --all --tags`. Confirm `origin/master` is the 2.1.0 merge (or later) and the tag `2.1.0` exists. Ask the maintainer for the 2.2 branch name and whether it is pushed as you go.
 3. Leave `info.xml` at 2.1.0 until the release; set the new version and date in the release pull request only.
 4. Ask which item to start with. Make a task list and work one item at a time, with tests and a deploy to the relevant test sites.

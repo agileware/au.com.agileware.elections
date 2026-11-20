@@ -1,6 +1,6 @@
 # Senate count (STV)
 
-Planning page for version 2.2, items 1 and 2 of [the roadmap](README.md). It describes an external pull request that adds the Senate count (single transferable vote, STV) as a way to count a position with several seats, the problems that stop it being merged into version 2 as it stands, the risks, the options, and six questions that need an answer from the maintainer. It was written from reading the pull request and the version 2 code on 2026-11-01 and re-checked against the code on 2026-11-15. Nothing in the pull request was run, and nothing has been posted to it.
+Planning page for version 2.3, items 1 and 2 of [the roadmap](README.md). It was planned for 2.2 and moved to 2.3 by the maintainer on 2026-11-21. It describes an external pull request that adds the Senate count (single transferable vote, STV) as a way to count a position with several seats, the problems that stop it being merged into version 2 as it stands, the risks, the options, and six questions that need an answer from the maintainer. It was written from reading the pull request and the version 2 code on 2026-11-01 and re-checked against the code on 2026-11-15. Nothing in the pull request was run, and nothing has been posted to it.
 
 ## What the pull request proposes
 
@@ -50,11 +50,11 @@ The pull request cannot be merged as it is.
 
 | Option | What it means | Cost |
 |---|---|---|
-| **A. Build STV in 2.2 on version 2** | Port the engine: a step from `20140`, the guard and audit log, `compactRanks`, a count sheet, a SearchKit column, docs, PHPUnit and Playwright tests on 6.16 and 6.19, an independent check and a security re-review. Keep the author's commits (cherry-pick with their name) and give a contributor credit. | A full item of work and a new round of testing on three CMSs. |
-| **B. Keep STV for a later version** | Release 2.2 without it. | None now; the question stays open. |
+| **A. Build STV on version 2** (now in 2.3) | Port the engine: an upgrade step from the next free number (`20140` unless 2.2 uses it), the guard and audit log, `compactRanks`, a count sheet, a SearchKit column, docs, PHPUnit and Playwright tests on 6.16 and 6.19, an independent check and a security re-review. Keep the author's commits (cherry-pick with their name) and give a contributor credit. | A full item of work and a new round of testing on three CMSs. |
+| **B. Keep STV for a later version** | Release 2.2 without it. Chosen 2026-11-21: STV moves to 2.3. | None for 2.2. |
 | **C. Drop approval voting** | Treat only STV: approval voting has no pull request or request behind it. Can be combined with A or B. | None. |
 
-The earlier recommendation (made before 2.0.0 was released) was to keep STV for later and drop approval voting. The maintainer has since placed STV in 2.2, so option A with C is the working assumption; question S4 confirms it.
+The earlier recommendation (made before 2.0.0 was released) was to keep STV for later and drop approval voting. The maintainer placed STV in 2.2, then on 2026-11-21 moved it to 2.3 (S4 answered). Option A, built in 2.3, with C is the working assumption.
 
 ## Questions for the maintainer
 
@@ -63,7 +63,7 @@ The earlier recommendation (made before 2.0.0 was released) was to keep STV for 
 | **S1** | How are ties handled in an STV count? | (a) Report the tie, list the tied candidates and let the organisation decide. (b) A documented draw recorded in the audit log, started by the organiser with a button, not automatic. (c) The pull request's automatic random draw. | (a), because it matches the rest of version 2. |
 | **S2** | Where does the setting live? | (a) Per position, `irv` or `stv`, for ranked elections only (a Chair by ranked choice and a committee of five by STV in one election). (b) Per election, `stv` as a third voting method beside ranked choice and most votes win. | (a) if mixing in one election is wanted; otherwise (b) is simpler. |
 | **S3** | What is a formal ballot? | Optional preferential (any valid first preference counts), or a minimum number of preferences. | Optional preferential. |
-| **S4** | Timing | STV in 2.2 (option A) or later (option B). | A, now that 2.2 is planned around it. |
+| **S4** | Timing | STV in 2.2 (option A) or later (option B). | **Answered 2026-11-21: version 2.3.** |
 | **S5** | Speaking to the fork | Whether the maintainer comments on the pull request, or contacts its author or the fork's organisation about retargeting it at version 2. A draft can be prepared once S1 to S4 are answered. | Comment after S1 to S4, thanking the author and saying how the contribution will be used. |
 | **S6** | Running the engine | Whether to run the pull request's tests and the stress checks (overflow, ties, gaps), in an empty directory outside the repository because it is third-party code. | Yes, before relying on the engine. |
 
