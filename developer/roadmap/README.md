@@ -7,7 +7,7 @@ How planning works in this repository. Each version that is being planned has it
 | 2.0 | Released 2026-11-01 | [History](../history/2.0/README.md) |
 | 2.1 | Released 2026-11-03 | [History](../history/2.1/README.md) |
 | **2.2** | **Being built** | [roadmap/2.2/README.md](2.2/README.md) |
-| 2.3 | Holds the Senate count (STV), moved from 2.2 | [roadmap/2.3/README.md](2.3/README.md) |
+| 2.3 | Holds the Senate count (STV) and the small findings, moved from 2.2 | [roadmap/2.3/README.md](2.3/README.md) |
 | 2.4 | Holds the mobile voting app discovery, moved from 2.2 | [roadmap/2.4/README.md](2.4/README.md) |
 
 ## What a version folder holds
