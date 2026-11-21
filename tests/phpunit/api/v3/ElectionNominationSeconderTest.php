@@ -10,7 +10,7 @@ class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase 
    */
   public function testCreateNominationSeconderSecondTime() {
     $params = $this->createNominationSeconder();
-    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params['params']);
+    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params['params'], 'already nominated this person');
   }
 
   /**
@@ -32,7 +32,7 @@ class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase 
     ]);
 
     $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_ADVERTISE_CANDIDATES_STARTED, $election);
-    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
+    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params, 'Nominations closed on');
   }
 
   /**
@@ -52,7 +52,7 @@ class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase 
     CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET is_deleted = 1 WHERE id = %1', [
       1 => [$position['election_id'], 'Integer'],
     ]);
-    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
+    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params, 'deleted or not active');
   }
 
   /**
@@ -72,7 +72,7 @@ class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase 
     CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET is_visible = 0 WHERE id = %1', [
       1 => [$position['election_id'], 'Integer'],
     ]);
-    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
+    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params, 'deleted or not active');
   }
 
   /**

@@ -31,7 +31,7 @@ class api_v3_ElectionVoteTest extends api_v3_ElectionBaseTestCase {
       1 => [$election['id'], 'Integer'],
     ]);
 
-    $this->callAPIFailure('ElectionVote', 'addvotes', $params);
+    $this->callAPIFailure('ElectionVote', 'addvotes', $params, 'not open for voting');
   }
 
   /**
@@ -60,7 +60,7 @@ class api_v3_ElectionVoteTest extends api_v3_ElectionBaseTestCase {
       1 => [$election['id'], 'Integer'],
     ]);
 
-    $this->callAPIFailure('ElectionVote', 'addvotes', $params);
+    $this->callAPIFailure('ElectionVote', 'addvotes', $params, 'not open for voting');
   }
 
 }

@@ -16,7 +16,7 @@ class api_v3_ElectionTest extends api_v3_ElectionBaseTestCase {
       'name'        => 'CiviTest Election',
     ];
     $params = array_merge($params, $electionDates);
-    $this->callAPIFailure('election', 'create', $params);
+    $this->callAPIFailure('election', 'create', $params, 'Fix the problems and try again');
   }
 
   /**
@@ -38,7 +38,7 @@ class api_v3_ElectionTest extends api_v3_ElectionBaseTestCase {
     $election = $this->createElection(['is_visible' => 1], api_v3_ElectionBaseTestCase::$ELECTION_NOMINATION_IN_PROGRESS);
     $election['name'] = 'Deleting started election';
     $election['is_deleted'] = 1;
-    $this->callAPIFailure('election', 'create', $election);
+    $this->callAPIFailure('election', 'create', $election, 'cannot be deleted');
   }
 
   /**

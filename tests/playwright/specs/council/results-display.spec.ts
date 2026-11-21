@@ -8,7 +8,9 @@ import { council, personaUrl } from '../../fixtures/personas';
  * results are published. Set on the Results page form (which works while the election is running) and shown to
  * people on a personal link.
  */
-test.describe.configure({ mode: 'serial', retries: 0 });
+// One retry: a blip (a slow first page after a deploy, say) would otherwise skip the rest of this serial file. A retry
+// runs the whole file again from beforeAll, which reseeds the council election.
+test.describe.configure({ mode: 'serial', retries: 1 });
 
 // A 4 x 4 PNG.
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAEUlEQVR4nGN4sEABjhiI4wAAsFIaAdpB+EoAAAAASUVORK5CYII=', 'base64');

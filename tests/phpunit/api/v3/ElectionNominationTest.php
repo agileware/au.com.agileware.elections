@@ -15,7 +15,7 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
       'member_nominee'       => $nominee,
       'election_position_id' => $position['id'],
     ];
-    $this->callAPIFailure('ElectionNomination', 'create', $params);
+    $this->callAPIFailure('ElectionNomination', 'create', $params, 'Nominations are not open yet');
   }
 
   /**
@@ -32,7 +32,7 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
       'id' => $position['election_id'],
     ]);
     $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_ADVERTISE_CANDIDATES_STARTED, $election);
-    $this->callAPIFailure('ElectionNomination', 'create', $params);
+    $this->callAPIFailure('ElectionNomination', 'create', $params, 'Nominations closed on');
   }
 
   /**
@@ -40,7 +40,7 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
    */
   public function testAddNominationSecondTime() {
     $params = $this->createNomination();
-    $this->callAPIFailure('ElectionNomination', 'create', $params);
+    $this->callAPIFailure('ElectionNomination', 'create', $params, 'already nominated for this position');
   }
 
   /**
@@ -61,7 +61,7 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
 
     $election['is_deleted'] = 1;
     $this->callAPISuccess('Election', 'create', $election);
-    $this->callAPIFailure('ElectionNomination', 'create', $params);
+    $this->callAPIFailure('ElectionNomination', 'create', $params, 'deleted or not active');
   }
 
   /**
@@ -79,7 +79,7 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
     ]);
     $election['is_visible'] = 0;
     civicrm_api3('Election', 'create', $election);
-    $this->callAPIFailure('ElectionNomination', 'create', $params);
+    $this->callAPIFailure('ElectionNomination', 'create', $params, 'deleted or not active');
   }
 
 }

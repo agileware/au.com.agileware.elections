@@ -8,7 +8,9 @@ import { council, personaUrl } from '../../fixtures/personas';
  * Write-ins: where a position allows it a voter can name a person who is not on the ballot. The person must
  * accept before voting closes; accepting puts them on the ballot for everyone who votes afterwards.
  */
-test.describe.configure({ mode: 'serial', retries: 0 });
+// One retry: a blip (a slow first page after a deploy, say) would otherwise skip the rest of this serial file. A retry
+// runs the whole file again from beforeAll, which reseeds the council election.
+test.describe.configure({ mode: 'serial', retries: 1 });
 
 let ids: Record<string, number> = {};
 

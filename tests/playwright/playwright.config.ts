@@ -31,7 +31,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: /council\/|security\/|frontend\/(layout|election-page|accessibility)/,
+      testIgnore: /council\/|security\/|frontend\/(page-walk|election-page)/,
       use: { ...devices['Desktop Chrome'] },
     },
     // The specs below move the one shared election through its stages (nominations, advertise, voting,
@@ -40,18 +40,14 @@ export default defineConfig({
     // chained with `dependencies`, which would skip every later project after one failure. Each spec reseeds the
     // election before it starts, so a failure leaves nothing behind for the next one to trip over.
     {
-      name: 'layout',
-      testMatch: /frontend\/layout/,
+      // One walk of every page: layout at three widths, axe and the keyboard (was the layout and accessibility projects).
+      name: 'page-walk',
+      testMatch: /frontend\/page-walk/,
       use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'election-page',
       testMatch: /frontend\/election-page/,
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'accessibility',
-      testMatch: /frontend\/accessibility/,
       use: { ...devices['Desktop Chrome'] },
     },
     {

@@ -18,7 +18,7 @@ class api_v3_ElectionPositionTest extends api_v3_ElectionBaseTestCase {
       'quantity'    => 1,
       'election_id' => $election['id'],
     ];
-    $this->callAPIFailure('ElectionPosition', 'create', $params);
+    $this->callAPIFailure('ElectionPosition', 'create', $params, 'its positions cannot be changed');
   }
 
   /**
@@ -33,7 +33,7 @@ class api_v3_ElectionPositionTest extends api_v3_ElectionBaseTestCase {
       'quantity'    => 1,
       'election_id' => $election['id'],
     ];
-    $this->callAPIFailure('ElectionPosition', 'create', $params);
+    $this->callAPIFailure('ElectionPosition', 'create', $params, 'deleted election');
   }
 
   /**
@@ -85,7 +85,7 @@ class api_v3_ElectionPositionTest extends api_v3_ElectionBaseTestCase {
 
     $electionPosition['name'] = 'IT Head';
 
-    $this->callAPIFailure('ElectionPosition', 'create', $electionPosition);
+    $this->callAPIFailure('ElectionPosition', 'create', $electionPosition, 'its positions cannot be changed');
   }
 
 }

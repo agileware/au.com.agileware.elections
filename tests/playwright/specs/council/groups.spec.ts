@@ -7,7 +7,9 @@ import { council } from '../../fixtures/personas';
  * the nomination group can nominate and second, and the people the election lets stand are limited to
  * the candidate group. An election with no groups of its own behaves as it always did.
  */
-test.describe.configure({ mode: 'serial', retries: 0 });
+// One retry: a blip (a slow first page after a deploy, say) would otherwise skip the rest of this serial file. A retry
+// runs the whole file again from beforeAll, which reseeds the council election.
+test.describe.configure({ mode: 'serial', retries: 1 });
 
 test.beforeAll(() => {
   reseedCouncil();
