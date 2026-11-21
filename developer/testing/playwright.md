@@ -123,6 +123,14 @@ Check that it is alive with the log's modified time (`ls -l`) and read it with `
 - A login timeout in the global setup usually means another run is still using the site.
 - One Drupal spec (`positions.spec.ts`) failed once and was not investigated.
 
+## Known allowances
+
+A test that accepts a behaviour it should not have to accept (a wrong HTTP status from CiviCRM, say) because of a bug outside the extension is listed here, with the upstream issue it waits for. Keep each allowance as narrow as it can be, and make the test say in the report each time it is used (`test.info().annotations`, type `known allowance`), so a clean report shows when it can go. Check this list when the CiviCRM version under test changes (see [../releases/README.md](../releases/README.md), section 3).
+
+| Test | What it accepts | Why | Remove when |
+|---|---|---|---|
+| `specs/backend/candidates-manager.spec.ts`, "is refused the screens that set up or change elections" | HTTP 500, not 403, for the refused page itself (not for any other request on it). The page must still be a refusal: its text, no Submit, no admin links. | CiviCRM answers its own route refusal with 500 on Joomla 5 (CiviCRM 6.19.5) and on WordPress in GitHub Actions; 403 on Drupal 11 (6.19.5) and WordPress (6.16.5) on DDEV. Upstream issue 004 (`upstream-issues/004-refused-page-http-status-500-after-403.md`, outside this repository). | No run's report has the note "refused with HTTP 500" on any CMS: then remove the 500 from the expected statuses and the allowance. |
+
 ## CI and local
 
 In GitHub Actions the suite runs on WordPress only, with `CI` set: one worker, a 90 second test timeout, an HTML report, and `CIVI_EXEC_PREFIX` set to a `docker exec` line. The setup script is `fixtures/setup-environment.sh`. The theme in CI is the shared workflow's default (Astra); the local sites use each CMS's own default theme (see [ci.md](ci.md)). Locally the config uses two workers and a 60 second timeout. Drupal and Joomla are run on DDEV before each release.

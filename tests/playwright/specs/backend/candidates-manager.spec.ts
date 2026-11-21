@@ -58,9 +58,11 @@ test.describe('a person who manages candidates only', () => {
   });
 
   test('is refused the screens that set up or change elections', async ({ candidatesPage: page, allowedProblems }) => {
-    // CiviCRM's refusal page answers 403, or HTTP 500 on Joomla and on WordPress in CI (upstream-issues 004); the page
-    // itself is checked to be a refusal below.
-    allowedProblems.push(/403/, /HTTP 500|status of 500/);
+    // Known allowance (developer/testing/playwright.md, "Known allowances"; upstream-issues 004): CiviCRM's refusal page
+    // should answer 403, but answers HTTP 500 on Joomla and on WordPress in CI. Only the refused page itself may answer
+    // 500, and each time it does the test notes it in the report, so the allowance can be removed once CiviCRM is fixed.
+    // A 500 from any other request (an AJAX or API call on the page) still fails the test.
+    allowedProblems.push(/403/, /console error: Failed to load resource: the server responded with a status of (403|500)/);
     const election = createElection(nm('Cand only refused'));
     for (const [civiPath, params] of [
       ['civicrm/elections/manage', {}],
@@ -69,7 +71,16 @@ test.describe('a person who manages candidates only', () => {
       ['civicrm/elections/position-list', { eid: election }],
       ['civicrm/elections/results-display', { eid: election }],
     ] as Array<[string, Record<string, number>]>) {
-      await page.goto(civiAdminUrl(civiPath, { reset: 1, ...params }));
+      const url = civiAdminUrl(civiPath, { reset: 1, ...params });
+      const response = await page.goto(url);
+      const status = response?.status();
+      // A refusal: 403, or 500 under the known allowance. Not 200 (the screen itself) and not a redirect to it.
+      expect([403, 500], `${civiPath} answered ${status}`).toContain(status);
+      if (status === 500) {
+        const pageUrl = response!.url();
+        allowedProblems.push(new RegExp(`^\\[candidates\\] HTTP 500 for ${pageUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
+        test.info().annotations.push({ type: 'known allowance', description: `${civiPath} refused with HTTP 500, not 403 (upstream-issues 004)` });
+      }
       // CiviCRM's own refusal, not an error page (Afform pages needed their permissions on the route for that).
       await expect(page.locator('body'), civiPath).toContainText(/do not have permission|do not have access|not allowed to access|not authori[sz]ed|access denied/i);
       await expect(page.locator('body'), civiPath).not.toContainText('not found in api results');
