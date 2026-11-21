@@ -42,7 +42,9 @@ Open the pull request from your branch to `master`. The description lists the fe
 - the three required checks passing: `phpunit / phpunit`, `upgrade / upgrade` and `playwright / playwright` (the first runs the PHPUnit suite, the second upgrades a 1.3.2 site to the commit and checks nothing was lost, the third runs the Playwright browser tests on WordPress; the upgrade check is described in [../testing/upgrade-test.md](../testing/upgrade-test.md)),
 - one approving review of the latest push, and every conversation resolved. You cannot approve your own pull request.
 
-Before asking for the review, check the known allowances in [../testing/playwright.md](../testing/playwright.md#known-allowances): for each, look in this pull request's Playwright report (and the Drupal and Joomla run's) for its note. When a note no longer appears on any CMS, or the CiviCRM version under test changed, check its upstream issue and remove the allowance that is no longer needed.
+Before asking for the review, remake the user guide's pictures if any screen changed: run **docs images** from the Actions tab on the release branch. It opens a pull request with the new `docs/images` into that branch; look at every picture (they show the screens as they are now, and the dates move with each run), then merge it into the release branch. To make them on a DDEV site instead, see `npm run docs-images` in [../testing/playwright.md](../testing/playwright.md).
+
+Also before the review, check the known allowances in [../testing/playwright.md](../testing/playwright.md#known-allowances): for each, look in this pull request's Playwright report (and the Drupal and Joomla run's) for its note. When a note no longer appears on any CMS, or the CiviCRM version under test changed, check its upstream issue and remove the allowance that is no longer needed.
 
 The pull request can be merged, squashed or rebased; 2.0.0 and 2.1.0 were squash merged. After the merge the same three workflows run again on `master`. Wait for them to pass before cutting the release.
 
