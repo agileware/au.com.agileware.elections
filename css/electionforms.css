@@ -349,7 +349,8 @@ ul#errorList {
 }
 
 .crm-election-form-block-container .select2-container .select2-choice > .select2-chosen, .crm-container .select2-search input {
-  color: #333;
+  /* Riverlea's input text colour, which follows its dark mode; #333 where the theme has none. */
+  color: var(--crm-input-color, #333);
 }
 
 .crm-container .crm-elections-list-block .crm-accordion-header {
@@ -520,6 +521,10 @@ ul#errorList {
     --election-btn-bg: var(--election-brand-bg, var(--wp--preset--color--contrast, var(--color--primary-40, var(--cassiopeia-color-primary, var(--crm-primary-color, #333)))));
     --election-btn-color: var(--election-brand-color, var(--wp--preset--color--base, #fff));
     --election-btn-hover-bg: color-mix(in srgb, var(--election-btn-bg) 82%, #000);
+    /* Text and quiet buttons drawn on CiviCRM's own background: CiviCRM's ink colour (Riverlea), which follows its
+       dark mode, so they stay readable when the site theme and CiviCRM differ (a light theme with CiviCRM dark, or
+       a dark theme with CiviCRM light). Without Riverlea, the button colour as before. */
+    --election-ink: var(--election-brand-ink, var(--crm-ink, var(--election-btn-bg)));
 }
 .crm-container .election-btn.election-btn,
 .crm-container .crm-election-form-block-container button.crm-button.crm-button {
@@ -594,7 +599,7 @@ ul#errorList {
 /* Cancel / back buttons on forms are the quiet variant */
 .crm-container .crm-election-form-block-container button.crm-button.crm-button-type-cancel.crm-button-type-cancel {
     background: transparent;
-    color: var(--election-btn-bg);
+    color: var(--election-ink);
 }
 .crm-container .crm-election-form-block-container .crm-submit-buttons {
     display: flex;
@@ -628,7 +633,7 @@ ul#errorList {
 }
 .crm-container .election-form-tabs .election-form-tab.has-problem::after {
     content: " !";
-    color: #b3261e;
+    color: var(--crm-danger-ink-color, #b3261e);
 }
 .election-form-panel[hidden] {
     display: none;
@@ -666,10 +671,10 @@ ul#errorList {
     font-size: 0.9em;
 }
 .election-timeline-preview .election-timeline-problem {
-    border-left: 4px solid #b3261e;
+    border-left: 4px solid var(--crm-danger-ink-color, #b3261e);
 }
 .election-timeline-preview .election-timeline-problem .election-timeline-note {
-    color: #b3261e;
+    color: var(--crm-danger-ink-color, #b3261e);
 }
 .election-timeline-preview .election-timeline-current {
     border-left: 4px solid #2e7d32;
@@ -953,7 +958,7 @@ ul#errorList {
     font-size: 0.9em;
 }
 .election-rank-status.election-rank-problem {
-    color: #b3261e;
+    color: var(--crm-danger-ink-color, #b3261e);
     font-weight: 600;
 }
 .election-review-dialog {
@@ -1022,7 +1027,7 @@ ul#errorList {
 }
 .crm-container .election-review-dialog .election-review-back {
     background: transparent;
-    color: var(--election-btn-bg, #333);
+    color: var(--election-ink);
 }
 .crm-container .election-review-dialog .election-review-confirm:hover,
 .crm-container .election-review-dialog .election-review-confirm:focus-visible {
@@ -1153,12 +1158,12 @@ ul#errorList {
 /* The quiet button: the same shape, outlined, for the choice that gives something up. */
 .crm-container .election-btn.election-btn.election-btn-quiet {
     background: transparent;
-    color: var(--election-btn-bg);
+    color: var(--election-ink);
 }
 .crm-container .election-btn.election-btn.election-btn-quiet:hover,
 .crm-container .election-btn.election-btn.election-btn-quiet:focus-visible {
     background: color-mix(in srgb, var(--election-btn-bg) 12%, transparent);
-    color: var(--election-btn-bg);
+    color: var(--election-ink);
 }
 
 /* Results */
@@ -1186,7 +1191,7 @@ ul#errorList {
 }
 .crm-container .election-winner-badge.election-winner-badge-tie {
     background: transparent;
-    color: var(--election-btn-bg, #333);
+    color: var(--election-ink);
     font-weight: normal;
 }
 
@@ -1590,7 +1595,7 @@ ul#errorList {
     border: 2px solid var(--election-btn-bg);
     border-radius: var(--election-radius, 4px);
     background: transparent;
-    color: var(--election-btn-bg);
+    color: var(--election-ink);
     font: inherit;
     font-weight: 600;
     cursor: pointer;
