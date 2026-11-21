@@ -98,7 +98,7 @@ All under [`files/.ddev/`](files/.ddev/) and copied to `<site>/.ddev/`. None is 
 | `commands/host/deploy-elections` | Copies the repository folder next to the site into `<docroot>/CRM/extensions/au.com.agileware.elections`, enables it, upgrades the database, clears the CiviCRM cache | The three sites had three copies that differed in docroot (`httpdocs`, `web`, `.`) and in the Joomla ending. One command now reads `DDEV_DOCROOT` and `DDEV_PROJECT_TYPE`. Joomla keeps its own ending: `jcv` and clearing the cache by hand. `ELECTIONS_SRC` overrides the source folder |
 | `homeadditions/bin/cv` | Runs `~/bin/cv.phar` | The existing sites put the phar itself in `bin/`; a wrapper keeps the binary out of version control |
 | `homeadditions/bin/jcv`, `homeadditions/joomla-prepend.php` | `cv` for Joomla, which `cv` cannot boot: runs CiviCRM in UnitTests mode with Joomla's `psr/log` | The existing wrapper hard-coded the home folder of the maintainer's user. It now uses `$HOME`. Joomla sites only |
-| `homeadditions/bin/phpunit` | Runs `~/bin/phpunit.phar` (9.6) with `CIVICRM_UF=UnitTests` | Only WordPress had it in use. It now refuses to run on Joomla (see Known limits) |
+| `homeadditions/bin/phpunit` | Runs `~/bin/phpunit.phar` (9.6) with `CIVICRM_UF=UnitTests` | Only WordPress had it in use; Drupal uses it too since 2.2. It refuses to run on Joomla (see Known limits) |
 | `homeadditions/bin/wp-config-localhost` | WordPress only: makes `wp-config.php` answer on `http://localhost` inside the container (`WP_HOME` and `WP_SITEURL`), and removes DDEV's `#ddev-generated` signature so a restart does not overwrite the file (it still includes `wp-config-ddev.php` for the database settings) | The `elections2` site has the same five lines at the top of `wp-config.php` |
 | `homeadditions/bin/civicrm-dev-settings` | Edits `civicrm.settings.php`: the `$elections_dev_base` address helper, the extensions folder and its URL | The existing sites were edited by hand, in different places. This reproduces the same result |
 | `homeadditions/bin/.gitignore` | Keeps `*.phar` out of version control | New |
@@ -131,6 +131,12 @@ PHPUnit (WordPress):
 ddev exec 'cd /var/www/html/httpdocs/CRM/extensions/au.com.agileware.elections && phpunit'
 ```
 
+PHPUnit (Drupal):
+
+```bash
+ddev exec 'cd /var/www/html/web/CRM/extensions/au.com.agileware.elections && phpunit'
+```
+
 Browser tests: use the commands the script prints at the end. In short, WordPress runs `bash fixtures/setup-environment.sh` from `tests/playwright`, which creates the roles, test users, election pages and the council election. Drupal and Joomla run `fixtures/setup-accounts-drupal.sh` or `setup-accounts-joomla.sh` from the project root; the suite seeds the council election when it starts. Then run `npx playwright test` with `BASE_URL=http://localhost`, plus `CMS=drupal`, or `CMS=joomla CIVI_CV=jcv`. On WordPress the suite logs in as `admin` with the password `admin` unless `WP_ADMIN_USER` and `WP_ADMIN_PASS` are set, so pass the generated ones as the script's closing text shows: it reads the password from `.ddev/.site-credentials` inside the container, so the password is never on a command line (DDEV prints the whole command when a test run fails, and a password in it would be printed too). After changing any file in `files/.ddev/homeadditions`, run `ddev restart` so the container picks it up. Details: [`../testing/playwright.md`](../testing/playwright.md) and [`../testing/phpunit.md`](../testing/phpunit.md).
 
 ## Passwords
@@ -151,7 +157,7 @@ Stop a site you are not using with `ddev stop <site-name>`; its data is kept and
 
 ## Known limits
 
-- **Joomla and PHPUnit.** `~/.cv.json` points `jcv` at the site database, and the headless tests rebuild the database they are given, so the `phpunit` wrapper refuses on Joomla. Run PHPUnit on WordPress (the maintainers' only PHPUnit site).
+- **Joomla and PHPUnit.** `~/.cv.json` points `jcv` at the site database, and the headless tests rebuild the database they are given, so the `phpunit` wrapper refuses on Joomla. Run PHPUnit on WordPress or Drupal.
 - **Joomla 6** is not supported (see above). **Drupal 12** is not covered: the constraint is `^11`.
 - **The script is for one site per run**, on macOS or Linux with DDEV. It does not set up Windows.
 - **No Agileware ESR patches** are included (see the version section).
@@ -172,7 +178,7 @@ On 2026-11-15 the script was run from nothing for each CMS (CiviCRM 6.19.5, exte
 Not verified:
 
 - CiviCRM 6.16.x on Drupal 11 and Joomla 5.4, and CiviCRM 6.20 on any CMS.
-- PHPUnit on Drupal and Joomla (the maintainers do not run it there).
+- PHPUnit on Joomla (refused, see Known limits). PHPUnit on Drupal was run on `kit-test-drupal` on 2026-11-21 (CiviCRM 6.19.5, 275 tests passed).
 - Mail reaching Mailpit through `localhost:1025` on Drupal and Joomla.
 - `shellcheck` on the scripts (not available); `bash -n` passes.
 - A second build of the same site name after `ddev delete` (done by hand for each rebuild during the check).

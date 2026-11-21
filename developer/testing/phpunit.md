@@ -2,7 +2,7 @@
 
 Written from the existing setup, 2026-11-15; not yet followed from scratch.
 
-The headless PHPUnit suite tests the extension's rules and code without a browser. It runs against a dedicated test database, never the site's own, on the WordPress DDEV site and in GitHub Actions. Where it runs is in [README.md](README.md).
+The headless PHPUnit suite tests the extension's rules and code without a browser. It runs against a dedicated test database, never the site's own, on the WordPress DDEV site (CiviCRM 6.16), on a Drupal site built by the DDEV kit (CiviCRM 6.19) and in GitHub Actions. Where it runs is in [README.md](README.md).
 
 ## How it is set up
 
@@ -12,7 +12,7 @@ The headless PHPUnit suite tests the extension's rules and code without a browse
 - The test database must already hold a full, working CiviCRM install, because the boot queries CiviCRM tables before any test runs. It is made by copying the site database. `CIVICRM_UF=UnitTests` tells CiviCRM to boot in test mode, where it reads the test database address from `cv`'s per-site configuration (`TEST_DB_DSN`).
 - The database connects as the database root user, because the headless schema install needs the `SUPER` privilege. The test database exists only on a development machine or in a throwaway CI container.
 
-On the DDEV WordPress site (`elections2`), `phpunit` (the 9.6 phar) and `cv` are in `.ddev/homeadditions/bin`, and `.ddev/homeadditions/.cv.json` holds `TEST_DB_DSN` for the database `civicrm_tests_dev`. [../environments/ddev-wordpress.md](../environments/ddev-wordpress.md) covers building the site. The Drupal and Joomla sites have neither a test database nor a safe configuration for one: the Joomla site's `cv` configuration points the test mode at the site's own database (that is how its `jcv` command works), so a headless run there would rebuild the site's CiviCRM tables. Do not run PHPUnit on Joomla or Drupal.
+On the DDEV WordPress site (`elections2`), `phpunit` (the 9.6 phar) and `cv` are in `.ddev/homeadditions/bin`, and `.ddev/homeadditions/.cv.json` holds `TEST_DB_DSN` for the database `civicrm_tests_dev`. [../environments/ddev-wordpress.md](../environments/ddev-wordpress.md) covers building the site. A Drupal site built by the DDEV kit ([../ddev-kit/README.md](../ddev-kit/README.md), for example `kit-test-drupal`) has the same set-up: the kit writes `.cv.json` with `TEST_DB_DSN` for `civicrm_tests_dev` and copies the site database into it. Run PHPUnit there before a release, because it is the only place the suite runs on CiviCRM 6.19 outside CI (first run 2026-11-21: 275 tests passed). The hand-built `elections2-drupal` site has no test database: do not run PHPUnit there. **Never run PHPUnit on Joomla:** the Joomla site's `cv` configuration points the test mode at the site's own database (that is how its `jcv` command works), so a headless run there would rebuild the site's CiviCRM tables. The kit's `phpunit` wrapper refuses on Joomla.
 
 ## Run it
 
@@ -34,6 +34,12 @@ ddev deploy-elections
 
 ```bash
 ddev exec 'cd /var/www/html/httpdocs/CRM/extensions/au.com.agileware.elections && CIVICRM_UF=UnitTests phpunit'
+```
+
+On the Drupal kit site the extension is under `web/`, and the kit's wrapper sets `CIVICRM_UF` itself. Copy the site database again first if the test database is older than the last schema change (the two commands above):
+
+```bash
+ddev exec 'cd /var/www/html/web/CRM/extensions/au.com.agileware.elections && phpunit'
 ```
 
 One class or one test: add the file path, or `--filter`:

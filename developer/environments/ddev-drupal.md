@@ -2,7 +2,7 @@
 
 Written from the existing setup, 2026-11-15. The kit builds a new site of this kind from nothing (`create-site.sh <cms>`); that path was followed on 2026-11-15 and is described in [`../ddev-kit/README.md`](../ddev-kit/README.md). The rest of this page describes the maintainers' existing site and was written from it.
 
-The Drupal site (`elections2-drupal`) runs the Playwright suite on Drupal 11 with Drupal's own default front end theme. PHPUnit is not run here: it runs on the WordPress site.
+The Drupal site (`elections2-drupal`) runs the Playwright suite on Drupal 11 with Drupal's own default front end theme. PHPUnit is not run here (no test database): run it on the WordPress site and on a Drupal site built by the DDEV kit ([../testing/phpunit.md](../testing/phpunit.md)).
 
 ## What the finished site looks like
 

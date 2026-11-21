@@ -20,11 +20,12 @@ CiviCRM versions: the main WordPress site runs 6.16 (an ESR build), the others 6
 
 | Site | PHPUnit | Upgrade test | Playwright | Notes |
 |---|---|---|---|---|
-| WordPress, CiviCRM 6.16 (DDEV site `elections2`) | Yes (the only DDEV site with a test database) | Yes | Yes, all projects | The main development site. |
+| WordPress, CiviCRM 6.16 (DDEV site `elections2`) | Yes | Yes | Yes, all projects | The main development site. |
 | WordPress, CiviCRM 6.19 (the Beekeepers review site) | Not set up | Not run there: it swaps the review data out for the length of the run | Possible; ask the maintainer first | The maintainer's review site: reviewed by hand, never reset without asking. |
-| Drupal 11, CiviCRM 6.19 (DDEV site `elections2-drupal`) | No | Yes | Yes (`CMS=drupal`), administrator, manager, limited and member sessions | |
+| Drupal 11, CiviCRM 6.19 (DDEV site `elections2-drupal`) | No (no test database; use the kit site) | Yes | Yes (`CMS=drupal`), administrator, manager, limited and voter sessions | |
+| Drupal 11, CiviCRM 6.19 (kit site `kit-test-drupal`) | Yes (since 2.2): the kit makes the test database | Not run | Yes (`CMS=drupal`) | Built by [../ddev-kit/](../ddev-kit/README.md). Runs PHPUnit on 6.19. |
 | Joomla 5.4, CiviCRM 6.19 (DDEV site `elections2-joomla`) | No: never run it there | Yes | Yes (`CMS=joomla`, `CIVI_CV=jcv`), all four sessions | All specs run (since 2.2). |
-| GitHub Actions (WordPress in Docker, the newest stable CiviCRM the pipeline image installs) | Yes | Yes | Yes | The only suites that gate a pull request. No Drupal or Joomla. |
+| GitHub Actions (WordPress in Docker, the newest stable CiviCRM the pipeline image installs) | Yes | Yes | Yes | The only suites that gate a pull request. Drupal and Joomla run the browser suite by hand and weekly ([ci.md](ci.md)), not as a pull request check. |
 
 The DDEV sites are described in [../environments/README.md](../environments/README.md).
 
@@ -32,7 +33,7 @@ The DDEV sites are described in [../environments/README.md](../environments/READ
 
 | You changed | Run before asking for review |
 |---|---|
-| A rule, the voting code, an API or a BAO | PHPUnit on WordPress. |
+| A rule, the voting code, an API or a BAO | PHPUnit on WordPress (6.16); before a release also on the Drupal kit site (6.19). |
 | The database (a new column or table) | PHPUnit and the upgrade test, and the new upgrade step's own test ([upgrade-test.md](upgrade-test.md)). |
 | A screen, template, style or script | PHPUnit, then the whole Playwright suite on WordPress, and the affected specs on Drupal and Joomla. Then look at the screen as a person ([manual-browser-testing.md](manual-browser-testing.md)). |
 | Wording | PHPUnit (`WordingTest` fails on "member" in anything a person reads). |
