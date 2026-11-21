@@ -14,6 +14,9 @@ on:
         default: '6.19'
   schedule:
     - cron: '0 18 * * 1'
+  # TEMPORARY: a first run from the version-2.2 branch, before this file is on master. Removed in the next commit.
+  push:
+    branches: [version-2.2]
 
 jobs:
   drupal:
