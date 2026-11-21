@@ -3,8 +3,8 @@
 use CRM_Elections_ExtensionUtil as E;
 
 /**
- * Add a candidate directly, as an administrator, for elections where nominations are made
- * outside the website.
+ * Add a candidate directly, as an administrator or a person with "manage Election candidates", for elections where
+ * nominations are made outside the website.
  */
 class CRM_Elections_Form_AddCandidate extends CRM_Elections_Form_Base {
 
@@ -13,7 +13,10 @@ class CRM_Elections_Form_AddCandidate extends CRM_Elections_Form_Base {
   private $election = NULL;
 
   public function buildQuickForm() {
-    if (throwUnauthorizedMessageIfRequired($this)) {
+    // An administrator, or a person who manages candidates only.
+    if (!canManageElectionCandidates()) {
+      [$message, $options] = electionsNoAccess();
+      throwAccessDeniedException($this, $message, $options);
       return;
     }
     $this->eId = CRM_Utils_Request::retrieve('eid', 'Positive', $this, TRUE);

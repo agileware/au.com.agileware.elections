@@ -37,6 +37,7 @@ export const logins: Record<string, { username: string; password: string }> = {
   admin: { username: process.env.WP_ADMIN_USER || 'admin', password: process.env.WP_ADMIN_PASS || 'admin' },
   manager: { username: users.manager.username, get password() { return testPassword('manager'); } },
   limited: { username: users.limited.username, get password() { return testPassword('limited'); } },
+  candidates: { username: users.candidates.username, get password() { return testPassword('candidates'); } },
   member: { username: users.member.username, get password() { return testPassword('member'); } },
 };
 
@@ -71,12 +72,12 @@ export default async function globalSetup(config: FullConfig) {
   fs.mkdirSync(AUTH_DIR, { recursive: true });
   const browser = await chromium.launch();
 
-  // Every CMS gets the four sessions. Drupal and Joomla use the accounts their setup script made; on Joomla
+  // Every CMS gets the five sessions. Drupal and Joomla use the accounts their setup script made; on Joomla
   // the organisers log in to the administrator and the member to the site, because a Joomla member may not
   // use the administrator at all.
   const sessions: Array<[string, { username: string; password: string }]> =
     CMS === 'wordpress' ? Object.entries(logins)
-      : [['admin', testAdmin], ['manager', logins.manager], ['limited', logins.limited], ['member', logins.member]];
+      : [['admin', testAdmin], ['manager', logins.manager], ['limited', logins.limited], ['candidates', logins.candidates], ['member', logins.member]];
 
   for (const [name, { username, password }] of sessions) {
     const context = await browser.newContext({ baseURL });

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Creates the test accounts the specs log in with on a Joomla 5 site (run inside the DDEV web container
-# from the site root): an administrator, an Elections manager, an organiser without View All Contacts and a
-# voter. Joomla sets CiviCRM's permissions per user group, so joomla-test-groups.php makes a group for each
+# from the site root): an administrator, an Elections manager, an organiser without View All Contacts, a person
+# who manages candidates only and a voter. Joomla sets CiviCRM's permissions per user group, so joomla-test-groups.php makes a group for each
 # role first. Safe to re-run. Passwords are generated here, at setup, into .generated/test-passwords.json
 # (git-ignored; never committed).
 set -euo pipefail
@@ -26,5 +26,6 @@ php "$SCRIPT_DIR/joomla-test-groups.php"
 account admin "Super Users" "Elections Admin (test)"
 account manager "Elections Manager (test)" "Elections Manager (test)"
 account limited "Elections Organiser without contacts (test)" "Elections Organiser (test)"
+account candidates "Elections Candidates Manager (test)" "Elections Candidates Manager (test)"
 account member "Elections Voter (test)" "Elections Voter (test)"
 echo "Joomla test accounts ready"

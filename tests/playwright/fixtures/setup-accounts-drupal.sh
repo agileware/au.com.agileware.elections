@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Creates the test accounts the back end specs log in with on a Drupal 11 site (run inside the
 # DDEV web container from the project root): an administrator, an Elections manager, an organiser without
-# View All Contacts (to check the notice about hidden groups) and a member.
+# View All Contacts (to check the notice about hidden groups), a person who manages candidates only and a member.
 # Safe to re-run. Passwords are generated here, at setup, into .generated/test-passwords.json (git-ignored; never committed).
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -34,11 +34,14 @@ role elections_manager "Elections Manager (test)"
 perms elections_manager "access CiviCRM" "administer Elections" "view Elections" "access AJAX API" "view all contacts"
 role elections_limited "Elections Organiser without contacts (test)"
 perms elections_limited "access CiviCRM" "administer Elections" "view Elections" "access AJAX API"
+role elections_candidates "Elections Candidates Manager (test)"
+perms elections_candidates "access CiviCRM" "manage Election candidates" "view Elections" "access AJAX API" "view all contacts"
 role elections_member "Elections Voter (test)"
 perms elections_member "view Elections" "access AJAX API" "access uploaded files" "profile view" "profile edit"
 
 account admin administrator
 account manager elections_manager
 account limited elections_limited
+account candidates elections_candidates
 account member elections_member
 echo "Drupal test accounts ready"

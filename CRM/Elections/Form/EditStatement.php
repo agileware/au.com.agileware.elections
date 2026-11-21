@@ -28,7 +28,7 @@ class CRM_Elections_Form_EditStatement extends CRM_Elections_Form_Base {
     $this->enId = CRM_Utils_Request::retrieve('enid', 'Positive', $this, FALSE, 0);
     // One form, two frames: an administrator in the back end gets the breadcrumb and Submit, Back, Back to
     // Manage Elections; a candidate gets Submit and Back to the election.
-    $this->isAdminFrame = isElectionAdmin() && !isRequestUsingShortCode();
+    $this->isAdminFrame = canManageElectionCandidates() && !isRequestUsingShortCode();
     $this->assign('isAdminFrame', $this->isAdminFrame);
     if (!$this->isAdminFrame) {
       hideNonRequiredItemsOnPage($this);
@@ -112,10 +112,10 @@ class CRM_Elections_Form_EditStatement extends CRM_Elections_Form_Base {
    * @return bool
    */
   private function canEdit($election) {
-    if (!$election->isVisible && !isElectionAdmin()) {
+    if (!$election->isVisible && !canManageElectionCandidates()) {
       return FALSE;
     }
-    if (isElectionAdmin()) {
+    if (canManageElectionCandidates()) {
       return !$election->isVotingEnded;
     }
     if (empty(\CRM_Core_Session::getLoggedInContactID()) && !filter_var($election->allow_checksum_access, FILTER_VALIDATE_BOOL)) {

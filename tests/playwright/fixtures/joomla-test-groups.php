@@ -28,6 +28,7 @@ use Joomla\Database\DatabaseInterface;
 $groups = [
   'Elections Manager (test)' => [TRUE, ['access CiviCRM', 'administer Elections', 'view Elections', 'access AJAX API', 'view all contacts']],
   'Elections Organiser without contacts (test)' => [TRUE, ['access CiviCRM', 'administer Elections', 'view Elections', 'access AJAX API']],
+  'Elections Candidates Manager (test)' => [TRUE, ['access CiviCRM', 'manage Election candidates', 'view Elections', 'access AJAX API', 'view all contacts']],
   'Elections Voter (test)' => [FALSE, ['view Elections', 'access AJAX API', 'access uploaded files', 'profile view', 'profile edit']],
 ];
 const REGISTERED = 2;

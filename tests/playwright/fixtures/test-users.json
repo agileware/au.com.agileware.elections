@@ -13,6 +13,11 @@
     "email": "elections-limited@example.test",
     "role": "elections_limited"
   },
+  "candidates": {
+    "username": "elections_candidates",
+    "email": "elections-candidates@example.test",
+    "role": "elections_candidates"
+  },
   "member": {
     "username": "elections_member",
     "email": "elections-member@example.test",

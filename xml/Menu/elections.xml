@@ -108,7 +108,7 @@
     <path>civicrm/elections/candidates/add</path>
     <page_callback>CRM_Elections_Form_AddCandidate</page_callback>
     <title>Add Candidate</title>
-    <access_arguments>administer Elections</access_arguments>
+    <access_arguments>administer Elections;manage Election candidates</access_arguments>
   </item>
   <item>
     <path>civicrm/elections/results-display</path>

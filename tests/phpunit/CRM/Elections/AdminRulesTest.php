@@ -445,4 +445,77 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
     }
   }
 
+  /**
+   * A person with "manage Election candidates" and not "administer Elections" may read elections, positions and
+   * nominations (for the candidates lists) and add candidates through the form, but change nothing through the API,
+   * and read no ballots, results or audit entries.
+   */
+  public function testAPersonWhoManagesCandidatesOnlyMayReadButNotChangeElections() {
+    $election = $this->createElection(['is_visible' => 0, 'is_deleted' => 0]);
+    $permissionClass = CRM_Core_Config::singleton()->userPermissionClass;
+    $original = $permissionClass->permissions ?? NULL;
+    $permissionClass->permissions = ['access CiviCRM', 'manage Election candidates', 'view Elections', 'access AJAX API', 'view all contacts'];
+    try {
+      $this->assertTrue(canManageElectionCandidates());
+      $this->assertFalse(isElectionAdmin());
+      $this->assertTrue(CRM_Elections_Helper_Frame::isCandidatesOnly());
+      $this->assertStringContainsString('civicrm/elections/candidate-list', CRM_Elections_Helper_Frame::managerUrl());
+      foreach (['Election', 'ElectionPosition', 'ElectionNomination'] as $entity) {
+        civicrm_api4($entity, 'get', ['checkPermissions' => TRUE, 'limit' => 1]);
+      }
+      foreach ([['Election', 'update', ['where' => [['id', '=', $election['id']]], 'values' => ['name' => 'Renamed']]], ['Election', 'delete', ['where' => [['id', '=', $election['id']]]]], ['ElectionPosition', 'create', ['values' => ['election_id' => $election['id'], 'name' => 'Chair', 'quantity' => 1]]], ['ElectionNomination', 'update', ['where' => [['id', '>', 0]], 'values' => ['is_eligible_candidate' => 0]]]] as [$entity, $action, $params]) {
+        try {
+          civicrm_api4($entity, $action, ['checkPermissions' => TRUE] + $params);
+          $this->fail("APIv4 $entity.$action must be refused to a person who manages candidates only");
+        }
+        catch (\Civi\API\Exception\UnauthorizedException $e) {
+          $this->assertTrue(TRUE);
+        }
+      }
+      foreach (['ElectionVote', 'ElectionResult', 'ElectionAudit'] as $entity) {
+        try {
+          civicrm_api4($entity, 'get', ['checkPermissions' => TRUE, 'limit' => 1]);
+          $this->fail("APIv4 $entity.get must be refused to a person who manages candidates only");
+        }
+        catch (\Civi\API\Exception\UnauthorizedException $e) {
+          $this->assertTrue(TRUE);
+        }
+      }
+      $this->assertSame('Renamed' === civicrm_api4('Election', 'get', ['checkPermissions' => FALSE, 'where' => [['id', '=', $election['id']]]])->first()['name'], FALSE);
+    }
+    finally {
+      $permissionClass->permissions = $original;
+    }
+    // An administrator still sees the usual frame.
+    $permissionClass->permissions = ['access CiviCRM', 'administer Elections'];
+    try {
+      $this->assertFalse(CRM_Elections_Helper_Frame::isCandidatesOnly());
+      $this->assertStringContainsString('civicrm/elections/manage', CRM_Elections_Helper_Frame::managerUrl());
+    }
+    finally {
+      $permissionClass->permissions = $original;
+    }
+  }
+
+  /**
+   * The back end list pages (Afform routes under civicrm/elections/) are checked against their own permissions, not
+   * the parent route's "view Elections or a personal link", so a person without them is refused by the route.
+   */
+  public function testTheListPagesAreGuardedByTheirOwnPermissions() {
+    CRM_Core_Menu::store();
+    $expected = [
+      'civicrm/elections/manage' => [['access CiviCRM', 'administer Elections'], 'and'],
+      'civicrm/elections/position-list' => [['access CiviCRM', 'administer Elections'], 'and'],
+      'civicrm/elections/audit-log' => [['access CiviCRM', 'administer Elections'], 'and'],
+      'civicrm/elections/candidate-list' => [['administer Elections', 'manage Election candidates'], 'or'],
+    ];
+    foreach ($expected as $path => $arguments) {
+      $item = CRM_Core_Menu::get($path);
+      $this->assertSame(['CRM_Core_Permission', 'checkMenu'], $item['access_callback'], $path);
+      $this->assertSame($arguments, $item['access_arguments'], $path);
+    }
+    // The front end routes keep the check that allows personal links.
+    $this->assertSame(['CRM_Elections_Permission', 'check'], CRM_Core_Menu::get('civicrm/elections/view')['access_callback']);
+  }
+
 }

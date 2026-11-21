@@ -166,7 +166,7 @@ Each entry gives the decision, why, the date, and where it shows. Dates of the 2
 
 ### D13 – A granular permission
 - **Question.** Add a permission between `administer Elections` and `view Elections` (for example `manage Election candidates`, so a returning officer can add candidates and fix statements without creating, activating or deleting elections)?
-- **Status.** Deferred to version 2.2 on 2026-11-03. Default: build it only if an organisation needs it. If built: the permission, the Candidates routes split from the other admin routes, audit entries, tests on three CMSs, and `docs/roles_and_permissions.md`.
+- **Status.** Decided 2026-11-21 and built in 2.2: **manage Election candidates**, for candidates only. It opens Election Candidates (a list of the elections, then each election's Candidates list), Add Candidate and Edit Statement; it reads elections, positions and nominations through APIv4 and changes nothing there (every write still needs administer Elections); it opens no other back end screen. Adding a candidate is recorded in the audit log as before. Tests: `AdminRulesTest::testAPersonWhoManagesCandidatesOnlyMayReadButNotChangeElections`, `candidates-manager.spec.ts` on three CMSs. See `docs/roles_and_permissions.md`. (Deferred to 2.2 on 2026-11-03.)
 
 ### D14 – More voting methods
 - **Question.** Add counting methods beyond ranked choice and most votes (approval, Senate count for several seats)?

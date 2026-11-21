@@ -41,11 +41,14 @@ run wp cap add elections_manager access_civicrm administer_elections view_electi
 run wp role create elections_limited "Elections Organiser without contacts (test)" --clone=subscriber >/dev/null 2>&1 || true
 run wp cap add elections_limited access_civicrm administer_elections view_elections access_ajax_api
 # member: takes part in an election while logged in.
+# candidates: manages candidates only (Election Candidates, Add Candidate, Edit Statement), not elections.
+run wp role create elections_candidates "Elections Candidates Manager (test)" --clone=subscriber >/dev/null 2>&1 || true
+run wp cap add elections_candidates access_civicrm manage_election_candidates view_elections access_ajax_api view_all_contacts
 run wp role create elections_member "Elections Voter (test)" --clone=subscriber >/dev/null 2>&1 || true
 run wp cap add elections_member view_elections access_ajax_api access_uploaded_files profile_view profile_edit
 
 echo "Creating WordPress users..."
-for key in manager limited member; do
+for key in manager limited candidates member; do
   USERNAME=$(json_get "$USERS_JSON" "$key" username)
   PASSWORD=$(password_get "$key")
   EMAIL=$(json_get "$USERS_JSON" "$key" email)
