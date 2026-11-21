@@ -1,5 +1,6 @@
 import { test, expect, civiAdminUrl, expectNoPhpOutput } from '../../fixtures/base';
 import { civiApi4 } from '../../fixtures/civi';
+import { CMS } from '../../fixtures/cms';
 import { addNomination, addPosition, createElection, createMembers, nm, nominationFlags, removeRunData, removeRunMembers } from '../../fixtures/data';
 
 /**
@@ -59,6 +60,10 @@ test.describe('a person who manages candidates only', () => {
 
   test('is refused the screens that set up or change elections', async ({ candidatesPage: page, allowedProblems }) => {
     allowedProblems.push(/403/);
+    if (CMS === 'joomla') {
+      // On Joomla CiviCRM's own refusal page answers HTTP 500 (upstream-issues 004); the page itself is a refusal.
+      allowedProblems.push(/HTTP 500|status of 500/);
+    }
     const election = createElection(nm('Cand only refused'));
     for (const [civiPath, params] of [
       ['civicrm/elections/manage', {}],
