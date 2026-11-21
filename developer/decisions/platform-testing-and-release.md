@@ -36,7 +36,7 @@ Each entry gives the decision, why, the date and where it shows.
 - **Decision.** Contribute Drupal and Joomla workflow variants to `agileware/ci-workflows` (it runs WordPress only), after WordPress is green. DDEV in Actions is the recommended way, and a `WP_THEME`-style input comes first. Until then both CMSs are tested on DDEV before every release.
 - **Why.** The browser tests of the other two CMSs should run in CI, not only on a maintainer's machine.
 - **Date.** Decided October 2026; moved to version 2.2 on 2026-11-03. On 2026-11-21 the maintainer chose when they run: **by hand and weekly**, not on every pull request (building a site takes several minutes).
-- **Status.** Built in 2.2: `ddev-playwright-tests.yml` in `ci-workflows` (DDEV in the runner, the caller's own site script) and `.github/workflows/frontend-tests-drupal-joomla.yml` here, which runs the kit for Drupal and Joomla. Not yet run in GitHub Actions. See [`../testing/ci.md`](../testing/ci.md).
+- **Status.** Built in 2.2: `ddev-playwright-tests.yml` in `ci-workflows` (DDEV in the runner, the caller's own site script) and `.github/workflows/frontend-tests-drupal-joomla.yml` here, which runs the kit for Drupal and Joomla. First run 2026-11-21 (Drupal and Joomla, CiviCRM 6.19.5): 108 passed on each. See [`../testing/ci.md`](../testing/ci.md).
 
 ### G2 – CI runs the browser tests on the Astra theme
 - **Decision.** The shared Playwright workflow keeps its default theme (Astra, through its `WP_THEME` input, default `astra`) because the suite passes on it, so callers do not set `WP_THEME`.
