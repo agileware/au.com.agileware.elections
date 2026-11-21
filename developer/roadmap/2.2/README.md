@@ -63,9 +63,10 @@ The full list and the decisions already made are in [../../decisions/README.md](
 | Decision | State |
 |---|---|
 | Additional voting methods (STV, approval voting) | STV moved to 2.3 on 2026-11-21 (S4); its other questions are in [../2.3/stv.md](../2.3/stv.md). Approval voting: the recommendation is to drop it, not yet confirmed. |
-| Granular permission (item 7) | Deferred to 2.2; default build only if needed. |
-| Publishing the standards more widely (item 6) | Open. |
-| Branch name for 2.2 and whether to push as work goes | Ask at the start. The 2.1 rule (kept local until finished, one release pull request) was for 2.1 only. Suggested name: `version-2.2`, cut from `origin/master`. |
+| Public `security.md` | Whether it includes the residual-risk notes. Open. |
+| PHPUnit on Drupal | Whether to run it through the DDEV kit. Open. |
+
+Decided during 2.2, kept here for reference: the granular permission (item 7) is **manage Election candidates** (D13, 2026-11-21); publishing the standards (item 6) is a pull request template, the standards stay in the developer guide (U14, 2026-11-21); the branch is `version-2.2`, cut from `origin/master`, pushed as a branch with the release pull request opened only when 2.2 is ready (2026-11-21).
 
 ## Rules that matter
 
