@@ -148,4 +148,4 @@ The review was done by reading the code; the decisions were approved on 2026-11-
 
 ### U14 – Publishing the standards with the extension
 - **Question.** Does the standard also go into `docs/` (published with the extension and listed in `mkdocs.yml`), linked from `CONTRIBUTING.md`, with its checklist as a pull request template?
-- **Status.** Open (2.2). The maintainer decided on 2026-11-01 that the guide stays out of `docs/` for now. It now lives in [`../standards/ui-standards.md`](../standards/ui-standards.md) in the repository's developer guide, which is left out of releases. `CONTRIBUTING.md` and `.github` are also left out of the released package; `docs/` is not. There is no pull request template yet.
+- **Status.** Decided 2026-11-21 (2.2): a pull request template only. `.github/pull_request_template.md` carries the checklist of section 14 of [`../standards/ui-standards.md`](../standards/ui-standards.md); the standards stay in the developer guide (public on GitHub, left out of releases) and are not copied into `docs/`, which is for site owners. Earlier (2026-11-01) the maintainer had kept the guide out of `docs/` for the time being.
