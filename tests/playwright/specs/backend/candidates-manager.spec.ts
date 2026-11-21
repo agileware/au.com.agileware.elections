@@ -31,7 +31,8 @@ test.describe('a person who manages candidates only', () => {
 
     await page.getByRole('link', { name: 'Add Candidate' }).click();
     // The breadcrumb starts at Election Candidates and the election leads to its candidates, not the overview.
-    const crumbs = page.locator('.breadcrumb, nav[aria-label="Breadcrumb"], .crm-container .breadcrumb').first();
+    // CiviCRM's own breadcrumb: a Drupal or Joomla theme draws one of its own above the page.
+    const crumbs = page.locator('.crm-container .breadcrumb');
     await expect(crumbs).toContainText('Election Candidates');
     await expect(crumbs).not.toContainText('Manage Elections');
     await page.getByLabel('Position').selectOption({ label: 'Chair' });
@@ -68,7 +69,7 @@ test.describe('a person who manages candidates only', () => {
     ] as Array<[string, Record<string, number>]>) {
       await page.goto(civiAdminUrl(civiPath, { reset: 1, ...params }));
       // CiviCRM's own refusal, not an error page (Afform pages needed their permissions on the route for that).
-      await expect(page.locator('body'), civiPath).toContainText(/do not have permission|not allowed to access|not authori[sz]ed|access denied/i);
+      await expect(page.locator('body'), civiPath).toContainText(/do not have permission|do not have access|not allowed to access|not authori[sz]ed|access denied/i);
       await expect(page.locator('body'), civiPath).not.toContainText('not found in api results');
       await expect(page.getByRole('button', { name: 'Submit' }), civiPath).toHaveCount(0);
       await expect(page.getByRole('link', { name: /^(Add Election|Add Position|Edit|Delete)$/ }), civiPath).toHaveCount(0);
