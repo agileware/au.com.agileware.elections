@@ -6,4 +6,4 @@ Written 2026-11-21. Version 2.4 is not being built yet: 2.2 and 2.3 come first (
 
 | # | Item | State and what it needs |
 |---|---|---|
-| 1 | **Mobile voting web app: discovery only** | Moved from 2.2 on 2026-11-21. Not started. A written plan, no code: API or mobile mode, ballot secrecy, how the personal link stays safe, offline behaviour, accessibility, and whether it works the same on the three CMSs. Building it is a later release. |
+| 1 | **Mobile voting web app: discovery only** | Moved from 2.2 on 2026-11-21. **Design draft written 2026-11-22: [mobile-app.md](mobile-app.md)**, from the maintainer's idea (a single page app; people request a voting link from a list of open elections or by entering an election code; own adjustable design; banner, text, pictures and instructions as settings; QR codes). Questions M1 to M10 wait for the maintainer. No code. Building it is a later release. |
