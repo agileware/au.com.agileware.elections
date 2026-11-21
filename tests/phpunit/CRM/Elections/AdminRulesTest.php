@@ -502,7 +502,13 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
    * the parent route's "view Elections or a personal link", so a person without them is refused by the route.
    */
   public function testTheListPagesAreGuardedByTheirOwnPermissions() {
-    CRM_Core_Menu::store();
+    // Rebuild the routes. CiviCRM 6.19 has Civi::router() and deprecates CRM_Core_Menu::store(); 6.16 has only store().
+    if (method_exists('Civi', 'router')) {
+      Civi::router()->clear()->rebuild();
+    }
+    else {
+      CRM_Core_Menu::store();
+    }
     $expected = [
       'civicrm/elections/manage' => [['access CiviCRM', 'administer Elections'], 'and'],
       'civicrm/elections/position-list' => [['access CiviCRM', 'administer Elections'], 'and'],
