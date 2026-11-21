@@ -44,11 +44,11 @@ With both in place the election screens use your theme's normal page layout and 
 1. Create a Page to display the election information. This page can be called anything, but typically _Election_.
 2. Insert the Election information short-code as a **HTML element** on the page: ```[civicrm component="electioninfo" hijack="0"]```
 3. Publish the page and take note of the Page ID.
-![Screenshot of the election information page](images/setup/election-page.png)
+![The election information page in the WordPress block editor, with the short-code in a Custom HTML block](images/setup/election-page.png)
 4. Create a Page to contain the listing of current elections. This page can be called anything, but typically _Current Elections_.
 5. Insert the Election listing short-code as a **HTML element** on the page. Use the Page ID from the election information page as the _viewpageid_ parameter: ```[civicrm component="elections" hijack="0" action="visible" viewpageid="19"]``` - shown where the election information Page ID = 19.
 6. Publish the page and take note of the Page ID.
-![Screenshot of the election listing page](images/setup/election-listing-page.png) 
+![The election listing page in the WordPress block editor, with the short-code in a Custom HTML block](images/setup/election-listing-page.png) 
 
 ### Set up CiviCRM Permissions
 

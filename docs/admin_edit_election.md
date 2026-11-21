@@ -5,9 +5,9 @@ An election can only be edited before its **Nominations open** date has passed w
 To edit an election, you should be a user who gains admin access for CiviCRM and follow these steps:
 
 1. Go to **Elections**  
-![Click Elections](images/admin_election/01.gif)  
+![Manage Elections, with the Add Election button marked](images/admin_election/01.png)  
 2. Select **Edit** on the election's row, or **Edit Election** on its [overview](admin_election_overview.md)  
-![Click Edit](images/admin_edit/03.gif)  
+![Manage Elections, with Edit marked on an election row](images/admin_edit/03.png)  
 3. Edit information of an existing election. The page has a breadcrumb above the heading (**Manage Elections** > the election's name > **Edit Election**) and the same six tabs as [adding an election](admin_create_election.md): **Details**, **Dates**, **Participation**, **Display**, **Emails** and **Privacy**.
 - **Name** and **Description** (**Details** tab): to edit the name and description of the election.  
 - **Visible from** (**Dates** tab): to edit the date and time when people can start seeing the election.  

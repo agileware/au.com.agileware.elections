@@ -1,7 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Configuration for the screenshot tool in `tools/screens.spec.ts` (`npm run screens`). It is separate from
+ * Configuration for the screenshot tools in `tools/`: `screens.spec.ts` (`npm run screens`) and `docs-images.spec.ts`
+ * (`npm run docs-images`, the user guide's pictures). It is separate from
  * `playwright.config.ts` so that the test suite never runs it. Pictures go to `test-results/screens/<cms>/`.
  */
 export default defineConfig({

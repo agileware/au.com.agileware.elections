@@ -63,15 +63,26 @@ done
 echo "Creating the election pages (as documented in docs/setup.md)..."
 INFO_SLUG=$(json_get "$USERS_JSON" pages infoSlug)
 LISTING_SLUG=$(json_get "$USERS_JSON" pages listingSlug)
+# Each short-code is in a Custom HTML block, as docs/setup.md tells site owners to insert it (and as the user guide's
+# pictures show). Pages made before 2.2 held the short-code as classic content: they are put in the block.
+html_block() { printf '<!-- wp:html -->\n%s\n<!-- /wp:html -->' "$1"; }
 INFO_ID=$(run wp post list --post_type=page --name="$INFO_SLUG" --field=ID | head -n 1)
 if [ -z "$INFO_ID" ]; then
   INFO_ID=$(run wp post create --post_type=page --post_title="Election" --post_name="$INFO_SLUG" --post_status=publish --porcelain \
-    --post_content='[civicrm component="electioninfo" hijack="0"]')
+    --post_content="$(html_block '[civicrm component="electioninfo" hijack="0"]')")
 fi
-if [ -z "$(run wp post list --post_type=page --name="$LISTING_SLUG" --field=ID | head -n 1)" ]; then
-  run wp post create --post_type=page --post_title="Current Elections" --post_name="$LISTING_SLUG" --post_status=publish \
-    --post_content="[civicrm component=\"elections\" hijack=\"0\" action=\"visible\" viewpageid=\"$INFO_ID\"]"
+LISTING_ID=$(run wp post list --post_type=page --name="$LISTING_SLUG" --field=ID | head -n 1)
+if [ -z "$LISTING_ID" ]; then
+  LISTING_ID=$(run wp post create --post_type=page --post_title="Current Elections" --post_name="$LISTING_SLUG" --post_status=publish --porcelain \
+    --post_content="$(html_block "[civicrm component=\"elections\" hijack=\"0\" action=\"visible\" viewpageid=\"$INFO_ID\"]")")
 fi
+for PAGE_ID in "$INFO_ID" "$LISTING_ID"; do
+  CONTENT=$(run wp post get "$PAGE_ID" --field=post_content)
+  case "$CONTENT" in
+    *'<!-- wp:html -->'*) ;;
+    *) run wp post update "$PAGE_ID" --post_content="$(html_block "$CONTENT")" >/dev/null ;;
+  esac
+done
 
 echo "Redirecting CiviCRM's outgoing email to the database (no mail server needed)..."
 # Nominations and write-ins send email while the tests run. Redirecting to the database (option 5) keeps

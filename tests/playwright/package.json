@@ -8,8 +8,9 @@
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
     "report": "playwright show-report",
-    "screens": "playwright test --config playwright.screens.config.ts",
-    "seed": "bash fixtures/setup-environment.sh"
+    "screens": "playwright test --config playwright.screens.config.ts tools/screens.spec.ts",
+    "seed": "bash fixtures/setup-environment.sh",
+    "docs-images": "playwright test --config playwright.screens.config.ts tools/docs-images.spec.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.0",

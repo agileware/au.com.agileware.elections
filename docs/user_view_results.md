@@ -3,11 +3,11 @@
 Once the election results have been published, then this information is available to the public.
 
 1. Go to **Elections**  
-![Click Elections](images/user_view_results/01.gif)    
+![The election list, with View Results marked on an election card](images/user_view_results/01.png)    
 2. Select **View Results** on the election's card  
-![Click Vote in the election](images/user_view_results/02.gif)       
+![The results on the election page, with View Election Summary marked](images/user_view_results/02.png)       
 3. If you want to see the whole process of the election, select **View Election Summary** (**Back to the election** returns to the results)  
-![Click Nominate](images/user_view_results/03.gif)  
+![The election summary](images/user_view_results/03.png)  
 
 The results page is titled "Results for" followed by the election's name, and shows **Election Results**: the **Winner for** each position (**Winners for** when it has more than one seat), each with a **Winner** badge. Each position's results show a status describing how the result was reached:
 
