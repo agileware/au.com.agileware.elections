@@ -40,7 +40,7 @@ The rule that follows: **a pass on one CMS or one CiviCRM version is not a pass.
 Two more that apply everywhere:
 
 - **A CMS session wins over a personal link.** An administrator signed in to the site in the same browser acts as the administrator whatever link they open. Sign the administrator out before looking at the front end as a voter ([manual-browser-testing.md](manual-browser-testing.md)). Seen on WordPress; not separately checked on the other two.
-- **Themes set button heights**, so the back end action buttons (Submit, Back) have one fixed height in `css/electionforms.css`, scoped with `:has(.election-back)`. Do not widen that rule: it once reached the front end ballot, where buttons must stay at least 36 px high at phone width (the layout spec checks).
+- **Themes set button heights**, so the back end action buttons (Submit, Back) have one fixed height in `css/electionforms.css`, scoped with `:has(.election-back)`. Do not widen that rule: it once reached the front end ballot, where buttons must stay at least 36 px high at phone width (the page walk checks).
 
 ## How these show up when you work
 

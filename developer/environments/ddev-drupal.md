@@ -89,7 +89,7 @@ Give the roles that take part the CiviCRM permissions `view Elections` and `acce
 
 ## Drupal gotchas
 
-- **Olivero sets button heights.** The extension's back end action buttons carry a fixed height to look right under Drupal's theme; front end buttons are checked at a minimum of 36 px by the layout spec. Check any new button on Drupal.
+- **Olivero sets button heights.** The extension's back end action buttons carry a fixed height to look right under Drupal's theme; front end buttons are checked at a minimum of 36 px by the page walk. Check any new button on Drupal.
 - **Run Drush from the project root, `cv` from `web`.** They look for different things.
 - **A refused page returns 403 or 500**: Drupal from CiviCRM 6.19, so the smoke spec accepts either. See [civicrm-versions.md](civicrm-versions.md).
 - The deploy command runs `cv flush` before and after enabling the extension; one failure on the first run after a flush is a known flake and the retry passes.

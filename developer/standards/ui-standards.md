@@ -291,10 +291,11 @@ The labels in the code are the source of truth; they were checked against `Creat
 - Everything works by keyboard in a logical order with a visible focus indicator. A dialog traps focus and returns it when it closes.
 - Contrast 4.5:1 for text and 3:1 for controls, in light and dark. Colour is never the only signal.
 - Form errors and changing content (copy confirmation, drag result, saved confirmation) are announced with `aria-live` or `role`.
-- **Touch targets.** Extension buttons are drawn at least 44 px high on a phone (`min-height: 2.75rem` for `election-btn`; 44 px for list row actions on narrow or touch screens). The layout spec fails any election button under **36 px**, which is the floor the checks enforce because some themes size their own buttons.
-- **Dark mode** is not a separate stylesheet: the extension has no `prefers-color-scheme` rules and takes its colours from the theme's variables, so it follows the theme. Check it with the theme variants script (`tests/playwright/fixtures/theme-variants.sh`) and `THEME_VARIANT`.
+- **Touch targets.** Extension buttons are drawn at least 44 px high on a phone (`min-height: 2.75rem` for `election-btn`; 44 px for list row actions on narrow or touch screens). The page walk fails any election button under **36 px**, which is the floor the checks enforce because some themes size their own buttons.
+- **Dark mode** is not a separate stylesheet: the extension has no `prefers-color-scheme` rules. The election sits inside CiviCRM's own container, whose background is CiviCRM's (Riverlea, with its own dark mode setting), so anything drawn on that background takes CiviCRM's colours: text and quiet buttons use `--election-ink` (Riverlea's `--crm-ink`), select text `--crm-input-color`, problem text `--crm-danger-ink-color`. Filled buttons take the site theme's colour and work out a readable text colour themselves. Never set a fixed text colour on CiviCRM's background. Check four ways with `tests/playwright/fixtures/theme-variants.sh` and `THEME_VARIANT`: CiviCRM light and dark (`civicrm light|dark`), each on a light and a dark theme (WordPress `default` and `midnight`).
+- **High contrast.** Run the page walk (`page-walk.spec.ts`) with `FORCED_COLORS=active` (Windows high contrast): the keyboard and focus checks must pass; axe's contrast rule is switched off there, because the browser draws the colours.
 - **Reduced motion.** The extension's CSS has no animation or transition. The results celebration (`js/election-celebrate.js`) checks `prefers-reduced-motion`, shows a static banner instead, runs for about six seconds, can be skipped, and stops when the tab is hidden.
-- Every new or changed screen gets an axe scan and a keyboard check at 375, 768 and 1280 px. The Playwright accessibility and layout specs (`tests/playwright/specs/frontend/`) do this for the front end; for the back end, check by hand.
+- Every new or changed screen gets an axe scan and a keyboard check at 375, 768 and 1280 px. The Playwright page walk (`tests/playwright/specs/frontend/page-walk.spec.ts`) does this for the front end; for the back end, check by hand.
 
 ## 11. Translation and data
 
@@ -317,7 +318,7 @@ Every back end screen is one of the four kinds in 3.1; every front end screen is
 
 ## 14. Checklist for reviewing a pull request
 
-A screen conforms when every box can be ticked. Copy the list into the pull request when a screen changes.
+A screen conforms when every box can be ticked. The pull request template (`.github/pull_request_template.md`) carries this list: keep the two the same.
 
 - [ ] The heading names the screen, and a description says what it is (not needed for dialogs and self-evident forms).
 - [ ] Breadcrumb as 3.3 on full back end pages; **Back** and **Back to Manage Elections** in the right order and place.

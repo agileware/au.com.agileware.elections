@@ -55,7 +55,7 @@ Status is **Decided** (and in force), **Applied** (decided on a default and buil
 | R2.1-20 | Election list on a personal link | Add the access callback to the list route | Decided |
 | SD7 | Rules stay locked | Who votes and how votes count stay locked once ballots exist, even when inactive | Decided |
 | SD8 | STV upgrade steps | Start at `20140` (or the next free number if 2.2 uses it) | Decided |
-| D13 | Granular permission | A permission between `administer` and `view` | **Deferred to 2.2** |
+| D13 | Granular permission | `manage Election candidates`: candidates and statements only | Decided (2.2) |
 | D14 | More voting methods | STV in 2.3; drop approval | **Open** (STV part decided) |
 | S1 | STV ties | Report ties; do not draw automatically | **Open** |
 | S2 | STV setting | Per position or per election | **Open** |
@@ -84,7 +84,7 @@ Status is **Decided** (and in force), **Applied** (decided on a default and buil
 | U11 | No ellipsis | No "..." in text | Decided |
 | U12 | Empty states | A reason and a next step on every list | Decided |
 | U13 | Icons | One fixed icon per action | Decided |
-| U14 | Standards in `docs/` | Whether to publish the standards with the extension | **Open (2.2)** |
+| U14 | Standards in `docs/` | A pull request template with the checklist; the standards stay in the developer guide | Decided (2.2) |
 | U15 | Button table | Placement, order and labels as the standard's tables | Decided |
 | U16 | Breadcrumb table | A trail for every page | Decided |
 | U17 | Field labels | Date labels name the event; unique labels on each form | Decided |
@@ -108,7 +108,7 @@ Status is **Decided** (and in force), **Applied** (decided on a default and buil
 | D15 | Project directory name | Use the existing workspace folder | Done |
 | D16 | Plan as its own repository | Every change committed | Replaced by D30 |
 | D18 | Playwright location | Inside the DDEV web container | Decided |
-| D19 | Drupal and Joomla in CI | Add workflow variants to `ci-workflows` | Decided, not built (2.2) |
+| D19 | Drupal and Joomla in CI | Add workflow variants to `ci-workflows`; run by hand and weekly, not a pull request check | Decided (2.2) |
 | ENV1 | Chromium in DDEV | Libraries in the image, browser in the global cache | Decided |
 | G2 | CI theme | Astra, the shared workflow default | Decided |
 | G5 | Documentation navigation | The extension's own `mkdocs.yml` | Decided |
@@ -125,14 +125,12 @@ These are asked of the maintainer; do not assume an answer.
 
 | ID | Question | Recommended or default |
 |---|---|---|
-| D13 | A granular permission such as `manage Election candidates` | Build only if an organisation needs it (deferred to 2.2) |
 | D14 | Voting methods beyond ranked choice and most votes | STV in 2.3 (decided 2026-11-21); drop approval voting (unconfirmed) |
 | S1 | Ties in an STV count | Report the tie |
 | S2 | Per position or per election setting for STV | Per position if mixing is wanted |
 | S3 | What counts as a formal STV ballot | Optional preferential |
 | S5 | Whether to comment on or contact the author of the STV pull request | Not yet decided; nothing has been posted |
 | S6 | Whether to run the STV engine's tests and stress checks | Yes, in an empty directory outside the project |
-| U14 | Whether the standards also go into `docs/` and a pull request template | Decide in 2.2 |
 | (none) | Test data scripts in the repository (`tests/seed/`) | Being added with this guide; confirm |
 | (none) | The 2.2 branch name and whether it is pushed as it goes | Branch `version-2.2` made 2026-11-17; push rule still to confirm |
 

@@ -18,17 +18,17 @@ The Playwright suite drives Chromium against a real site. It tests the back end 
 | `fixtures/setup-environment.sh` | First-time set-up of a WordPress site (roles, users, pages, mail, council seed). |
 | `fixtures/setup-accounts-drupal.sh`, `setup-accounts-joomla.sh` | Test accounts on Drupal and Joomla. |
 | `fixtures/seed-council.php`, `advance-council.php` | The council election and its stage steps ([seeding.md](seeding.md)). |
-| `fixtures/theme-variants.sh` | Switches a site's default theme to a colour variation, for accessibility checks. |
+| `fixtures/theme-variants.sh` | Switches a site's default theme to a colour variation, or CiviCRM's (Riverlea) dark mode (`civicrm dark`), for accessibility checks. Before 2.2 it never applied a WordPress variation (see the roadmap). |
 | `fixtures/test-users.json` | Names, e-mail addresses and roles of the test accounts. It holds no passwords. |
 | `fixtures/generate-passwords.php` | Called by the three setup scripts. Makes a random password for each account in `test-users.json` and saves them in `fixtures/.generated/test-passwords.json` (git-ignored, never committed). Existing passwords are kept, so running a script again changes nothing; delete the file and run the script again to make new ones. `global-setup.ts` reads the file and stops with a message that names the setup script if it is missing. |
 | `specs/backend/` | Organisers: Manage Elections, the election form, positions (drag, edit in place, duplicate, delete, locking), candidates, overview, permissions, the page frame. |
-| `specs/frontend/` | People on personal links: smoke, election page by stage, layout, accessibility. |
+| `specs/frontend/` | People on personal links: smoke, election page by stage, and the page walk (`page-walk.spec.ts`: layout at three widths, axe and the keyboard on every page). |
 | `specs/council/` | A complete council election and variations on it: ranked choice, most votes, groups, write-ins, referendum, organiser-chosen candidates, results page. |
 | `specs/security/` | `xss` (script in every field people can fill) and `tampering` (links, requests and forms that should be refused). |
 
 ## Projects and their order
 
-The config has a `chromium` project (everything not named below), then projects that each move the one seeded election through its stages and put it back at the nominations stage, one after the other in the order listed: `layout`, `election-page`, `accessibility`, `security` (the `xss` spec), `tampering`, `council`, `plurality`, `groups`, `writein`, `referendum` and `results-display`. The projects are **not** chained with `dependencies` (they were until 2.1): the suite always runs with one worker, which runs the projects in this order, so no two of them touch the election at once, and a failure in one project never stops the later ones. Each of these specs reseeds the election before it starts, so a failed run leaves nothing for the next to trip over. Never raise the worker count for a full run; `PW_WORKERS=2` is safe only for the `chromium` project on its own, whose specs make their own elections.
+The config has a `chromium` project (everything not named below), then projects that each move the one seeded election through its stages and put it back at the nominations stage, one after the other in the order listed: `page-walk` (layout and accessibility in one walk of every page, since 2.2), `election-page`, `security` (the `xss` spec), `tampering`, `council`, `plurality`, `groups`, `writein`, `referendum` and `results-display`. The projects are **not** chained with `dependencies` (they were until 2.1): the suite always runs with one worker, which runs the projects in this order, so no two of them touch the election at once, and a failure in one project never stops the later ones. Each of these specs reseeds the election before it starts, so a failed run leaves nothing for the next to trip over. Never raise the worker count for a full run; `PW_WORKERS=2` is safe only for the `chromium` project on its own, whose specs make their own elections.
 
 ## How it runs on each CMS
 
@@ -42,7 +42,7 @@ The config has a `chromium` project (everything not named below), then projects 
 | `WP_ADMIN_USER`, `WP_ADMIN_PASS` | The WordPress administrator the suite logs in as (it defaults to the CI account). Set them to match your site's administrator. |
 | `WP_CLEAN_URLS=0` | WordPress without pretty permalinks: use the `?page=CiviCRM&q=` address form. |
 | `npm run screens` | Not a test: takes screenshots of every page (`tools/screens.spec.ts`, its own config `playwright.screens.config.ts`, pictures in `test-results/screens/<cms>/`). |
-| `A11Y_WIDTHS`, `THEME_VARIANT` | Widths for the axe scan (default 1280) and the theme variation in use (see `theme-variants.sh`). |
+| `A11Y_WIDTHS`, `THEME_VARIANT`, `FORCED_COLORS`, `WALK_CHECKS` | For the page walk: widths for the axe scan (default 1280), the theme variation in use (see `theme-variants.sh`), `active` to check in forced colours (high contrast), and `layout` or `a11y` to run one of its two checks. |
 
 Sessions saved by `global-setup.ts` under `fixtures/.generated/auth/<name>.json`:
 
