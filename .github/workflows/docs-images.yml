@@ -7,9 +7,6 @@ name: docs images
 
 on:
   workflow_dispatch: {}
-  # TEMPORARY: a fourth run from the version-2.2 branch, before this file is on master. Removed in the next commit.
-  push:
-    branches: [version-2.2]
 
 jobs:
   screenshots:
