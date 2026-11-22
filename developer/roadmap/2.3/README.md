@@ -17,4 +17,4 @@ Written 2026-11-21. Version 2.3 is not being built yet: 2.2 comes first ([../2.2
 | Decision | State |
 |---|---|
 | STV questions S1 to S3, S5, S6 | Open, in [stv.md](stv.md) and [../../decisions/voting-and-elections.md](../../decisions/voting-and-elections.md). |
-| Approval voting (part of D14) | No request behind it; the recommendation is to drop it, not yet confirmed. |
+| Approval voting (part of D14) | Decided 2026-11-22: deferred until there is a requirement; listed in [potential future features](../README.md#potential-future-features). |

@@ -54,7 +54,7 @@ The pull request cannot be merged as it is.
 | **B. Keep STV for a later version** | Release 2.2 without it. Chosen 2026-11-21: STV moves to 2.3. | None for 2.2. |
 | **C. Drop approval voting** | Treat only STV: approval voting has no pull request or request behind it. Can be combined with A or B. | None. |
 
-The earlier recommendation (made before 2.0.0 was released) was to keep STV for later and drop approval voting. The maintainer placed STV in 2.2, then on 2026-11-21 moved it to 2.3 (S4 answered). Option A, built in 2.3, with C is the working assumption.
+The earlier recommendation (made before 2.0.0 was released) was to keep STV for later and drop approval voting. The maintainer placed STV in 2.2, then on 2026-11-21 moved it to 2.3 (S4 answered). Option A, built in 2.3, with C is the working assumption. On 2026-11-22 the maintainer confirmed C as "deferred until there is a requirement": approval voting was an assistant's suggestion, not a request, and is kept in [potential future features](../README.md#potential-future-features).
 
 ## Questions for the maintainer
 

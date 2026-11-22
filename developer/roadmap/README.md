@@ -10,6 +10,14 @@ How planning works in this repository. Each version that is being planned has it
 | 2.3 | Holds the Senate count (STV) and the small findings, moved from 2.2 | [roadmap/2.3/README.md](2.3/README.md) |
 | 2.4 | Holds the mobile voting app discovery, moved from 2.2 | [roadmap/2.4/README.md](2.4/README.md) |
 
+## Potential future features
+
+Ideas that are noted but not planned for any version. Each waits for a real requirement (an organisation that needs it, a GitHub issue, or the maintainer's decision) before it is placed in a version.
+
+| Idea | Where it came from | State |
+|---|---|---|
+| **Approval voting**: voters tick any number of candidates and the most ticks win. It would be an option on **most votes win** ("voters may tick any number") rather than a new counting method: a setting, a database column with an upgrade step, and tests. | Not from any user request or requirement. An AI assistant suggested it in the first version 2 plan (2026-10-27) while planning the "straight up elections" request in issue #3; see D14 in [../decisions/voting-and-elections.md](../decisions/voting-and-elections.md). | Deferred 2026-11-22 until there is a requirement. |
+
 ## What a version folder holds
 
 - **`README.md`**: where things stand, the items in recommended order with what each needs, open decisions, traps, and a start-up checklist for the first session. Keep it current while the version is built: tick items off, move answered decisions to [`../decisions/`](../decisions/README.md) with their date.

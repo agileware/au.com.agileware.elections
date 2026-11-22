@@ -56,7 +56,7 @@ Status is **Decided** (and in force), **Applied** (decided on a default and buil
 | SD7 | Rules stay locked | Who votes and how votes count stay locked once ballots exist, even when inactive | Decided |
 | SD8 | STV upgrade steps | Start at `20140` (or the next free number if 2.2 uses it) | Decided |
 | D13 | Granular permission | `manage Election candidates`: candidates and statements only | Decided (2.2) |
-| D14 | More voting methods | STV in 2.3; drop approval | **Open** (STV part decided) |
+| D14 | More voting methods | STV in 2.3; approval voting deferred until there is a requirement (it was an assistant's suggestion, not a request) | Decided |
 | S1 | STV ties | Report ties; do not draw automatically | **Open** |
 | S2 | STV setting | Per position or per election | **Open** |
 | S3 | STV formal ballot | Optional preferential | **Open** |
@@ -125,7 +125,6 @@ These are asked of the maintainer; do not assume an answer.
 
 | ID | Question | Recommended or default |
 |---|---|---|
-| D14 | Voting methods beyond ranked choice and most votes | STV in 2.3 (decided 2026-11-21); drop approval voting (unconfirmed) |
 | S1 | Ties in an STV count | Report the tie |
 | S2 | Per position or per election setting for STV | Per position if mixing is wanted |
 | S3 | What counts as a formal STV ballot | Optional preferential |
