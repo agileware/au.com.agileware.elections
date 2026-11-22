@@ -1,6 +1,6 @@
 import { test, expect, civiAdminUrl } from '../fixtures/base';
 import type { Locator, Page } from '@playwright/test';
-import { advanceCouncil, civiApi4, moveToStage, reseedCouncil } from '../fixtures/civi';
+import { advanceCouncil, civiApi4, civiEval, moveToStage, reseedCouncil } from '../fixtures/civi';
 import { personaUrl } from '../fixtures/personas';
 import { addPosition, createElection, removeRunData } from '../fixtures/data';
 import fs from 'node:fs';
@@ -44,7 +44,7 @@ async function mark(target: Locator) {
  * A picture of the election's part of the page (CiviCRM's container, or a dialog), at most 900 px high from its top,
  * or from the marked control when that is lower down.
  */
-async function shot(page: Page, file: string, options: { region?: Locator; focus?: Locator; height?: number } = {}) {
+async function shot(page: Page, file: string, options: { region?: Locator; focus?: Locator; height?: number; include?: Locator } = {}) {
   const region = (options.region ?? page.locator('.crm-container:visible').first());
   await region.waitFor();
   await page.waitForLoadState('networkidle').catch(() => {});
@@ -61,10 +61,22 @@ async function shot(page: Page, file: string, options: { region?: Locator; focus
     const f = onPage((await focus.first().boundingBox())!);
     if (f.y + f.height > top + maxHeight) top = Math.max(box.y, f.y - 200);
   }
-  const height = Math.min(maxHeight, box.y + box.height - top);
+  let height = Math.min(maxHeight, box.y + box.height - top);
+  let left = box.x;
+  let width = box.width;
+  // Something outside the region that the picture is about, such as CiviCRM's pop-up message at the top right.
+  if (options.include) {
+    const extra = onPage((await options.include.first().boundingBox())!);
+    const newTop = Math.min(top, extra.y - 10);
+    height += top - newTop;
+    top = newTop;
+    const right = Math.max(left + width, extra.x + extra.width + 10);
+    left = Math.min(left, extra.x - 10);
+    width = right - left;
+  }
   const out = path.join(OUT, file);
   fs.mkdirSync(path.dirname(out), { recursive: true });
-  await page.screenshot({ path: out, clip: { x: box.x, y: top, width: box.width, height }, fullPage: true });
+  await page.screenshot({ path: out, clip: { x: left, y: top, width, height }, fullPage: true });
 }
 
 async function adminAt(page: Page, civiPath: string, params: Record<string, string | number> = {}, hash = '') {
@@ -80,13 +92,20 @@ async function adminAt(page: Page, civiPath: string, params: Record<string, stri
 
 /** The election the back end pictures show, made for them and deleted afterwards. */
 let shownElection = 0;
+/** The site's WordPress time zone before the pictures, put back afterwards. */
+let previousTimeZone = '';
 
 test.beforeAll(() => {
   // Elections left by earlier test runs (their names start with "PW ") would show in the lists.
   removeRunData('PW %');
+  // The pages say "Times are shown in ..." and show the times in it: use the time zone of the guide's readers, not
+  // the UTC of a new site. WordPress only (the tool is for WordPress).
+  previousTimeZone = civiEval("echo get_option('timezone_string');").trim();
+  civiEval("update_option('timezone_string', 'Australia/Sydney');");
 });
 
 test.afterAll(() => {
+  civiEval(`update_option('timezone_string', ${JSON.stringify(previousTimeZone)});`);
   if (shownElection) {
     civiApi4('Election.delete', { where: [['id', '=', shownElection]] });
   }
@@ -147,8 +166,10 @@ test('the pictures of the back end', async ({ adminPage: page }) => {
   await adminAt(page, 'civicrm/elections/positions/create', { eid: id, epid: president });
   await page.getByLabel('Description').fill('Chairs the meetings and speaks for the association.');
   await page.getByRole('button', { name: 'Submit' }).click();
-  await expect(page.getByText('Position saved.')).toBeVisible();
-  await shot(page, 'admin_edit/02.png', { height: 620 });
+  // CiviCRM shows "Position saved." in a pop-up at the top right, above the list: keep it in the picture.
+  const saved = page.locator('#crm-notification-container .ui-notify-message', { hasText: 'Position saved.' });
+  await expect(saved).toBeVisible();
+  await shot(page, 'admin_edit/02.png', { height: 620, include: saved });
 
   // Edit an election: Edit on its row in Manage Elections.
   await adminAt(page, 'civicrm/elections/manage');
@@ -264,6 +285,9 @@ test('the pictures of the set-up pages (WordPress block editor)', async ({ admin
     await page.getByRole('button', { name: 'Close' }).first().click({ timeout: 5000 }).catch(() => {});
     const html = editor.locator('[data-type="core/html"]').first();
     await html.waitFor({ timeout: 30000 });
+    // The editor keeps drawing after the block appears (a grey panel was caught half faded in): let it settle.
+    await page.waitForLoadState('networkidle').catch(() => {});
+    await page.waitForTimeout(1500);
     // Not selected: a selected block's toolbar would cover the page title.
     const out = path.join(OUT, file);
     fs.mkdirSync(path.dirname(out), { recursive: true });
