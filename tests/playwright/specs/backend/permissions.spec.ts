@@ -1,5 +1,4 @@
 import { test, expect, civiAdminUrl, expectNoPhpOutput } from '../../fixtures/base';
-import { CMS } from '../../fixtures/cms';
 
 /**
  * What an organiser needs to see the groups on the election form (docs/roles_and_permissions.md).
@@ -16,7 +15,6 @@ test.describe('organiser permissions', () => {
   });
 
   test('an organiser without View All Contacts is told why no groups are listed', async ({ limitedPage }) => {
-    test.skip(CMS === 'joomla', 'Joomla has no limited organiser session: its access levels are set in Joomla');
     await limitedPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
     await limitedPage.getByRole('tab', { name: 'Participation' }).click();
     const notice = limitedPage.locator('.election-groups-hidden');

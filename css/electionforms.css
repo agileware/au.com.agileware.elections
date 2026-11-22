@@ -349,7 +349,8 @@ ul#errorList {
 }
 
 .crm-election-form-block-container .select2-container .select2-choice > .select2-chosen, .crm-container .select2-search input {
-  color: #333;
+  /* Riverlea's input text colour, which follows its dark mode; #333 where the theme has none. */
+  color: var(--crm-input-color, #333);
 }
 
 .crm-container .crm-elections-list-block .crm-accordion-header {
@@ -520,6 +521,10 @@ ul#errorList {
     --election-btn-bg: var(--election-brand-bg, var(--wp--preset--color--contrast, var(--color--primary-40, var(--cassiopeia-color-primary, var(--crm-primary-color, #333)))));
     --election-btn-color: var(--election-brand-color, var(--wp--preset--color--base, #fff));
     --election-btn-hover-bg: color-mix(in srgb, var(--election-btn-bg) 82%, #000);
+    /* Text and quiet buttons drawn on CiviCRM's own background: CiviCRM's ink colour (Riverlea), which follows its
+       dark mode, so they stay readable when the site theme and CiviCRM differ (a light theme with CiviCRM dark, or
+       a dark theme with CiviCRM light). Without Riverlea, the button colour as before. */
+    --election-ink: var(--election-brand-ink, var(--crm-ink, var(--election-btn-bg)));
 }
 .crm-container .election-btn.election-btn,
 .crm-container .crm-election-form-block-container button.crm-button.crm-button {
@@ -594,7 +599,7 @@ ul#errorList {
 /* Cancel / back buttons on forms are the quiet variant */
 .crm-container .crm-election-form-block-container button.crm-button.crm-button-type-cancel.crm-button-type-cancel {
     background: transparent;
-    color: var(--election-btn-bg);
+    color: var(--election-ink);
 }
 .crm-container .crm-election-form-block-container .crm-submit-buttons {
     display: flex;
@@ -628,7 +633,7 @@ ul#errorList {
 }
 .crm-container .election-form-tabs .election-form-tab.has-problem::after {
     content: " !";
-    color: #b3261e;
+    color: var(--crm-danger-ink-color, #b3261e);
 }
 .election-form-panel[hidden] {
     display: none;
@@ -666,10 +671,10 @@ ul#errorList {
     font-size: 0.9em;
 }
 .election-timeline-preview .election-timeline-problem {
-    border-left: 4px solid #b3261e;
+    border-left: 4px solid var(--crm-danger-ink-color, #b3261e);
 }
 .election-timeline-preview .election-timeline-problem .election-timeline-note {
-    color: #b3261e;
+    color: var(--crm-danger-ink-color, #b3261e);
 }
 .election-timeline-preview .election-timeline-current {
     border-left: 4px solid #2e7d32;
@@ -864,13 +869,96 @@ ul#errorList {
     padding-top: 0.5rem;
 }
 
+/* Ballot: drag to rank (js/election-ballot.js; only with JavaScript, on a ranked ballot) */
+.election-rank-hint {
+    margin: 0 0 0.75rem;
+}
+.election-rank-tools {
+    display: flex;
+    flex: 1 0 100%;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+}
+.election-rank-handle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--election-border, rgba(0, 0, 0, 0.18));
+    border-radius: var(--election-radius, 4px);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+.election-rank-handle::before {
+    /* Six dots: the usual sign for "drag me". Drawn in the text colour, so it follows dark themes. */
+    content: "";
+    width: 0.75rem;
+    height: 1.125rem;
+    background: radial-gradient(circle, currentColor 1.5px, transparent 2px) 0 0 / 0.375rem 0.375rem;
+}
+.election-rank-badge {
+    font-weight: 600;
+    min-width: 5.5rem;
+}
+.vote-candidate-row:not(.election-ranked) .election-rank-badge {
+    font-weight: normal;
+    opacity: 0.8;
+}
+.election-rank-buttons {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.election-rank-buttons .election-btn {
+    min-height: 2.75rem;
+}
+.election-rank-divider {
+    margin: 0 0 1.25rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 2px dashed var(--election-border, rgba(0, 0, 0, 0.3));
+    font-weight: 600;
+}
+.election-rank-dragging {
+    opacity: 0.5;
+    outline: 2px dashed currentColor;
+    outline-offset: 2px;
+    cursor: grabbing;
+}
+.election-rank-dragging .election-rank-handle {
+    cursor: grabbing;
+}
+.election-rank-placeholder {
+    box-sizing: border-box;
+    height: 3rem;
+    margin-bottom: 1.25rem;
+    border: 2px dashed currentColor;
+    border-radius: var(--election-radius, 4px);
+    opacity: 0.5;
+}
+@media (forced-colors: active) {
+    .election-rank-handle::before {
+        background: none;
+        content: "\2261";
+        width: auto;
+        height: auto;
+        forced-color-adjust: auto;
+    }
+    .election-rank-dragging {
+        outline: 2px solid Highlight;
+    }
+}
+
 /* Ballot: rank checks and the review dialog */
 .election-rank-status {
     margin: 0.25rem 0 0.75rem;
     font-size: 0.9em;
 }
 .election-rank-status.election-rank-problem {
-    color: #b3261e;
+    color: var(--crm-danger-ink-color, #b3261e);
     font-weight: 600;
 }
 .election-review-dialog {
@@ -939,7 +1027,7 @@ ul#errorList {
 }
 .crm-container .election-review-dialog .election-review-back {
     background: transparent;
-    color: var(--election-btn-bg, #333);
+    color: var(--election-ink);
 }
 .crm-container .election-review-dialog .election-review-confirm:hover,
 .crm-container .election-review-dialog .election-review-confirm:focus-visible {
@@ -1070,12 +1158,12 @@ ul#errorList {
 /* The quiet button: the same shape, outlined, for the choice that gives something up. */
 .crm-container .election-btn.election-btn.election-btn-quiet {
     background: transparent;
-    color: var(--election-btn-bg);
+    color: var(--election-ink);
 }
 .crm-container .election-btn.election-btn.election-btn-quiet:hover,
 .crm-container .election-btn.election-btn.election-btn-quiet:focus-visible {
     background: color-mix(in srgb, var(--election-btn-bg) 12%, transparent);
-    color: var(--election-btn-bg);
+    color: var(--election-ink);
 }
 
 /* Results */
@@ -1103,7 +1191,7 @@ ul#errorList {
 }
 .crm-container .election-winner-badge.election-winner-badge-tie {
     background: transparent;
-    color: var(--election-btn-bg, #333);
+    color: var(--election-ink);
     font-weight: normal;
 }
 
@@ -1358,14 +1446,17 @@ ul#errorList {
     cursor: not-allowed;
 }
 /* Back end lists (the SearchKit pages): the action bar, the filters, the table and its card layout on a phone. */
-.election-list-actions .election-action-end {
-    margin-left: auto;
-}
 .crm-container .election-list-actions .btn {
     display: inline-flex;
     align-items: center;
     gap: 0.4em;
     margin: 0;
+}
+/* The Add button sits at the right end of the row. In a narrow column (Drupal's Olivero) it wraps to a row of its
+   own and stays at the right end. !important: CiviCRM sets the margin of its buttons with an ID selector
+   (#bootstrap-theme .btn), which no class selector here can outrank. */
+.crm-container .election-list-actions .btn.election-action-end {
+    margin-left: auto !important;
 }
 .crm-container .election-list-actions a.btn.election-action-quiet,
 .crm-container .election-list-actions a.btn.election-action-quiet:visited {
@@ -1386,6 +1477,15 @@ ul#errorList {
 }
 .election-list-table table {
     width: 100%;
+}
+/* A wide table scrolls inside its own box instead of widening the page. Without this, the table's width stretches
+   Joomla's admin column past the window (its sidebar stays open down to 768px), and the Add button at the right end
+   of the action bar is pushed off screen. contain: inline-size stops the table's width counting towards the page's. */
+.election-list-table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    contain: inline-size;
 }
 .election-list-table td[data-field-name="lock_reason"] {
     font-size: 0.9em;
@@ -1451,8 +1551,8 @@ ul#errorList {
         flex-wrap: wrap;
         gap: 0.5em;
     }
-    .crm-container .election-list-actions .election-action-end {
-        margin-left: 0;
+    .crm-container .election-list-actions .btn.election-action-end {
+        margin-left: 0 !important;
     }
 }
 .election-fingerprint {
@@ -1495,7 +1595,7 @@ ul#errorList {
     border: 2px solid var(--election-btn-bg);
     border-radius: var(--election-radius, 4px);
     background: transparent;
-    color: var(--election-btn-bg);
+    color: var(--election-ink);
     font: inherit;
     font-weight: 600;
     cursor: pointer;
@@ -1615,6 +1715,7 @@ ul#errorList {
 .crm-container .election-action-bar a.button,
 .crm-container .election-action-bar span.button,
 .crm-container .election-action-bar a.btn,
+.crm-container .election-action-bar span.btn,
 .crm-container .election-action-bar button.button {
     display: inline-flex;
     align-items: center;

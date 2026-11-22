@@ -31,7 +31,7 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
     }
 
     $this->election = findElectionById($this->electionNomination['election_position_id.election_id']);
-    if ((!$this->election->isVisible && !isElectionAdmin())) {
+    if ((!$this->election->isVisible && !canManageElectionCandidates())) {
       throwAccessDeniedPage($this);
       parent::run();
       return;
@@ -89,12 +89,12 @@ class CRM_Elections_Page_ElectionCandidate extends CRM_Elections_Page_Base {
   }
 
   /**
-   * Show the "Edit Statement" button to administrators, and to the candidate until voting starts.
+   * Show the "Edit Statement" button to administrators and people who manage candidates, and to the candidate until voting starts.
    *
    * @return bool
    */
   private function canEditStatement() {
-    if (isElectionAdmin()) {
+    if (canManageElectionCandidates()) {
       return !$this->election->isVotingEnded;
     }
     $actingContactId = CRM_Elections_Helper_Eligibility::getActingContactId();

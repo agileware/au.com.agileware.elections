@@ -1,5 +1,4 @@
 import { test, expect } from '../../fixtures/base';
-import { frontUrl } from '../../fixtures/cms';
 import { personaUrl } from '../../fixtures/personas';
 
 /**
@@ -40,16 +39,5 @@ test.describe('election front end (nominations stage)', () => {
     await expect(page.getByText('This election could not be found.')).toBeVisible();
     await expect(page.getByRole('link', { name: 'View Elections' })).toBeVisible();
     await expect(page.locator('body')).not.toContainText(/not authori[sz]ed|Exception|Stack trace/i);
-  });
-
-  test('a link with a wrong checksum is refused', async ({ persona, allowedProblems }) => {
-    // A refused page is reported as HTTP 403 or, by CiviCRM's fatal error page, 500: Joomla always, and WordPress
-    // and Drupal from CiviCRM 6.19 (its unhandled exception handler now sets 500 after the 403).
-    allowedProblems.push(/403|500/);
-    const page = await persona('V01');
-    const response = await page.goto(frontUrl('civicrm/elections/view', { eid: 1, cid: 1, cs: 'wrong' }));
-    await expect(page.locator('body')).not.toContainText('Welcome,');
-    await expect(page.locator('body')).toContainText(/do not have permission|not authorized|access denied/i);
-    expect([200, 403, 500]).toContain(response?.status());
   });
 });

@@ -62,15 +62,15 @@ Joomla's mailer is `mail` (PHP's mail function), which DDEV routes to Mailpit. N
 
 ## Accounts and permissions
 
-`tests/playwright/fixtures/setup-accounts-joomla.sh` creates one account, a Super User, with the Joomla command line (`user:add`, or `user:reset-password` if it exists). Run it from the site root:
+`tests/playwright/fixtures/setup-accounts-joomla.sh` creates the four test accounts with the Joomla command line (`user:add`, or `user:reset-password` if the account exists): an administrator (Super Users), an Elections manager, an organiser without View All Contacts and a voter. Run it from the site root:
 
 ```bash
 ddev exec 'bash CRM/extensions/au.com.agileware.elections/tests/playwright/fixtures/setup-accounts-joomla.sh'
 ```
 
-The script reads the name, e-mail address and test password from `fixtures/test-users.json` (test values for local sites only).
+The script reads the names and e-mail addresses from `fixtures/test-users.json` and makes random passwords, kept in the git-ignored `fixtures/.generated/test-passwords.json` (see [Playwright](../testing/playwright.md)).
 
-**There are no manager or participant sessions on Joomla.** CiviCRM permissions on Joomla are set through Joomla's access levels, not roles the script can create, so the global setup of the suite signs in only the administrator and six specs skip by design (election form, overview, permissions twice, smoke twice). Giving Joomla manager and participant sessions is planned for 2.2: see [`../roadmap/README.md`](../roadmap/README.md).
+**Groups and permissions.** Joomla keeps CiviCRM's permissions as actions on the `com_civicrm` asset, set per user group (`access CiviCRM` is `civicrm.access_civicrm`, `administer Elections` is `civicrm.administer_elections`). So the script first runs `fixtures/joomla-test-groups.php`, which makes three groups under Registered, `Elections Manager (test)`, `Elections Organiser without contacts (test)` and `Elections Voter (test)`, and gives each the same CiviCRM permissions as the Drupal roles in `setup-accounts-drupal.sh`. The two organiser groups may also log in to the administrator and open CiviCRM there (`core.login.admin` on the site, `core.manage` on `com_civicrm`). Both scripts are safe to run again. The suite signs the organisers in to the administrator and the voter in to the site, because a Joomla voter may not use the administrator; the voter's refusal tests open the back office pages through the site, where CiviCRM's own check refuses them (`memberAdminUrl()` in `fixtures/cms.ts`). Since 2.2 no spec skips on Joomla.
 
 To let a Joomla group take part in elections, give it the CiviCRM permissions **view Elections** and **access AJAX API** under Users > Permissions, as [`../../docs/setup.md`](../../docs/setup.md) says for site owners.
 

@@ -36,7 +36,7 @@ Both candidate methods store a ballot the same way, so the one ballot per person
 5. If two candidates remain for one seat without a majority, both get rank 1 and the status is `tie`.
 6. Otherwise eliminate the candidate with the fewest first-choice votes (one candidate each round, the first in the working list when several share the fewest), move those ballots to their next remaining choice, and repeat from step 3.
 
-A position with more than one seat is counted in the same way: the voter votes once and the ranks count across all seats. This is **not** a single transferable vote count (no quota, no surplus transfers). The open work to add one is in [../roadmap/2.2/stv.md](../roadmap/2.2/stv.md).
+A position with more than one seat is counted in the same way: the voter votes once and the ranks count across all seats. This is **not** a single transferable vote count (no quota, no surplus transfers). The open work to add one is in [../roadmap/2.3/stv.md](../roadmap/2.3/stv.md).
 
 ## Counting most votes win
 

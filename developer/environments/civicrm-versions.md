@@ -31,8 +31,8 @@ The sites were not moved to 6.16.6 or 6.19.3. That was considered for a security
 - **Test on both lines.** A change that passes on 6.16.5 alone has not passed: every difference in the table below was first met on 6.19 after the work had passed on 6.16.5. Run the checks for a change on at least one 6.19 site as well (any of the three, for the browser suite).
 - A new WordPress site for the main suite: use 6.16, so PHPUnit runs on the supported minimum. [`../ddev-kit/README.md`](../ddev-kit/README.md) lists the versions the build script installs.
 - A new Drupal or Joomla site: use the newest 6.19 the CMS package supports. Joomla needs Joomla 5.4 for CiviCRM 6.19.2: see [ddev-joomla.md](ddev-joomla.md).
-- Before a release, run the browser suite on each CMS and PHPUnit on the WordPress site, and look at the review site on 6.19.
-- Do not mix up the sites' roles: PHPUnit runs only on the WordPress site (6.16), so it does not exercise 6.19 code paths. The Playwright suite on Drupal and Joomla and in CI is what covers 6.19.
+- Before a release, run the browser suite on each CMS, PHPUnit on the WordPress site (6.16) and on the Drupal kit site (6.19), and look at the review site on 6.19.
+- Do not mix up the sites' roles: PHPUnit runs on the WordPress site (6.16) and on the Drupal kit site (6.19, since 2.2), never on Joomla. The Playwright suite on Drupal and Joomla and in CI also covers 6.19.
 
 ## Differences between 6.16 and 6.19
 

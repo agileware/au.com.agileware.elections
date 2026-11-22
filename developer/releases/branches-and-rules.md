@@ -8,12 +8,16 @@ Reference for how the branches of `agileware/au.com.agileware.elections` are use
 |---|---|---|
 | `master` | The default branch. Holds the next release candidate: after a release it holds exactly what was released (plus the developer guide and tests, which the package leaves out). | Pull requests only. |
 | `release` | The filtered tree that is published: the same files as `master` minus the development-only paths. Tags point at its commits. Nobody develops on it. | Only the **Cut release** workflow. |
-| Version branches (`version-2.1`, `version-2.2`, ...) | The work for one version, cut from `origin/master`, merged by pull request. Delete after the merge. | Developers. |
+| Version branches (`version-2.1`, `version-2.2`, ...) | The work for one version, cut from `origin/master`, merged by pull request. Kept on GitHub after the merge as the version's history; never build on it again. | Developers. |
+| History branches (`version-1.3.3`, `version-2.0`) | Kept for history only (2026-11-22); see below. | Nobody. |
 
 Notes:
 
 - `release` is reset to the source commit on every cut and then force pushed, so anything committed to it by hand is lost. Earlier tags are not ancestors of the new `release` tip; the workflow gives GitHub the previous tag explicitly so the generated release notes are right.
-- The `version-2` branch of the 2.0 work was deleted after 2.0.0. `version-2.1` was still on the remote on 2026-11-15.
+- History branches, pushed 2026-11-22 so the full history is on GitHub. Nobody develops on them.
+  - `version-1.3.3` is 1.3.2 (`6344799`) plus the two 1.3.3 commits: `c100953` (declare `is_ajax` on the AJAX routes, CIVI-SA-2026-49) and `4f1ff73` (Version 1.3.3). Its tip is the commit the `1.3.3` tag points at.
+  - `version-2.0` holds the 95 commits of the 2.0 work (2026-10-27 to 2026-11-01), which reached `master` as the squash of pull request 48. The original local branch was called `version-2` (its remote copy was deleted after 2.0.0) and was built on top of the two 1.3.3 commits; `version-2.0` is the same work rebased onto `6344799` without them, so the 1.3.3 commits live only in `version-1.3.3` (and `master`). Its final files are identical to the original `version-2` tip (`f1517f1`); the commit hashes differ.
+  - `version-2.1` is the 2.1 work (pull request 49).
 - Before the first cut the `release` branch has to exist. It was created once by hand: branch `release` from `master`, remove `.github`, `tests`, `developer`, `AGENTS.md`, `.gitignore` and `CONTRIBUTING.md`, commit and push. The first cut resets it anyway. Do not use the **Init release** workflow (it refuses to run because `cut-release.yml` exists).
 
 ## The `master` rules

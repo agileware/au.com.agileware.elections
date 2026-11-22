@@ -34,9 +34,9 @@ Each entry gives the decision, why, the date and where it shows.
 
 ### D19 – Drupal 11 and Joomla workflows on GitHub Actions
 - **Decision.** Contribute Drupal and Joomla workflow variants to `agileware/ci-workflows` (it runs WordPress only), after WordPress is green. DDEV in Actions is the recommended way, and a `WP_THEME`-style input comes first. Until then both CMSs are tested on DDEV before every release.
-- **Why.** The browser tests of the other two CMSs should run on every pull request.
-- **Date.** Decided October 2026; moved to version 2.2 on 2026-11-03.
-- **Status.** Decided, not yet built. **In the code.** `.github/workflows/frontend-tests.yml` (WordPress only); see [`../testing/ci.md`](../testing/ci.md).
+- **Why.** The browser tests of the other two CMSs should run in CI, not only on a maintainer's machine.
+- **Date.** Decided October 2026; moved to version 2.2 on 2026-11-03. On 2026-11-21 the maintainer chose when they run: **by hand and weekly**, not on every pull request (building a site takes several minutes).
+- **Status.** Built in 2.2: `ddev-playwright-tests.yml` in `ci-workflows` (DDEV in the runner, the caller's own site script) and `.github/workflows/frontend-tests-drupal-joomla.yml` here, which runs the kit for Drupal and Joomla. First run 2026-11-21 (Drupal and Joomla, CiviCRM 6.19.5): 108 passed on each. See [`../testing/ci.md`](../testing/ci.md).
 
 ### G2 – CI runs the browser tests on the Astra theme
 - **Decision.** The shared Playwright workflow keeps its default theme (Astra, through its `WP_THEME` input, default `astra`) because the suite passes on it, so callers do not set `WP_THEME`.
@@ -81,15 +81,26 @@ Each entry gives the decision, why, the date and where it shows.
 - **Date.** 2026-11-15.
 - **In the code.** `developer/`, `AGENTS.md`; `developer/` and `AGENTS.md` are left out of releases by `cut-release.yml`.
 
+### D31 – Test account passwords are generated, never committed
+- **Decision.** The test accounts' passwords are made at setup by `tests/playwright/fixtures/generate-passwords.php` and kept in the git-ignored `fixtures/.generated/test-passwords.json`. `test-users.json` holds names, e-mail addresses and roles only.
+- **Why.** The file had held fixed throwaway passwords since 2.0.0, in a public repository. They only opened local and CI test sites, but a committed password invites reuse and a scanner flags it. The values already published stay in the git history: never use them anywhere.
+- **Decided.** 2026-11-15, by the maintainer.
+
+### D32 – The test suite is cleaned up: no project chain, low-value tests removed
+- **Decision.** (1) The Playwright projects that move the one seeded election are no longer chained with `dependencies`: one worker always runs them in the order listed, and each spec reseeds the election, so a failure never skips the projects after it (decided 2026-11-16). (2) The tests that add little were removed (decided 2026-11-17): 29 PHPUnit tests and `Helper/TimeZoneTest`; 7 browser tests; the `admin-managed` project, whose one unique check (the page says the organisers choose and there is no nomination form) is now the last test of `groups.spec.ts`; the screenshot walk, which asserts nothing, is a tool run with `npm run screens` and not a test. Two assertions were moved into PHPUnit first (adding a position to a started election is refused; an organiser cannot add an outsider as a candidate when no candidate group is set). A test is removed only when something else fails for the same regression or it asserts nothing meaningful. (3) The review's second tier was removed (2026-11-20, the maintainer asked): 22 PHPUnit and 8 browser tests, after moving three assertions to stronger neighbours, checked against a line coverage report before and after. PHPUnit in CI reports line coverage (pcov), with no minimum. Retries on the council and security files and merged page walks are not decided; see the 2.2 roadmap.
+- **Why.** The chain skipped every later project after one failure (on Drupal one failing layout test left 53 tests not run), and a number of tests only repeated a stronger neighbour or checked a constant, so they cost time and noise without catching anything.
+- **Date.** 2026-11-16, 2026-11-17 and 2026-11-20, by the maintainer.
+- **In the code.** `phpunit.xml.dist` (`<coverage>`), `.github/workflows/phpunit-tests.yml`, `tests/playwright/playwright.config.ts`, `tests/playwright/playwright.screens.config.ts`, `tests/playwright/tools/screens.spec.ts`; [`../testing/playwright.md`](../testing/playwright.md), [`../testing/phpunit.md`](../testing/phpunit.md).
+
 ## Open decisions
 
 ### Test data scripts in the repository
 - **Question.** Ship the CMS-independent core of the Beekeepers site's seeding scripts (eight kinds of election, a stage mover) in the repository, run with `cv scr`, so any new site can get an election of each kind at a chosen stage in one command? Logins and pages stay a separate optional step.
-- **Status.** Proposed in the 2.2 handover on 2026-11-04. `tests/seed/` is being added with this guide (see [`../testing/seeding.md`](../testing/seeding.md)); confirm with the maintainer that this is the agreed outcome.
+- **Status.** Decided: proposed in the 2.2 handover on 2026-11-04 and on `master` since 2026-11-17, when the maintainer merged the developer guide pull request (#51) with `tests/seed/` in it. See [`../testing/seeding.md`](../testing/seeding.md).
 
 ### Version 2.2 branch name and push rule
 - **Question.** What is the 2.2 branch called (suggested `version-2.2`, cut from `origin/master`) and is it pushed as it goes? The 2.1 rule (kept local until finished, one release pull request) applied to 2.1 only.
-- **Status.** Ask the maintainer at the start of 2.2.
+- **Status.** The branch `version-2.2` was cut from `origin/master` on 2026-11-17 and the maintainer said to work on it. Decided 2026-11-21: it is pushed to GitHub as a branch (on the maintainer's go-ahead for each push), and the release pull request is opened only when 2.2 is ready to release.
 
 ### D19, D13, D14, U14
-D19 is above (decided, not built). D13 and D14 are in [`voting-and-elections.md`](voting-and-elections.md#open-decisions); U14 is in [`interface-and-wording.md`](interface-and-wording.md#open-decisions).
+D19 is above (built in 2.2). D13 and D14 are in [`voting-and-elections.md`](voting-and-elections.md#open-decisions); U14 is in [`interface-and-wording.md`](interface-and-wording.md#open-decisions).

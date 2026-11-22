@@ -5,7 +5,7 @@ An election can only be deleted before its **Nominations open** date has passed 
 To delete an election, you should be a user who gains admin access for CiviCRM and follow these steps:
 
 1. Go to **Elections**  
-![Click Elections](images/admin_election/01.gif)  
+![Manage Elections, with the Add Election button marked](images/admin_election/01.png)  
 2. Select **Delete** on the election's row. A **Delete Election** dialog says that the election can no longer be seen or used, and that it cannot be restored from the screen.  
-![Click Delete](images/admin_delete/03.gif)  
+![The Delete Election dialog](images/admin_delete/03.png)  
 3. Select **Delete** to confirm, or **Cancel**. The message "Election deleted." is shown.

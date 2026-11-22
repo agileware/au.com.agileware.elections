@@ -21,6 +21,8 @@ class ElectionNomination extends Generic\DAOEntity {
   public static function permissions(): array {
     return [
       'meta' => ['access CiviCRM'],
+      // People who manage candidates only may read, for the candidates lists; every change needs administer Elections.
+      'get' => [['administer Elections', 'manage Election candidates']],
       'default' => ['administer Elections'],
     ];
   }

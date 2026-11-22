@@ -14,3 +14,4 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
       EXTENSION_NAME: au.com.agileware.elections
+      COVERAGE: true

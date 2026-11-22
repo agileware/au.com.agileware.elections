@@ -50,8 +50,38 @@ class CRM_Elections_Helper_Frame {
     return $url;
   }
 
+  const CANDIDATES_PATH = 'civicrm/elections/candidate-list';
+
+  /**
+   * True for a person who manages candidates only ("manage Election candidates" without "administer Elections"):
+   * their way in is Election Candidates, not Manage Elections or the overview, which they cannot open.
+   */
+  public static function isCandidatesOnly(): bool {
+    return !isElectionAdmin() && canManageElectionCandidates();
+  }
+
+  /**
+   * The top of the back end for this person: Manage Elections, or Election Candidates for a person who manages
+   * candidates only.
+   */
   public static function managerUrl(): string {
-    return CRM_Utils_System::url(self::MANAGE_PATH, 'reset=1', FALSE, NULL, FALSE);
+    return self::isCandidatesOnly()
+      ? CRM_Utils_System::url(self::CANDIDATES_PATH, 'reset=1', FALSE, NULL, FALSE)
+      : CRM_Utils_System::url(self::MANAGE_PATH, 'reset=1', FALSE, NULL, FALSE);
+  }
+
+  /**
+   * The name of the top of the back end, for the breadcrumb.
+   */
+  public static function managerLabel(): string {
+    return self::isCandidatesOnly() ? E::ts('Election Candidates') : E::ts('Manage Elections');
+  }
+
+  /**
+   * The words of the button that goes back to the top of the back end.
+   */
+  public static function managerButtonLabel(): string {
+    return self::isCandidatesOnly() ? E::ts('Back to Election Candidates') : E::ts('Back to Manage Elections');
   }
 
   public static function overviewUrl(int $electionId): string {
@@ -141,12 +171,17 @@ class CRM_Elections_Helper_Frame {
    * @return array
    */
   public static function trail(int $electionId, array $between, string $page): array {
-    $trail = [[E::ts('Manage Elections'), self::managerUrl()]];
+    $trail = [[self::managerLabel(), self::managerUrl()]];
     $name = self::electionName($electionId);
+    $candidatesOnly = self::isCandidatesOnly();
     if ($name !== NULL) {
-      $trail[] = [$name, self::overviewUrl($electionId)];
+      // A person who manages candidates only cannot open the overview: the election leads to its candidates.
+      $trail[] = [$name, $candidatesOnly ? self::candidatesUrl($electionId) : self::overviewUrl($electionId)];
     }
     foreach ($between as $item) {
+      if ($candidatesOnly && $name !== NULL && ($item[1] ?? NULL) === self::candidatesUrl($electionId)) {
+        continue;
+      }
       $trail[] = $item;
     }
     $trail[] = [$page, NULL];
@@ -215,6 +250,7 @@ class CRM_Elections_Helper_Frame {
     self::setBreadcrumb($trail);
     $pageOrForm->assign('backUrl', self::backUrl($fallbackBack));
     $pageOrForm->assign('managerUrl', self::managerUrl());
+    $pageOrForm->assign('managerButtonLabel', self::managerButtonLabel());
   }
 
   /**
@@ -243,7 +279,14 @@ class CRM_Elections_Helper_Frame {
       return;
     }
     $electionId = (int) CRM_Utils_Request::retrieve('eid', 'Positive');
-    self::setBreadcrumb(self::trail($electionId, [], $screens[$path]));
+    if ($path === self::CANDIDATES_PATH && $electionId <= 0 && self::isCandidatesOnly()) {
+      // The list of elections, the top of the back end for this person (the script below adds the election when
+      // the list of one election's candidates was opened with it after the # only).
+      self::setBreadcrumb([[self::managerLabel(), NULL]]);
+    }
+    else {
+      self::setBreadcrumb(self::trail($electionId, [], $screens[$path]));
+    }
     // These screens read the election from the address after the #, which the server never sees, so a page opened
     // without it in the query gets its breadcrumb completed in the browser.
     if ($electionId <= 0) {
@@ -251,8 +294,10 @@ class CRM_Elections_Helper_Frame {
         ->addScriptFile(E::LONG_NAME, 'js/election-breadcrumb.js', 110, 'page-footer')
         ->addVars('electionsFrame', [
           'manageUrl' => self::managerUrl(),
-          'manageLabel' => E::ts('Manage Elections'),
-          'overviewUrl' => CRM_Utils_System::url(self::OVERVIEW_PATH, 'reset=1&eid=', FALSE, NULL, FALSE),
+          'manageLabel' => self::managerLabel(),
+          'overviewUrl' => self::isCandidatesOnly()
+            ? CRM_Utils_System::url(self::CANDIDATES_PATH, 'reset=1&eid=', FALSE, NULL, FALSE)
+            : CRM_Utils_System::url(self::OVERVIEW_PATH, 'reset=1&eid=', FALSE, NULL, FALSE),
           'pageLabel' => $screens[$path],
         ]);
     }

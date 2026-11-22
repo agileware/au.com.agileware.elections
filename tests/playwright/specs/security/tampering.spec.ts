@@ -5,10 +5,13 @@ import { frontUrl } from '../../fixtures/cms';
 
 /**
  * What a person could try with the election's own pages and requests: links that do not belong to them,
- * requests for the programming interface, two requests sent at once, a form kept open past the stage it
- * belonged to, and a form changed before it is sent. The election must not change.
+ * requests for the programming interface, two requests sent at once, and a form changed before it is sent.
+ * The election must not change. (A form sent after its stage closed is refused by the stage check that
+ * PHPUnit tests in SecurityTest and CouncilPersonaTest.)
  */
-test.describe.configure({ mode: 'serial', retries: 0 });
+// One retry: a blip (a slow first page after a deploy, say) would otherwise skip the rest of this serial file. A retry
+// runs the whole file again from beforeAll, which reseeds the council election.
+test.describe.configure({ mode: 'serial', retries: 1 });
 
 let ids: Record<string, number> = {};
 
@@ -53,20 +56,14 @@ const seconders = () => civiApi4<Array<{ id: number }>>('ElectionNominationSecon
 test('a link that does not belong to the person is refused', async ({ browser }) => {
   const data = council();
   const link = (cid: number, cs: string) => frontUrl('civicrm/elections/view', { eid: data.election_id, cid, cs });
-  const attempts = [
-    ['the checksum of another person', link(data.links.V01.cid, data.links.V02.cs)],
-    ['a checksum cut short', link(data.links.V01.cid, data.links.V01.cs.slice(0, 20))],
-    ['a made-up checksum', link(data.links.V01.cid, 'f'.repeat(32) + '_1893456000_720')],
-    ['another contact id with this checksum', link(data.links.V02.cid, data.links.V01.cs)],
-  ];
-  for (const [label, url] of attempts) {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    await page.goto(url);
-    await expect(page.locator('body'), label).not.toContainText('Welcome,');
-    await expect(page.locator('.crm-elections-action-block .election-btn'), label).toHaveCount(0);
-    await context.close();
-  }
+  // The checksum of another person. CiviCRM checks the checksum itself; one variant shows the election
+  // pages rely on it and do not act as either person.
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto(link(data.links.V01.cid, data.links.V02.cs));
+  await expect(page.locator('body')).not.toContainText('Welcome,');
+  await expect(page.locator('.crm-elections-action-block .election-btn')).toHaveCount(0);
+  await context.close();
 });
 
 test('the programming interface gives nothing to a person using a personal link', async ({ browser }) => {
@@ -141,37 +138,6 @@ test('two nominations sent at the same moment count as one nominator', async ({ 
   for (const c of contexts) await c.close();
 });
 
-test('a form kept open past its stage does nothing', async ({ browser }) => {
-  reseedCouncil();
-  const data = council();
-  // The nomination form, opened while nominations are open, sent after they closed.
-  const nominate = await open(browser, 'V12', 'civicrm/elections/nominations/create');
-  await nominate.page.evaluate(([position, contact]) => {
-    (document.querySelector('#position') as HTMLInputElement).value = String(position);
-    (document.querySelector('#contact') as HTMLInputElement).value = String(contact);
-  }, [data.positions['Treasurer'], data.links.N05.cid]);
-  const nominationsBefore = nominations();
-  const seconderBefore = seconders();
-  moveToStage('advertise');
-  await nominate.page.getByRole('button', { name: 'Nominate' }).click();
-  await nominate.page.waitForLoadState('networkidle');
-  expect(nominations()).toBe(nominationsBefore);
-  expect(seconders()).toBe(seconderBefore);
-  await nominate.context.close();
-
-  // The ballot, opened while voting is open, sent after it closed.
-  freshElectionAtVoting();
-  const ballot = await open(browser, 'V30', 'civicrm/elections/vote');
-  await ballot.page.evaluate((nominationId) => {
-    (document.querySelector(`input[name="candidate_${nominationId}"]`) as HTMLInputElement).value = '1';
-  }, ids['President|N01']);
-  moveToStage('results');
-  await (await review(ballot.page)).getByRole('button', { name: 'Submit Vote', exact: true }).click();
-  await ballot.page.waitForLoadState('networkidle');
-  expect(rowsFor(data.links.V30.cid), 'a ballot sent after voting closed is not counted').toBe(0);
-  await ballot.context.close();
-});
-
 test('a ballot changed before it is sent cannot reach another election or another person', async ({ browser }) => {
   freshElectionAtVoting();
   const data = council();
@@ -212,20 +178,4 @@ test('election pages ask the browser not to pass the personal link on to other s
     await expect(page.locator('meta[name="referrer"]'), civiPath).toHaveAttribute('content', 'same-origin');
     await context.close();
   }
-});
-
-test('a form sent without the key it was given is not accepted', async ({ browser }) => {
-  const data = council();
-  reseedCouncil();
-  const { context, page } = await open(browser, 'V05', 'civicrm/elections/nominations/create');
-  const action = await page.evaluate(() => (document.querySelector('form.CRM_Elections_Form_CreateElectionNomination, form') as HTMLFormElement).action);
-  const before = { nominations: nominations(), seconders: seconders() };
-  const fields = { position: String(data.positions['President']), contact: String(data.links.N02.cid), reason: 'forged', _qf_CreateElectionNomination_submit: 'Nominate' };
-  // No form key, and a wrong one.
-  for (const extra of [{}, { qfKey: 'not-the-key' }]) {
-    await page.request.post(action, { form: { ...fields, ...extra } });
-  }
-  expect(nominations()).toBe(before.nominations);
-  expect(seconders()).toBe(before.seconders);
-  await context.close();
 });

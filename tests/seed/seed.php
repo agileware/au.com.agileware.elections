@@ -160,9 +160,9 @@ $people = [
   30 => ['Noelene', 'Fraser', '', '8 Federal Street', 'Narrogin', 'WA', '6312'],
 ];
 
-$beekeepers = civicrm_api3('Group', 'create', ['name' => 'beekeepers', 'title' => 'Beekeepers', 'description' => 'Members of the Association who may vote in its elections.', 'group_type' => ['Mailing List']])['id'];
+$beekeepers = civicrm_api3('Group', 'create', ['name' => 'beekeepers', 'title' => 'Beekeepers', 'description' => 'People in the Association who may vote in its elections.', 'group_type' => ['Mailing List']])['id'];
 $executive = civicrm_api3('Group', 'create', ['name' => 'executive_committee', 'title' => 'Executive Committee', 'description' => 'The current executive: may nominate people for the Research Grants Committee.', 'group_type' => ['Mailing List']])['id'];
-$candidatesGroup = civicrm_api3('Group', 'create', ['name' => 'committee_candidates', 'title' => 'Committee Candidates', 'description' => 'Members who have agreed to be considered for committee positions.', 'group_type' => ['Mailing List']])['id'];
+$candidatesGroup = civicrm_api3('Group', 'create', ['name' => 'committee_candidates', 'title' => 'Committee Candidates', 'description' => 'People who have agreed to be considered for committee positions.', 'group_type' => ['Mailing List']])['id'];
 
 $B = [];
 foreach ($people as $n => [$first, $last, $nick, $street, $city, $state, $postcode]) {
@@ -232,7 +232,7 @@ function nominate(int $electionId, array $positions, array $B, array $plan): arr
   $nominations = [];
   foreach ($plan as [$position, $nominee, $nominators]) {
     foreach ($nominators as $nominator) {
-      $result = Process::nominate($electionId, $positions[$position], $B[$nominee], $B[$nominator], "Nominated by member $nominator for $position");
+      $result = Process::nominate($electionId, $positions[$position], $B[$nominee], $B[$nominator], "Nominated by Beekeeper $nominator for $position");
       $nominations["$position|$nominee"] = (int) $result['nomination_id'];
     }
   }
@@ -298,7 +298,7 @@ $builders = [];
 $builders[1] = function () use ($B, $groups): int {
   [$id, $pos] = make_election([
     'name' => ELECTION_NAMES[0],
-    'description' => 'Election of the Association committee for 2027: President, Secretary, Treasurer and three Committee Members. Members nominate and second; the people nominated then accept before the candidates are announced. Votes are counted by ranked choice.',
+    'description' => 'Election of the Association committee for 2027: President, Secretary, Treasurer and three Committee Members. People in the Association nominate and second; the people nominated then accept before the candidates are announced. Votes are counted by ranked choice.',
     'allowed_groups' => $groups['beekeepers'],
     'required_nominations' => 2,
     'voting_method' => 'irv',
@@ -375,7 +375,7 @@ $builders[3] = function () use ($B, $groups): int {
 $builders[4] = function () use ($B, $groups): int {
   [$id, $pos] = make_election([
     'name' => ELECTION_NAMES[3],
-    'description' => 'State delegates to the national meeting. Voters can write in a person who is not on the ballot; the person must accept before voting closes. Members may change their vote until voting closes.',
+    'description' => 'State delegates to the national meeting. Voters can write in a person who is not on the ballot; the person must accept before voting closes. Voters may change their vote until voting closes.',
     'allowed_groups' => $groups['beekeepers'],
     'candidate_groups' => $groups['candidates'],
     'required_nominations' => 2,

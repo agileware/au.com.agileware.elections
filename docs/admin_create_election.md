@@ -3,14 +3,14 @@
 To add a new election, you should be a user who gains admin access for CiviCRM and follow these steps: 
 
 1. Go to **Elections** (this opens **Manage Elections**)  
-![Click Elections](images/admin_election/01.gif)
+![Manage Elections, with the Add Election button marked](images/admin_election/01.png)
 2. Select **Add Election**  
-![Click Add Election](images/admin_election/02.gif)
+![The Add Election form on its Details tab](images/admin_election/02.png)
 The page has a breadcrumb above the heading (**Manage Elections** > **Add Election**). The form has six tabs: **Details** (name and description), **Dates**, **Participation**, **Display**, **Emails** and **Privacy**. Move between them with the mouse or the left and right arrow keys. Required fields on a tab you have not opened are flagged when you select **Submit**, and a tab with a problem is marked with a !. The buttons at the bottom of the form are **Submit**, **Back** and **Back to Manage Elections**. **Back** and **Back to Manage Elections** leave the form without saving.
 
 3. Enter information about the new election  
 - **Name** and **Description** (on the **Details** tab): enter the name and description of the new election. It helps users to know more about the election that they will participate.  
-![Set Name and description](images/admin_election/03.gif)
+![The Details tab with the name and description filled in](images/admin_election/03.png)
 - **Quick set-up** (top of the **Dates** tab): fills in all the dates for you. Choose an **Election cycle** (1 week of nominations and 1 week of voting; 2 and 2; 2 and 3; or 2 and 4), enter **Nominations start on**, set the times each phase starts (**Each phase starts at**, default 09:00) and ends (**Each phase ends at**, default 17:00), choose when **Results are published** (5 minutes after voting closes, or the morning after voting closes) and for how many weeks the election stays visible (**Election stays visible for (weeks after the results)**), then select **Fill in the dates**. The dates are worked out like this:
     - **Visible from** is the same moment nominations open.
     - Nominations run for whole weeks and close at the end time on the last day (Monday to Sunday when they open on a Monday).
@@ -30,7 +30,7 @@ The page has a breadcrumb above the heading (**Manage Elections** > **Add Electi
     - **Voting closes**: voters can vote until this date. This date should be after **Voting opens** and before **Visible until**.
     - **Results published on**: from this date people can see the results. This date should be after **Voting closes** and before **Visible until**.
 
-![Set Election Dates](images/admin_election/04.gif)  
+![The Dates tab: the quick set-up has filled in the dates](images/admin_election/04.png)  
 The dates are checked as you change them: a date that is out of order is marked straight away with a message beside it (for example "Voting closes must be after Voting opens."), and the **Timeline** at the bottom of the **Dates** tab shows the stages in order with the one that is running now highlighted. Dates are also checked when you select **Submit**.
 4. On the **Participation** tab, configure who takes part and how:
 - **Voting groups**: The CiviCRM Groups and Smart Groups with people who are permitted to vote in this election. Unless you set the two groups below, the same people can also nominate, second and stand.

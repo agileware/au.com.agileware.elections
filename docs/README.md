@@ -90,7 +90,7 @@ Elections is based on the voting features first built into [MemberDB](https://ww
 
 Viewing election results are shown below as an example.
 
-![Elections](https://github.com/agileware/au.com.agileware.elections/raw/master/docs/images/user_view_results/03.gif)  
+![The results on the election page](https://github.com/agileware/au.com.agileware.elections/raw/master/docs/images/user_view_results/02.png)  
 
 Prerequisites
 -------------

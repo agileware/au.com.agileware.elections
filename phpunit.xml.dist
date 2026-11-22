@@ -7,8 +7,16 @@
   </testsuites>
   <coverage processUncoveredFiles="true">
     <include>
-      <directory suffix=".php">./</directory>
+      <directory suffix=".php">./CRM</directory>
+      <directory suffix=".php">./Civi</directory>
+      <directory suffix=".php">./api</directory>
+      <file>./elections.php</file>
     </include>
+    <!-- Classes for the Action Provider and Form Processor extensions: they cannot load without them. -->
+    <exclude>
+      <directory>./Civi/Elections/ActionProvider</directory>
+      <directory>./Civi/Elections/FormProcessor</directory>
+    </exclude>
   </coverage>
   <listeners>
     <listener class="Civi\Test\CiviTestListener">

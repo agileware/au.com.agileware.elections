@@ -2,7 +2,7 @@
 
 Written from the existing setup, 2026-11-15. The kit builds a new site of this kind from nothing (`create-site.sh <cms>`); that path was followed on 2026-11-15 and is described in [`../ddev-kit/README.md`](../ddev-kit/README.md). The rest of this page describes the maintainers' existing site and was written from it.
 
-The Drupal site (`elections2-drupal`) runs the Playwright suite on Drupal 11 with Drupal's own default front end theme. PHPUnit is not run here: it runs on the WordPress site.
+The Drupal site (`elections2-drupal`) runs the Playwright suite on Drupal 11 with Drupal's own default front end theme. PHPUnit is not run here (no test database): run it on the WordPress site and on a Drupal site built by the DDEV kit ([../testing/phpunit.md](../testing/phpunit.md)).
 
 ## What the finished site looks like
 
@@ -54,7 +54,7 @@ Drupal sends through PHP's mail function, which DDEV routes to Mailpit; nothing 
 
 ## Roles, accounts and permissions the tests need
 
-`tests/playwright/fixtures/setup-accounts-drupal.sh` makes the roles and accounts with Drush. It reads the user names, e-mail addresses and passwords from `fixtures/test-users.json` (test values for local sites only) and is safe to run again. Run it from the project root, where `vendor/bin/drush` exists:
+`tests/playwright/fixtures/setup-accounts-drupal.sh` makes the roles and accounts with Drush. It reads the user names and e-mail addresses from `fixtures/test-users.json`, makes random passwords (kept in the git-ignored `fixtures/.generated/test-passwords.json`), and is safe to run again. Run it from the project root, where `vendor/bin/drush` exists:
 
 ```bash
 ddev exec 'bash /var/www/html/web/CRM/extensions/au.com.agileware.elections/tests/playwright/fixtures/setup-accounts-drupal.sh'
@@ -89,7 +89,7 @@ Give the roles that take part the CiviCRM permissions `view Elections` and `acce
 
 ## Drupal gotchas
 
-- **Olivero sets button heights.** The extension's back end action buttons carry a fixed height to look right under Drupal's theme; front end buttons are checked at a minimum of 36 px by the layout spec. Check any new button on Drupal.
+- **Olivero sets button heights.** The extension's back end action buttons carry a fixed height to look right under Drupal's theme; front end buttons are checked at a minimum of 36 px by the page walk. Check any new button on Drupal.
 - **Run Drush from the project root, `cv` from `web`.** They look for different things.
 - **A refused page returns 403 or 500**: Drupal from CiviCRM 6.19, so the smoke spec accepts either. See [civicrm-versions.md](civicrm-versions.md).
 - The deploy command runs `cv flush` before and after enabling the extension; one failure on the first run after a flush is a known flake and the retry passes.

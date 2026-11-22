@@ -14,15 +14,35 @@ import { civiApi4, reseedCouncil } from './civi';
  */
 export const AUTH_DIR = path.resolve(__dirname, '.generated', 'auth');
 
+/**
+ * Passwords of the test accounts are made by the setup scripts (generate-passwords.php) when they create the
+ * accounts, and kept in the git-ignored .generated/test-passwords.json. They are never committed.
+ */
+const PASSWORDS_FILE = path.resolve(__dirname, '.generated', 'test-passwords.json');
+let generatedPasswords: Record<string, string> = {};
+try {
+  generatedPasswords = JSON.parse(fs.readFileSync(PASSWORDS_FILE, 'utf8'));
+} catch {
+  // Reported below, only when a login that needs one is used.
+}
+function testPassword(key: string): string {
+  const password = generatedPasswords[key];
+  if (!password) {
+    throw new Error(`No password for the test account "${key}". Run the setup script for this CMS first (fixtures/setup-environment.sh, setup-accounts-drupal.sh or setup-accounts-joomla.sh): it makes ${PASSWORDS_FILE}.`);
+  }
+  return password;
+}
+
 export const logins: Record<string, { username: string; password: string }> = {
   admin: { username: process.env.WP_ADMIN_USER || 'admin', password: process.env.WP_ADMIN_PASS || 'admin' },
-  manager: { username: users.manager.username, password: users.manager.password },
-  limited: { username: users.limited.username, password: users.limited.password },
-  member: { username: users.member.username, password: users.member.password },
+  manager: { username: users.manager.username, get password() { return testPassword('manager'); } },
+  limited: { username: users.limited.username, get password() { return testPassword('limited'); } },
+  candidates: { username: users.candidates.username, get password() { return testPassword('candidates'); } },
+  member: { username: users.member.username, get password() { return testPassword('member'); } },
 };
 
 /** Drupal and Joomla use test accounts created by fixtures/setup-accounts-<cms>.sh. */
-const testAdmin = { username: users.admin.username, password: users.admin.password };
+const testAdmin = { username: users.admin.username, get password() { return testPassword('admin'); } };
 
 const WARM_UP = ['civicrm/elections/manage', 'civicrm/elections/position-list', 'civicrm/elections/candidate-list', 'civicrm/elections/create', 'civicrm/elections/result-list', 'civicrm/elections/audit-log'];
 
@@ -52,12 +72,12 @@ export default async function globalSetup(config: FullConfig) {
   fs.mkdirSync(AUTH_DIR, { recursive: true });
   const browser = await chromium.launch();
 
-  // Which sessions each CMS gets. Joomla has no manager or member session: CiviCRM permissions are
-  // set through Joomla's access levels there, so those specs are skipped on Joomla.
+  // Every CMS gets the five sessions. Drupal and Joomla use the accounts their setup script made; on Joomla
+  // the organisers log in to the administrator and the member to the site, because a Joomla member may not
+  // use the administrator at all.
   const sessions: Array<[string, { username: string; password: string }]> =
     CMS === 'wordpress' ? Object.entries(logins)
-      : CMS === 'drupal' ? [['admin', testAdmin], ['manager', logins.manager], ['limited', logins.limited], ['member', logins.member]]
-        : [['admin', testAdmin]];
+      : [['admin', testAdmin], ['manager', logins.manager], ['limited', logins.limited], ['candidates', logins.candidates], ['member', logins.member]];
 
   for (const [name, { username, password }] of sessions) {
     const context = await browser.newContext({ baseURL });
@@ -76,6 +96,13 @@ export default async function globalSetup(config: FullConfig) {
       await page.locator('#edit-pass').fill(password);
       await page.locator('#edit-submit').click();
       await page.waitForURL((u) => !u.pathname.startsWith('/user/login'));
+    }
+    else if (name === 'member') {
+      await page.goto('/index.php?option=com_users&view=login');
+      await page.locator('#username').fill(username);
+      await page.locator('#password').fill(password);
+      await page.locator('form.com-users-login__form button[type="submit"]').click();
+      await page.waitForURL((u) => !u.search.includes('view=login'), { timeout: 30000 });
     }
     else {
       await page.goto('/administrator/index.php');

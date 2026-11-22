@@ -166,14 +166,6 @@ class CRM_Elections_ElectionStatusTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame('', $card($voting + ['isUserAllowedToVote' => TRUE])['voteLine']);
   }
 
-  public function testTheStepperUsesTheStageWords() {
-    $fixture = $this->fixture(CRM_Elections_Test_CouncilFixture::STAGE_NOMINATIONS);
-    $steps = CRM_Elections_Helper_ElectionStatus::steps($this->election($fixture));
-    $this->assertSame(['Nominations open', 'Candidates advertised', 'Voting open', 'Results published'], array_column($steps, 'label'));
-    // The hidden state words are never the same as a stage called Not started.
-    $this->assertSame('not yet started', $steps[1]['stateLabel']);
-  }
-
   public function testPeopleSeeTheirOwnNominationsAndBallotOnly() {
     $fixture = $this->fixture(CRM_Elections_Test_CouncilFixture::STAGE_VOTING);
     $election = $this->election($fixture);

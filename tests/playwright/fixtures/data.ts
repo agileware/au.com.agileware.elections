@@ -67,8 +67,11 @@ export function positionNames(electionId: number): string[] {
   }).map((p) => p.name);
 }
 
-export function removeRunData() {
-  const like = `%PW % ${RUN}`;
+/**
+ * Remove this run's elections and everything in them. `like` widens it: 'PW %' removes every run's, for example
+ * what an interrupted run left behind.
+ */
+export function removeRunData(like = `%PW % ${RUN}`) {
   civiSql('DELETE v FROM civicrm_election_vote v INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id INNER JOIN civicrm_election_position p ON p.id = n.election_position_id INNER JOIN civicrm_election e ON e.id = p.election_id WHERE e.name LIKE %1', { 1: like });
   civiSql('DELETE s FROM civicrm_election_nomination_seconder s INNER JOIN civicrm_election_nomination n ON n.id = s.election_nomination_id INNER JOIN civicrm_election_position p ON p.id = n.election_position_id INNER JOIN civicrm_election e ON e.id = p.election_id WHERE e.name LIKE %1', { 1: like });
   civiSql('DELETE n FROM civicrm_election_nomination n INNER JOIN civicrm_election_position p ON p.id = n.election_position_id INNER JOIN civicrm_election e ON e.id = p.election_id WHERE e.name LIKE %1', { 1: like });

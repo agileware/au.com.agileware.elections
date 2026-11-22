@@ -1,5 +1,6 @@
 import { test, expect, civiAdminUrl, expectNoPhpOutput } from '../../fixtures/base';
 import { civiApi4, civiEval } from '../../fixtures/civi';
+import { memberAdminUrl } from '../../fixtures/cms';
 import { addNomination, addPosition, createElection, createMembers, nm, removeRunData, removeRunMembers, startElection } from '../../fixtures/data';
 
 test.afterAll(() => {
@@ -129,14 +130,14 @@ test.describe('Election overview', () => {
     await expect(adminPage.locator('#election-copy-status')).toHaveText(/Copied|Select the fingerprint/);
   });
 
-  test('the manage list links to the overview and a member cannot open it', async ({ adminPage, memberPage, allowedProblems }) => {
-    const id = createElection(nm('Overview link'));
-    await adminPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
-    await adminPage.locator('tr', { hasText: nm('Overview link') }).getByRole('link', { name: nm('Overview link'), exact: true }).click();
-    await expect(adminPage.locator('.election-stage')).toBeVisible();
-
+  test('a person without the organiser permission is refused the overview and told so', async ({ memberPage, allowedProblems }) => {
+    const name = nm('Overview refused');
+    const id = createElection(name);
     allowedProblems.push(/403/);
-    await memberPage.goto(overviewUrl(id));
+    await memberPage.goto(memberAdminUrl('civicrm/elections/overview', { reset: 1, eid: id }));
+    // Each CMS words the refusal its own way (WordPress: "Sorry, you are not allowed to access this page.").
+    await expect(memberPage.locator('body')).toContainText(/do not have permission|not allowed to access|not authori[sz]ed|access denied/i);
     await expect(memberPage.locator('.election-stage')).toHaveCount(0);
+    await expect(memberPage.locator('body')).not.toContainText(name);
   });
 });

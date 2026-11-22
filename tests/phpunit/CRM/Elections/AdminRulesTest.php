@@ -90,6 +90,66 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
   }
 
   /**
+   * The stage of an election is worked out in three places: the Stage column of Manage Elections (SQL, in
+   * ElectionSpecProvider), Election::getStage() for the overview and the stepper, and the card on the front end
+   * list of elections. Their keys differ; the stage and the words a person reads must be the same in all three.
+   */
+  public function testTheThreeWaysOfWorkingOutTheStageAgree() {
+    $at = fn($days) => date('Y-m-d H:i:s', strtotime("$days days"));
+    // For each state: the days from now of nominations open, nominations close, candidates advertised, voting
+    // opens, voting closes and results; whether results are generated; whether the election is active; then the
+    // key each of the three gives, and the words.
+    $cases = [
+      'not started' => [[2, 4, 6, 8, 10, 12], 0, 1, 'upcoming', 'upcoming', 'upcoming', 'Not started'],
+      'nominations open' => [[-2, 4, 6, 8, 10, 12], 0, 1, 'nominations', 'nominations', 'nominations', 'Nominations open'],
+      'nominations closed, candidates not yet advertised' => [[-4, -2, 6, 8, 10, 12], 0, 1, 'nominations_closed', 'advertise', 'advertise', 'Nominations closed'],
+      'candidates advertised' => [[-6, -4, -2, 8, 10, 12], 0, 1, 'candidates', 'advertise', 'advertise', 'Candidates advertised'],
+      'voting open' => [[-8, -6, -4, -2, 10, 12], 0, 1, 'voting', 'voting', 'voting', 'Voting open'],
+      'voting closed, results not yet due' => [[-10, -8, -6, -4, -2, 12], 0, 1, 'voting_closed', 'closed', 'closed', 'Voting closed'],
+      'results due but not generated' => [[-12, -10, -8, -6, -4, -2], 0, 1, 'voting_closed', 'closed', 'closed', 'Voting closed'],
+      'results generated but not yet due' => [[-10, -8, -6, -4, -2, 12], 1, 1, 'voting_closed', 'closed', 'closed', 'Voting closed'],
+      'results published' => [[-12, -10, -8, -6, -4, -2], 1, 1, 'results', 'results', 'results', 'Results published'],
+      'inactive, whatever the dates say' => [[-8, -6, -4, -2, 10, 12], 0, 0, 'inactive', 'inactive', 'inactive', 'Inactive'],
+    ];
+    $election = $this->inactiveElection();
+    $columns = ['nomination_start_date', 'nomination_end_date', 'advertise_candidates_date', 'voting_start_date', 'voting_end_date', 'result_date'];
+    foreach ($cases as $state => [$days, $generated, $active, $listKey, $pageKey, $cardKey, $words]) {
+      $dates = array_combine($columns, array_map($at, $days));
+      $sets = [];
+      $params = [1 => [$election['id'], 'Integer'], 2 => [$generated, 'Integer'], 3 => [$active, 'Integer']];
+      foreach (array_values($dates) as $i => $value) {
+        $sets[] = $columns[$i] . ' = %' . ($i + 4);
+        $params[$i + 4] = [$value, 'String'];
+      }
+      CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET has_results_generated = %2, is_visible = %3, ' . implode(', ', $sets) . ' WHERE id = %1', $params);
+
+      // 1. The Stage column of Manage Elections.
+      $list = \Civi\Api4\Election::get(FALSE)->addSelect('stage')->addWhere('id', '=', $election['id'])->execute()->single()['stage'];
+      $this->assertSame($listKey, $list, "Manage Elections: $state");
+      $this->assertSame($words, \Civi\Api4\Service\Spec\Provider\ElectionSpecProvider::getStages()[$list], "Manage Elections words: $state");
+
+      // 2. The overview and the stepper.
+      $page = findElectionById($election['id'])->getStage();
+      $this->assertSame($pageKey, $page['key'], "getStage: $state");
+      $this->assertSame($words, $page['label'], "getStage words: $state");
+
+      // 3. The card on the list of elections, given what CRM_Elections_Page_Elections::modifyElectionValues() gives it.
+      $between = fn($from, $to = NULL) => CRM_Elections_BAO_Election::isTodayBetweenDates($from, $to);
+      $card = CRM_Elections_Helper_ElectionStatus::card($dates + [
+        'is_visible' => $active,
+        'hasNominationsStarted' => $between($dates['nomination_start_date']),
+        'isNominationsInProgress' => $between($dates['nomination_start_date'], $dates['nomination_end_date']),
+        'advertiseCandidatesStarted' => $between($dates['advertise_candidates_date']),
+        'isVotingStarted' => $between($dates['voting_start_date']),
+        'isVotingEnded' => $between($dates['voting_end_date']),
+        'isResultsOut' => $between($dates['result_date']) && $generated,
+      ]);
+      $this->assertSame($cardKey, $card['stage'], "card: $state");
+      $this->assertSame($words, $card['stageLabel'], "card words: $state");
+    }
+  }
+
+  /**
    * CiviCRM 6.19 and later hide an exception's message from an AJAX caller (SearchKit drag and drop, editing
    * in place) behind "Sorry an error occurred ... (Error ID ...)" unless the exception says it is safe to show.
    */
@@ -161,6 +221,13 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
     try {
       \Civi\Api4\ElectionPosition::delete(FALSE)->addWhere('id', '=', $position['id'])->execute();
       $this->fail('Deleting a position of a started election must be refused.');
+    }
+    catch (CRM_Core_Exception $e) {
+      $this->assertStringContainsString('This election is active', $e->getMessage());
+    }
+    try {
+      \Civi\Api4\ElectionPosition::create(FALSE)->setValues(['election_id' => $election['id'], 'name' => 'Late', 'quantity' => 1, 'sortorder' => 2])->execute();
+      $this->fail('Adding a position to a started election must be refused.');
     }
     catch (CRM_Core_Exception $e) {
       $this->assertStringContainsString('This election is active', $e->getMessage());
@@ -376,6 +443,85 @@ class CRM_Elections_AdminRulesTest extends api_v3_ElectionBaseTestCase {
     finally {
       $permissionClass->permissions = $original;
     }
+  }
+
+  /**
+   * A person with "manage Election candidates" and not "administer Elections" may read elections, positions and
+   * nominations (for the candidates lists) and add candidates through the form, but change nothing through the API,
+   * and read no ballots, results or audit entries.
+   */
+  public function testAPersonWhoManagesCandidatesOnlyMayReadButNotChangeElections() {
+    $election = $this->createElection(['is_visible' => 0, 'is_deleted' => 0]);
+    $permissionClass = CRM_Core_Config::singleton()->userPermissionClass;
+    $original = $permissionClass->permissions ?? NULL;
+    $permissionClass->permissions = ['access CiviCRM', 'manage Election candidates', 'view Elections', 'access AJAX API', 'view all contacts'];
+    try {
+      $this->assertTrue(canManageElectionCandidates());
+      $this->assertFalse(isElectionAdmin());
+      $this->assertTrue(CRM_Elections_Helper_Frame::isCandidatesOnly());
+      $this->assertStringContainsString('civicrm/elections/candidate-list', CRM_Elections_Helper_Frame::managerUrl());
+      foreach (['Election', 'ElectionPosition', 'ElectionNomination'] as $entity) {
+        civicrm_api4($entity, 'get', ['checkPermissions' => TRUE, 'limit' => 1]);
+      }
+      foreach ([['Election', 'update', ['where' => [['id', '=', $election['id']]], 'values' => ['name' => 'Renamed']]], ['Election', 'delete', ['where' => [['id', '=', $election['id']]]]], ['ElectionPosition', 'create', ['values' => ['election_id' => $election['id'], 'name' => 'Chair', 'quantity' => 1]]], ['ElectionNomination', 'update', ['where' => [['id', '>', 0]], 'values' => ['is_eligible_candidate' => 0]]]] as [$entity, $action, $params]) {
+        try {
+          civicrm_api4($entity, $action, ['checkPermissions' => TRUE] + $params);
+          $this->fail("APIv4 $entity.$action must be refused to a person who manages candidates only");
+        }
+        catch (\Civi\API\Exception\UnauthorizedException $e) {
+          $this->assertTrue(TRUE);
+        }
+      }
+      foreach (['ElectionVote', 'ElectionResult', 'ElectionAudit'] as $entity) {
+        try {
+          civicrm_api4($entity, 'get', ['checkPermissions' => TRUE, 'limit' => 1]);
+          $this->fail("APIv4 $entity.get must be refused to a person who manages candidates only");
+        }
+        catch (\Civi\API\Exception\UnauthorizedException $e) {
+          $this->assertTrue(TRUE);
+        }
+      }
+      $this->assertSame('Renamed' === civicrm_api4('Election', 'get', ['checkPermissions' => FALSE, 'where' => [['id', '=', $election['id']]]])->first()['name'], FALSE);
+    }
+    finally {
+      $permissionClass->permissions = $original;
+    }
+    // An administrator still sees the usual frame.
+    $permissionClass->permissions = ['access CiviCRM', 'administer Elections'];
+    try {
+      $this->assertFalse(CRM_Elections_Helper_Frame::isCandidatesOnly());
+      $this->assertStringContainsString('civicrm/elections/manage', CRM_Elections_Helper_Frame::managerUrl());
+    }
+    finally {
+      $permissionClass->permissions = $original;
+    }
+  }
+
+  /**
+   * The back end list pages (Afform routes under civicrm/elections/) are checked against their own permissions, not
+   * the parent route's "view Elections or a personal link", so a person without them is refused by the route.
+   */
+  public function testTheListPagesAreGuardedByTheirOwnPermissions() {
+    // Rebuild the routes. CiviCRM 6.19 has Civi::router() and deprecates CRM_Core_Menu::store(); 6.16 has only store().
+    if (method_exists('Civi', 'router')) {
+      Civi::router()->clear()->rebuild();
+    }
+    else {
+      CRM_Core_Menu::store();
+    }
+    $expected = [
+      'civicrm/elections/manage' => [['access CiviCRM', 'administer Elections'], 'and'],
+      'civicrm/elections/position-list' => [['access CiviCRM', 'administer Elections'], 'and'],
+      'civicrm/elections/audit-log' => [['access CiviCRM', 'administer Elections'], 'and'],
+      'civicrm/elections/candidate-list' => [['administer Elections', 'manage Election candidates'], 'or'],
+    ];
+    foreach ($expected as $path => $arguments) {
+      $item = CRM_Core_Menu::get($path);
+      $this->assertSame(['CRM_Core_Permission', 'checkMenu'], $item['access_callback'], $path);
+      $this->assertSame($arguments, $item['access_arguments'], $path);
+    }
+    // The front end routes keep the check that allows personal links.
+    $this->assertSame(['CRM_Elections_Permission', 'check'], CRM_Core_Menu::get('civicrm/elections/view')['access_callback']);
   }
 
 }

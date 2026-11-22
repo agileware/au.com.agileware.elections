@@ -1,0 +1,36 @@
+name: frontend tests (Drupal and Joomla)
+
+# The browser suite on Drupal 11 and Joomla 5, on sites the DDEV kit (developer/ddev-kit/create-site.sh) builds in
+# the runner. Run by hand (Actions > frontend tests (Drupal and Joomla) > Run workflow, for example before a
+# release) and every Monday on master. Not a pull request check: each site takes several minutes to build.
+# WordPress runs on every pull request in frontend-tests.yml.
+
+on:
+  workflow_dispatch:
+    inputs:
+      CIVICRM_VERSION:
+        description: 'CiviCRM version for the sites (6.19, 6.19.5 or latest)'
+        required: false
+        default: '6.19'
+  schedule:
+    - cron: '0 18 * * 1'
+
+jobs:
+  drupal:
+    uses: agileware/ci-workflows/.github/workflows/ddev-playwright-tests.yml@main
+    with:
+      CMS: drupal
+      EXTENSION_NAME: au.com.agileware.elections
+      SITE_SCRIPT: developer/ddev-kit/create-site.sh
+      CIVICRM_VERSION: ${{ inputs.CIVICRM_VERSION || '6.19' }}
+      ACCOUNTS_COMMAND: 'cd /var/www/html && bash "$EXTENSION_DIR/tests/playwright/fixtures/setup-accounts-drupal.sh"'
+
+  joomla:
+    uses: agileware/ci-workflows/.github/workflows/ddev-playwright-tests.yml@main
+    with:
+      CMS: joomla
+      EXTENSION_NAME: au.com.agileware.elections
+      SITE_SCRIPT: developer/ddev-kit/create-site.sh
+      CIVICRM_VERSION: ${{ inputs.CIVICRM_VERSION || '6.19' }}
+      ACCOUNTS_COMMAND: 'cd /var/www/html && bash "$EXTENSION_DIR/tests/playwright/fixtures/setup-accounts-joomla.sh"'
+      TEST_ENV: 'CIVI_CV=jcv'

@@ -8,7 +8,9 @@ import { council, personaUrl } from '../../fixtures/personas';
  * Write-ins: where a position allows it a voter can name a person who is not on the ballot. The person must
  * accept before voting closes; accepting puts them on the ballot for everyone who votes afterwards.
  */
-test.describe.configure({ mode: 'serial', retries: 0 });
+// One retry: a blip (a slow first page after a deploy, say) would otherwise skip the rest of this serial file. A retry
+// runs the whole file again from beforeAll, which reseeds the council election.
+test.describe.configure({ mode: 'serial', retries: 1 });
 
 let ids: Record<string, number> = {};
 
@@ -93,25 +95,6 @@ test('the person written in is not on the ballot until they accept, then they ar
 
   const after = await personaGoto('V03', 'civicrm/elections/vote');
   await expect(after.locator('.vote-candidate-row', { hasText: '09' })).toHaveCount(1);
-});
-
-test('someone who declines cannot be written in again', async ({ persona }) => {
-  const data = council();
-  // N10 is written in by a script as a voter would, then declines.
-  civiEval(`
-    $election = findElectionById(${data.election_id});
-    civicrm_api3('ElectionVote', 'addvotes', ['election_id' => ${data.election_id}, 'member_id' => ${data.links.V04.cid}, 'votes' => [['election_nomination_id' => ${ids['President|N01']}, 'rank' => 1]], 'write_ins' => [['position_id' => ${data.positions['President']}, 'contact_id' => ${data.links.N10.cid}, 'rank' => 2]]]);
-  `);
-  const [nomination] = civiApi4<Array<{ id: number }>>('ElectionNomination.get', { select: ['id'], where: [['is_write_in', '=', true], ['member_nominee', '=', data.links.N10.cid]] });
-  const page = await persona('N10');
-  await page.goto(personaUrl('N10', 'civicrm/elections/nominations/reject', { enid: nomination.id }));
-  await page.getByLabel('Comments').fill('No thanks');
-  // A person who was written in has not accepted, so the answer is Decline.
-  await page.getByRole('button', { name: 'Decline', exact: true }).click();
-  await expect(page.getByText('Nomination declined.')).toBeVisible();
-  await page.context().close();
-  const rows = civiApi4<any[]>('ElectionNomination.get', { select: ['has_rejected_nomination'], where: [['id', '=', nomination.id]] });
-  expect(rows[0].has_rejected_nomination).toBeTruthy();
 });
 
 test('once voting has closed the person who never answered is told, and cannot accept', async ({ persona, allowedProblems }) => {

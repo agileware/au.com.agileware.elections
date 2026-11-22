@@ -96,7 +96,7 @@ class CRM_Elections_Test_CouncilFixture {
 
   private function createPersonas() {
     $this->groupId = (int) civicrm_api3('Group', 'create', [
-      'title' => 'Council Members ' . uniqid(),
+      'title' => 'Council Voters ' . uniqid(),
       'name' => 'council_members_' . uniqid(),
     ])['id'];
 

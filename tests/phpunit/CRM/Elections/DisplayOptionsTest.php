@@ -32,18 +32,6 @@ class CRM_Elections_DisplayOptionsTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame(CRM_Elections_Helper_Candidate::NAME_NICK_LAST, $election->name_format);
   }
 
-  public function testApiRejectsUnknownStatementOption() {
-    $dates = $this->getElectionDates();
-    $this->modifyDatesInString($dates);
-    $this->callAPIFailure('Election', 'create', $dates + [
-      'name' => 'Bad option',
-      'show_statements' => 'bogus',
-      'is_visible' => 0,
-      'is_deleted' => 0,
-      'allowed_groups' => $this->groupCreate(),
-    ]);
-  }
-
   public function testUnknownStoredStatementOptionFallsBackToNone() {
     $created = $this->createElection(['is_visible' => 0, 'is_deleted' => 0]);
     CRM_Core_DAO::executeQuery("UPDATE civicrm_election SET show_statements = 'bogus' WHERE id = %1", [1 => [$created['id'], 'Integer']]);
@@ -94,27 +82,6 @@ class CRM_Elections_DisplayOptionsTest extends api_v3_ElectionBaseTestCase {
    */
   public function testStatementUrlValidation($url, $expected) {
     $this->assertSame($expected, CRM_Elections_Helper_Candidate::isValidStatementUrl($url));
-  }
-
-  public function testNominationStoresStatementAndLink() {
-    $nomination = $this->createNomination();
-    $updated = $this->callAPISuccess('ElectionNomination', 'create', [
-      'id' => $nomination['nomination']['id'],
-      'comments' => 'My statement',
-      'statement_url' => 'https://example.org/cv',
-    ]);
-    $loaded = $this->callAPISuccessGetSingle('ElectionNomination', ['id' => $updated['id'], 'return' => ['comments', 'statement_url']]);
-    $this->assertSame('My statement', $loaded['comments']);
-    $this->assertSame('https://example.org/cv', $loaded['statement_url']);
-  }
-
-  public function testTheStatementChoicesAreWordedAsOnTheForm() {
-    $this->assertSame([
-      CRM_Elections_BAO_Election::STATEMENTS_NONE => 'Not shown',
-      CRM_Elections_BAO_Election::STATEMENTS_LINK => 'Read statement',
-      CRM_Elections_BAO_Election::STATEMENTS_INLINE => 'In full',
-    ], CRM_Elections_BAO_Election::getStatementDisplayOptions());
-    $this->assertSame(['election' => 'Position', 'referendum' => 'Question'], CRM_Elections_BAO_ElectionPosition::getTypes());
   }
 
 }

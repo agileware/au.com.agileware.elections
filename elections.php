@@ -27,6 +27,38 @@ function elections_civicrm_container(ContainerBuilder $container) {
  */
 function elections_civicrm_config(&$config) {
   _elections_civix_civicrm_config($config);
+  // After Afform has added its page routes (a late priority), give the extension's own list pages their real
+  // permissions: see elections_afform_route_permissions().
+  // (Added on each boot: the dispatcher can be rebuilt, for example between headless tests; the listener only sets
+  // values, so running it twice does no harm.)
+  Civi::dispatcher()->addListener('hook_civicrm_alterMenu', 'elections_afform_route_permissions', -1000);
+}
+
+/**
+ * Give each of the extension's Afform list pages (ang/*.aff.php with a server_route) the permissions written in it,
+ * checked by CiviCRM's usual route check.
+ *
+ * Without this the routes under civicrm/elections/ take the access callback of their parent route, civicrm/elections
+ * (CRM_Elections_Permission::check: view Elections or a personal link), so anyone who may take part passed the route
+ * check; and Afform's own "@afform:<name>" check is granted to anyone with access CiviCRM. The page then could not
+ * load the form for a person without its permission and showed "Index 0 not found in api results" with an HTTP 500,
+ * rather than refusing (no data was shown: the APIs check their own permissions). With the form's permissions on
+ * the route, CiviCRM refuses such a person with its usual page.
+ *
+ * @param \Civi\Core\Event\GenericHookEvent $event
+ */
+function elections_afform_route_permissions($event) {
+  $items = &$event->items;
+  foreach (glob(E::path('ang') . '/*.aff.php') ?: [] as $file) {
+    $meta = include $file;
+    $route = $meta['server_route'] ?? NULL;
+    if (!$route || empty($meta['permission']) || !isset($items[$route])) {
+      continue;
+    }
+    $operator = strtolower($meta['permission_operator'] ?? 'AND') === 'or' ? 'or' : 'and';
+    $items[$route]['access_callback'] = ['CRM_Core_Permission', 'checkMenu'];
+    $items[$route]['access_arguments'] = [(array) $meta['permission'], $operator];
+  }
 }
 
 /**
@@ -286,6 +318,17 @@ function elections_civicrm_navigationMenu(&$menu) {
 
   ]);
 
+  // For people who manage candidates only: the page that lists the elections, each leading to its candidates.
+  _elections_civix_insert_navigation_menu($menu, NULL, [
+    'label' => E::ts('Election Candidates'),
+    'name' => 'ElectionCandidates',
+    'icon'     => 'crm-i fa-users',
+    'url' => 'civicrm/elections/candidate-list',
+    'permission' => 'access CiviCRM,manage Election candidates',
+    'operator' => 'AND',
+    'weight' => 63,
+  ]);
+
   _elections_civix_insert_navigation_menu($menu, 'Administer/System Settings', [
     'label' => E::ts('Elections Settings'),
     'name' => 'configureElections',
@@ -311,6 +354,16 @@ function elections_civicrm_coreResourceList(&$list, $region) {
  */
 function isElectionAdmin() {
   return CRM_Core_Permission::check('administer Elections');
+}
+
+/**
+ * Check if the logged in user may add candidates and edit their statements: an administrator, or a person given
+ * only "manage Election candidates" (for example a returning officer).
+ *
+ * @return bool
+ */
+function canManageElectionCandidates() {
+  return CRM_Core_Permission::check([['administer Elections', 'manage Election candidates']]);
 }
 
 /**
@@ -426,7 +479,7 @@ function throwUnauthorizedMessageIfRequired($formOrPage) {
  *   What the person cannot do and how to get access, already translated.
  * @param array $pageOptions
  *   - return_button_text, return_button_action: the link, both already translated and ready to print. Without
- *     them the link is "View Elections". An older call passes [''] for no link at all.
+ *     them the link is "View Elections".
  *   - status: the HTTP status to send, 403 unless the page says otherwise.
  *   - kind: error (the default), or status for a page that tells the person where things stand and is not a
  *     refusal.
@@ -437,15 +490,14 @@ function throwAccessDeniedException($formOrPage, $exceptionMessage, $pageOptions
   $formOrPage->throwError = TRUE;
   $formOrPage->assign('errormessage', $exceptionMessage);
 
-  $noLink = array_key_exists(0, $pageOptions);
   $text = $pageOptions['return_button_text'] ?? '';
   $action = $pageOptions['return_button_action'] ?? '';
-  if (!$noLink && ($text === '' || $action === '')) {
+  if ($text === '' || $action === '') {
     $text = E::ts('View Elections');
     $action = electionsListUrl();
   }
-  $formOrPage->assign('return_button_text', $noLink ? '' : $text);
-  $formOrPage->assign('return_button_action', $noLink ? '' : (string) $action);
+  $formOrPage->assign('return_button_text', $text);
+  $formOrPage->assign('return_button_action', (string) $action);
   $formOrPage->assign('errorKind', ($pageOptions['kind'] ?? 'error') === 'status' ? 'status' : 'error');
 
   if (!empty($pageOptions['title'])) {
@@ -688,6 +740,10 @@ function elections_civicrm_permission(&$permissions) {
   $permissions['administer Elections'] = [
     'label' => E::ts('CiviCRM: administer elections'),
     'description' => E::ts('Grants the necessary permissions for administrating elections in CiviCRM.'),
+  ];
+  $permissions['manage Election candidates'] = [
+    'label' => E::ts('CiviCRM: manage Election candidates'),
+    'description' => E::ts('Add candidates to elections and edit their statements, without setting up or changing elections. Give it with access CiviCRM.'),
   ];
   $permissions['view Elections'] = [
     'label' => E::ts('CiviCRM: view Elections'),

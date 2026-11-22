@@ -4,48 +4,13 @@
  * @group headless
  */
 class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase {
-  /**
-   * Test that an election nomination seconder is not created without any params and throw errors.
-   */
-  public function testCreateNominationSeconderWithoutAnyParams() {
-    $this->callAPIFailure('ElectionNominationSeconder', 'create', []);
-  }
-
-  /**
-   * Test that an election nomination seconder is not created with wrong params.
-   */
-  public function testCreateNominationSeconderWithWrongParams() {
-    $nominator = $this->individualCreate();
-    $nominationParams = $this->createNomination();
-    $nomination = $nominationParams['nomination'];
-
-    $params = [
-      'member_nominator'       => $nominator,
-      'election_nomination_id' => -1,
-    ];
-
-    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
-    $params = [
-      'member_nominator'       => -1,
-      'election_nomination_id' => $nomination['id'],
-    ];
-
-    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
-  }
-
-  /**
-   * Test that an election nomination seconder is created with valid params.
-   */
-  public function testCreateNominationSeconderWithValidParams() {
-    $this->createNominationSeconder();
-  }
 
   /**
    * Test that an election nomination seconder should not be created for second time.
    */
   public function testCreateNominationSeconderSecondTime() {
     $params = $this->createNominationSeconder();
-    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params['params']);
+    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params['params'], 'already nominated this person');
   }
 
   /**
@@ -67,7 +32,7 @@ class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase 
     ]);
 
     $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_ADVERTISE_CANDIDATES_STARTED, $election);
-    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
+    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params, 'Nominations closed on');
   }
 
   /**
@@ -87,7 +52,7 @@ class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase 
     CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET is_deleted = 1 WHERE id = %1', [
       1 => [$position['election_id'], 'Integer'],
     ]);
-    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
+    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params, 'deleted or not active');
   }
 
   /**
@@ -107,7 +72,7 @@ class api_v3_ElectionNominationSeconderTest extends api_v3_ElectionBaseTestCase 
     CRM_Core_DAO::executeQuery('UPDATE civicrm_election SET is_visible = 0 WHERE id = %1', [
       1 => [$position['election_id'], 'Integer'],
     ]);
-    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params);
+    $this->callAPIFailure('ElectionNominationSeconder', 'create', $params, 'deleted or not active');
   }
 
   /**

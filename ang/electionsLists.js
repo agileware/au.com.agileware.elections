@@ -29,6 +29,7 @@
     positions: {caption: ts('Positions'), reorder: true, election: true},
     locked: {caption: ts('Positions'), election: true},
     candidates: {caption: ts('Candidates'), election: true},
+    'candidate-elections': {caption: ts('Elections'), dates: true},
     results: {caption: ts('Results'), election: true},
     audit: {caption: ts('Audit Log'), dates: true, election: true}
   };
@@ -79,6 +80,15 @@
         var queued = false;
 
         host.classList.add('election-list-table');
+
+        // A person who manages candidates only cannot open the overview or Manage Elections: their way back is
+        // Election Candidates.
+        Array.prototype.forEach.call(host.parentNode.querySelectorAll('.election-admin-only'), function (button) {
+          button.hidden = !!settings.candidatesOnly;
+        });
+        Array.prototype.forEach.call(host.parentNode.querySelectorAll('.election-candidates-only'), function (button) {
+          button.hidden = !settings.candidatesOnly;
+        });
 
         // A list is of one election. Without one it would show the rows of every election, with buttons that lead to
         // the wrong election: say so instead and send the person to Manage Elections.

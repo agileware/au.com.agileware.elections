@@ -166,11 +166,12 @@ Each entry gives the decision, why, the date, and where it shows. Dates of the 2
 
 ### D13 – A granular permission
 - **Question.** Add a permission between `administer Elections` and `view Elections` (for example `manage Election candidates`, so a returning officer can add candidates and fix statements without creating, activating or deleting elections)?
-- **Status.** Deferred to version 2.2 on 2026-11-03. Default: build it only if an organisation needs it. If built: the permission, the Candidates routes split from the other admin routes, audit entries, tests on three CMSs, and `docs/roles_and_permissions.md`.
+- **Status.** Decided 2026-11-21 and built in 2.2: **manage Election candidates**, for candidates only. It opens Election Candidates (a list of the elections, then each election's Candidates list), Add Candidate and Edit Statement; it reads elections, positions and nominations through APIv4 and changes nothing there (every write still needs administer Elections); it opens no other back end screen. Adding a candidate is recorded in the audit log as before. Tests: `AdminRulesTest::testAPersonWhoManagesCandidatesOnlyMayReadButNotChangeElections`, `candidates-manager.spec.ts` on three CMSs. See `docs/roles_and_permissions.md`. (Deferred to 2.2 on 2026-11-03.)
 
 ### D14 – More voting methods
 - **Question.** Add counting methods beyond ranked choice and most votes (approval, Senate count for several seats)?
-- **Status.** Open. 2.0 shipped ranked choice and most votes. Recommended: keep STV for 2.2 and drop approval voting, which has no request behind it (the second part is unconfirmed). See [`../roadmap/2.2/stv.md`](../roadmap/2.2/stv.md).
+- **Status.** Decided 2026-11-22. 2.0 shipped ranked choice and most votes. STV is planned for 2.3 (the maintainer moved it from 2.2 on 2026-11-21; see [`../roadmap/2.3/stv.md`](../roadmap/2.3/stv.md)). **Approval voting is deferred until there is a requirement for it**; it is kept as a potential future feature in [`../roadmap/README.md`](../roadmap/README.md#potential-future-features).
+- **Where approval voting came from.** Approval voting did not come from any user request or requirement. It was a suggestion by the AI assistant that wrote the first version 2 plan (2026-10-27): issue #3 asked only for "straight up elections" (now **most votes win**), and the assistant added "maybe Approval" to the plan for that request. From there it was carried into the implementation plan, the testing plan and this decision, where it read like a requirement. No GitHub issue or pull request mentions it (checked 2026-11-22).
 
 ### S1 to S6 – The Senate count (STV) pull request
 A pull request on the Linux Australia fork (against the 1.x code) adds a Senate count, STV, as a per-position option. A review found it cannot be merged as it is: it uses an upgrade step number from the 1.x series, picks winners of ties by a random draw (version 2 never picks a winner of a tie), stops reading a voter's numbers at the first gap (version 2 closes gaps), does not fit the version 2 position and election settings, and shows no count sheet. The review was done by reading the code; none of its code has been run.
@@ -180,8 +181,8 @@ A pull request on the Linux Australia fork (against the 1.x code) adds a Senate 
 | S1 | Ties in an STV count | Report the tie and let the organisation decide (matches the rest of version 2); alternatives are a documented draw run by the organiser with a button, or the pull request's automatic draw | Open |
 | S2 | Where the setting lives | Per position (`irv` or `stv`, ranked elections only), if mixing in one election is wanted; or per election as a third voting method | Open |
 | S3 | What is a formal ballot | Optional preferential: any valid first preference counts | Open |
-| S4 | Timing | Build in 2.2, after the points above are decided | Open |
+| S4 | Timing | Version 2.3 (moved from 2.2 by the maintainer, 2026-11-21) | Decided |
 | S5 | Speaking to the fork | Whether to comment on the pull request or contact the author about retargeting it. Nothing has been posted | Open |
 | S6 | Running the engine | Run its tests and stress checks (overflow, ties, gaps) in an empty directory outside the project, since it is third-party code | Open |
 
-Related decision `SD8` (2026-11-02): the STV upgrade steps start at `20140`. If the code is adopted, keep the author's commits and give a contributor credit.
+Related decision `SD8` (2026-11-02): the STV upgrade steps start at `20140`, or the next free number if 2.2 uses it. If the code is adopted, keep the author's commits and give a contributor credit.

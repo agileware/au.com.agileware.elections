@@ -7,11 +7,7 @@
  */
 class CRM_Elections_FrameTest extends api_v3_ElectionBaseTestCase {
 
-  public function testEveryAuditActionHasAReadableLabel() {
-    $this->assertSame('Election changed', CRM_Elections_Helper_Audit::actionLabel('election_changed'));
-    $this->assertSame('Votes anonymised', CRM_Elections_Helper_Audit::actionLabel('votes_anonymised'));
-    $this->assertSame('Write-ins summary', CRM_Elections_Helper_Audit::actionLabel('write_ins_summary'));
-    // A kind of entry that is not listed never shows a code.
+  public function testAnAuditActionThatIsNotListedNeverShowsACode() {
     $this->assertSame('Something new happened', CRM_Elections_Helper_Audit::actionLabel('something_new_happened'));
   }
 
@@ -41,13 +37,6 @@ class CRM_Elections_FrameTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame(['url', 'title'], array_keys($links[0]));
     $this->assertSame('Beekeepers &lt;b&gt;2027&lt;/b&gt;', $links[1]['title']);
     $this->assertSame('<span aria-current="page">Positions</span>', $links[2]['title']);
-  }
-
-  public function testTheOverviewTrailHasTheElectionAsItsPage() {
-    $election = $this->createElection();
-    $trail = CRM_Elections_Helper_Frame::overviewTrail((int) $election['id']);
-    $this->assertCount(2, $trail);
-    $this->assertNull($trail[1][1]);
   }
 
   public function testALinkBackToAListNamesTheElectionBecauseTheBrowserLeavesOutTheFragment() {

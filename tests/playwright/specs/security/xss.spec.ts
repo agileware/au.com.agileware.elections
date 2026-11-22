@@ -10,7 +10,9 @@ import { frontUrl } from '../../fixtures/cms';
  * is filled with script and markup, and every page of the election is loaded as other people. Nothing
  * may run, and nothing may be turned into page elements.
  */
-test.describe.configure({ mode: 'serial', retries: 0 });
+// One retry: a blip (a slow first page after a deploy, say) would otherwise skip the rest of this serial file. A retry
+// runs the whole file again from beforeAll, which reseeds the council election.
+test.describe.configure({ mode: 'serial', retries: 1 });
 
 const PAYLOADS = [
   `<img src=x onerror="window.__xss='img'">`,
@@ -37,14 +39,17 @@ test('script and markup in any field are shown as text, never run', async ({ bro
       1: first, 2: PAYLOADS[(i + 1) % PAYLOADS.length], 3: `${first} Payload ${persona}`, 4: `x" onerror="window.__xss='photo'`, 5: cid,
     });
   }
-  // Statements, reasons and the election's and positions' own text.
-  civiSql('UPDATE civicrm_election_nomination SET comments = %1, rejection_comments = %1, statement_url = %2', { 1: PAYLOADS[0], 2: `javascript:window.__xss='url'` });
-  civiSql('UPDATE civicrm_election_nomination_seconder SET description = %1', { 1: PAYLOADS[1] });
+  // Statements, reasons and the election's and positions' own text. Only this election's rows: the site may
+  // hold other elections, whose text must stay as it is.
+  civiSql('UPDATE civicrm_election_nomination n INNER JOIN civicrm_election_position p ON p.id = n.election_position_id SET n.comments = %1, n.rejection_comments = %1, n.statement_url = %2 WHERE p.election_id = %3', { 1: PAYLOADS[0], 2: `javascript:window.__xss='url'`, 3: data.election_id });
+  civiSql('UPDATE civicrm_election_nomination_seconder s INNER JOIN civicrm_election_nomination n ON n.id = s.election_nomination_id INNER JOIN civicrm_election_position p ON p.id = n.election_position_id SET s.description = %1 WHERE p.election_id = %2', { 1: PAYLOADS[1], 2: data.election_id });
   civiSql('UPDATE civicrm_election SET name = %1, description = %2 WHERE id = %3', { 1: `Council ${PAYLOADS[2]}`, 2: PAYLOADS[0], 3: data.election_id });
-  civiSql('UPDATE civicrm_election_position SET description = %1', { 1: PAYLOADS[1] });
+  civiSql('UPDATE civicrm_election_position SET description = %1 WHERE election_id = %2', { 1: PAYLOADS[1], 2: data.election_id });
   civiEval(`Civi::settings()->set('elections_name_format', 'first_nick_last');`);
 
   const problems: string[] = [];
+  // The pages on which the test text was seen as plain text: proof that it reached the page at all.
+  const shown: string[] = [];
   async function visit(label: string, persona: string, civiPath: string, params: Record<string, string | number> = {}, interact?: (page: import('@playwright/test').Page) => Promise<void>) {
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -67,6 +72,7 @@ test('script and markup in any field are shown as text, never run', async ({ bro
       return out;
     });
     for (const f of found) problems.push(`${label}: ${f}`);
+    if ((await page.locator('body').innerText()).includes('__xss')) shown.push(label);
     await context.close();
   }
 
@@ -114,4 +120,6 @@ test('script and markup in any field are shown as text, never run', async ({ bro
   civiEval(`Civi::settings()->revert('elections_name_format');`);
   reseedCouncil();
   expect(problems, 'script or markup from a field reached a page').toEqual([]);
+  // A run in which the text never reached a page would prove nothing: these pages must have shown it as text.
+  expect(shown, 'the test text was shown as plain text').toEqual(expect.arrayContaining(['election page (voting)', 'ballot', 'candidate page', 'candidates list', 'results']));
 });

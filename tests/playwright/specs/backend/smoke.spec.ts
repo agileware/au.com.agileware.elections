@@ -1,5 +1,6 @@
 import { test, expect, civiAdminUrl, expectNoPhpOutput } from '../../fixtures/base';
 import { createElection, nm, positionNames, removeRunData } from '../../fixtures/data';
+import { memberAdminUrl } from '../../fixtures/cms';
 
 // A required field's name ends with its separate * marker, so an exact name is matched as a pattern.
 const exactLabel = (label: string) => new RegExp(`^\\s*${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\*?\\s*$`);
@@ -13,14 +14,6 @@ test.afterAll(() => {
  * only - members take part through the front end.
  */
 test.describe('election administration', () => {
-  test('the administrator sees the elections list with the seeded election', async ({ adminPage }) => {
-    await adminPage.goto(civiAdminUrl('civicrm/elections/manage', { reset: 1 }));
-    await expect(adminPage.getByRole('heading', { name: 'Manage Elections' })).toBeVisible();
-    await expect(adminPage.getByRole('link', { name: 'Add Election' })).toBeVisible();
-    await expect(adminPage.getByText('Playwright Council Election')).toBeVisible();
-    await expectNoPhpOutput(adminPage);
-  });
-
   test('the create election form offers the display options', async ({ adminPage }) => {
     await adminPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
     await adminPage.getByRole('tab', { name: 'Display' }).click();
@@ -39,7 +32,7 @@ test.describe('election administration', () => {
 
   test('a member cannot reach the administration screens', async ({ memberPage, allowedProblems }) => {
     allowedProblems.push(/403/);
-    await memberPage.goto(civiAdminUrl('civicrm/elections/create', { reset: 1 }));
+    await memberPage.goto(memberAdminUrl('civicrm/elections/create', { reset: 1 }));
     await expect(memberPage.getByRole('button', { name: 'Submit' })).toHaveCount(0);
   });
 

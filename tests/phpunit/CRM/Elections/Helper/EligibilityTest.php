@@ -24,21 +24,11 @@ class CRM_Elections_Helper_EligibilityTest extends api_v3_ElectionBaseTestCase {
     $this->assertFalse(CRM_Elections_Helper_Eligibility::isContactInGroups($this->individualCreate(), ''));
   }
 
-  public function testCanVoteUsesElectionGroups() {
-    $election = $this->createElection(['is_visible' => 1, 'is_deleted' => 0]);
-    $member = $this->individualCreate();
-    $outsider = $this->individualCreate();
-    $this->addMembersInElectionGroup($member, $election);
-
-    $this->assertTrue(CRM_Elections_Helper_Eligibility::canVote($election['id'], $member));
-    $this->assertTrue(CRM_Elections_Helper_Eligibility::canNominate($election['id'], $member));
-    $this->assertFalse(CRM_Elections_Helper_Eligibility::canVote($election['id'], $outsider));
-    // No logged in user in tests and no contact supplied.
-    $this->assertFalse(CRM_Elections_Helper_Eligibility::canVote($election['id']));
-  }
-
   public function testNoActingContactWithoutLoginOrChecksum() {
     $this->assertNull(CRM_Elections_Helper_Eligibility::getActingContactId());
+    // So with no contact given, no one may vote.
+    $election = $this->createElection(['is_visible' => 1, 'is_deleted' => 0]);
+    $this->assertFalse(CRM_Elections_Helper_Eligibility::canVote($election['id']));
   }
 
   public function testInvalidChecksumIsNotAnActingContact() {
@@ -60,12 +50,6 @@ class CRM_Elections_Helper_EligibilityTest extends api_v3_ElectionBaseTestCase {
     $election = $this->createElection(['is_visible' => 1, 'is_deleted' => 0]);
     $this->assertFalse(CRM_Elections_Helper_Eligibility::hasVoted($election['id']));
     $this->assertNull(CRM_Elections_Helper_Eligibility::getVoteDate($election['id']));
-  }
-
-  public function testApiV4EntitiesRequireAdministerElections() {
-    $this->assertSame(0, \Civi\Api4\Election::get(FALSE)->selectRowCount()->execute()->countMatched());
-    $permissions = \Civi\Api4\ElectionVote::permissions();
-    $this->assertSame(['administer Elections'], $permissions['default']);
   }
 
 }

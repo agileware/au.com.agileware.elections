@@ -9,11 +9,12 @@ How changes get into the extension: branches, commits, pull requests, the requir
 | `master` | The next release. It holds the latest release plus anything merged since. Protected. | A pull request only. Nobody pushes to it. The Cut release workflow (the Actions bot) cannot push its docs commit |
 | `release` | The released tree: `master` with the development files removed. It is what tags point at and what the CiviCRM extension directory installs | Only the Cut release workflow, which resets it to the filtered tree each time. Never edit it by hand |
 | Version branches, for example `version-2.1`, `version-2.2` | The work for one release, cut from `origin/master` | The developers of that release |
+| History branches `version-1.3.3` and `version-2.0` | The 1.3.3 commits and the 2.0 work, kept for history (see [../releases/branches-and-rules.md](../releases/branches-and-rules.md)) | Nobody |
 | Topic branches, for example `developer-docs` | One piece of work (the developer guide), cut from `origin/master`, merged by pull request | The author |
 
 Rules:
 
-- Cut a new branch from the current `origin/master` (`git fetch --all --tags` first), not from an old local `master` or from an earlier version branch. Release 2.1.0 was the squash of `version-2.1` into `master`, so that branch is history.
+- Cut a new branch from the current `origin/master` (`git fetch --all --tags` first), not from an old local `master` or from an earlier version branch. Release 2.1.0 was the squash of `version-2.1` into `master`, so that branch is history. Version branches stay on GitHub after their merge as history, like `version-1.3.3`, `version-2.0` and `version-2.1`.
 - Name a version branch `version-<major>.<minor>`. Ask the maintainer for the name and whether the branch is pushed as it goes. The rule "kept local until every item is done, then one release pull request" applied to 2.1 only; do not assume it for later versions.
 - Old branches called `backup*` or `backup/*` are history. Do not build on them.
 - Never push to `master` and never force push a shared branch.

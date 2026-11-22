@@ -62,15 +62,6 @@ class CRM_Elections_DateRulesTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame(E::ts('Voting closes must be after Voting opens.'), $errors['voting_end_date']);
   }
 
-  public function testRuleTableIsUsableByTheBrowser() {
-    foreach (CRM_Elections_BAO_Election::getDateRules() as $rule) {
-      $this->assertContains($rule['rule'], ['after', 'notAfter', 'notBefore']);
-      $this->assertNotEmpty($rule['message']);
-      $this->assertNotEmpty($rule['field']);
-      $this->assertNotEmpty($rule['other']);
-    }
-  }
-
   public function testEveryMessageNamesItsDatesByTheLabelsOnTheForm() {
     $labels = ['Visible from', 'Visible until', 'Nominations open', 'Nominations close', 'Candidates advertised from', 'Voting opens', 'Voting closes', 'Results published on'];
     $messages = [];

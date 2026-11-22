@@ -7,7 +7,9 @@ import { council, personaUrl } from '../../fixtures/personas';
  * A yes or no question on the same ballot as the council positions: one choice for each voter, counted by the
  * pass threshold, shown as passed or not passed with no counts.
  */
-test.describe.configure({ mode: 'serial', retries: 0 });
+// One retry: a blip (a slow first page after a deploy, say) would otherwise skip the rest of this serial file. A retry
+// runs the whole file again from beforeAll, which reseeds the council election.
+test.describe.configure({ mode: 'serial', retries: 1 });
 
 const QUESTION = 'Adopt the new constitution?';
 
@@ -79,7 +81,8 @@ test('voters answer, see their answer, and can change it', async ({ persona }) =
   const page = await persona('V03');
   await answer(page, 'V03', 'For');
   await page.context().close();
-  const rows = civiApi4<any[]>('ElectionOptionVote.get', { select: ['id'], limit: 0 });
+  // Only this election's answers: the site may hold other elections with answers of their own.
+  const rows = civiApi4<any[]>('ElectionOptionVote.get', { select: ['id'], where: [['election_position_id.election_id', '=', council().election_id]], limit: 0 });
   expect(rows).toHaveLength(4);
 });
 

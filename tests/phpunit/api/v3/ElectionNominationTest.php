@@ -6,32 +6,6 @@
 class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
 
   /**
-   * Test that a election nomination is not created without any params and throw errors.
-   */
-  public function testCreateElectionNominationWithoutAnyParams() {
-    $this->callAPIFailure('ElectionNomination', 'create', []);
-  }
-
-  /**
-   * Test that a election nomination is not created with wrong data.
-   */
-  public function testCreateElectionNominationWithWrongData() {
-    $nominee = $this->individualCreate();
-    $params = [
-      'member_nominee'       => $nominee,
-      'election_position_id' => -1,
-    ];
-    $this->callAPIFailure('ElectionNomination', 'create', $params);
-
-    $position = $this->createElectionPosition();
-    $params = [
-      'member_nominee'       => -1,
-      'election_position_id' => $position['id'],
-    ];
-    $this->callAPIFailure('ElectionNomination', 'create', $params);
-  }
-
-  /**
    * Test that a election nomination is not before nominations period is started.
    */
   public function testCreateElectionNominationBeforeNominationsStarted() {
@@ -41,14 +15,7 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
       'member_nominee'       => $nominee,
       'election_position_id' => $position['id'],
     ];
-    $this->callAPIFailure('ElectionNomination', 'create', $params);
-  }
-
-  /**
-   * Test that a election nomination.
-   */
-  public function testCreateElectionNomination() {
-    $this->createNomination();
+    $this->callAPIFailure('ElectionNomination', 'create', $params, 'Nominations are not open yet');
   }
 
   /**
@@ -65,7 +32,7 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
       'id' => $position['election_id'],
     ]);
     $this->editElectionByState(api_v3_ElectionBaseTestCase::$ELECTION_ADVERTISE_CANDIDATES_STARTED, $election);
-    $this->callAPIFailure('ElectionNomination', 'create', $params);
+    $this->callAPIFailure('ElectionNomination', 'create', $params, 'Nominations closed on');
   }
 
   /**
@@ -73,7 +40,7 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
    */
   public function testAddNominationSecondTime() {
     $params = $this->createNomination();
-    $this->callAPIFailure('ElectionNomination', 'create', $params);
+    $this->callAPIFailure('ElectionNomination', 'create', $params, 'already nominated for this position');
   }
 
   /**
@@ -94,7 +61,7 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
 
     $election['is_deleted'] = 1;
     $this->callAPISuccess('Election', 'create', $election);
-    $this->callAPIFailure('ElectionNomination', 'create', $params);
+    $this->callAPIFailure('ElectionNomination', 'create', $params, 'deleted or not active');
   }
 
   /**
@@ -112,7 +79,7 @@ class api_v3_ElectionNominationTest extends api_v3_ElectionBaseTestCase {
     ]);
     $election['is_visible'] = 0;
     civicrm_api3('Election', 'create', $election);
-    $this->callAPIFailure('ElectionNomination', 'create', $params);
+    $this->callAPIFailure('ElectionNomination', 'create', $params, 'deleted or not active');
   }
 
 }

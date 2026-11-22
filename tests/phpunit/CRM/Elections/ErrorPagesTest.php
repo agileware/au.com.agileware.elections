@@ -100,11 +100,4 @@ class CRM_Elections_ErrorPagesTest extends api_v3_ElectionBaseTestCase {
     $this->assertStringContainsString('election-btn-quiet', $html, 'A way out is never the primary button');
   }
 
-  public function testAnOlderCallThatAsksForNoLinkGetsNone() {
-    $page = $this->stub();
-    throwAccessDeniedException($page, 'Nothing to do here.', ['']);
-    $this->assertSame('', $page->vars['return_button_text']);
-    $this->assertStringNotContainsString('<a ', $this->render($page->vars));
-  }
-
 }

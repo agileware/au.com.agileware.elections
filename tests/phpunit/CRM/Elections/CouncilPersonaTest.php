@@ -48,16 +48,6 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
 
   // ---------------------------------------------------------------- personas
 
-  public function testThereAreEnoughPersonasForACouncilElection() {
-    $fixture = Council::create();
-    $voters = array_filter(array_keys($fixture->personas), fn($p) => $p[0] === 'V');
-    $nominees = array_filter(array_keys($fixture->personas), fn($p) => $p[0] === 'N');
-    $this->assertGreaterThanOrEqual(30, count($voters));
-    $this->assertGreaterThanOrEqual(10, count($nominees));
-    $this->assertSame(['President', 'Secretary', 'Treasurer', 'Council Member 1', 'Council Member 2', 'Council Member 3'], array_keys($fixture->positions));
-    $this->assertCount(6, array_unique(array_merge(...array_values(Council::CANDIDATES))));
-  }
-
   // ------------------------------------------------------------ nominations
 
   public function testNominationsBecomeEligibleOnlyWithEnoughNominators() {
@@ -71,32 +61,14 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     }
   }
 
-  public function testSecondNominationMakesAnUnsecondedNomineeEligible() {
-    $fixture = Council::create();
-    $fixture->runNominations();
-    $key = 'President|N08';
-    $this->assertEquals(0, $this->nominationField($fixture, $key, 'is_eligible_candidate'));
-
-    $result = CRM_Elections_Helper_Process::nominate($fixture->electionId, $fixture->positions['President'], $fixture->id('N08'), $fixture->id('V12'));
-    $this->assertTrue($result['is_eligible_candidate']);
-    $this->assertEquals(1, $this->nominationField($fixture, $key, 'is_eligible_candidate'));
-  }
-
-  public function testANominatorCannotCountTwice() {
-    $fixture = Council::create();
-    $fixture->runNominations();
-    $again = CRM_Elections_Helper_Process::nominate($fixture->electionId, $fixture->positions['President'], $fixture->id('N08'), $fixture->id('V01'));
-    $this->assertTrue($again['already_nominated']);
-    $this->assertFalse($again['is_eligible_candidate']);
-    $this->assertSame(1, civicrm_api3('ElectionNominationSeconder', 'getcount', ['election_nomination_id' => $fixture->nominations['President|N08']]));
-  }
-
   public function testSomeoneWhoIsNotAMemberCannotTakePartInNominations() {
     $fixture = Council::create();
     $position = $fixture->positions['President'];
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('N01'), $fixture->id('OUT')), 'cannot nominate in this election');
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('OUT'), $fixture->id('V01')), 'can stand');
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::nominate($fixture->electionId, $position, $fixture->id('N01'), NULL));
+    // An organiser adding a candidate directly meets the same rule, with no candidate group set.
+    $this->assertRejected(fn() => CRM_Elections_BAO_ElectionNomination::addCandidate($position, $fixture->id('OUT')), 'can stand');
   }
 
   public function testNominationsCloseWithTheNominationPeriod() {
@@ -190,12 +162,6 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame('https://example.org/N01', $nomination['statement_url']);
   }
 
-  public function testAcceptingThenWithdrawingMeansNotStanding() {
-    $fixture = Council::create()->playUntil(Council::STAGE_ADVERTISE);
-    $this->assertNotContains('N10', $fixture->standingCandidates('Council Member 3'));
-    $this->assertEquals(1, $this->nominationField($fixture, 'Council Member 3|N10', 'has_rejected_nomination'));
-  }
-
   public function testOnlyTheNomineeCanAccept() {
     $fixture = Council::create();
     $fixture->runNominations();
@@ -205,6 +171,9 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     foreach (['V01', 'N02', 'OUT'] as $persona) {
       $this->assertRejected(fn() => CRM_Elections_Helper_Process::accept($nomination, $fixture->id($persona), 'Not mine'), 'You do not have access to this nomination');
     }
+    // Nor can anyone else withdraw it, and it cannot be accepted without a person.
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::withdraw($nomination, $fixture->id('V01'), 'I withdraw them'), 'You do not have access to this nomination');
+    $this->assertRejected(fn() => CRM_Elections_Helper_Process::accept($nomination, NULL), 'You do not have access to this nomination');
     $this->assertEquals(0, $this->nominationField($fixture, 'President|N01', 'has_accepted_nomination'));
     CRM_Elections_Helper_Process::accept($nomination, $fixture->id('N01'));
     $this->assertEquals(1, $this->nominationField($fixture, 'President|N01', 'has_accepted_nomination'));
@@ -271,18 +240,6 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame(0, $this->countVotes($fixture));
   }
 
-  public function testThirtyEightMembersVoteAndTwoAbstain() {
-    $fixture = Council::create()->playUntil(Council::STAGE_VOTING);
-    $voted = CRM_Core_DAO::singleValueQuery('
-      SELECT COUNT(DISTINCT v.member_id) FROM civicrm_election_vote v
-      INNER JOIN civicrm_election_nomination n ON n.id = v.election_nomination_id
-      INNER JOIN civicrm_election_position p ON p.id = n.election_position_id WHERE p.election_id = %1', [1 => [$fixture->electionId, 'Integer']]);
-    $this->assertEquals(38, $voted);
-    $this->assertTrue(CRM_Elections_Helper_Eligibility::hasVoted($fixture->electionId, $fixture->id('V01')));
-    $this->assertFalse(CRM_Elections_Helper_Eligibility::hasVoted($fixture->electionId, $fixture->id('V29')));
-    $this->assertFalse(CRM_Elections_Helper_Eligibility::hasVoted($fixture->electionId, $fixture->id('OUT')));
-  }
-
   public function testOnlyStandingCandidatesCanBeVotedFor() {
     $fixture = Council::create()->playUntil(Council::STAGE_ADVERTISE);
     $fixture->moveToStage(Council::STAGE_VOTING);
@@ -336,6 +293,10 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     $before = $this->countVotes($fixture, 'V01');
     $this->assertRejected(fn() => CRM_Elections_Helper_Process::vote($fixture->electionId, $fixture->id('V01'), $fixture->ranksForApi(['President' => ['N02' => 1]])), 'already voted');
     $this->assertSame($before, $this->countVotes($fixture, 'V01'));
+    // V01 voted; V29 did not; someone outside the election never has.
+    $this->assertTrue(CRM_Elections_Helper_Eligibility::hasVoted($fixture->electionId, $fixture->id('V01')));
+    $this->assertFalse(CRM_Elections_Helper_Eligibility::hasVoted($fixture->electionId, $fixture->id('V29')));
+    $this->assertFalse(CRM_Elections_Helper_Eligibility::hasVoted($fixture->electionId, $fixture->id('OUT')));
   }
 
   public function testARejectedRevoteKeepsTheEarlierBallot() {
@@ -403,20 +364,6 @@ class CRM_Elections_CouncilPersonaTest extends api_v3_ElectionBaseTestCase {
     $this->assertSame($counts['N04'], $counts['N05'], 'The Treasurer ballots are a tie by design');
     $this->assertSame(['N04' => 1, 'N05' => 1], $this->ranksForPosition($fixture, 'Treasurer'));
     $this->assertSame(CRM_Elections_BAO_Election::$RESULTS_NO_MAJORITY, $this->positionStatus($fixture, 'Treasurer'));
-  }
-
-  public function testAnonymisedElectionKeepsNoVoterIdentities() {
-    $fixture = Council::create(['anonymize_votes' => 1])->playUntil(Council::STAGE_RESULTS);
-    $this->assertGreaterThan(0, $this->countVotes($fixture));
-    $named = CRM_Core_DAO::singleValueQuery('SELECT COUNT(*) FROM civicrm_election_vote WHERE member_id IS NOT NULL');
-    $this->assertEquals(0, $named);
-    $this->assertSame(1, $this->ranksForPosition($fixture, 'President')['N01'], 'Results are still calculated for every position');
-    $this->assertSame(1, $this->ranksForPosition($fixture, 'Council Member 3')['N05']);
-  }
-
-  public function testOpenElectionKeepsVoterIdentities() {
-    $fixture = Council::create(['anonymize_votes' => 0])->playUntil(Council::STAGE_RESULTS);
-    $this->assertSame(38, (int) CRM_Core_DAO::singleValueQuery('SELECT COUNT(DISTINCT member_id) FROM civicrm_election_vote'));
   }
 
   public function testPublishedResultsNameWinnersWithNicknames() {

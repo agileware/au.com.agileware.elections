@@ -58,3 +58,12 @@ export function adminUrl(civiPath: string, params: Record<string, string | numbe
       return `/wp-admin/admin.php?${query.toString()}`;
   }
 }
+
+/**
+ * Address of a back office CiviCRM page as a member would try it. On Joomla a member may not use the
+ * administrator at all (Joomla shows its own login form there), so the member tries the page through the
+ * site instead, where CiviCRM's own permission check refuses it. Elsewhere this is adminUrl.
+ */
+export function memberAdminUrl(civiPath: string, params: Record<string, string | number> = {}): string {
+  return CMS === 'joomla' ? frontUrl(civiPath, params) : adminUrl(civiPath, params);
+}
