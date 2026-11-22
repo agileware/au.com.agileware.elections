@@ -118,6 +118,8 @@ Status is **Decided** (and in force), **Applied** (decided on a default and buil
 | D30 | Developer guide | Move plans, environments and tests into `developer/` | Decided |
 | D31 | Test account passwords | Generated at setup, never committed | Decided |
 | D32 | Test suite clean-up | No Playwright project chain; low-value tests removed; screenshot walk is a tool | Decided |
+| (none) | Test data scripts | `tests/seed/` in the repository, run with `cv scr` (merged with #51, 2026-11-17) | Decided |
+| (none) | 2.2 branch and push rule | `version-2.2` from `origin/master`, pushed as a branch; release pull request only when 2.2 is ready (2026-11-21) | Decided |
 
 ## Open decisions
 
@@ -130,8 +132,6 @@ These are asked of the maintainer; do not assume an answer.
 | S3 | What counts as a formal STV ballot | Optional preferential |
 | S5 | Whether to comment on or contact the author of the STV pull request | Not yet decided; nothing has been posted |
 | S6 | Whether to run the STV engine's tests and stress checks | Yes, in an empty directory outside the project |
-| (none) | Test data scripts in the repository (`tests/seed/`) | Being added with this guide; confirm |
-| (none) | The 2.2 branch name and whether it is pushed as it goes | Branch `version-2.2` made 2026-11-17; push rule still to confirm |
 
 ## How to add a decision
 

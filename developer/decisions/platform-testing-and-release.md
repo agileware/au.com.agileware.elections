@@ -96,11 +96,11 @@ Each entry gives the decision, why, the date and where it shows.
 
 ### Test data scripts in the repository
 - **Question.** Ship the CMS-independent core of the Beekeepers site's seeding scripts (eight kinds of election, a stage mover) in the repository, run with `cv scr`, so any new site can get an election of each kind at a chosen stage in one command? Logins and pages stay a separate optional step.
-- **Status.** Proposed in the 2.2 handover on 2026-11-04. `tests/seed/` is being added with this guide (see [`../testing/seeding.md`](../testing/seeding.md)); confirm with the maintainer that this is the agreed outcome.
+- **Status.** Decided: proposed in the 2.2 handover on 2026-11-04 and on `master` since 2026-11-17, when the maintainer merged the developer guide pull request (#51) with `tests/seed/` in it. See [`../testing/seeding.md`](../testing/seeding.md).
 
 ### Version 2.2 branch name and push rule
 - **Question.** What is the 2.2 branch called (suggested `version-2.2`, cut from `origin/master`) and is it pushed as it goes? The 2.1 rule (kept local until finished, one release pull request) applied to 2.1 only.
-- **Status.** The branch `version-2.2` was cut from `origin/master` on 2026-11-17 and the maintainer said to work on it. Whether it is pushed as it goes, or kept local until the release pull request, has not been decided.
+- **Status.** The branch `version-2.2` was cut from `origin/master` on 2026-11-17 and the maintainer said to work on it. Decided 2026-11-21: it is pushed to GitHub as a branch (on the maintainer's go-ahead for each push), and the release pull request is opened only when 2.2 is ready to release.
 
 ### D19, D13, D14, U14
 D19 is above (built in 2.2). D13 and D14 are in [`voting-and-elections.md`](voting-and-elections.md#open-decisions); U14 is in [`interface-and-wording.md`](interface-and-wording.md#open-decisions).
