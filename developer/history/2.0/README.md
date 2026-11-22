@@ -2,7 +2,7 @@
 
 > **Historical.** Written during version 2.0; may be out of date. Current guidance: [developer guide](../../README.md).
 
-Released 2026-11-01 as pull request 48 (squash commit `5a314e7`, tag `2.0.0`). Work ran from 2026-10-27 to 2026-11-01 on a `version-2` branch of 95 commits. This is the story of that release; the detail is in [the archive](archive/).
+Released 2026-11-01 as pull request 48 (squash commit `5a314e7`, tag `2.0.0`). Work ran from 2026-10-27 to 2026-11-01 on a `version-2` branch of 95 commits, kept on GitHub since 2026-11-22 as `version-2.0` (rebased without the two 1.3.3 commits, which are on `version-1.3.3`; see [../../releases/branches-and-rules.md](../../releases/branches-and-rules.md)). This is the story of that release; the detail is in [the archive](archive/).
 
 ## Goals
 
@@ -91,7 +91,7 @@ Existing elections behave as before: ranked choice, the voting groups for every 
 - Re-recording the user guide pictures, the Drupal and Joomla workflows on GitHub, drag to rank on the ballot, a dark mode re-check, the Senate count, a granular permission and the Joomla manager sessions (these moved on to 2.2: see [../../roadmap/2.2/README.md](../../roadmap/2.2/README.md)).
 - Version 1.x is no longer supported and there was no 1.3.4: only 2.x gets fixes.
 
-After the release the maintainer commented on and closed all eleven issues, and the `version-2` branch was deleted.
+After the release the maintainer commented on and closed all eleven issues, and the `version-2` branch was deleted from GitHub. It was pushed again as `version-2.0` on 2026-11-22, for history.
 
 ## Archive
 
