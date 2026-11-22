@@ -29,12 +29,12 @@ The status says how far each section has been checked. Pages marked "not yet fol
 | [`standards/`](standards/README.md) | User interface standards, wording rules, git and pull request conventions | Current |
 | [`decisions/`](decisions/README.md) | One short entry for each decision: what, why, when; the open decisions | Current |
 | [`releases/`](releases/README.md) | How to cut a release, branch rules, what ships and what does not | Written from the 2.0.0 and 2.1.0 releases |
-| [`roadmap/`](roadmap/README.md) | The plan for the next version (start with [2.2](roadmap/2.2/README.md)) | Current |
+| [`roadmap/`](roadmap/README.md) | The plan for the next version (start with [2.3](roadmap/2.3/README.md)) | Current |
 | [`history/`](history/README.md) | Summaries and archived plans of 2.0 and 2.1 | Frozen |
 
 Test data scripts are code, so they live in [`tests/seed/`](../tests/seed/README.md) (also left out of releases) and are described in [`testing/seeding.md`](testing/seeding.md).
 
-**Starting a new session or joining the project?** Read [`roadmap/2.2/README.md`](roadmap/2.2/README.md) first, then the page for the part you will change.
+**Starting a new session or joining the project?** Read [`roadmap/2.3/README.md`](roadmap/2.3/README.md) first, then the page for the part you will change.
 
 ## Ground rules
 

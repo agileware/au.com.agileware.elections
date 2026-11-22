@@ -10,6 +10,7 @@ What earlier versions of the extension planned, found and delivered. Pages here 
 |---|---|---|---|
 | 2.0 | 2026-11-01 (pull request 48) | [2.0/README.md](2.0/README.md): the rewrite of the extension for version 2, from the code review of 1.3.2 to the release | [2.0/archive/](2.0/archive/) |
 | 2.1 | 2026-11-03 (pull request 49) | [2.1/README.md](2.1/README.md): one consistent user interface on every screen, and the fixes that found | [2.1/archive/](2.1/archive/) |
+| 2.2 | 2026-11-22 (pull request 55) | [2.2/README.md](2.2/README.md): drag to rank, a permission for managing candidates, dark mode, new guide pictures, Drupal and Joomla on GitHub, and this developer guide | [2.2/archive/](2.2/archive/) |
 
 The plan for the next version is in [`../roadmap/`](../roadmap/README.md) and moves here when it is released.
 
@@ -36,5 +37,6 @@ The plan for the next version is in [`../roadmap/`](../roadmap/README.md) and mo
 | `21-ui-review.md` and `21-ui-review/` | 2.1 | The screen-by-screen review against the user interface standards |
 | `23-readme-draft.md` | 2.1 | The draft of the new README opening |
 | `08-progress.md` (part 2) | 2.1 | Progress log from 2026-11-01 to 2026-11-15 |
+| `roadmap.md` | 2.2 | The living 2.2 roadmap page as it stood at the release |
 
 The working notes that became living pages are not archived, because their content is now in the guide: the environment and test environment notes (see [`../environments/`](../environments/README.md)), the testing, Playwright and CI notes ([`../testing/`](../testing/README.md)), the schema and security notes ([`../architecture/`](../architecture/README.md)), the decisions log ([`../decisions/`](../decisions/README.md)), the user interface standards ([`../standards/`](../standards/README.md)), the Beekeepers review site notes, the STV review and the 2.2 handover ([`../roadmap/`](../roadmap/README.md)).
