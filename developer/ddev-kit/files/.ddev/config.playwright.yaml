@@ -1,4 +1,0 @@
-# Playwright downloads its browsers into DDEV's global cache, which survives ddev stop, restart and rebuilds and is
-# shared by every site on this machine, so the browser is downloaded once (npx playwright install chromium).
-web_environment:
-  - PLAYWRIGHT_BROWSERS_PATH=/mnt/ddev-global-cache/ms-playwright

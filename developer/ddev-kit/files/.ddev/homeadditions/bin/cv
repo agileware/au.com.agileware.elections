@@ -1,8 +1,0 @@
-#!/bin/bash
-# cv, the CiviCRM command line tool. create-site.sh downloads the phar to ~/bin/cv.phar (it is not committed).
-# Run it from inside the site's web root, for example: ddev exec 'cd /var/www/html/httpdocs && cv flush'
-if [ ! -f "$HOME/bin/cv.phar" ]; then
-  echo "cv: $HOME/bin/cv.phar is missing. Download https://download.civicrm.org/cv/cv.phar into .ddev/homeadditions/bin and run ddev restart." >&2
-  exit 1
-fi
-exec php "$HOME/bin/cv.phar" "$@"

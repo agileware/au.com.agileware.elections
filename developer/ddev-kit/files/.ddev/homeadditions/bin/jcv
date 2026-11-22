@@ -1,9 +1,0 @@
-#!/bin/bash
-# cv for a Joomla site. cv cannot boot Joomla itself, so this runs CiviCRM without the CMS (UnitTests mode
-# pointed at the site database through ~/.cv.json) with Joomla's psr/log made available.
-# Run it from the site root: ddev exec 'jcv ext:list -L'
-if [ ! -f "$HOME/bin/cv.phar" ]; then
-  echo "jcv: $HOME/bin/cv.phar is missing. Download https://download.civicrm.org/cv/cv.phar into .ddev/homeadditions/bin and run ddev restart." >&2
-  exit 1
-fi
-CIVICRM_UF=UnitTests exec php -d auto_prepend_file="$HOME/joomla-prepend.php" "$HOME/bin/cv.phar" "$@"
