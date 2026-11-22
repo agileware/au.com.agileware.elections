@@ -285,9 +285,9 @@ test('the pictures of the set-up pages (WordPress block editor)', async ({ admin
     await page.getByRole('button', { name: 'Close' }).first().click({ timeout: 5000 }).catch(() => {});
     const html = editor.locator('[data-type="core/html"]').first();
     await html.waitFor({ timeout: 30000 });
-    // The editor keeps drawing after the block appears (a grey panel was caught half faded in): let it settle.
-    await page.waitForLoadState('networkidle').catch(() => {});
-    await page.waitForTimeout(1500);
+    // The editor keeps drawing after the block appears (a grey panel was caught half faded in): let it settle. Not
+    // "network idle": the block editor keeps polling, so that wait never ends.
+    await page.waitForTimeout(2500);
     // Not selected: a selected block's toolbar would cover the page title.
     const out = path.join(OUT, file);
     fs.mkdirSync(path.dirname(out), { recursive: true });
