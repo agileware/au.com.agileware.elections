@@ -63,7 +63,7 @@ The full list and the decisions already made are in [../../decisions/README.md](
 | Decision | State |
 |---|---|
 | Additional voting methods (STV, approval voting) | STV moved to 2.3 on 2026-11-21 (S4); its other questions are in [../2.3/stv.md](../2.3/stv.md). Approval voting: deferred 2026-11-22 until there is a requirement; it was an assistant's suggestion, not a request (D14, and [potential future features](../README.md#potential-future-features)). |
-| Public `security.md` | Whether it includes the residual-risk notes. Open. |
+| Public `security.md` | Decided 2026-11-22: it includes the known limits ("What it does not protect against", with the rate limit note corrected for the write-in search), and the user guide's "What the extension cannot prevent" now lists all of them. |
 
 Decided during 2.2, kept here for reference: the granular permission (item 7) is **manage Election candidates** (D13, 2026-11-21); publishing the standards (item 6) is a pull request template, the standards stay in the developer guide (U14, 2026-11-21); the branch is `version-2.2`, cut from `origin/master`, pushed as a branch with the release pull request opened only when 2.2 is ready (2026-11-21); PHPUnit also runs on the Drupal kit site, for CiviCRM 6.19, before each release (2026-11-21, first run 275 passed).
 

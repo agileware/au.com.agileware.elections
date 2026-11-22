@@ -26,9 +26,12 @@ When you publish the results, note the **Audit log fingerprint** shown on the ov
 
 ## What the extension cannot prevent
 
-- Someone who can write to the database can change rows. The extension makes that detectable (fingerprints, audit chain). Keep database access to few people and keep backups.
+- Someone who can write to the database can change rows. The extension makes that detectable (fingerprints, audit chain). Keep database access to few people, keep backups, and note the audit log fingerprint outside the website when you publish the results (see above).
 - A personal link is a key: whoever has it can act as that person until it expires. Keep the checksum timeout short, and send links only to the person.
 - The Vote activity records that a person voted and when, which is how turnout is shown.
-- The server clock and time zone decide which stage the election is in.
+- The server clock and time zone decide which stage the election is in. Keep the server time right.
+- Requests are not slowed down, apart from searching for a person to write in. Personal links cannot practically be guessed, but if you want to limit repeated requests, do it in the web server, a firewall or the CMS.
+- The election pages do not set a Content Security Policy, because a policy depends on your theme and site. The extension escapes everything it shows; add a policy at the site if you use one.
+- The extension relies on CiviCRM for logins, form security and personal links. Keep CiviCRM, your CMS and PHP up to date.
 
 The full review is kept with the project plans (security review, findings 1 to 20).

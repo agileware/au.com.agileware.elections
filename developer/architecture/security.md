@@ -44,6 +44,18 @@ All write-path rules are in the data layer so they hold for forms, APIv3, APIv4,
 
 Suites are described in [../testing/phpunit.md](../testing/phpunit.md) and [../testing/playwright.md](../testing/playwright.md). `tests/playwright/specs/security/` holds `xss.spec.ts` and `tampering.spec.ts`; a guard in the shared Playwright fixtures also fails any test whose page shows PHP or template errors.
 
+## What it does not protect against
+
+These limits are known and deliberate: each is left to the site, the server or the people running the election. They are not weaknesses to report. The user guide gives the same list for site operators.
+
+1. **Anyone who can write to the database can change rows.** The extension cannot stop that; it detects it (the fingerprints and the audit chain above). Keep database access to as few people as possible, take backups, and note the audit log fingerprint shown on the election overview somewhere outside the website when the results are published.
+2. **A personal link is a key.** Whoever has the link can act as that person until it expires. Keep CiviCRM's checksum timeout short, allow access without logging in (`allow_checksum_access`) only on elections that need it, and send links only to the person, by email.
+3. **The `Vote` activity records that a person voted, and when** (never how). That is how turnout is shown and how a second ballot is refused; it cannot be removed without losing that record.
+4. **Requests are not rate limited, apart from the write-in name search** (30 searches a minute for each person, above). Guessing a checksum is impractical (it is a long keyed hash), but the extension does not slow down other repeated requests. Use the web server, a firewall or the CMS for that.
+5. **No Content Security Policy on the election pages.** Escaping on output is the defence. A policy depends on the theme and the site, so it is left to the site. (The uploaded results logo is the exception: `CRM_Elections_Page_ResultsLogo` serves it with `default-src 'none'; sandbox`.)
+6. **The server clock and time zone decide which stage an election is in.** Keep the server time right.
+7. **CiviCRM, the CMS and PHP must be kept up to date.** The extension relies on CiviCRM's own checks for sessions, form keys and the checksum.
+
 ## Extending it safely
 
 1. **Write through the hooks.** Create and change rows with the BAO, APIv3 or APIv4, so `hook_civicrm_pre` runs. Raw SQL skips the guards; the only raw writes to ballot tables are in `Results::removeVotes()` (anonymising, inside the results transaction) and the upgrade steps.
@@ -56,4 +68,4 @@ Suites are described in [../testing/phpunit.md](../testing/phpunit.md) and [../t
 8. **Lock concurrent actions** that must happen once (`Civi::lockManager()->acquire('data.elections....')`) and do them in a transaction.
 9. **Add a test** next to the matching one above: a PHPUnit test that tries the forbidden thing through the API and expects a refusal, and a Playwright case when a screen is involved. Run both CiviCRM 6.16 and 6.19.
 
-CiviCRM itself provides sessions, form tokens and the checksum; keep CiviCRM, the CMS and PHP up to date. Operating advice for organisers (noting the fingerprint, short link expiry) is in the user guide page linked at the top.
+Operating advice for organisers and site operators (the limits above, noting the fingerprint, short link expiry) is also in the user guide page linked at the top.
