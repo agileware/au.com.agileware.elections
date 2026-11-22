@@ -88,7 +88,7 @@ Existing elections behave as before: ranked choice, the voting groups for every 
 ## What moved to the next version
 
 - A user interface standards guide and a review of every screen against it (became 2.1).
-- Re-recording the user guide pictures, the Drupal and Joomla workflows on GitHub, drag to rank on the ballot, a dark mode re-check, the Senate count, a granular permission and the Joomla manager sessions (these moved on to 2.2: see [../../roadmap/2.2/README.md](../../roadmap/2.2/README.md)).
+- Re-recording the user guide pictures, the Drupal and Joomla workflows on GitHub, drag to rank on the ballot, a dark mode re-check, the Senate count, a granular permission and the Joomla manager sessions (these moved on to 2.2: see [../../roadmap/2.2/README.md](../2.2/archive/roadmap.md)).
 - Version 1.x is no longer supported and there was no 1.3.4: only 2.x gets fixes.
 
 After the release the maintainer commented on and closed all eleven issues, and the `version-2` branch was deleted from GitHub. It was pushed again as `version-2.0` on 2026-11-22, for history.

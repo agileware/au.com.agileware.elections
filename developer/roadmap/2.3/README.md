@@ -1,6 +1,6 @@
 # Version 2.3: start here
 
-Written 2026-11-21. Version 2.3 is not being built yet: 2.2 comes first ([../2.2/README.md](../2.2/README.md)). This page holds the work the maintainer moved out of 2.2: the Senate count (items 1 and 2) and three small findings (items 3 to 5). When 2.3 starts, bring it up to the layout of the 2.2 page (where things stand, open decisions, traps, start-up checklist).
+Written 2026-11-21. Version 2.3 is the next version; it has not been started. 2.2 was released on 2026-11-22 ([its summary](../../history/2.2/README.md)). This page holds the work the maintainer moved out of 2.2: the Senate count (items 1 and 2) and three small findings (items 3 to 5). When 2.3 starts, bring it up to the layout of the 2.2 page (where things stand, open decisions, traps, start-up checklist).
 
 ## The items
 

@@ -56,7 +56,7 @@ Every finding in this review, with where it stands on the `version-2` branch. **
 | Legacy Smarty modifiers on Smarty 5 | **Fixed** | Every front-end and admin page is exercised by Playwright with a "no PHP output" guard on WordPress, Drupal and Joomla; the CiviCRM log shows no deprecation or undefined-key lines from the extension |
 | `info.xml` says 5.73, tested on 6.16 / 6.19 | **Fixed** (D12) | Minimum is now CiviCRM 6.16 in `info.xml` and the README; v2 is tested on 6.16.5 (WordPress) and 6.19.2 (Drupal, Joomla) |
 | Photo setting is domain-wide | **By design** | Image source stays a site setting; whether to show photos is per election |
-| Security and permissions (ballots must stay private, anonymisation preserved, new screens covered by the same rules) | **Fixed for what was added; full review Open** | New APIv4 entities and SearchKit/Afform screens require `administer Elections`; turnout shows counts only; a PHPUnit test checks a member cannot read ballots or other tables through APIv3/APIv4. A full security review and hardening is in the To Do list ([11-todo.md](../../../roadmap/2.2/README.md)) |
+| Security and permissions (ballots must stay private, anonymisation preserved, new screens covered by the same rules) | **Fixed for what was added; full review Open** | New APIv4 entities and SearchKit/Afform screens require `administer Elections`; turnout shows counts only; a PHPUnit test checks a member cannot read ballots or other tables through APIv3/APIv4. A full security review and hardening is in the To Do list ([11-todo.md](../../2.2/archive/roadmap.md)) |
 
 ### C. Existing documentation
 | Item | Status |

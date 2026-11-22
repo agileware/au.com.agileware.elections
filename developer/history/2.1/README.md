@@ -79,7 +79,7 @@ Current reference: [../../architecture/upgrades.md](../../architecture/upgrades.
 ## What was learned
 
 - **A standard needs a live check.** The reading review gave about 350 findings, and looking at the screens in Chrome still found things the reading could not.
-- **The referrer drops the `#` part**, where SearchKit lists keep the election. Any link from a list to a form must carry the election in the query as well. See [../../roadmap/2.2/README.md](../../roadmap/2.2/README.md) (traps).
+- **The referrer drops the `#` part**, where SearchKit lists keep the election. Any link from a list to a form must carry the election in the query as well. See [../../roadmap/2.2/README.md](../2.2/archive/roadmap.md) (traps).
 - **CSS scope matters.** A rule that sized the back end buttons once also caught the front end ballot and failed the layout spec; the selector is now scoped to forms with a Back button.
 - **CiviCRM 6.19 gave error and warning messages no colours of their own**, so a refusal looked like a success message; the extension now styles them.
 - **DDEV rebuilds lost the browser tools.** The fix is a build file that installs the Chromium libraries and a shared browser cache; it is now part of [../../environments/README.md](../../environments/README.md).
@@ -87,7 +87,7 @@ Current reference: [../../architecture/upgrades.md](../../architecture/upgrades.
 
 ## What moved to the next version
 
-The Drupal and Joomla GitHub workflows, re-recording the user guide pictures and the Joomla manager sessions were moved to 2.2 on 2026-11-03; the granular permission was deferred; and the voting features left over from 2.0 (Senate count, drag to rank, dark mode re-check, a mobile app discovery) were already planned there. See [../../roadmap/2.2/README.md](../../roadmap/2.2/README.md).
+The Drupal and Joomla GitHub workflows, re-recording the user guide pictures and the Joomla manager sessions were moved to 2.2 on 2026-11-03; the granular permission was deferred; and the voting features left over from 2.0 (Senate count, drag to rank, dark mode re-check, a mobile app discovery) were already planned there. See [../../roadmap/2.2/README.md](../2.2/archive/roadmap.md).
 
 ## Archive
 
