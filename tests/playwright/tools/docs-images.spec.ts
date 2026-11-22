@@ -48,6 +48,8 @@ async function shot(page: Page, file: string, options: { region?: Locator; focus
   const region = (options.region ?? page.locator('.crm-container:visible').first());
   await region.waitFor();
   await page.waitForLoadState('networkidle').catch(() => {});
+  // WordPress's own notices (for example "WordPress 7.1.5 is available!") are about the test site, not the guide.
+  await page.addStyleTag({ content: '.update-nag, #wpbody-content > .notice { display: none !important; }' });
   await page.waitForTimeout(300);
   // Boxes are measured from the window, the full-page picture from the top of the page: add the scroll.
   const scroll = await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }));
